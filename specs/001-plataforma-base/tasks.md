@@ -78,23 +78,23 @@ las historias
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T028 [P] [US1] Prueba de contrato de `GET /health`, `GET /health/deep`, `GET /version` y `GET /config` de la API contra `contracts/health.openapi.yaml` en `apps/api/tests/contract/health.contract.test.ts` — `test(api)`
-- [ ] T029 [P] [US1] Prueba de integración en `apps/api/tests/integration/health.test.ts`: `/health` → `200 ok` con Mongo y Redis arriba y `503 degraded` con Mongo caído (sin depender de analytics); `/health/deep` → `503` con analytics caído, y reenvía `x-request-id` a analytics — `test(api)`
-- [ ] T030 [P] [US1] Pruebas de contrato e integración de `/health` y `/version` de analytics en `apps/analytics/tests/contract/test_health.py` — `test(analytics)`
-- [ ] T031 [P] [US1] Prueba del componente `App` (muestra "ReqCanvas" y la versión) en `apps/web/tests/App.test.tsx` y prueba de shell del arranque de `web` en `apps/web/tests/entrypoint.test.sh` (sin `API_PUBLIC_URL` termina con código 1 e indica la variable sin mostrar valores; con ella genera `/config.js`) — `test(web)`
-- [ ] T032 [P] [US1] Smoke de Playwright en `e2e/smoke.spec.ts` y `e2e/playwright.config.ts`: página inicial, `web /health` y `api /health/deep` (que verifica analytics por la red privada), parametrizado por `BASE_URL` y `API_URL` — `test(e2e)`
+- [X] T028 [P] [US1] Prueba de contrato de `GET /health`, `GET /health/deep`, `GET /version` y `GET /config` de la API contra `contracts/health.openapi.yaml` en `apps/api/tests/contract/health.contract.test.ts` — `test(api)`
+- [X] T029 [P] [US1] Prueba de integración en `apps/api/tests/integration/health.test.ts`: `/health` → `200 ok` con Mongo y Redis arriba y `503 degraded` con Mongo caído (sin depender de analytics); `/health/deep` → `503` con analytics caído, y reenvía `x-request-id` a analytics — `test(api)`
+- [X] T030 [P] [US1] Pruebas de contrato e integración de `/health` y `/version` de analytics en `apps/analytics/tests/contract/test_health.py` — `test(analytics)`
+- [X] T031 [P] [US1] Prueba del componente `App` (muestra "ReqCanvas" y la versión) en `apps/web/tests/App.test.tsx` y prueba de shell del arranque de `web` en `apps/web/tests/entrypoint.test.sh` (sin `API_PUBLIC_URL` termina con código 1 e indica la variable sin mostrar valores; con ella genera `/config.js`) — `test(web)`
+- [X] T032 [P] [US1] Smoke de Playwright en `e2e/smoke.spec.ts` y `e2e/playwright.config.ts`: página inicial, `web /health` y `api /health/deep` (que verifica analytics por la red privada), parametrizado por `BASE_URL` y `API_URL` — `test(e2e)`
 
 ### Implementation for User Story 1
 
-- [ ] T033 [P] [US1] Plugins de conexión a Mongo (Mongoose) y Redis (ioredis) con `ping` y cierre ordenado en `apps/api/src/plugins/mongo.ts` y `apps/api/src/plugins/redis.ts` — `feat(api)`
-- [ ] T034 [US1] Rutas `/health`, `/health/deep` (check `analytics` con el cliente interno, timeout de 2 s), `/version` y `/config` (flags de T016) en `apps/api/src/routes/health.ts`; `server.ts` escucha en `HOST` (`::`) — `feat(api)`
-- [ ] T035 [P] [US1] Rutas `/health` y `/version` de analytics (ping a Mongo con motor y a Redis) en `apps/analytics/src/analytics/routes/health.py` — `feat(analytics)`
-- [ ] T036 [P] [US1] Página inicial de `web` que muestra "ReqCanvas", la versión y un canvas three.js mínimo de prueba en `apps/web/src/App.tsx`; carga la configuración de `/config.js` en `apps/web/src/lib/config.ts` — `feat(web)`
-- [ ] T037 [P] [US1] `Dockerfile` multi-stage de `api` (pnpm deploy, usuario no root; incluye `migrate-mongo` para el *pre-deploy*) en `apps/api/Dockerfile` — `build(api)`
-- [ ] T038 [P] [US1] `Dockerfile` multi-stage de `analytics` (uv, usuario no root) en `apps/analytics/Dockerfile` — `build(analytics)`
-- [ ] T039 [P] [US1] `Dockerfile` de `web` (build de Vite + Caddy), `Caddyfile` con fallback de SPA y `/health`, y `docker-entrypoint.sh` que valida `API_PUBLIC_URL` (termina con código 1 si falta, FR-005) y genera `/config.js`, en `apps/web/` — `build(web)`
-- [ ] T040 [US1] `infra/docker-compose.yml` con `mongodb`, `redis`, `api`, `analytics` y `web` (healthchecks, `depends_on: condition: service_healthy`, migraciones al arrancar `api`) y `.env.example` — `build(infra)`
-- [ ] T041 [US1] README con prerrequisitos, `pnpm dev:up` y la verificación de salud (quickstart §1–4) en `README.md` — `docs(repo)`
+- [X] T033 [P] [US1] Plugins de conexión a Mongo (Mongoose) y Redis (ioredis) con `ping` y cierre ordenado en `apps/api/src/plugins/mongo.ts` y `apps/api/src/plugins/redis.ts` — `feat(api)`
+- [X] T034 [US1] Rutas `/health`, `/health/deep` (check `analytics` con el cliente interno, timeout de 2 s), `/version` y `/config` (flags de T016) en `apps/api/src/routes/health.ts`; `server.ts` escucha en `HOST` (`::`) — `feat(api)`
+- [X] T035 [P] [US1] Rutas `/health` y `/version` de analytics (ping a Mongo con motor y a Redis) en `apps/analytics/src/analytics/routes/health.py` — `feat(analytics)`
+- [X] T036 [P] [US1] Página inicial de `web` que muestra "ReqCanvas", la versión y un canvas three.js mínimo de prueba en `apps/web/src/App.tsx`; carga la configuración de `/config.js` en `apps/web/src/lib/config.ts` — `feat(web)`
+- [X] T037 [P] [US1] `Dockerfile` multi-stage de `api` (pnpm deploy, usuario no root; incluye `migrate-mongo` para el *pre-deploy*) en `apps/api/Dockerfile` — `build(api)`
+- [X] T038 [P] [US1] `Dockerfile` multi-stage de `analytics` (uv, usuario no root) en `apps/analytics/Dockerfile` — `build(analytics)`
+- [X] T039 [P] [US1] `Dockerfile` de `web` (build de Vite + Caddy), `Caddyfile` con fallback de SPA y `/health`, y `docker-entrypoint.sh` que valida `API_PUBLIC_URL` (termina con código 1 si falta, FR-005) y genera `/config.js`, en `apps/web/` — `build(web)`
+- [X] T040 [US1] `infra/docker-compose.yml` con `mongodb`, `redis`, `api`, `analytics` y `web` (healthchecks, `depends_on: condition: service_healthy`, migraciones al arrancar `api`) y `.env.example` — `build(infra)`
+- [X] T041 [US1] README con prerrequisitos, `pnpm dev:up` y la verificación de salud (quickstart §1–4) en `README.md` — `docs(repo)`
 
 **Checkpoint**: US1 funcional y demostrable de forma local
 
