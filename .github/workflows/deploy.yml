@@ -1,0 +1,150 @@
+# Contrato: specs/001-plataforma-base/contracts/ci-cd-pipeline.md
+# Los despliegues se hacen SOLO desde aquí (constitución v1.1.0); el autodeploy de Railway
+# está desactivado. Las migraciones las aplica el preDeployCommand de api en Railway.
+name: deploy
+
+on:
+  # staging: cada vez que el CI termina en verde sobre main.
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main]
+  # production: al crear un tag de release (release.yml lo invoca con workflow_call).
+  workflow_call:
+    inputs:
+      environment: { type: string, required: true }
+      ref: { type: string, required: true }
+  # Manual: redespliegue / rollback a un ref concreto, o revertir la última migración.
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        default: staging
+      ref:
+        description: Tag o SHA a desplegar (rollback = tag anterior)
+        type: string
+        default: main
+      action:
+        type: choice
+        options: [deploy, migrate-down]
+        default: deploy
+
+concurrency:
+  # Los despliegues de un mismo entorno se ejecutan en orden, sin cancelarse.
+  group: deploy-${{ inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.plan.outputs.environment }}
+      ref: ${{ steps.plan.outputs.ref }}
+      action: ${{ steps.plan.outputs.action }}
+    steps:
+      - id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          IN_ENV: ${{ inputs.environment }}
+          IN_REF: ${{ inputs.ref }}
+          IN_ACTION: ${{ inputs.action }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT" = "workflow_run" ]; then
+            env_name=staging; ref="$RUN_SHA"; action=deploy
+          else
+            env_name="$IN_ENV"; ref="$IN_REF"; action="${IN_ACTION:-deploy}"
+          fi
+          {
+            echo "environment=$env_name"
+            echo "ref=$ref"
+            echo "action=$action"
+          } >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: plan
+    if: needs.plan.outputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    # production exige la aprobación de los revisores del GitHub Environment (FR-009).
+    environment:
+      name: ${{ needs.plan.outputs.environment }}
+      url: ${{ vars.BASE_URL }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      ENVIRONMENT: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.ref }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - run: npm install --global @railway/cli@4
+      - name: Versión a desplegar
+        id: version
+        run: |
+          {
+            echo "commit=$(git rev-parse --short HEAD)"
+            echo "version=$(git describe --tags --always)"
+          } >> "$GITHUB_OUTPUT"
+      - name: Respaldo previo si hay migraciones destructivas nuevas
+        run: |
+          prev=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          if git diff --name-only --diff-filter=A "$prev" HEAD -- apps/api/migrations \
+             | xargs -r grep -l 'destructive = true'; then
+            echo "Migraciones destructivas nuevas: respaldo con mongodump"
+            # $MONGO_URL se expande dentro del contenedor de MongoDB en Railway, no aquí.
+            # shellcheck disable=SC2016
+            railway ssh --service MongoDB --environment "$ENVIRONMENT" -- \
+              sh -c 'mongodump --uri "$MONGO_URL" --archive --gzip' > backup.archive.gz
+            test -s backup.archive.gz
+          else
+            echo "Sin migraciones destructivas nuevas"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mongo-backup-${{ env.ENVIRONMENT }}-${{ steps.version.outputs.commit }}
+          path: backup.archive.gz
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Desplegar api, analytics y web
+        run: |
+          for service in analytics api web; do
+            scripts/railway/deploy-service.sh "$service" "$ENVIRONMENT" \
+              "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.commit }}" &
+          done
+          wait
+      - name: Esperar a que web y api (con analytics) estén saludables
+        run: |
+          scripts/wait-for-health.sh "${{ vars.BASE_URL }}/health" 600 10
+          scripts/wait-for-health.sh "${{ vars.API_URL }}/health/deep" 600 10
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Smoke tests contra ${{ env.ENVIRONMENT }}
+        run: pnpm e2e
+        env:
+          BASE_URL: ${{ vars.BASE_URL }}
+          API_URL: ${{ vars.API_URL }}
+          EXPECTED_VERSION: ${{ steps.version.outputs.version }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ env.ENVIRONMENT }}
+          path: playwright-report/
+
+  migrate-down:
+    needs: plan
+    if: needs.plan.outputs.action == 'migrate-down'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.plan.outputs.environment }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - run: npm install --global @railway/cli@4
+      - name: Revertir la última migración (dentro de la red privada)
+        run: >
+          railway ssh --service api --environment "${{ needs.plan.outputs.environment }}"
+          -- node dist/migrate.js down

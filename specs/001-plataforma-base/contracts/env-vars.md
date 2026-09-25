@@ -41,11 +41,14 @@ se definen como referencias (`${{MongoDB.MONGO_URL}}`), no como valores copiados
 
 ## GitHub (secrets y variables por Environment)
 
-| Nombre | Environment | Descripción |
-|--------|-------------|-------------|
-| `RAILWAY_TOKEN` | `staging`, `production` | Project token de Railway del entorno correspondiente |
-| `STAGING_BASE_URL` / `PRODUCTION_BASE_URL` | variables | URL pública de `web` para los smoke tests |
-| `STAGING_API_URL` / `PRODUCTION_API_URL` | variables | URL pública de `api` para los smoke tests |
+Cada GitHub Environment (`staging`, `production`) define los mismos nombres con sus propios
+valores; los jobs de `deploy.yml` los leen del Environment en el que se ejecutan.
+
+| Nombre | Tipo | Descripción |
+|--------|------|-------------|
+| `RAILWAY_TOKEN` | secret | Project token de Railway del entorno correspondiente |
+| `BASE_URL` | variable | URL pública de `web` (smoke tests y enlace del Environment) |
+| `API_URL` | variable | URL pública de `api` (smoke tests; `analytics` se verifica vía `/health/deep`) |
 
 > Las migraciones no necesitan credenciales en GitHub: se ejecutan como *pre-deploy command*
 > del servicio `api` en Railway, dentro de la red privada. MongoDB no tiene proxy TCP público.
