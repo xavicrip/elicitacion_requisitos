@@ -134,7 +134,7 @@ Procesa los detalles con técnicas de **minería de datos y de texto** (en espa�
 | Capa | Tecnología |
 |------|------------|
 | Frontend | React + TypeScript + Vite, **three.js** (vía `@react-three/fiber` y `@react-three/drei`), Zustand, TanStack Query, Tailwind CSS, Recharts o ECharts para el dashboard. |
-| Backend API | Node.js 22 + TypeScript, Fastify (o Express), Socket.IO, Mongoose, zod. |
+| Backend API | Node.js 24 LTS + TypeScript, Fastify (o Express), Socket.IO, Mongoose, zod. |
 | Servicio analítico | Python 3.12 + FastAPI, spaCy, scikit-learn, sentence-transformers, BERTopic, OpenCV, Tesseract/pytesseract. |
 | Base de datos | **MongoDB** (Railway MongoDB o MongoDB Atlas). |
 | Colas / caché | Redis (adapter de Socket.IO para múltiples instancias + cola de trabajos con BullMQ). |
@@ -205,6 +205,8 @@ Procesa los detalles con técnicas de **minería de datos y de texto** (en espa�
 
 # 7. CI/CD (GitHub Actions + Railway)
 
+Los despliegues se ejecutan **solo desde GitHub Actions** con la Railway CLI (`railway up --ci`) y un project token por entorno; el autodeploy de Railway queda desactivado.
+
 **Pipeline en cada Pull Request:**
 1. Instalar dependencias con caché (pnpm y pip).
 2. Lint y verificación de formato (ESLint, Prettier, Ruff).
@@ -217,7 +219,7 @@ Procesa los detalles con técnicas de **minería de datos y de texto** (en espa�
 
 **Pipeline en `main`:**
 1. Repetir las validaciones anteriores.
-2. Desplegar automáticamente en `staging`.
+2. Desplegar automáticamente en `staging` desde GitHub Actions.
 3. Ejecutar smoke tests contra `staging`.
 4. Promover a `production` con aprobación manual (GitHub Environments) usando `railway up` con `RAILWAY_TOKEN`.
 5. Crear un tag semántico y un changelog automático (release-please).
