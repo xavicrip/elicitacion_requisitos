@@ -76,8 +76,7 @@ Diferencias respecto a lo previsto:
 
 - **Ruta del _config as code_**: la configuración de entorno de Railway acepta el campo
   `configFile` pero lo ignora, y `railway up` solo lee un `railway.json` en la raíz del código
-  subido. Por eso los valores de `apps/<servicio>/railway.json` (builder, Dockerfile,
-  `watchPatterns`, healthcheck, reinicios, `preDeployCommand`) se aplicaron a cada servicio con
+  subido. Por eso los valores de `apps/<servicio>/railway.json` (builder, Dockerfile, healthcheck, reinicios, `preDeployCommand`) se aplicaron a cada servicio con
   `railway environment edit`, generando el patch desde esos mismos archivos. Los `railway.json`
   siguen siendo la fuente de verdad (los valida el CI); si cambian, hay que volver a aplicar el
   patch en ambos entornos.
@@ -88,3 +87,10 @@ Diferencias respecto a lo previsto:
   usa comandos compatibles).
 - **`restartPolicyType`**: `ON_FAILURE` es el valor por defecto de Railway y no aparece en la
   configuración; `restartPolicyMaxRetries: 3` sí.
+- **Sin `watchPatterns`**: Railway los aplica también a los despliegues por CLI y marcaba como
+  `SKIPPED` los commits que no tocaban `apps/<servicio>/**` (p. ej., solo documentación), dejando
+  staging en una versión anterior. Como el CI decide qué se despliega, se eliminaron de los
+  `railway.json` y de ambos entornos.
+- **Espera por versión**: `railway up --ci` termina al acabar el build y la versión anterior sigue
+  sirviendo hasta que la nueva pasa su healthcheck; `deploy.yml` espera a que `api /version` y
+  `web /config.js` muestren el commit nuevo antes de los smoke tests.
