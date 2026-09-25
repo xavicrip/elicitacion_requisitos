@@ -24,6 +24,13 @@ describe('railway.json', () => {
     expect(config.deploy.restartPolicyMaxRetries).toBe(3);
   });
 
+  it.each(services)(
+    '%s: sin watchPatterns (el CI decide qué se despliega; Railway omitiría commits)',
+    (service) => {
+      expect(read(service).build).not.toHaveProperty('watchPatterns');
+    },
+  );
+
   it('solo api ejecuta migraciones antes de desplegar (S1: sin exponer MongoDB)', () => {
     expect(read('api').deploy.preDeployCommand).toEqual(['node dist/migrate.js up']);
     expect(read('analytics').deploy.preDeployCommand).toBeUndefined();
