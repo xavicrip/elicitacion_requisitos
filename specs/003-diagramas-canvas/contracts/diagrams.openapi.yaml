@@ -1,0 +1,206 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas API - Diagramas y actividades
+  version: 1.0.0
+servers:
+  - url: /api
+security:
+  - bearer: []
+paths:
+  /projects/{projectId}/diagrams:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      summary: Listar diagramas (miembros; los Participantes solo ven los publicados)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DiagramSummary' }
+    post:
+      summary: Crear diagrama subiendo la imagen de la versión 1 (Admin)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, file]
+              properties:
+                name: { type: string, maxLength: 100 }
+                file: { type: string, format: binary, description: 'PNG, JPG o SVG ≤ 10 MB' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DiagramVersion' }
+        '413': { description: 'Archivo mayor de 10 MB' }
+        '415': { description: 'Formato no admitido (se valida el contenido real)' }
+  /diagrams/{diagramId}/versions:
+    parameters: [{ $ref: '#/components/parameters/DiagramId' }]
+    post:
+      summary: Subir nueva versión (Admin). Copia las actividades de la última versión con la misma key.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties: { file: { type: string, format: binary } }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DiagramVersion' }
+        '409': { description: Ya existe una versión en borrador }
+  /diagram-versions/{versionId}:
+    parameters: [{ $ref: '#/components/parameters/VersionId' }]
+    get:
+      summary: Versión con URLs firmadas y actividades (Participantes solo si está publicada)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/DiagramVersion'
+                  - type: object
+                    required: [activities]
+                    properties:
+                      activities:
+                        type: array
+                        items: { $ref: '#/components/schemas/Activity' }
+        '404': { description: No existe o no es visible para el usuario }
+  /diagram-versions/{versionId}/publish:
+    parameters: [{ $ref: '#/components/parameters/VersionId' }]
+    post:
+      summary: Publicar la versión (Admin)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DiagramVersion' }
+        '422': { description: 'Sin actividades (o con propuestas pendientes, feature 006)' }
+  /diagram-versions/{versionId}/activities:
+    parameters: [{ $ref: '#/components/parameters/VersionId' }]
+    post:
+      summary: Crear actividad (Admin, versión en borrador)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityInput' }
+      responses:
+        '201':
+          headers: { ETag: { schema: { type: string } } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Activity' }
+        '409': { description: La versión no está en borrador }
+  /activities/{activityId}:
+    parameters: [{ name: activityId, in: path, required: true, schema: { type: string } }]
+    patch:
+      summary: Actualizar actividad (Admin). Requiere If-Match con el rev actual.
+      parameters:
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityPatch' }
+      responses:
+        '200':
+          headers: { ETag: { schema: { type: string } } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Activity' }
+        '409':
+          description: rev desactualizado; devuelve la versión actual
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Activity' }
+        '428': { description: Falta If-Match }
+    delete:
+      summary: Eliminar actividad (Admin). Si tiene requisitos, exige confirm=true.
+      parameters:
+        - { name: confirm, in: query, schema: { type: boolean } }
+      responses:
+        '204': { description: Eliminada }
+        '409':
+          description: Tiene requisitos y no se confirmó
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { detailCount: { type: integer } }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    ProjectId: { name: projectId, in: path, required: true, schema: { type: string } }
+    DiagramId: { name: diagramId, in: path, required: true, schema: { type: string } }
+    VersionId: { name: versionId, in: path, required: true, schema: { type: string } }
+  schemas:
+    ActivityType: { type: string, enum: [action, decision, start, end] }
+    BBox:
+      type: object
+      required: [x, y, w, h]
+      properties:
+        x: { type: number, minimum: 0, maximum: 1 }
+        y: { type: number, minimum: 0, maximum: 1 }
+        w: { type: number, exclusiveMinimum: 0, maximum: 1 }
+        h: { type: number, exclusiveMinimum: 0, maximum: 1 }
+    ActivityInput:
+      type: object
+      required: [label, type, bbox]
+      properties:
+        label: { type: string, minLength: 1, maxLength: 120 }
+        type: { $ref: '#/components/schemas/ActivityType' }
+        bbox: { $ref: '#/components/schemas/BBox' }
+        next: { type: array, items: { type: string } }
+    ActivityPatch:
+      type: object
+      minProperties: 1
+      properties:
+        label: { type: string, minLength: 1, maxLength: 120 }
+        type: { $ref: '#/components/schemas/ActivityType' }
+        bbox: { $ref: '#/components/schemas/BBox' }
+        next: { type: array, items: { type: string } }
+    Activity:
+      allOf:
+        - $ref: '#/components/schemas/ActivityInput'
+        - type: object
+          required: [id, key, rev, source]
+          properties:
+            id: { type: string }
+            key: { type: string, format: uuid }
+            rev: { type: integer }
+            source: { type: string, enum: [manual, detected] }
+    DiagramSummary:
+      type: object
+      required: [id, name, order]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        order: { type: integer }
+        publishedVersionId: { type: [string, 'null'] }
+        draftVersionId: { type: [string, 'null'], description: Solo para Admin }
+        thumbUrl: { type: string, format: uri }
+    DiagramVersion:
+      type: object
+      required: [id, diagramId, number, status, image]
+      properties:
+        id: { type: string }
+        diagramId: { type: string }
+        number: { type: integer }
+        status: { type: string, enum: [draft, published, archived] }
+        image:
+          type: object
+          required: [displayUrl, thumbUrl, width, height]
+          properties:
+            displayUrl: { type: string, format: uri, description: Presigned URL (1 h) }
+            thumbUrl: { type: string, format: uri }
+            width: { type: integer }
+            height: { type: integer }
+        publishedAt: { type: [string, 'null'], format: date-time }
