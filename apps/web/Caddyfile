@@ -1,0 +1,38 @@
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Healthcheck del contenedor (Railway y Docker Compose). En su propio `handle` porque
+	# `try_files` se evalúa antes que `respond` y lo reescribiría a index.html.
+	handle /health {
+		header Content-Type application/json
+		respond `{"status":"ok","service":"web"}` 200
+	}
+
+	handle {
+		root * /srv
+		# La configuración cambia por entorno: nunca en caché.
+		header /config.js Cache-Control "no-store"
+		# Los assets de Vite llevan hash en el nombre.
+		header /assets/* Cache-Control "public, max-age=31536000, immutable"
+		# SPA: cualquier ruta desconocida sirve index.html.
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
