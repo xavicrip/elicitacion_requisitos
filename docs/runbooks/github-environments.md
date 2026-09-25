@@ -38,3 +38,12 @@ gh secret list --env production
 
 Con un único mantenedor, `prevent_self_review` queda en `false` para poder aprobar tus propios
 despliegues; cámbialo a `true` cuando haya otro revisor.
+
+## Estado (2026-09-25)
+
+Configurados con `scripts/github/setup-environments.sh` tras hacer público el repositorio (en un
+repositorio privado del plan gratuito, GitHub no ofrece Environments ni protección de ramas).
+Los _project tokens_ de Railway (`github-actions-staging`, `github-actions-production`) se
+crearon con la API de Railway y se enviaron a `gh secret set` por stdin, sin mostrarse ni
+guardarse en disco. Para rotarlos: crear un token nuevo en Railway, volver a ejecutar el script
+y borrar el anterior en Railway.
