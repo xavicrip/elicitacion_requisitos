@@ -14,7 +14,10 @@
 | `build` | `lint`, `typecheck` | `docker buildx` de `web`, `api` y `analytics` (con caché de GHA) | Alguna imagen no se construye |
 | `e2e-smoke` | `build` | `docker compose up` + Playwright `e2e/smoke.spec.ts` | La página inicial, `web /health` o `api /health/deep` (que incluye `analytics`) falla |
 
-Todos son *required status checks* en la protección de rama de `main`.
+Todos son *required status checks* en la protección de rama de `main`, que además exige
+1 revisión aprobada e **historial lineal**. El repositorio solo permite **"Rebase and merge"**
+(merge commits y squash deshabilitados), para que cada commit de `main` sea un commit atómico
+en formato Conventional Commits (SC-005).
 
 ## `deploy.yml`
 
