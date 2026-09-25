@@ -13,7 +13,16 @@ Esta feature no introduce datos de negocio. Define las estructuras de soporte op
 | `migrationBlock` | number | Lote de ejecución (permite revertir el último lote). |
 
 **Transiciones**: *pendiente* → (`up`) → *aplicada* → (`down`) → *pendiente*.
-**Regla**: toda migración DEBE implementar `up` y `down`; CI valida `up → down → up`.
+**Reglas**:
+- Toda migración DEBE implementar `up` y `down`; CI valida `up → down → up`.
+- Cada archivo exporta `destructive: boolean`. Es `true` si `up` elimina o transforma datos que
+  `down` no puede reconstruir (p. ej., borrar un campo o fusionar documentos).
+- Garantía de `down`: el **esquema** (colecciones, índices, forma de los documentos) vuelve al
+  estado anterior y se conservan los datos que existían antes del `up`. Para las migraciones
+  con `destructive: true`, la reversión completa exige restaurar el respaldo (`mongodump`)
+  tomado justo antes de aplicarla; el runbook de rollback lo documenta.
+- Una prueba de política (`migrations-policy.test.ts`) falla si una migración no declara
+  `destructive` o no implementa `down`.
 
 Migración inicial `20260925000000-init-indexes.js`: crea la colección `_platform` con un
 documento de versión del esquema (`{ _id: "schema", version: 1 }`); su `down` la elimina.
