@@ -38,3 +38,15 @@ def test_lista_variables_invalidas_sin_mostrar_valores() -> None:
     assert "REDIS_URL" in message
     assert "s3cret" not in message
     assert set(info.value.variables) >= {"PORT", "REDIS_URL"}
+
+
+def test_socket_dual_stack_acepta_ipv4_e_ipv6() -> None:
+    import socket
+
+    from analytics.main import dual_stack_socket
+
+    sock = dual_stack_socket("::", 0)
+    try:
+        assert sock.getsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY) == 0
+    finally:
+        sock.close()
