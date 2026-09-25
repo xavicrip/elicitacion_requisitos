@@ -115,6 +115,7 @@ jobs:
           pnpm migrate:status
 
   build:
+    name: build (${{ matrix.service }})
     needs: [lint, typecheck]
     runs-on: ubuntu-latest
     strategy:
