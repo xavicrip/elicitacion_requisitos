@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.1.0...v0.1.1) (2026-09-25)
+
+
+### Correcciones
+
+* **ci:** detect destructive migrations without false positives ([58401c6](https://github.com/xavicrip/elicitacion_requisitos/commit/58401c6fbbbec36664e5c10bfa1ed2339fb895f9))
+* **ci:** wait for the web version instead of the commit ([6b9f2ea](https://github.com/xavicrip/elicitacion_requisitos/commit/6b9f2ea0ba362974c81afe1dab103d55dee47fe1))
+
 ## 0.1.0 (2026-09-25)
 
 
