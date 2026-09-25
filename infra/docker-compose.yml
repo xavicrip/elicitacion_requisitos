@@ -1,0 +1,103 @@
+# Entorno local completo: `pnpm dev:up` (desde la raíz). Web en :5173, API en :3000,
+# analytics en :8000. MongoDB y Redis no se publican en el host (evita choques de puertos).
+name: reqcanvas
+
+x-node-healthcheck: &http-healthcheck
+  interval: 5s
+  timeout: 3s
+  retries: 20
+  start_period: 5s
+
+services:
+  mongodb:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping").ok']
+      <<: *http-healthcheck
+
+  redis:
+    image: redis:7
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      <<: *http-healthcheck
+
+  analytics:
+    build:
+      context: ..
+      dockerfile: apps/analytics/Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+        GIT_SHA: ${GIT_SHA:-local}
+    environment:
+      ENV: development
+      PORT: 8000
+      MONGO_URL: mongodb://mongodb:27017
+      MONGO_DB: reqcanvas
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: INFO
+    ports:
+      - '8000:8000'
+    depends_on:
+      mongodb: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          'import urllib.request; urllib.request.urlopen("http://localhost:8000/health", timeout=2)',
+        ]
+      <<: *http-healthcheck
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+        GIT_SHA: ${GIT_SHA:-local}
+    # Igual que el preDeployCommand de Railway: migrar antes de arrancar.
+    command: ['sh', '-c', 'node dist/migrate.js up && exec node dist/server.js']
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGO_URL: mongodb://mongodb:27017
+      MONGO_DB: reqcanvas
+      REDIS_URL: redis://redis:6379
+      ANALYTICS_URL: http://analytics:8000
+      CORS_ORIGINS: http://localhost:5173
+      LOG_LEVEL: info
+      FEATURE_FLAGS: ${FEATURE_FLAGS:-}
+    ports:
+      - '3000:3000'
+    depends_on:
+      mongodb: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      analytics: { condition: service_started }
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health']
+      <<: *http-healthcheck
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+    environment:
+      PORT: 8080
+      API_PUBLIC_URL: http://localhost:3000
+      APP_VERSION: ${APP_VERSION:-dev}
+    ports:
+      - '5173:8080'
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8080/health']
+      <<: *http-healthcheck
+
+volumes:
+  mongo-data:
