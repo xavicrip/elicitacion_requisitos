@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+.venv/
+venv/
+
+# Builds y artefactos
+dist/
+build/
+coverage/
+htmlcov/
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+playwright-report/
+test-results/
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Logs y temporales
+*.log
+*.tmp
+*.swp
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
