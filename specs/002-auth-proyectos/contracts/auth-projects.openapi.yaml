@@ -1,0 +1,323 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas API - Autenticación y proyectos
+  version: 1.0.0
+  description: Todas las rutas se sirven bajo el prefijo /api (proxy de web → api).
+servers:
+  - url: /api
+security:
+  - bearer: []
+paths:
+  /auth/register:
+    post:
+      security: []
+      summary: Registrar una cuenta e iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterInput' }
+      responses:
+        '201': { $ref: '#/components/responses/Session' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { description: 'Mensaje genérico: "No se pudo crear la cuenta con esos datos"' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/login:
+    post:
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginInput' }
+      responses:
+        '200': { $ref: '#/components/responses/Session' }
+        '401': { description: 'Mensaje genérico: "Email o contraseña incorrectos"' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/refresh:
+    post:
+      security: []
+      summary: Rota el refresh token (cookie rt) y emite un nuevo access token
+      responses:
+        '200': { $ref: '#/components/responses/Session' }
+        '401': { description: Cookie ausente, caducada, revocada o reutilizada }
+  /auth/logout:
+    post:
+      summary: Revoca la familia de sesión y borra la cookie
+      responses:
+        '204': { description: Sesión cerrada }
+  /me:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+  /projects:
+    get:
+      summary: Mis proyectos
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ProjectSummary' }
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProjectInput' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Project' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /projects/{projectId}:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Project' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Editar nombre y descripción (Admin)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProjectInput' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Project' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      summary: Eliminar el proyecto (Admin; borrado en cascada asíncrono)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirmName]
+              properties: { confirmName: { type: string } }
+      responses:
+        '202': { description: Borrado encolado }
+        '400': { description: confirmName no coincide }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /projects/{projectId}/status:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    post:
+      summary: Cambiar el estado (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: { type: string, enum: [open, close, reopen] }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Project' }
+        '409': { description: Transición no válida desde el estado actual }
+  /projects/{projectId}/members:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Member' }
+  /projects/{projectId}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - { name: userId, in: path, required: true, schema: { type: string } }
+    patch:
+      summary: Cambiar rol (Admin)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties: { role: { $ref: '#/components/schemas/Role' } }
+      responses:
+        '200': { description: Rol actualizado }
+        '409': { description: Dejaría el proyecto sin Administradores }
+    delete:
+      summary: Retirar miembro (Admin) o abandonar el proyecto (uno mismo)
+      responses:
+        '204': { description: Miembro retirado }
+        '409': { description: Dejaría el proyecto sin Administradores }
+  /projects/{projectId}/invitations:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      summary: Listar invitaciones (Admin)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Invitation' }
+    post:
+      summary: Crear enlace de invitación (Admin). El token solo se devuelve en esta respuesta.
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Invitation'
+                  - type: object
+                    required: [url]
+                    properties: { url: { type: string, format: uri } }
+  /projects/{projectId}/invitations/{invitationId}:
+    delete:
+      summary: Revocar invitación (Admin)
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - { name: invitationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Revocada }
+  /invitations/{token}:
+    get:
+      security: []
+      summary: Vista previa pública (nombre del proyecto) de una invitación válida
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { projectName: { type: string } }
+        '410': { description: Invitación caducada o revocada }
+  /invitations/{token}/accept:
+    post:
+      summary: Unirse al proyecto como Participante (idempotente)
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProjectSummary' }
+        '410': { description: Invitación caducada o revocada }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    ProjectId: { name: projectId, in: path, required: true, schema: { type: string } }
+  responses:
+    Session:
+      description: Sesión iniciada. Incluye Set-Cookie rt (httpOnly; Secure; SameSite=Strict; Path=/api/auth)
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [accessToken, expiresIn, user]
+            properties:
+              accessToken: { type: string }
+              expiresIn: { type: integer, description: segundos }
+              user: { $ref: '#/components/schemas/User' }
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Miembro sin el rol necesario
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: No existe o el usuario no es miembro
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Demasiados intentos; incluye la cabecera Retry-After
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string, description: Mensaje en español para el usuario }
+        fields:
+          type: object
+          additionalProperties: { type: string }
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 10, maxLength: 128 }
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    User:
+      type: object
+      required: [id, name, email]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+    Role: { type: string, enum: [admin, participant] }
+    ProjectStatus: { type: string, enum: [draft, open, closed] }
+    ProjectInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        description: { type: string, maxLength: 2000 }
+    ProjectSummary:
+      type: object
+      required: [id, name, status, myRole, lastActivityAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        status: { $ref: '#/components/schemas/ProjectStatus' }
+        myRole: { $ref: '#/components/schemas/Role' }
+        lastActivityAt: { type: string, format: date-time }
+    Project:
+      allOf:
+        - $ref: '#/components/schemas/ProjectSummary'
+        - type: object
+          properties:
+            description: { type: string }
+            memberCount: { type: integer }
+            createdAt: { type: string, format: date-time }
+    Member:
+      type: object
+      required: [userId, name, email, role, joinedAt]
+      properties:
+        userId: { type: string }
+        name: { type: string }
+        email: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        joinedAt: { type: string, format: date-time }
+    Invitation:
+      type: object
+      required: [id, status, expiresAt, uses]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [active, expired, revoked] }
+        expiresAt: { type: string, format: date-time }
+        uses: { type: integer }
