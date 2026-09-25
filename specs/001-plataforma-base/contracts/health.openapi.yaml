@@ -5,6 +5,8 @@ info:
   description: >
     Contrato común que implementan los servicios `api` y `analytics`.
     `web` solo implementa `GET /health` (respuesta estática 200).
+    `analytics` solo es accesible por la red privada; desde fuera se verifica con
+    `GET /health/deep` de `api`.
 servers:
   - url: http://localhost:3000
     description: api (local)
@@ -52,6 +54,36 @@ paths:
                   mongo: { status: down, latencyMs: 2000, error: 'timeout' }
                   redis: { status: up, latencyMs: 1 }
                 timestamp: '2026-09-25T16:00:00.000Z'
+  /health/deep:
+    get:
+      summary: Salud profunda (solo api) - incluye analytics vía red privada; lo usan los smoke tests
+      description: >
+        Igual que /health más el check `analytics` (GET a analytics.railway.internal/health con
+        timeout de 2 s, reenviando x-request-id). No es el healthcheck de despliegue de Railway.
+      operationId: getDeepHealth
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: api y todas sus dependencias, incluido analytics, están disponibles
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+              example:
+                status: ok
+                service: api
+                version: 0.1.0
+                commit: a3ce1ad
+                checks:
+                  mongo: { status: up, latencyMs: 3 }
+                  redis: { status: up, latencyMs: 1 }
+                  analytics: { status: up, latencyMs: 12 }
+                timestamp: '2026-09-25T16:00:00.000Z'
+        '503':
+          description: Alguna dependencia, incluido analytics, no está disponible
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
   /version:
     get:
       summary: Versión desplegada

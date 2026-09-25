@@ -35,21 +35,35 @@ No quedaron `NEEDS CLARIFICATION` en el Technical Context. Estas son las decisio
 
 ## R4. Healthchecks
 
-- **Decision**: `GET /health` devuelve `200` con `{status:"ok", checks:{mongo,redis}}` cuando
-  todas las dependencias responden, y `503` con `status:"degraded"` y la dependencia que
-  falla en caso contrario. `GET /version` devuelve la versión y el commit (`GIT_SHA`). `web`
-  sirve un `/health` estático desde Caddy.
-- **Rationale**: Railway solo promueve un despliegue cuando el healthcheck responde `200`;
-  si responde `503` con una dependencia caída, Railway mantiene la versión anterior.
-- **Alternatives considered**: liveness y readiness separados (útil en Kubernetes; Railway
-  usa un solo healthcheck de despliegue).
+- **Decision**: dos niveles en `api`:
+  - `GET /health` (**el que usa Railway** como healthcheck de despliegue): `200` con
+    `{status:"ok", checks:{mongo,redis}}` si sus dependencias directas responden; `503` con
+    `status:"degraded"` y la dependencia que falla en caso contrario.
+  - `GET /health/deep` (el que usan los smoke tests): igual que `/health` más el check
+    `analytics`, que llama a `GET http://analytics.railway.internal:<port>/health` por la red
+    privada con un timeout de 2 s, **reenviando `x-request-id`**.
+  `analytics` expone su propio `/health` (Mongo y Redis), que solo es accesible por la red
+  privada. `GET /version` devuelve la versión y el commit (`GIT_SHA`). `web` sirve un
+  `/health` estático desde Caddy.
+- **Rationale**: `analytics` no tiene dominio público, así que un smoke test externo no
+  puede consultarlo directamente; el check profundo lo verifica a través de `api` y, a la vez,
+  demuestra la propagación del `requestId` entre servicios (FR-004). `analytics` no forma
+  parte del healthcheck de despliegue de `api`, para que una caída de `analytics` no bloquee
+  los despliegues de `api`.
+- **Alternatives considered**: dar un dominio público a `analytics` (aumenta la superficie de
+  ataque); liveness y readiness separados al estilo de Kubernetes (Railway usa un solo
+  healthcheck de despliegue).
 
 ## R5. Logs y correlación
 
 - **Decision**: pino (`api`) y python-json-logger (`analytics`), en JSON a stdout. Cabecera
   `x-request-id`: se reutiliza si llega, o se genera un UUID v7; se propaga en las llamadas
   entre servicios y se incluye en cada línea de log.
-- **Rationale**: Railway indexa los logs JSON y permite filtrar por atributos.
+  `api` usa un cliente HTTP interno (`apps/api/src/lib/http-client.ts`, basado en `fetch`)
+  que añade automáticamente el `x-request-id` de la petición en curso a toda llamada saliente;
+  el primer uso es el check `analytics` de `/health/deep`.
+- **Rationale**: Railway indexa los logs JSON y permite filtrar por atributos; el cliente
+  interno garantiza la propagación sin depender de que cada llamada la recuerde.
 - **Alternatives considered**: OpenTelemetry completo (se deja para más adelante; el
   `requestId` cubre RNF-07).
 
