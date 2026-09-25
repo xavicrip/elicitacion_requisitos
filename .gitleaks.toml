@@ -1,0 +1,14 @@
+# Detección de secretos (job `secrets` del CI). Usa las reglas por defecto de gitleaks.
+title = "ReqCanvas"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Credenciales ficticias de las pruebas (p. ej. 's3cret-…') y archivos de ejemplo"
+paths = [
+  '''apps/api/tests/''',
+  '''apps/analytics/tests/''',
+  '''apps/web/tests/''',
+  '''\.env\.example$''',
+]
