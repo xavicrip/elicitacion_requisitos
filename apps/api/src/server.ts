@@ -15,5 +15,5 @@ try {
   throw error;
 }
 
-const app = await buildApp();
+const app = await buildApp({ logLevel: env.LOG_LEVEL });
 await app.listen({ port: env.PORT, host: env.HOST });

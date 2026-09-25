@@ -21,6 +21,8 @@
   "dependencies": {
     "@reqcanvas/shared": "workspace:*",
     "fastify": "^5.12.5",
+    "fastify-plugin": "^6.0.0",
+    "uuid": "^14.0.2",
     "zod": "^4.6.5"
   }
 }
