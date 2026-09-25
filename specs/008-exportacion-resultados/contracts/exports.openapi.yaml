@@ -1,0 +1,100 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas API - Exportaciones
+  version: 1.0.0
+  description: Solo Administradores del proyecto.
+servers:
+  - url: /api
+security:
+  - bearer: []
+paths:
+  /projects/{projectId}/exports:
+    parameters: [{ name: projectId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Historial de exportaciones del proyecto
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Export' }
+    post:
+      summary: Solicitar una exportación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExportRequest' }
+      responses:
+        '200':
+          description: Exportación síncrona (≤ 1 000 detalles y formato distinto de PDF); el cuerpo es el archivo
+          headers:
+            Content-Disposition: { schema: { type: string } }
+            X-Export-Id: { schema: { type: string } }
+          content:
+            text/csv: { schema: { type: string, format: binary } }
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } }
+            application/zip: { schema: { type: string, format: binary } }
+        '202':
+          description: Exportación asíncrona encolada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Export' }
+        '403': { description: No es Administrador }
+        '422': { description: 'PDF sin diagramas publicados' }
+  /exports/{exportId}:
+    parameters: [{ name: exportId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Estado de una exportación
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Export' }
+  /exports/{exportId}/download:
+    parameters: [{ name: exportId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Redirige a una presigned URL (15 min) mientras no haya caducado; registra la descarga
+      responses:
+        '302': { description: Redirección al archivo }
+        '409': { description: Aún no está lista }
+        '410': { description: Caducada (más de 24 h) }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    ExportRequest:
+      type: object
+      required: [format]
+      properties:
+        format: { type: string, enum: [csv, xlsx, gherkin, pdf] }
+        filters:
+          type: object
+          properties:
+            diagramIds: { type: array, items: { type: string } }
+            from: { type: string, format: date }
+            to: { type: string, format: date }
+            types: { type: array, items: { type: string } }
+            includeStatuses: { type: array, items: { type: string, enum: [pending, validated, duplicate, discarded] } }
+        options:
+          type: object
+          properties:
+            delimiter: { type: string, enum: [comma, semicolon], default: comma }
+            includePending: { type: boolean, default: false, description: Solo Gherkin }
+    Export:
+      type: object
+      required: [id, format, mode, status, createdAt]
+      properties:
+        id: { type: string }
+        format: { type: string, enum: [csv, xlsx, gherkin, pdf] }
+        mode: { type: string, enum: [sync, async] }
+        status: { type: string, enum: [queued, running, ready, failed, expired] }
+        detailCount: { type: integer }
+        bytes: { type: [integer, 'null'] }
+        createdAt: { type: string, format: date-time }
+        readyAt: { type: [string, 'null'], format: date-time }
+        expiresAt: { type: [string, 'null'], format: date-time }
+        error:
+          type: [object, 'null']
+          properties: { code: { type: string }, message: { type: string } }
