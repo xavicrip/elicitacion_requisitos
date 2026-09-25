@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # deploy.yml (invocado con workflow_call) declara un job que necesita `actions: read`; un
+  # workflow invocado no puede pedir más permisos que quien lo invoca.
+  actions: read
 
 jobs:
   release:
