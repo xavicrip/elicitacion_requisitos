@@ -39,6 +39,7 @@ docker compose -f infra/docker-compose.yml start mongodb
 
 ```bash
 MONGO_URL= pnpm --filter api start   # Termina con código 1 y el log indica "MONGO_URL" sin mostrar valores
+docker run --rm -e API_PUBLIC_URL= reqcanvas-web   # Termina con código 1 e indica "API_PUBLIC_URL"
 ```
 
 ## 4. Correlación de logs (FR-004)
