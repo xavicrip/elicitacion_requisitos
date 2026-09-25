@@ -36,6 +36,7 @@ revirtiendo el commit.
 | II. Servicios desacoplados con contratos | Tres servicios independientes, `packages/shared` con esquemas zod; contrato de salud común en `contracts/health.openapi.yaml`; los servicios no comparten colecciones. | ✅ |
 | III. Pruebas primero | Cada historia empieza con pruebas que fallan (healthcheck, validación de config, logs); gates de cobertura ≥ 70 % en CI para `api` y `analytics`. | ✅ |
 | IV. Commits atómicos y reversibles | commitlint + Husky; migrate-mongo con `up`/`down`; feature flags; despliegue por tag que permite volver a cualquier versión; PR sin squash. | ✅ |
+| Restricciones (v1.1.0) | Node.js 24 LTS fijado en `.nvmrc`/`engines`/imágenes/CI; despliegue solo desde GitHub Actions con `railway up --ci`, autodeploy de Railway desactivado. | ✅ |
 | V. Seguridad por defecto | Validación de config al arrancar; gitleaks en CI; secretos en GitHub Environments y Railway; Helmet y CORS restringido en `api`. | ✅ |
 | VI. Observabilidad | `GET /health` en los tres servicios; logs JSON (pino / python-json-logger) con `x-request-id` propagado. | ✅ |
 | VII. Humano en el bucle y simplicidad | Promoción a producción con aprobación manual; sin orquestador de monorepo (Turborepo/Nx) ni servicio externo de flags (YAGNI). | ✅ |

@@ -17,11 +17,12 @@ No quedaron `NEEDS CLARIFICATION` en el Technical Context. Estas son las decisio
 
 ## R2. Versión de Node.js
 
-- **Decision**: Node.js **24 LTS**.
-- **Rationale**: prompt.md menciona Node 22, pero a la fecha (2026-09) Node 24 es la LTS
-  activa y Node 22 está en mantenimiento; empezar en la LTS activa evita una migración a mitad
-  del proyecto.
-- **Alternatives considered**: Node 22 (válida, pero con menos tiempo de soporte).
+- **Decision**: Node.js **24 LTS** (fijado en la constitución v1.1.0). Se declara en `.nvmrc`,
+  en `engines.node` (`>=24 <25`), en las imágenes base `node:24-alpine` y en
+  `actions/setup-node` (`node-version-file: .nvmrc`).
+- **Rationale**: es la LTS activa en 2026-09; Node 22 está en mantenimiento. Empezar en la LTS
+  activa evita una migración a mitad del proyecto.
+- **Alternatives considered**: Node 22 (valor original de prompt.md, ya actualizado).
 
 ## R3. Framework de la API
 
@@ -87,7 +88,7 @@ No quedaron `NEEDS CLARIFICATION` en el Technical Context. Estas son las decisio
   - Configuración como código en `apps/*/railway.json`: `build.dockerfilePath`,
     `build.watchPatterns`, `deploy.healthcheckPath`, `deploy.healthcheckTimeout`,
     `deploy.restartPolicyType: ON_FAILURE`, `deploy.restartPolicyMaxRetries: 3`.
-  - Los despliegues los dispara **GitHub Actions** con `railway up --ci --service <svc>
+  - Los despliegues los dispara **exclusivamente GitHub Actions** (constitución v1.1.0) con `railway up --ci --service <svc>
     --environment <env>`, usando un **project token** por entorno (`RAILWAY_TOKEN`, guardado
     en el GitHub Environment correspondiente). El autodeploy de Railway queda desactivado para
     que solo se despliegue lo que pasó CI.
