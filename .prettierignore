@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+pnpm-lock.yaml
+apps/analytics/
+specs/
+.specify/
+.claude/
+playwright-report/
+test-results/
