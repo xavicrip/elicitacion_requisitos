@@ -1,0 +1,18 @@
+name: setup
+description: Node 24 (.nvmrc), pnpm (packageManager), uv + Python 3.12 y dependencias instaladas
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+      shell: bash
+    - uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: apps/analytics/uv.lock
+    - run: uv sync --directory apps/analytics --frozen
+      shell: bash
