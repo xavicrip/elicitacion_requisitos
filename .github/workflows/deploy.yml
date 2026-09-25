@@ -27,8 +27,12 @@ on:
         default: main
       action:
         type: choice
-        options: [deploy, migrate-down]
+        options: [deploy, migrate-down, restore-backup]
         default: deploy
+      backup_run_id:
+        description: 'restore-backup: ID de la ejecución de deploy que guardó el respaldo'
+        type: string
+        default: ''
 
 concurrency:
   # Los despliegues de un mismo entorno se ejecutan en orden, sin cancelarse.
@@ -148,3 +152,31 @@ jobs:
         run: >
           railway ssh --service api --environment "${{ needs.plan.outputs.environment }}"
           -- node dist/migrate.js down
+
+  # Solo para migraciones destructivas: restaura el respaldo tomado antes de aplicarlas.
+  restore-backup:
+    needs: plan
+    if: needs.plan.outputs.action == 'restore-backup'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.plan.outputs.environment }}
+    permissions:
+      contents: read
+      actions: read
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      ENVIRONMENT: ${{ needs.plan.outputs.environment }}
+    steps:
+      - run: npm install --global @railway/cli@4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mongo-backup-${{ needs.plan.outputs.environment }}-*
+          run-id: ${{ inputs.backup_run_id }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
+      - name: mongorestore (--drop) dentro de la red privada
+        run: |
+          test -s backup.archive.gz
+          # $MONGO_URL se expande dentro del contenedor de MongoDB en Railway, no aquí.
+          # shellcheck disable=SC2016
+          railway ssh --service MongoDB --environment "$ENVIRONMENT" -- \
+            sh -c 'mongorestore --uri "$MONGO_URL" --archive --gzip --drop' < backup.archive.gz
