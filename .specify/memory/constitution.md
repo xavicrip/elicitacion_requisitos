@@ -1,21 +1,18 @@
 <!--
 Sync Impact Report
-- Version change: plantilla (sin versión) → 1.0.0
-- Principios definidos (nuevos):
-  I. Requisito anclado a la actividad
-  II. Servicios desacoplados con contratos compartidos
-  III. Pruebas primero (NO NEGOCIABLE)
-  IV. Commits atómicos y reversibles (NO NEGOCIABLE)
-  V. Seguridad por defecto
-  VI. Observabilidad y operabilidad
-  VII. Humano en el bucle y simplicidad
-- Secciones añadidas: Restricciones tecnológicas y de despliegue; Flujo de desarrollo y quality gates
-- Secciones eliminadas: ninguna
+- Version change: 1.0.0 → 1.1.0 (MINOR: guía de despliegue ampliada y versión de runtime fijada)
+- Principios modificados: ninguno
+- Secciones modificadas:
+  - Restricciones tecnológicas y de despliegue: Node.js fijado a 24 LTS; despliegue en Railway
+    exclusivamente desde GitHub Actions (Railway CLI + project tokens), autodeploy desactivado.
+  - Flujo de desarrollo y quality gates: una rama por spec (`NNN-nombre`), apiladas según las
+    dependencias del roadmap; el paso 4 detalla el despliegue desde GitHub Actions.
+- Secciones añadidas / eliminadas: ninguna
 - Plantillas revisadas:
-  ✅ .specify/templates/plan-template.md (la "Constitution Check" se deriva de este archivo; sin cambios)
-  ✅ .specify/templates/spec-template.md (sin secciones obligatorias nuevas)
-  ✅ .specify/templates/tasks-template.md (las pruebas pasan a ser obligatorias por el Principio III;
-     cada tasks.md generado DEBE incluir tareas de prueba)
+  ✅ .specify/templates/plan-template.md (sin cambios; la Constitution Check se deriva de aquí)
+  ✅ .specify/templates/spec-template.md (sin cambios)
+  ✅ .specify/templates/tasks-template.md (sin cambios; las pruebas siguen siendo obligatorias
+     por el Principio III)
 - TODOs diferidos: ninguno
 -->
 
@@ -116,12 +113,17 @@ sistema depende de que el analista mantenga el control.
 
 - **Frontend:** React + TypeScript + Vite; el canvas se implementa con **three.js**
   (vía `@react-three/fiber`).
-- **Backend:** Node.js LTS + TypeScript, con Socket.IO para el tiempo real.
+- **Runtime JavaScript:** **Node.js 24 LTS** en todos los servicios y en CI (`.nvmrc` y
+  `engines.node` lo fijan); cambiar de versión mayor requiere un ADR.
+- **Backend:** Node.js 24 + TypeScript, con Socket.IO para el tiempo real.
 - **Servicio analítico:** Python 3.12 + FastAPI para OCR, visión y minería de datos y texto.
 - **Persistencia:** **MongoDB** como base de datos principal; Redis para colas y pub/sub;
   almacenamiento de objetos compatible con S3 para imágenes.
 - **Despliegue:** **Railway**, un servicio por componente, cada uno con su `Dockerfile`,
-  healthcheck y política de reinicio; entornos `staging` y `production`.
+  `railway.json`, healthcheck y política de reinicio; entornos `staging` y `production`.
+- **Entrega:** los despliegues se ejecutan **solo desde GitHub Actions** con la Railway CLI
+  (`railway up --ci`) y un project token por entorno guardado en GitHub Environments. El
+  autodeploy de Railway permanece desactivado para que nada llegue a un entorno sin pasar CI.
 - **Monorepo:** pnpm workspaces (`apps/*`, `packages/*`).
 - **Idioma:** la interfaz y los mensajes al usuario están en español.
 - Introducir una tecnología fuera de esta lista requiere un ADR en `docs/adr/`.
@@ -129,13 +131,16 @@ sistema depende de que el analista mantenga el control.
 ## Flujo de desarrollo y quality gates
 
 1. Cada funcionalidad sigue el flujo de spec-kit: `specify` → (`clarify`) → `plan` →
-   `tasks` → (`analyze`) → `implement`.
+   `tasks` → (`analyze`) → `implement`, en su propia rama `NNN-nombre`. Las ramas se apilan
+   según las dependencias del roadmap (`specs/README.md`) y se integran a `main` en ese orden.
 2. El plan de cada feature DEBE pasar la *Constitution Check* antes de generar tareas.
 3. Gates de CI obligatorios en cada PR: lint, verificación de tipos, pruebas unitarias,
    de contrato e integración, build de imágenes Docker y validación de mensajes de commit
    (commitlint).
-4. `main` se despliega automáticamente en `staging`; la promoción a `production` requiere
-   smoke tests en verde y aprobación manual.
+4. Tras el CI en verde en `main`, GitHub Actions despliega en `staging` y ejecuta smoke
+   tests; la promoción a `production` se hace desde un tag `vX.Y.Z` y requiere la aprobación
+   manual del GitHub Environment `production`. El rollback se hace redesplegando un tag
+   anterior desde el mismo workflow.
 5. Cada PR requiere al menos una revisión que verifique el cumplimiento de esta constitución.
 
 ## Governance
@@ -149,4 +154,4 @@ sistema depende de que el analista mantenga el control.
   deben justificarse en *Complexity Tracking* o corregirse.
 - La guía operativa para agentes está en `CLAUDE.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-25 | **Last Amended**: 2026-09-25
+**Version**: 1.1.0 | **Ratified**: 2026-09-25 | **Last Amended**: 2026-09-25
