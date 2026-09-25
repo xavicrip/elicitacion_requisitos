@@ -108,14 +108,14 @@ las historias
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T042 [P] [US2] Prueba de que la configuración de commitlint rechaza `"cambios varios"` y acepta `"feat(api): add health"` en `tests/repo/commitlint.test.ts` — `test(repo)`
-- [ ] T043 [P] [US2] Configurar el umbral de cobertura del 70 % en `apps/api/vitest.config.ts` y en `apps/analytics/pyproject.toml` (`--cov-fail-under=70`) — `test(ci)`
+- [X] T042 [P] [US2] Prueba de que la configuración de commitlint rechaza `"cambios varios"` y acepta `"feat(api): add health"` en `tests/repo/commitlint.test.ts` — `test(repo)`
+- [X] T043 [P] [US2] Configurar el umbral de cobertura del 70 % en `apps/api/vitest.config.ts` y en `apps/analytics/pyproject.toml` (`--cov-fail-under=70`) — `test(ci)`
 
 ### Implementation for User Story 2
 
-- [ ] T044 [US2] Workflow `.github/workflows/ci.yml` con los jobs `lint`, `typecheck`, `commitlint`, `secrets`, `test-node`, `test-python`, `migrations` (up/down/up + política), `build` (con verificación de tamaño de imagen: `api` < 300 MB, `analytics` < 1,2 GB) y `e2e-smoke` según `contracts/ci-cd-pipeline.md` (con caché de pnpm, uv y buildx) — `ci`
-- [ ] T045 [P] [US2] Configuración de gitleaks en `.gitleaks.toml` — `ci`
-- [ ] T046 [P] [US2] Plantilla de PR con checklist de constitución (commits atómicos, pruebas, sin secretos, migraciones destructivas declaradas) en `.github/pull_request_template.md` — `docs(repo)`
+- [X] T044 [US2] Workflow `.github/workflows/ci.yml` con los jobs `lint`, `typecheck`, `commitlint`, `secrets`, `test-node`, `test-python`, `migrations` (up/down/up + política), `build` (con verificación de tamaño de imagen: `api` < 300 MB, `analytics` < 1,2 GB) y `e2e-smoke` según `contracts/ci-cd-pipeline.md` (con caché de pnpm, uv y buildx) — `ci`
+- [X] T045 [P] [US2] Configuración de gitleaks en `.gitleaks.toml` — `ci`
+- [X] T046 [P] [US2] Plantilla de PR con checklist de constitución (commits atómicos, pruebas, sin secretos, migraciones destructivas declaradas) en `.github/pull_request_template.md` — `docs(repo)`
 - [ ] T047 [US2] Documentar en `docs/runbooks/branch-protection.md` y aplicar con `gh api` la protección de `main`: checks obligatorios de T044, 1 revisión, **historial lineal obligatorio**, y en el repositorio solo **"Rebase and merge"** habilitado (merge commits y squash deshabilitados) — `docs(ci)`
 
 **Checkpoint**: US1 y US2 funcionan de forma independiente
