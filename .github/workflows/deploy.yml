@@ -127,10 +127,16 @@ jobs:
           failed=0
           for pid in $pids; do wait "$pid" || failed=1; done
           exit "$failed"
-      - name: Esperar a que web y api (con analytics) estén saludables
+      - name: Esperar a la versión nueva y a que web y api (con analytics) estén saludables
+        env:
+          COMMIT: ${{ steps.version.outputs.commit }}
         run: |
-          scripts/wait-for-health.sh "${{ vars.BASE_URL }}/health" 600 10
-          scripts/wait-for-health.sh "${{ vars.API_URL }}/health/deep" 600 10
+          # `railway up --ci` termina al acabar el build: la versión anterior sigue sirviendo
+          # hasta que la nueva pasa su healthcheck. Se espera a ver el commit nuevo.
+          scripts/wait-for-health.sh "${{ vars.API_URL }}/version" 900 10 "\"commit\":\"$COMMIT\""
+          scripts/wait-for-health.sh "${{ vars.BASE_URL }}/config.js" 900 10 "$COMMIT"
+          scripts/wait-for-health.sh "${{ vars.BASE_URL }}/health" 120 5
+          scripts/wait-for-health.sh "${{ vars.API_URL }}/health/deep" 120 5
       - run: pnpm exec playwright install --with-deps chromium
       - name: Smoke tests contra ${{ env.ENVIRONMENT }}
         run: pnpm e2e
