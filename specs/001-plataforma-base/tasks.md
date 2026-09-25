@@ -78,7 +78,7 @@ las historias
 - [ ] T028 [P] [US1] Prueba de contrato de `GET /health`, `GET /health/deep`, `GET /version` y `GET /config` de la API contra `contracts/health.openapi.yaml` en `apps/api/tests/contract/health.contract.test.ts` — `test(api)`
 - [ ] T029 [P] [US1] Prueba de integración en `apps/api/tests/integration/health.test.ts`: `/health` → `200 ok` con Mongo y Redis arriba y `503 degraded` con Mongo caído (sin depender de analytics); `/health/deep` → `503` con analytics caído, y reenvía `x-request-id` a analytics — `test(api)`
 - [ ] T030 [P] [US1] Pruebas de contrato e integración de `/health` y `/version` de analytics en `apps/analytics/tests/contract/test_health.py` — `test(analytics)`
-- [ ] T031 [P] [US1] Prueba del componente `App` (muestra "ReqCanvas" y la versión) en `apps/web/tests/App.test.tsx` — `test(web)`
+- [ ] T031 [P] [US1] Prueba del componente `App` (muestra "ReqCanvas" y la versión) en `apps/web/tests/App.test.tsx` y prueba de shell del arranque de `web` en `apps/web/tests/entrypoint.test.sh` (sin `API_PUBLIC_URL` termina con código 1 e indica la variable sin mostrar valores; con ella genera `/config.js`) — `test(web)`
 - [ ] T032 [P] [US1] Smoke de Playwright en `e2e/smoke.spec.ts` y `e2e/playwright.config.ts`: página inicial, `web /health` y `api /health/deep` (que verifica analytics por la red privada), parametrizado por `BASE_URL` y `API_URL` — `test(e2e)`
 
 ### Implementation for User Story 1
@@ -89,7 +89,7 @@ las historias
 - [ ] T036 [P] [US1] Página inicial de `web` que muestra "ReqCanvas", la versión y un canvas three.js mínimo de prueba en `apps/web/src/App.tsx`; carga la configuración de `/config.js` en `apps/web/src/lib/config.ts` — `feat(web)`
 - [ ] T037 [P] [US1] `Dockerfile` multi-stage de `api` (pnpm deploy, usuario no root; incluye `migrate-mongo` para el *pre-deploy*) en `apps/api/Dockerfile` — `build(api)`
 - [ ] T038 [P] [US1] `Dockerfile` multi-stage de `analytics` (uv, usuario no root) en `apps/analytics/Dockerfile` — `build(analytics)`
-- [ ] T039 [P] [US1] `Dockerfile` de `web` (build de Vite + Caddy), `Caddyfile` con fallback de SPA y `/health`, y `docker-entrypoint.sh` que genera `/config.js` desde `API_PUBLIC_URL`, en `apps/web/` — `build(web)`
+- [ ] T039 [P] [US1] `Dockerfile` de `web` (build de Vite + Caddy), `Caddyfile` con fallback de SPA y `/health`, y `docker-entrypoint.sh` que valida `API_PUBLIC_URL` (termina con código 1 si falta, FR-005) y genera `/config.js`, en `apps/web/` — `build(web)`
 - [ ] T040 [US1] `infra/docker-compose.yml` con `mongodb`, `redis`, `api`, `analytics` y `web` (healthchecks, `depends_on: condition: service_healthy`, migraciones al arrancar `api`) y `.env.example` — `build(infra)`
 - [ ] T041 [US1] README con prerrequisitos, `pnpm dev:up` y la verificación de salud (quickstart §1–4) en `README.md` — `docs(repo)`
 
@@ -110,7 +110,7 @@ las historias
 
 ### Implementation for User Story 2
 
-- [ ] T044 [US2] Workflow `.github/workflows/ci.yml` con los jobs `lint`, `typecheck`, `commitlint`, `secrets`, `test-node`, `test-python`, `migrations` (up/down/up + política), `build` y `e2e-smoke` según `contracts/ci-cd-pipeline.md` (con caché de pnpm, uv y buildx) — `ci`
+- [ ] T044 [US2] Workflow `.github/workflows/ci.yml` con los jobs `lint`, `typecheck`, `commitlint`, `secrets`, `test-node`, `test-python`, `migrations` (up/down/up + política), `build` (con verificación de tamaño de imagen: `api` < 300 MB, `analytics` < 1,2 GB) y `e2e-smoke` según `contracts/ci-cd-pipeline.md` (con caché de pnpm, uv y buildx) — `ci`
 - [ ] T045 [P] [US2] Configuración de gitleaks en `.gitleaks.toml` — `ci`
 - [ ] T046 [P] [US2] Plantilla de PR con checklist de constitución (commits atómicos, pruebas, sin secretos, migraciones destructivas declaradas) en `.github/pull_request_template.md` — `docs(repo)`
 - [ ] T047 [US2] Documentar en `docs/runbooks/branch-protection.md` y aplicar con `gh api` la protección de `main`: checks obligatorios de T044, 1 revisión, **historial lineal obligatorio**, y en el repositorio solo **"Rebase and merge"** habilitado (merge commits y squash deshabilitados) — `docs(ci)`
@@ -168,7 +168,7 @@ las historias
 ## Phase 7: Polish & Cross-Cutting Concerns
 
 - [ ] T062 [P] ADR del monorepo y el stack en `docs/adr/0001-monorepo-y-stack.md` (decisiones R1–R3 y R13 de research.md) — `docs(adr)`
-- [ ] T063 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y optimizar las cachés si hace falta (SC-002, SC-003) — `ci`
+- [ ] T063 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y la latencia de `/health` en staging (p95 < 200 ms con 50 peticiones, añadido como aserción al smoke de T032); optimizar las cachés si hace falta (SC-002, SC-003) — `ci`
 - [ ] T064 Ejecutar quickstart.md completo en una máquina limpia y corregir el README donde falle (SC-001) — `docs(repo)`
 - [ ] T065 Actualizar la referencia al plan en `CLAUDE.md` si cambian comandos o estructura — `docs(repo)`
 

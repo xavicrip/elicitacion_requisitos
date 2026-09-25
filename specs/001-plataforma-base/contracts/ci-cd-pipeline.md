@@ -11,7 +11,7 @@
 | `test-node` | — | Vitest (unit, contract, integration) con servicios `mongo:7` y `redis:7` | Una prueba falla o la cobertura de `api` es < 70 % |
 | `test-python` | — | pytest con servicios `mongo:7` y `redis:7` | Una prueba falla o la cobertura es < 70 % |
 | `migrations` | — | `migrate-mongo up → down → up` sobre una Mongo efímera | Alguna migración no es reversible |
-| `build` | `lint`, `typecheck` | `docker buildx` de `web`, `api` y `analytics` (con caché de GHA) | Alguna imagen no se construye |
+| `build` | `lint`, `typecheck` | `docker buildx` de `web`, `api` y `analytics` (con caché de GHA) y tamaño de cada imagen | Alguna imagen no se construye o supera su límite (`api` < 300 MB, `analytics` < 1,2 GB) |
 | `e2e-smoke` | `build` | `docker compose up` + Playwright `e2e/smoke.spec.ts` | La página inicial, `web /health` o `api /health/deep` (que incluye `analytics`) falla |
 
 Todos son *required status checks* en la protección de rama de `main`, que además exige
