@@ -1,7 +1,21 @@
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { MigrateMongoConfig } from 'migrate-mongo';
 
-export const MIGRATIONS_DIR = fileURLToPath(new URL('../../migrations', import.meta.url));
+/**
+ * Directorio `migrations/` del paquete `api`. Se busca hacia arriba desde este archivo porque
+ * la profundidad cambia entre el código fuente (`src/db/`) y el bundle (`dist/`).
+ */
+function findMigrationsDir(start: string): string {
+  for (let dir = start; dir !== dirname(dir); dir = dirname(dir)) {
+    const candidate = join(dir, 'migrations');
+    if (existsSync(candidate)) return candidate;
+  }
+  throw new Error('No se encontró el directorio migrations/');
+}
+
+export const MIGRATIONS_DIR = findMigrationsDir(dirname(fileURLToPath(import.meta.url)));
 
 /**
  * Configuración de migrate-mongo. El lock propio de migrate-mongo 14 queda desactivado
