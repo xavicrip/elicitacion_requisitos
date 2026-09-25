@@ -8,7 +8,18 @@
   },
   "type": "module",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "eslint . && pnpm run lint:py",
+    "lint:py": "uv run --directory apps/analytics ruff check . && uv run --directory apps/analytics ruff format --check .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r run typecheck && pnpm run typecheck:py",
+    "typecheck:py": "uv run --directory apps/analytics mypy",
+    "test": "pnpm -r run test && pnpm run test:py",
+    "test:py": "uv run --directory apps/analytics pytest",
+    "dev:up": "docker compose -f infra/docker-compose.yml up -d --build",
+    "dev:down": "docker compose -f infra/docker-compose.yml down",
+    "e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,cjs,mjs}": [
