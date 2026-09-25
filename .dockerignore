@@ -1,0 +1,22 @@
+# Contexto de build: raíz del repositorio (lo necesitan api y web por el workspace pnpm).
+**/node_modules
+**/dist
+**/coverage
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.log
+**/.env
+**/.env.*
+.git
+.github
+.husky
+.specify
+.claude
+specs
+docs
+e2e
+playwright-report
+test-results
