@@ -151,8 +151,12 @@ No quedaron `NEEDS CLARIFICATION` en el Technical Context. Estas son las decisio
   70 %), `migrations` (up/down/up), `build` (docker buildx con caché de GHA),
   `commitlint` (wagoid/commitlint-github-action), `secrets` (gitleaks) y `e2e-smoke`
   (Docker Compose + Playwright). Protección de rama en `main`: todos los jobs obligatorios, al
-  menos 1 revisión, merge commit o rebase (sin squash).
-- **Rationale**: cumple FR-006 y FR-007 y el principio IV.
+  menos 1 revisión, **historial lineal obligatorio** y, en la configuración del repositorio,
+  solo **"Rebase and merge"** habilitado (sin *merge commits* ni *squash*).
+- **Rationale**: cumple FR-006 y FR-007 y el principio IV. El *rebase merge* conserva los
+  commits atómicos del PR (el *squash* los fusionaría) y no genera commits "Merge pull request
+  #…", que no siguen Conventional Commits; así el 100 % de los commits de `main` cumple el
+  formato (SC-005).
 
 ## R12. Releases
 
