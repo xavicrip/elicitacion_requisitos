@@ -130,18 +130,18 @@ las historias
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T048 [US3] Script `scripts/wait-for-health.sh` (reintenta una URL hasta `200` o timeout) con su prueba de shell en `tests/repo/wait-for-health.test.sh` — `test(ci)`
+- [X] T048 [US3] Script `scripts/wait-for-health.sh` (reintenta una URL hasta `200` o timeout) con su prueba de shell en `tests/repo/wait-for-health.test.sh` — `test(ci)`
 
 ### Implementation for User Story 3
 
-- [ ] T049 [P] [US3] `apps/api/railway.json` (builder DOCKERFILE, `dockerfilePath`, `watchPatterns` = `apps/api/**` y `packages/shared/**`, `healthcheckPath: /health`, **`preDeployCommand: pnpm migrate:up`**, `restartPolicyType: ON_FAILURE`, `restartPolicyMaxRetries: 3`) — `build(api)`
-- [ ] T050 [P] [US3] `apps/analytics/railway.json` con la misma estructura, sin `preDeployCommand` — `build(analytics)`
-- [ ] T051 [P] [US3] `apps/web/railway.json` con la misma estructura, sin `preDeployCommand` — `build(web)`
+- [X] T049 [P] [US3] `apps/api/railway.json` (builder DOCKERFILE, `dockerfilePath`, `watchPatterns` = `apps/api/**` y `packages/shared/**`, `healthcheckPath: /health`, **`preDeployCommand: pnpm migrate:up`**, `restartPolicyType: ON_FAILURE`, `restartPolicyMaxRetries: 3`) — `build(api)`
+- [X] T050 [P] [US3] `apps/analytics/railway.json` con la misma estructura, sin `preDeployCommand` — `build(analytics)`
+- [X] T051 [P] [US3] `apps/web/railway.json` con la misma estructura, sin `preDeployCommand` — `build(web)`
 - [ ] T052 [US3] Crear en Railway el proyecto, los entornos `staging` y `production`, los servicios `api`, `analytics` y `web` (desde el repo, autodeploy desactivado; dominio público solo en `web` y `api`) y `MongoDB` y `Redis` (plantillas, **sin proxy TCP público**); definir las variables de referencia de `contracts/env-vars.md`; documentarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [ ] T053 [US3] Crear con `gh api` los GitHub Environments `staging` y `production`: secret `RAILWAY_TOKEN` (project token del entorno) en cada uno; variables `STAGING_BASE_URL`/`STAGING_API_URL` y `PRODUCTION_BASE_URL`/`PRODUCTION_API_URL`; en `production`, revisores obligatorios y despliegue solo desde tags `v*` y `main`; documentarlo en `docs/runbooks/github-environments.md` — `docs(ci)`
-- [ ] T054 [US3] Workflow `.github/workflows/deploy.yml`: staging tras `ci` en `main`; producción con tag o `workflow_dispatch` usando el Environment `production` (aprobación manual); `concurrency` por entorno; job `backup` (`mongodump` vía `railway ssh`) solo si hay migraciones nuevas con `destructive: true`; `railway up --ci` ×3 (las migraciones las aplica el `preDeployCommand` de `api`) → `wait-for-health` sobre `web /health` y `api /health/deep` → smoke de Playwright; si el smoke falla, el job falla y GitHub notifica al autor del push — `ci`
-- [ ] T055 [US3] Workflow `.github/workflows/release.yml` con release-please (`release-please-config.json`, `.release-please-manifest.json`) — `ci`
-- [ ] T056 [US3] Inyectar `APP_VERSION` y `GIT_SHA` en las imágenes (build args) y verificarlos con `/version` en el smoke test — `feat(ci)`
+- [X] T054 [US3] Workflow `.github/workflows/deploy.yml`: staging tras `ci` en `main`; producción con tag o `workflow_dispatch` usando el Environment `production` (aprobación manual); `concurrency` por entorno; job `backup` (`mongodump` vía `railway ssh`) solo si hay migraciones nuevas con `destructive: true`; `railway up --ci` ×3 (las migraciones las aplica el `preDeployCommand` de `api`) → `wait-for-health` sobre `web /health` y `api /health/deep` → smoke de Playwright; si el smoke falla, el job falla y GitHub notifica al autor del push — `ci`
+- [X] T055 [US3] Workflow `.github/workflows/release.yml` con release-please (`release-please-config.json`, `.release-please-manifest.json`) — `ci`
+- [X] T056 [US3] Inyectar `APP_VERSION` y `GIT_SHA` en las imágenes (build args) y verificarlos con `/version` en el smoke test — `feat(ci)`
 
 **Checkpoint**: una versión integrada llega a staging y se puede promover a producción
 
@@ -155,13 +155,13 @@ las historias
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T057 [US4] Prueba del script de rollback `scripts/rollback.sh` (valida `ref` y `environment`, rechaza refs inexistentes y construye la invocación de `deploy.yml` y de `migrate-down`) en `tests/repo/rollback.test.sh` — `test(ops)`
+- [X] T057 [US4] Prueba del script de rollback `scripts/rollback.sh` (valida `ref` y `environment`, rechaza refs inexistentes y construye la invocación de `deploy.yml` y de `migrate-down`) en `tests/repo/rollback.test.sh` — `test(ops)`
 
 ### Implementation for User Story 4
 
-- [ ] T058 [US4] Implementar `scripts/rollback.sh` (dispara `deploy.yml` con el `ref` anterior mediante `gh workflow run` y, opcionalmente, `migrate-down`) — `feat(ops)`
-- [ ] T059 [US4] Acción `migrate-down` en `.github/workflows/deploy.yml` (`railway ssh --service api --environment <env> -- pnpm migrate:down`, con aprobación en `production`) y restauración del respaldo (`mongorestore`) para migraciones destructivas — `ci`
-- [ ] T060 [US4] Runbook de rollback en `docs/runbooks/rollback.md`: redespliegue por tag (`scripts/rollback.sh`), Rollback en el panel de Railway, `migrate-down`, restauración del respaldo si la migración era destructiva, alternativa desde la consola de Railway si `railway ssh` no está disponible, y verificación con `/version` — `docs(ops)`
+- [X] T058 [US4] Implementar `scripts/rollback.sh` (dispara `deploy.yml` con el `ref` anterior mediante `gh workflow run` y, opcionalmente, `migrate-down`) — `feat(ops)`
+- [X] T059 [US4] Acción `migrate-down` en `.github/workflows/deploy.yml` (`railway ssh --service api --environment <env> -- pnpm migrate:down`, con aprobación en `production`) y restauración del respaldo (`mongorestore`) para migraciones destructivas — `ci`
+- [X] T060 [US4] Runbook de rollback en `docs/runbooks/rollback.md`: redespliegue por tag (`scripts/rollback.sh`), Rollback en el panel de Railway, `migrate-down`, restauración del respaldo si la migración era destructiva, alternativa desde la consola de Railway si `railway ssh` no está disponible, y verificación con `/version` — `docs(ops)`
 - [ ] T061 [US4] Ensayo de rollback en staging: desplegar v0.1.0 y v0.1.1 (con una migración de prueba), volver a v0.1.0 y revertir la migración midiendo el tiempo; registrar el resultado en `docs/runbooks/rollback.md` (SC-004) — `docs(ops)`
 
 **Checkpoint**: las cuatro historias funcionan de forma independiente
@@ -170,10 +170,10 @@ las historias
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T062 [P] ADR del monorepo y el stack en `docs/adr/0001-monorepo-y-stack.md` (decisiones R1–R3 y R13 de research.md) — `docs(adr)`
+- [X] T062 [P] ADR del monorepo y el stack en `docs/adr/0001-monorepo-y-stack.md` (decisiones R1–R3 y R13 de research.md) — `docs(adr)`
 - [ ] T063 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y la latencia de `/health` en staging (p95 < 200 ms con 50 peticiones, añadido como aserción al smoke de T032); optimizar las cachés si hace falta (SC-002, SC-003) — `ci`
 - [ ] T064 Ejecutar quickstart.md completo en una máquina limpia y corregir el README donde falle (SC-001) — `docs(repo)`
-- [ ] T065 Actualizar la referencia al plan en `CLAUDE.md` si cambian comandos o estructura — `docs(repo)`
+- [X] T065 Actualizar la referencia al plan en `CLAUDE.md` si cambian comandos o estructura — `docs(repo)`
 
 ---
 
