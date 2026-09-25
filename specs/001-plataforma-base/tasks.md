@@ -25,14 +25,14 @@ alcance sugeridos van al final de cada tarea, p. ej. `feat(api)`.
 
 **Purpose**: esqueleto del monorepo y herramientas de calidad
 
-- [ ] T001 Crear `package.json` raíz (private, `packageManager: pnpm@10`, `engines.node >=24`) y `pnpm-workspace.yaml` con `apps/web`, `apps/api`, `packages/shared` — `chore(repo)`
+- [ ] T001 Crear `package.json` raíz (private, `packageManager: pnpm@10`, `engines.node: ">=24 <25"`) y `pnpm-workspace.yaml` con `apps/web`, `apps/api`, `packages/shared` — `chore(repo)`
 - [ ] T002 [P] Añadir `.gitignore`, `.editorconfig`, `.nvmrc` (24) y `.python-version` (3.12) en la raíz — `chore(repo)`
 - [ ] T003 [P] Configurar TypeScript base en `tsconfig.base.json` (strict, ES2023, `moduleResolution: bundler`) — `chore(repo)`
 - [ ] T004 [P] Configurar ESLint (flat config) en `eslint.config.js` y Prettier en `.prettierrc` + `.prettierignore` — `chore(lint)`
 - [ ] T005 [P] Configurar commitlint (`@commitlint/config-conventional`, scopes: repo, web, api, analytics, shared, infra, ci, docs, specs, speckit) en `commitlint.config.cjs` — `chore(repo)`
 - [ ] T006 Instalar Husky + lint-staged: hooks `commit-msg` (commitlint) y `pre-commit` (lint-staged) en `.husky/` — `chore(repo)`
 - [ ] T007 [P] Crear `packages/shared` (`package.json`, `tsconfig.json`, `src/index.ts`, Vitest) — `chore(shared)`
-- [ ] T008 [P] Crear `apps/api` con Fastify 5, TypeScript y Vitest (`package.json`, `tsconfig.json`, `vitest.config.ts`, `src/app.ts`, `src/server.ts`) — `chore(api)`
+- [ ] T008 [P] Crear `apps/api` con Fastify 5, TypeScript y Vitest (`package.json` con los scripts `dev` (tsx watch), `build`, `start` (`node dist/server.js`) y `test`; `tsconfig.json`, `vitest.config.ts`, `src/app.ts`, `src/server.ts`) — `chore(api)`
 - [ ] T009 [P] Crear `apps/web` con Vite + React + TypeScript + `three`, `@react-three/fiber` y Vitest (`apps/web/package.json`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`) — `chore(web)`
 - [ ] T010 [P] Crear `apps/analytics` con uv: `pyproject.toml` (fastapi, uvicorn, pydantic-settings, motor, redis, python-json-logger; dev: pytest, pytest-cov, httpx, ruff, mypy) y `src/analytics/main.py` — `chore(analytics)`
 - [ ] T011 Añadir scripts raíz en `package.json`: `lint`, `format:check`, `typecheck`, `test`, `test:py`, `dev:up`, `dev:down` — `chore(repo)`
