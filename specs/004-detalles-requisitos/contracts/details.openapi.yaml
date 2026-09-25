@@ -1,0 +1,324 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas API - Detalles de requisitos
+  version: 1.0.0
+servers:
+  - url: /api
+security:
+  - bearer: []
+paths:
+  /diagrams/{diagramId}/activities/{activityKey}/details:
+    parameters:
+      - { name: diagramId, in: path, required: true, schema: { type: string } }
+      - { name: activityKey, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      summary: Detalles de una actividad (miembros)
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/DetailStatus' } }
+        - { name: type, in: query, schema: { $ref: '#/components/schemas/DetailType' } }
+        - { name: priority, in: query, schema: { $ref: '#/components/schemas/Priority' } }
+        - { name: tag, in: query, schema: { type: string } }
+        - { name: sort, in: query, schema: { type: string, enum: [votes, recent], default: votes } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Detail' }
+    post:
+      summary: Crear detalle (miembros; proyecto abierto)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DetailInput' }
+      responses:
+        '201':
+          headers: { ETag: { schema: { type: string } } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Detail' }
+        '400': { description: Validación (indica los campos) }
+        '422': { description: La actividad no existe en la versión publicada }
+        '423': { description: Proyecto cerrado }
+  /details/{detailId}:
+    parameters: [{ $ref: '#/components/parameters/DetailId' }]
+    patch:
+      summary: Editar (autor si pending; Admin siempre)
+      parameters:
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DetailInputPartial' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Detail' }
+        '403': { description: Sin permiso según autor/estado }
+        '409':
+          description: Conflicto de edición; devuelve la versión actual
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Detail' }
+        '423': { description: Proyecto cerrado }
+    delete:
+      summary: Eliminar (autor si pending; Admin siempre); elimina votos y comentarios
+      responses:
+        '204': { description: Eliminado }
+  /details/{detailId}/status:
+    parameters: [{ $ref: '#/components/parameters/DetailId' }]
+    post:
+      summary: Moderar (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/DetailStatus' }
+                duplicateOf: { type: string }
+                discardReason: { type: string, maxLength: 500 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Detail' }
+        '422': { description: Falta duplicateOf/discardReason o el destino no es válido }
+  /details/{detailId}/reassign:
+    parameters: [{ $ref: '#/components/parameters/DetailId' }]
+    post:
+      summary: Reasignar un detalle huérfano a otra actividad (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [diagramId, activityKey]
+              properties:
+                diagramId: { type: string }
+                activityKey: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Detail' }
+  /details/{detailId}/history:
+    parameters: [{ $ref: '#/components/parameters/DetailId' }]
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rev: { type: integer }
+                    change: { type: string, enum: [edit, status, reassign] }
+                    editedBy: { $ref: '#/components/schemas/UserRef' }
+                    editedAt: { type: string, format: date-time }
+                    snapshot: { type: object }
+  /details/{detailId}/vote:
+    parameters: [{ $ref: '#/components/parameters/DetailId' }]
+    put:
+      summary: Votar (idempotente; no se puede votar un detalle propio)
+      responses:
+        '200': { $ref: '#/components/responses/VoteState' }
+        '403': { description: Detalle propio }
+    delete:
+      summary: Retirar voto (idempotente)
+      responses:
+        '200': { $ref: '#/components/responses/VoteState' }
+  /details/{detailId}/comments:
+    parameters: [{ $ref: '#/components/parameters/DetailId' }]
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Comment' }
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties: { text: { type: string, minLength: 1, maxLength: 1000 } }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+  /comments/{commentId}:
+    parameters: [{ name: commentId, in: path, required: true, schema: { type: string } }]
+    patch:
+      summary: Editar comentario propio
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties: { text: { type: string, minLength: 1, maxLength: 1000 } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+    delete:
+      summary: Eliminar comentario propio (o Admin)
+      responses:
+        '204': { description: Eliminado }
+  /diagram-versions/{versionId}/coverage:
+    parameters: [{ name: versionId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Cobertura por actividad para los indicadores del canvas
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ActivityCoverage' }
+  /projects/{projectId}/details/orphans:
+    parameters: [{ name: projectId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Detalles cuya actividad ya no existe en la versión publicada (Admin)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Detail' }
+  /projects/{projectId}/details/facets:
+    parameters: [{ name: projectId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Valores usados de rol y etiquetas (autocompletado)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles: { type: array, items: { $ref: '#/components/schemas/Facet' } }
+                  tags: { type: array, items: { $ref: '#/components/schemas/Facet' } }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    DetailId: { name: detailId, in: path, required: true, schema: { type: string } }
+  responses:
+    VoteState:
+      description: Estado del voto
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [voteCount, votedByMe]
+            properties:
+              voteCount: { type: integer }
+              votedByMe: { type: boolean }
+  schemas:
+    DetailType: { type: string, enum: [functional, non_functional, business_rule, constraint] }
+    Priority: { type: string, enum: [must, should, could, wont] }
+    DetailStatus: { type: string, enum: [pending, validated, duplicate, discarded] }
+    UserRef:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+    Facet:
+      type: object
+      properties:
+        value: { type: string }
+        count: { type: integer }
+    DetailInput:
+      type: object
+      required: [given, when, then, type]
+      properties:
+        given: { type: string, minLength: 5, maxLength: 1000 }
+        when: { type: string, minLength: 5, maxLength: 1000 }
+        then: { type: string, minLength: 5, maxLength: 1000 }
+        type: { $ref: '#/components/schemas/DetailType' }
+        priority: { oneOf: [{ $ref: '#/components/schemas/Priority' }, { type: 'null' }] }
+        authorRole: { type: [string, 'null'], maxLength: 60 }
+        tags: { type: array, maxItems: 10, items: { type: string, maxLength: 30 } }
+    DetailInputPartial:
+      type: object
+      minProperties: 1
+      properties:
+        given: { type: string, minLength: 5, maxLength: 1000 }
+        when: { type: string, minLength: 5, maxLength: 1000 }
+        then: { type: string, minLength: 5, maxLength: 1000 }
+        type: { $ref: '#/components/schemas/DetailType' }
+        priority: { oneOf: [{ $ref: '#/components/schemas/Priority' }, { type: 'null' }] }
+        authorRole: { type: [string, 'null'], maxLength: 60 }
+        tags: { type: array, maxItems: 10, items: { type: string, maxLength: 30 } }
+    Detail:
+      allOf:
+        - $ref: '#/components/schemas/DetailInput'
+        - type: object
+          required: [id, diagramId, activityKey, status, voteCount, votedByMe, commentCount, author, rev, createdAt, permissions]
+          properties:
+            id: { type: string }
+            diagramId: { type: string }
+            activityKey: { type: string }
+            status: { $ref: '#/components/schemas/DetailStatus' }
+            duplicateOf: { type: [string, 'null'] }
+            discardReason: { type: [string, 'null'] }
+            voteCount: { type: integer }
+            votedByMe: { type: boolean }
+            commentCount: { type: integer }
+            author: { $ref: '#/components/schemas/UserRef' }
+            rev: { type: integer }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+            permissions:
+              type: object
+              description: Calculado en el servidor para el usuario actual
+              properties:
+                canEdit: { type: boolean }
+                canDelete: { type: boolean }
+                canVote: { type: boolean }
+                canModerate: { type: boolean }
+    Comment:
+      type: object
+      required: [id, detailId, text, author, createdAt]
+      properties:
+        id: { type: string }
+        detailId: { type: string }
+        text: { type: string }
+        author: { $ref: '#/components/schemas/UserRef' }
+        createdAt: { type: string, format: date-time }
+        editedAt: { type: [string, 'null'], format: date-time }
+    ActivityCoverage:
+      type: object
+      required: [activityKey, total, byStatus, effectiveVotes, top]
+      properties:
+        activityKey: { type: string }
+        total: { type: integer }
+        byStatus:
+          type: object
+          additionalProperties: { type: integer }
+        effectiveVotes: { type: integer }
+        top:
+          type: array
+          maxItems: 3
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              summary: { type: string, maxLength: 80 }
