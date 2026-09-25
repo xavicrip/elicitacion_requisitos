@@ -20,9 +20,9 @@ Todos son *required status checks* en la protección de rama de `main`.
 
 | Disparador | Entorno | Pasos |
 |------------|---------|-------|
-| `workflow_run` de `ci.yml` exitoso en `main` | `staging` | 1. `migrate-mongo up` (staging) → 2. `railway up --ci --service api/analytics/web --environment staging` (en paralelo) → 3. esperar a que `web /health` y `api /health/deep` respondan `200` (`analytics` se verifica a través de `api`) → 4. Playwright smoke contra staging |
+| `workflow_run` de `ci.yml` exitoso en `main` | `staging` | 1. Si hay migraciones nuevas con `destructive: true`: job `backup` (`mongodump` vía `railway ssh`) → 2. `railway up --ci --service api/analytics/web --environment staging` (en paralelo; `api` aplica las migraciones con su `preDeployCommand`) → 3. esperar a que `web /health` y `api /health/deep` respondan `200` (`analytics` se verifica a través de `api`) → 4. Playwright smoke contra staging |
 | Push de tag `v*.*.*` o `workflow_dispatch` (`ref`, `environment`) | `production` | Requiere aprobación del GitHub Environment `production` → mismos pasos contra production |
-| `workflow_dispatch` con `action=migrate-down` | elegido | `migrate-mongo down` (revierte el último lote) |
+| `workflow_dispatch` con `action=migrate-down` | elegido | `railway ssh --service api --environment <env> -- pnpm migrate:down` (revierte el último lote dentro de la red privada; en `production` requiere aprobación) |
 
 Reglas:
 - `concurrency: deploy-${{ environment }}` con `cancel-in-progress: false` (los despliegues se

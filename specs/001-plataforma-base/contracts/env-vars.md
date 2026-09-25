@@ -46,4 +46,6 @@ se definen como referencias (`${{MongoDB.MONGO_URL}}`), no como valores copiados
 | `RAILWAY_TOKEN` | `staging`, `production` | Project token de Railway del entorno correspondiente |
 | `STAGING_BASE_URL` / `PRODUCTION_BASE_URL` | variables | URL pública de `web` para los smoke tests |
 | `STAGING_API_URL` / `PRODUCTION_API_URL` | variables | URL pública de `api` para los smoke tests |
-| `MONGO_URL_MIGRATIONS` | `staging`, `production` | Conexión (URL pública de Mongo con TCP proxy) para ejecutar migraciones desde CI |
+
+> Las migraciones no necesitan credenciales en GitHub: se ejecutan como *pre-deploy command*
+> del servicio `api` en Railway, dentro de la red privada. MongoDB no tiene proxy TCP público.

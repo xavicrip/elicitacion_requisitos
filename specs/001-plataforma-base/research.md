@@ -111,21 +111,38 @@ No quedaron `NEEDS CLARIFICATION` en el Technical Context. Estas son las decisio
     tienen dominio público.
   - Referencias entre variables de Railway: `MONGO_URL=${{MongoDB.MONGO_URL}}`,
     `REDIS_URL=${{Redis.REDIS_URL}}`.
+  - **Migraciones**: se ejecutan como `deploy.preDeployCommand` en `apps/api/railway.json`
+    (`pnpm migrate:up`). Railway corre el comando dentro de la red privada, con las variables
+    del servicio, antes de poner en marcha la nueva versión; si falla, el despliegue se marca
+    como fallido y sigue activa la versión anterior. MongoDB **no** se expone con un proxy TCP
+    público.
 - **Rationale**: GitHub Environments aportan la aprobación manual (required reviewers) que
   exige FR-009, y el despliegue desde CI garantiza que nada llega a staging sin pasar las
   gates.
 - **Alternatives considered**: autodeploy de Railway desde GitHub con "Wait for CI" (más
   simple, pero sin aprobación manual para producción); entornos efímeros por PR de Railway
-  (se activan si el plan de la cuenta lo permite; no bloquean la feature, según la spec).
+  (se activan si el plan de la cuenta lo permite; no bloquean la feature, según la spec);
+  ejecutar las migraciones desde GitHub Actions (obliga a publicar MongoDB en Internet mediante
+  un proxy TCP, contra el Principio V).
 
 ## R10. Rollback
 
-- **Decision**: el workflow `deploy.yml` admite `workflow_dispatch` con un `ref` (tag o SHA),
-  así que un rollback consiste en redesplegar el tag anterior (< 10 min). Como alternativa
-  inmediata, se usa "Rollback" en el panel de Railway. Si la versión incluía una migración, se
-  ejecuta `migrate-mongo down` con el job `migrate-down` del mismo workflow. Todo se documenta
-  en `docs/runbooks/rollback.md`.
-- **Rationale**: es reproducible y queda auditado en GitHub (SC-004).
+- **Decision**:
+  - **Código**: el workflow `deploy.yml` admite `workflow_dispatch` con un `ref` (tag o SHA),
+    así que un rollback consiste en redesplegar el tag anterior (< 10 min). Como alternativa
+    inmediata, se usa "Rollback" en el panel de Railway.
+  - **Datos**: si la versión incluía una migración, el job `migrate-down` del mismo workflow
+    ejecuta `railway ssh --service api --environment <env> -- pnpm migrate:down` (el comando
+    se ejecuta dentro del contenedor, en la red privada). Si la CLI de Railway del runner no
+    admite ejecutar comandos por `ssh`, el runbook indica ejecutarlo desde la consola del
+    servicio en el panel de Railway.
+  - **Migraciones destructivas** (`destructive: true`): antes de aplicarlas, el job `backup`
+    de `deploy.yml` ejecuta `mongodump` dentro del servicio (vía `railway ssh`) y sube el
+    archivo al almacenamiento de respaldos; la reversión restaura ese respaldo con
+    `mongorestore`.
+  Todo se documenta en `docs/runbooks/rollback.md`.
+- **Rationale**: es reproducible, queda auditado en GitHub (SC-004) y no requiere exponer la
+  base de datos.
 
 ## R11. Gates de calidad en CI
 
