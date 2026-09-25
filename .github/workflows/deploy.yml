@@ -130,11 +130,14 @@ jobs:
       - name: Esperar a la versión nueva y a que web y api (con analytics) estén saludables
         env:
           COMMIT: ${{ steps.version.outputs.commit }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           # `railway up --ci` termina al acabar el build: la versión anterior sigue sirviendo
-          # hasta que la nueva pasa su healthcheck. Se espera a ver el commit nuevo.
+          # hasta que la nueva pasa su healthcheck. Se espera a ver la versión nueva:
+          # api expone el commit en /version; web solo expone la versión en /config.js
+          # (en un tag es `vX.Y.Z`, no el commit).
           scripts/wait-for-health.sh "${{ vars.API_URL }}/version" 900 10 "\"commit\":\"$COMMIT\""
-          scripts/wait-for-health.sh "${{ vars.BASE_URL }}/config.js" 900 10 "$COMMIT"
+          scripts/wait-for-health.sh "${{ vars.BASE_URL }}/config.js" 900 10 "\"version\":\"$VERSION\""
           scripts/wait-for-health.sh "${{ vars.BASE_URL }}/health" 120 5
           scripts/wait-for-health.sh "${{ vars.API_URL }}/health/deep" 120 5
       - run: pnpm exec playwright install --with-deps chromium
