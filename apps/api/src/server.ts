@@ -15,5 +15,5 @@ try {
   throw error;
 }
 
-const app = await buildApp({ logLevel: env.LOG_LEVEL });
+const app = await buildApp({ logLevel: env.LOG_LEVEL, corsOrigins: env.CORS_ORIGINS });
 await app.listen({ port: env.PORT, host: env.HOST });
