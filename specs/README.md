@@ -1,34 +1,45 @@
 # ReqCanvas — Roadmap de implementación (spec-kit)
 
-Fuente: [`prompt.md`](../prompt.md) · Constitución: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) (v1.0.0)
+Fuente: [`prompt.md`](../prompt.md) · Constitución: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) (v1.1.0)
 
 ## Features
 
-| # | Feature | Cubre (prompt.md) | Historias (prioridad) | Depende de | Estado |
-|---|---------|-------------------|------------------------|------------|--------|
-| 001 | [Plataforma base y entrega continua](./001-plataforma-base/spec.md) | §6, §7, §8, Fase 0 | 4 (P1, P1, P2, P3) | — | spec ✅ · plan ✅ · tasks ✅ |
-| 002 | [Autenticación, roles y proyectos](./002-auth-proyectos/spec.md) | RF-01, RF-02, §2 | 4 (P1, P1, P2, P1) | 001 | spec ✅ |
-| 003 | [Diagramas y espacio de trabajo interactivo](./003-diagramas-canvas/spec.md) | RF-02, RF-03 (manual), RF-04 | 4 (P1 ×4) | 002 | spec ✅ |
-| 004 | [Detalles de requisitos por actividad](./004-detalles-requisitos/spec.md) | RF-04 (indicadores), RF-05 | 5 (P1, P1, P2, P2, P3) | 003 | spec ✅ |
-| 005 | [Colaboración en tiempo real](./005-colaboracion-tiempo-real/spec.md) | RF-06, RNF-02 | 4 (P1, P2, P3, P2) | 004 | spec ✅ |
-| 006 | [Detección asistida de actividades](./006-deteccion-asistida/spec.md) | RF-03 (automático) | 3 (P1, P1, P3) | 003 | spec ✅ |
-| 007 | [Dashboard analítico](./007-dashboard-analitico/spec.md) | RF-07 | 5 (P1, P1, P2, P2, P3) | 004 | spec ✅ |
-| 008 | [Exportación de resultados](./008-exportacion-resultados/spec.md) | RF-07 (exportación) | 3 (P1, P2, P2) | 004, 007 | spec ✅ |
+Cada feature vive en **su propia rama** (`NNN-nombre`), con su spec, su plan y (en la 001)
+sus tareas. Las ramas se apilan según las dependencias: cada una parte de la rama de la
+feature de la que depende, por lo que contiene también los documentos de sus antecesoras.
+
+| # | Rama | Feature | Cubre (prompt.md) | Parte de | Estado |
+|---|------|---------|-------------------|----------|--------|
+| 001 | `001-plataforma-base` | Plataforma base y entrega continua | §6, §7, §8, Fase 0 | `main` | spec ✅ · plan ✅ · tasks ✅ |
+| 002 | `002-auth-proyectos` | Autenticación, roles y proyectos | RF-01, RF-02, §2 | `001-plataforma-base` | spec ✅ · plan ✅ |
+| 003 | `003-diagramas-canvas` | Diagramas y espacio de trabajo interactivo | RF-02, RF-03 (manual), RF-04 | `002-auth-proyectos` | spec ✅ · plan ✅ |
+| 004 | `004-detalles-requisitos` | Detalles de requisitos por actividad | RF-04 (indicadores), RF-05 | `003-diagramas-canvas` | spec ✅ · plan ✅ |
+| 005 | `005-colaboracion-tiempo-real` | Colaboración en tiempo real | RF-06, RNF-02 | `004-detalles-requisitos` | spec ✅ · plan ✅ |
+| 006 | `006-deteccion-asistida` | Detección asistida de actividades | RF-03 (automático) | `003-diagramas-canvas` | spec ✅ · plan ✅ |
+| 007 | `007-dashboard-analitico` | Dashboard analítico | RF-07 | `004-detalles-requisitos` | spec ✅ · plan ✅ |
+| 008 | `008-exportacion-resultados` | Exportación de resultados | RF-07 (exportación) | `007-dashboard-analitico` | spec ✅ · plan ✅ |
+
+Para leer una feature: `git switch NNN-nombre` y abrir `specs/NNN-nombre/`.
+
+## Decisiones transversales
+
+- **Node.js 24 LTS** en `web`, `api`, `packages/shared` y en CI.
+- **Despliegue solo desde GitHub Actions** (`railway up --ci` con project token por entorno);
+  autodeploy de Railway desactivado; producción con aprobación manual.
 
 ## Orden y paralelismo
 
 ```text
 001 ──▶ 002 ──▶ 003 ──┬──▶ 004 ──┬──▶ 005
-                      │          ├──▶ 007 ──▶ 008
-                      └──▶ 006   │
-                                 └──▶ 008 (CSV/Gherkin no requieren 007)
+                      │          └──▶ 007 ──▶ 008
+                      └──▶ 006
 ```
 
 - **Camino crítico (MVP de valor)**: 001 → 002 → 003 → 004. Con eso, un administrador sube un
   diagrama, marca las actividades y los participantes registran requisitos Dado/Cuando/Entonces.
 - **En paralelo tras 003**: 006 (detección, con el servicio `analytics`) puede avanzar a la vez que 004.
 - **En paralelo tras 004**: 005 (tiempo real) y 007 (dashboard) son independientes entre sí.
-- **008** cierra la v1: CSV y Gherkin solo necesitan 004; el PDF necesita 007.
+- **008** cierra la v1; parte de 007 porque el reporte PDF usa los resultados del dashboard.
 
 ## Hitos sugeridos
 
@@ -43,13 +54,12 @@ Fuente: [`prompt.md`](../prompt.md) · Constitución: [`.specify/memory/constitu
 
 Para cada feature, en orden:
 
-1. `/speckit-git-feature` → crea la rama `NNN-nombre` desde `main`.
-2. Fijar la feature en `.specify/feature.json` (`"feature_directory": "specs/NNN-nombre"`).
-3. `/speckit-clarify` (opcional) → resolver ambigüedades de la spec.
-4. `/speckit-plan` → `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`.
-5. `/speckit-tasks` → `tasks.md` (con pruebas obligatorias según la constitución).
-6. `/speckit-analyze` → consistencia entre spec, plan y tareas.
-7. `/speckit-implement` → implementación con commits atómicos; PR a `main`.
+1. `git switch NNN-nombre` (la rama ya existe con su spec y su plan).
+2. Comprobar que `.specify/feature.json` apunta a `specs/NNN-nombre`.
+3. `/speckit-tasks` → `tasks.md` (con pruebas obligatorias según la constitución).
+4. `/speckit-analyze` → consistencia entre spec, plan y tareas.
+5. `/speckit-implement` → implementación con commits atómicos.
+6. PR de la rama a `main`; al integrarla, hacer `git rebase --update-refs main` en las ramas
+   que dependen de ella.
 
-> Las features 002–008 tienen solo la spec: su plan técnico se genera al empezar cada una,
-> para que refleje el código real construido en las features anteriores.
+Para una feature nueva: `/speckit-git-feature` crea la rama y `/speckit-specify` la spec.
