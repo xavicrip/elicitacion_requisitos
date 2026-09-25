@@ -171,7 +171,7 @@ las historias
 ## Phase 7: Polish & Cross-Cutting Concerns
 
 - [X] T062 [P] ADR del monorepo y el stack en `docs/adr/0001-monorepo-y-stack.md` (decisiones R1–R3 y R13 de research.md) — `docs(adr)`
-- [ ] T063 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y la latencia de `/health` en staging (p95 < 200 ms con 50 peticiones, añadido como aserción al smoke de T032); optimizar las cachés si hace falta (SC-002, SC-003) — `ci`
+- [X] T063 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y la latencia de `/health` en staging (p95 < 200 ms con 50 peticiones, añadido como aserción al smoke de T032); optimizar las cachés si hace falta (SC-002, SC-003) — `ci` · **Medido 2026-09-25**: CI en `main` 3,8 min; merge → staging saludable 6,2 min; p95 de `/health` en staging 58 ms
 - [ ] T064 Ejecutar quickstart.md completo en una máquina limpia y corregir el README donde falle (SC-001) — `docs(repo)`
 - [X] T065 Actualizar la referencia al plan en `CLAUDE.md` si cambian comandos o estructura — `docs(repo)`
 
