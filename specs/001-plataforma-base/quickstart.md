@@ -21,7 +21,8 @@ Validar:
 
 ```bash
 curl -s localhost:3000/health | jq .status   # "ok"   (api)
-curl -s localhost:8000/health | jq .status   # "ok"   (analytics)
+curl -s localhost:8000/health | jq .status   # "ok"   (analytics, solo accesible en local)
+curl -s localhost:3000/health/deep | jq .checks.analytics.status   # "up" (analytics vía api)
 curl -s -o /dev/null -w "%{http_code}" localhost:5173/health   # 200 (web)
 open http://localhost:5173                   # Muestra "ReqCanvas" y la versión
 ```
@@ -45,6 +46,8 @@ MONGO_URL= pnpm --filter api start   # Termina con código 1 y el log indica "MO
 ```bash
 curl -s -H "x-request-id: prueba-123" localhost:3000/health > /dev/null
 docker compose -f infra/docker-compose.yml logs api | grep prueba-123   # Línea JSON con reqId "prueba-123"
+curl -s -H "x-request-id: prueba-456" localhost:3000/health/deep > /dev/null
+docker compose -f infra/docker-compose.yml logs analytics | grep prueba-456   # Propagado a analytics
 ```
 
 ## 5. Migraciones reversibles (FR-010, US4)
