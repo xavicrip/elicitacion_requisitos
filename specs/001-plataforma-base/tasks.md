@@ -8,10 +8,11 @@ description: "Task list for feature 001-plataforma-base"
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
 **Tests**: OBLIGATORIAS (Principio III de la constitución). Las pruebas de cada historia se
-escriben primero y deben fallar antes de implementar.
+escriben primero y deben fallar antes de implementar. Prueba e implementación van en tareas y
+commits separados.
 
-**Commits**: cada tarea (o cada par prueba + implementación) es **un commit atómico** con
-formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. ej. `(api)`.
+**Commits**: cada tarea es **un commit atómico** con formato Conventional Commits; el tipo y
+alcance sugeridos van al final de cada tarea, p. ej. `feat(api)`.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -40,22 +41,27 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: contratos compartidos, configuración y logging que usan todas las historias
+**Purpose**: contratos compartidos, flags, configuración, logging y migraciones que usan todas
+las historias
 
 **⚠️ CRITICAL**: ninguna historia puede empezar hasta completar esta fase
 
-- [ ] T012 [P] Prueba unitaria del esquema de salud en `packages/shared/tests/health.test.ts` (valida los ejemplos de `contracts/health.openapi.yaml`) — `test(shared)`
+- [ ] T012 [P] Prueba unitaria del esquema de salud en `packages/shared/tests/health.test.ts` (valida los ejemplos de `contracts/health.openapi.yaml`, incluido `/health/deep`) — `test(shared)`
 - [ ] T013 Implementar el esquema zod `HealthSchema` y los tipos en `packages/shared/src/health.ts` — `feat(shared)`
 - [ ] T014 [P] Prueba unitaria de la resolución de flags (default, sobrescritura, nombre desconocido → aviso) en `packages/shared/tests/flags.test.ts` — `test(shared)`
 - [ ] T015 Implementar el registro de flags y `resolveFlags(env)` en `packages/shared/src/flags.ts` — `feat(shared)`
-- [ ] T016 [P] Prueba unitaria de la validación de entorno de la API (falta `MONGO_URL` → error que nombra la variable sin su valor) en `apps/api/tests/unit/env.test.ts` — `test(api)`
-- [ ] T017 Implementar `apps/api/src/config/env.ts` con zod según `contracts/env-vars.md` — `feat(api)`
-- [ ] T018 [P] Prueba unitaria de la configuración de analytics en `apps/analytics/tests/unit/test_config.py` — `test(analytics)`
-- [ ] T019 Implementar `apps/analytics/src/analytics/config.py` con pydantic-settings — `feat(analytics)`
-- [ ] T020 [P] Prueba de integración: la API reutiliza o genera `x-request-id`, lo devuelve y lo incluye en el log, en `apps/api/tests/integration/request-id.test.ts` — `test(api)`
-- [ ] T021 Implementar el plugin de requestId + logger pino (redacción de secretos) en `apps/api/src/plugins/observability.ts` — `feat(api)`
-- [ ] T022 [P] Prueba y middleware de `request_id` + logs JSON en `apps/analytics/tests/unit/test_logging.py` y `apps/analytics/src/analytics/logging.py` — `feat(analytics)`
-- [ ] T023 Registrar `@fastify/helmet` y `@fastify/cors` (desde `CORS_ORIGINS`) en `apps/api/src/app.ts` — `feat(api)`
+- [ ] T016 Implementar `apps/api/src/lib/flags.ts` (lee `FEATURE_FLAGS` con `resolveFlags` y expone los flags activos) y documentar cómo crear un flag en `docs/feature-flags.md` — `feat(api)`
+- [ ] T017 [P] Prueba unitaria de la validación de entorno de la API (falta `MONGO_URL` → error que nombra la variable sin su valor) en `apps/api/tests/unit/env.test.ts` — `test(api)`
+- [ ] T018 Implementar `apps/api/src/config/env.ts` con zod según `contracts/env-vars.md` — `feat(api)`
+- [ ] T019 [P] Prueba unitaria de la configuración de analytics en `apps/analytics/tests/unit/test_config.py` — `test(analytics)`
+- [ ] T020 Implementar `apps/analytics/src/analytics/config.py` con pydantic-settings — `feat(analytics)`
+- [ ] T021 [P] Prueba de integración de requestId en `apps/api/tests/integration/request-id.test.ts`: la API reutiliza o genera `x-request-id`, lo devuelve, lo incluye en el log **y lo reenvía en las llamadas salientes del cliente interno** (verificado con un servidor `analytics` simulado) — `test(api)`
+- [ ] T022 Implementar el plugin de requestId + logger pino (redacción de secretos) en `apps/api/src/plugins/observability.ts` y el cliente HTTP interno que reenvía `x-request-id` en `apps/api/src/lib/http-client.ts` — `feat(api)`
+- [ ] T023 [P] Prueba de `request_id` y logs JSON de analytics (reutiliza la cabecera entrante y la incluye en cada línea) en `apps/analytics/tests/unit/test_logging.py` — `test(analytics)`
+- [ ] T024 Implementar el middleware de `request_id` y los logs JSON en `apps/analytics/src/analytics/logging.py` — `feat(analytics)`
+- [ ] T025 Registrar `@fastify/helmet` y `@fastify/cors` (desde `CORS_ORIGINS`) en `apps/api/src/app.ts` — `feat(api)`
+- [ ] T026 [P] Pruebas de migraciones en `apps/api/tests/integration/migrations.test.ts` (`up → down → up` de la migración inicial) y de política en `apps/api/tests/unit/migrations-policy.test.ts` (falla si una migración no exporta `destructive` o no implementa `down`) — `test(api)`
+- [ ] T027 Configurar migrate-mongo (`apps/api/migrate-mongo-config.cjs`, scripts `migrate:up|down|status`), la plantilla `apps/api/migrations/_template.js` (con `destructive`) y la migración `apps/api/migrations/20260925000000-init-indexes.js` según data-model.md — `feat(api)`
 
 **Checkpoint**: fundaciones listas
 
@@ -69,23 +75,23 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T024 [P] [US1] Prueba de contrato de `GET /health`, `GET /version` y `GET /config` de la API contra `contracts/health.openapi.yaml` en `apps/api/tests/contract/health.contract.test.ts` — `test(api)`
-- [ ] T025 [P] [US1] Prueba de integración de `/health`: `200 ok` con Mongo y Redis arriba; `503 degraded` con Mongo caído, en `apps/api/tests/integration/health.test.ts` — `test(api)`
-- [ ] T026 [P] [US1] Pruebas de contrato e integración de `/health` y `/version` de analytics en `apps/analytics/tests/contract/test_health.py` — `test(analytics)`
-- [ ] T027 [P] [US1] Prueba del componente `App` (muestra "ReqCanvas" y la versión) en `apps/web/tests/App.test.tsx` — `test(web)`
-- [ ] T028 [P] [US1] Smoke de Playwright (página inicial + los 3 `/health`), parametrizado por `BASE_URL` y `API_URL`, en `e2e/smoke.spec.ts` y `e2e/playwright.config.ts` — `test(e2e)`
+- [ ] T028 [P] [US1] Prueba de contrato de `GET /health`, `GET /health/deep`, `GET /version` y `GET /config` de la API contra `contracts/health.openapi.yaml` en `apps/api/tests/contract/health.contract.test.ts` — `test(api)`
+- [ ] T029 [P] [US1] Prueba de integración en `apps/api/tests/integration/health.test.ts`: `/health` → `200 ok` con Mongo y Redis arriba y `503 degraded` con Mongo caído (sin depender de analytics); `/health/deep` → `503` con analytics caído, y reenvía `x-request-id` a analytics — `test(api)`
+- [ ] T030 [P] [US1] Pruebas de contrato e integración de `/health` y `/version` de analytics en `apps/analytics/tests/contract/test_health.py` — `test(analytics)`
+- [ ] T031 [P] [US1] Prueba del componente `App` (muestra "ReqCanvas" y la versión) en `apps/web/tests/App.test.tsx` — `test(web)`
+- [ ] T032 [P] [US1] Smoke de Playwright en `e2e/smoke.spec.ts` y `e2e/playwright.config.ts`: página inicial, `web /health` y `api /health/deep` (que verifica analytics por la red privada), parametrizado por `BASE_URL` y `API_URL` — `test(e2e)`
 
 ### Implementation for User Story 1
 
-- [ ] T029 [P] [US1] Plugins de conexión a Mongo (Mongoose) y Redis (ioredis) con `ping` y cierre ordenado en `apps/api/src/plugins/mongo.ts` y `apps/api/src/plugins/redis.ts` — `feat(api)`
-- [ ] T030 [US1] Rutas `/health`, `/version` y `/config` (flags activos) en `apps/api/src/routes/health.ts`; `server.ts` escucha en `HOST` (`::`) — `feat(api)`
-- [ ] T031 [P] [US1] Rutas `/health` y `/version` de analytics (ping a Mongo con motor y a Redis) en `apps/analytics/src/analytics/routes/health.py` — `feat(analytics)`
-- [ ] T032 [P] [US1] Página inicial de `web` que muestra "ReqCanvas", la versión y un canvas three.js mínimo de prueba en `apps/web/src/App.tsx`; carga la configuración de `/config.js` en `apps/web/src/lib/config.ts` — `feat(web)`
-- [ ] T033 [P] [US1] `Dockerfile` multi-stage de `api` (pnpm deploy, usuario no root) en `apps/api/Dockerfile` — `build(api)`
-- [ ] T034 [P] [US1] `Dockerfile` multi-stage de `analytics` (uv, usuario no root) en `apps/analytics/Dockerfile` — `build(analytics)`
-- [ ] T035 [P] [US1] `Dockerfile` de `web` (build de Vite + Caddy), `Caddyfile` con fallback de SPA y `/health`, y `docker-entrypoint.sh` que genera `/config.js` desde `API_PUBLIC_URL`, en `apps/web/` — `build(web)`
-- [ ] T036 [US1] `infra/docker-compose.yml` con `mongodb`, `redis`, `api`, `analytics` y `web` (healthchecks y `depends_on: condition: service_healthy`) y `.env.example` — `build(infra)`
-- [ ] T037 [US1] README con prerrequisitos, `pnpm dev:up` y la verificación de salud (quickstart §1–4) en `README.md` — `docs(repo)`
+- [ ] T033 [P] [US1] Plugins de conexión a Mongo (Mongoose) y Redis (ioredis) con `ping` y cierre ordenado en `apps/api/src/plugins/mongo.ts` y `apps/api/src/plugins/redis.ts` — `feat(api)`
+- [ ] T034 [US1] Rutas `/health`, `/health/deep` (check `analytics` con el cliente interno, timeout de 2 s), `/version` y `/config` (flags de T016) en `apps/api/src/routes/health.ts`; `server.ts` escucha en `HOST` (`::`) — `feat(api)`
+- [ ] T035 [P] [US1] Rutas `/health` y `/version` de analytics (ping a Mongo con motor y a Redis) en `apps/analytics/src/analytics/routes/health.py` — `feat(analytics)`
+- [ ] T036 [P] [US1] Página inicial de `web` que muestra "ReqCanvas", la versión y un canvas three.js mínimo de prueba en `apps/web/src/App.tsx`; carga la configuración de `/config.js` en `apps/web/src/lib/config.ts` — `feat(web)`
+- [ ] T037 [P] [US1] `Dockerfile` multi-stage de `api` (pnpm deploy, usuario no root; incluye `migrate-mongo` para el *pre-deploy*) en `apps/api/Dockerfile` — `build(api)`
+- [ ] T038 [P] [US1] `Dockerfile` multi-stage de `analytics` (uv, usuario no root) en `apps/analytics/Dockerfile` — `build(analytics)`
+- [ ] T039 [P] [US1] `Dockerfile` de `web` (build de Vite + Caddy), `Caddyfile` con fallback de SPA y `/health`, y `docker-entrypoint.sh` que genera `/config.js` desde `API_PUBLIC_URL`, en `apps/web/` — `build(web)`
+- [ ] T040 [US1] `infra/docker-compose.yml` con `mongodb`, `redis`, `api`, `analytics` y `web` (healthchecks, `depends_on: condition: service_healthy`, migraciones al arrancar `api`) y `.env.example` — `build(infra)`
+- [ ] T041 [US1] README con prerrequisitos, `pnpm dev:up` y la verificación de salud (quickstart §1–4) en `README.md` — `docs(repo)`
 
 **Checkpoint**: US1 funcional y demostrable de forma local
 
@@ -99,15 +105,15 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T038 [P] [US2] Prueba de que la configuración de commitlint rechaza `"cambios varios"` y acepta `"feat(api): add health"` en `tests/repo/commitlint.test.ts` — `test(repo)`
-- [ ] T039 [P] [US2] Configurar el umbral de cobertura del 70 % en `apps/api/vitest.config.ts` y en `apps/analytics/pyproject.toml` (`--cov-fail-under=70`) — `test(ci)`
+- [ ] T042 [P] [US2] Prueba de que la configuración de commitlint rechaza `"cambios varios"` y acepta `"feat(api): add health"` en `tests/repo/commitlint.test.ts` — `test(repo)`
+- [ ] T043 [P] [US2] Configurar el umbral de cobertura del 70 % en `apps/api/vitest.config.ts` y en `apps/analytics/pyproject.toml` (`--cov-fail-under=70`) — `test(ci)`
 
 ### Implementation for User Story 2
 
-- [ ] T040 [US2] Workflow `.github/workflows/ci.yml` con los jobs `lint`, `typecheck`, `commitlint`, `secrets`, `test-node`, `test-python`, `build` y `e2e-smoke` según `contracts/ci-cd-pipeline.md` (con caché de pnpm, uv y buildx) — `ci`
-- [ ] T041 [P] [US2] Configuración de gitleaks en `.gitleaks.toml` — `ci`
-- [ ] T042 [P] [US2] Plantilla de PR con checklist de constitución (commits atómicos, pruebas, sin secretos) en `.github/pull_request_template.md` — `docs(repo)`
-- [ ] T043 [US2] Documentar en `docs/runbooks/branch-protection.md` la protección de `main` (checks obligatorios, 1 revisión, sin squash) y aplicarla con `gh api` — `docs(ci)`
+- [ ] T044 [US2] Workflow `.github/workflows/ci.yml` con los jobs `lint`, `typecheck`, `commitlint`, `secrets`, `test-node`, `test-python`, `migrations` (up/down/up + política), `build` y `e2e-smoke` según `contracts/ci-cd-pipeline.md` (con caché de pnpm, uv y buildx) — `ci`
+- [ ] T045 [P] [US2] Configuración de gitleaks en `.gitleaks.toml` — `ci`
+- [ ] T046 [P] [US2] Plantilla de PR con checklist de constitución (commits atómicos, pruebas, sin secretos, migraciones destructivas declaradas) en `.github/pull_request_template.md` — `docs(repo)`
+- [ ] T047 [US2] Documentar en `docs/runbooks/branch-protection.md` y aplicar con `gh api` la protección de `main`: checks obligatorios de T044, 1 revisión, **historial lineal obligatorio**, y en el repositorio solo **"Rebase and merge"** habilitado (merge commits y squash deshabilitados) — `docs(ci)`
 
 **Checkpoint**: US1 y US2 funcionan de forma independiente
 
@@ -121,17 +127,18 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T044 [US3] Script `scripts/wait-for-health.sh` (reintenta `/health` hasta 200 o timeout) con su prueba bats o de shell en `tests/repo/wait-for-health.test.sh` — `test(ci)`
+- [ ] T048 [US3] Script `scripts/wait-for-health.sh` (reintenta una URL hasta `200` o timeout) con su prueba de shell en `tests/repo/wait-for-health.test.sh` — `test(ci)`
 
 ### Implementation for User Story 3
 
-- [ ] T045 [P] [US3] `apps/api/railway.json` (builder DOCKERFILE, `dockerfilePath`, `watchPatterns` = `apps/api/**` y `packages/shared/**`, `healthcheckPath: /health`, `restartPolicyType: ON_FAILURE`, `restartPolicyMaxRetries: 3`) — `build(api)`
-- [ ] T046 [P] [US3] `apps/analytics/railway.json` con la misma estructura — `build(analytics)`
-- [ ] T047 [P] [US3] `apps/web/railway.json` con la misma estructura — `build(web)`
-- [ ] T048 [US3] Crear en Railway el proyecto, los entornos `staging` y `production`, los servicios `api`, `analytics` y `web` (desde el repo, autodeploy desactivado) y `MongoDB` y `Redis` (plantillas); definir las variables de referencia de `contracts/env-vars.md`; documentarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
-- [ ] T049 [US3] Workflow `.github/workflows/deploy.yml`: staging tras `ci` en `main`; producción con tag o `workflow_dispatch`, con GitHub Environment `production` protegido; `concurrency` por entorno; pasos de migración → `railway up --ci` ×3 → `wait-for-health` → smoke de Playwright — `ci`
-- [ ] T050 [US3] Workflow `.github/workflows/release.yml` con release-please (`release-please-config.json`, `.release-please-manifest.json`) — `ci`
-- [ ] T051 [US3] Inyectar `APP_VERSION` y `GIT_SHA` en las imágenes (build args) y verificarlos con `/version` en el smoke test — `feat(ci)`
+- [ ] T049 [P] [US3] `apps/api/railway.json` (builder DOCKERFILE, `dockerfilePath`, `watchPatterns` = `apps/api/**` y `packages/shared/**`, `healthcheckPath: /health`, **`preDeployCommand: pnpm migrate:up`**, `restartPolicyType: ON_FAILURE`, `restartPolicyMaxRetries: 3`) — `build(api)`
+- [ ] T050 [P] [US3] `apps/analytics/railway.json` con la misma estructura, sin `preDeployCommand` — `build(analytics)`
+- [ ] T051 [P] [US3] `apps/web/railway.json` con la misma estructura, sin `preDeployCommand` — `build(web)`
+- [ ] T052 [US3] Crear en Railway el proyecto, los entornos `staging` y `production`, los servicios `api`, `analytics` y `web` (desde el repo, autodeploy desactivado; dominio público solo en `web` y `api`) y `MongoDB` y `Redis` (plantillas, **sin proxy TCP público**); definir las variables de referencia de `contracts/env-vars.md`; documentarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
+- [ ] T053 [US3] Crear con `gh api` los GitHub Environments `staging` y `production`: secret `RAILWAY_TOKEN` (project token del entorno) en cada uno; variables `STAGING_BASE_URL`/`STAGING_API_URL` y `PRODUCTION_BASE_URL`/`PRODUCTION_API_URL`; en `production`, revisores obligatorios y despliegue solo desde tags `v*` y `main`; documentarlo en `docs/runbooks/github-environments.md` — `docs(ci)`
+- [ ] T054 [US3] Workflow `.github/workflows/deploy.yml`: staging tras `ci` en `main`; producción con tag o `workflow_dispatch` usando el Environment `production` (aprobación manual); `concurrency` por entorno; job `backup` (`mongodump` vía `railway ssh`) solo si hay migraciones nuevas con `destructive: true`; `railway up --ci` ×3 (las migraciones las aplica el `preDeployCommand` de `api`) → `wait-for-health` sobre `web /health` y `api /health/deep` → smoke de Playwright; si el smoke falla, el job falla y GitHub notifica al autor del push — `ci`
+- [ ] T055 [US3] Workflow `.github/workflows/release.yml` con release-please (`release-please-config.json`, `.release-please-manifest.json`) — `ci`
+- [ ] T056 [US3] Inyectar `APP_VERSION` y `GIT_SHA` en las imágenes (build args) y verificarlos con `/version` en el smoke test — `feat(ci)`
 
 **Checkpoint**: una versión integrada llega a staging y se puede promover a producción
 
@@ -145,14 +152,14 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T052 [P] [US4] Prueba de migración `up → down → up` de la migración inicial en `apps/api/tests/integration/migrations.test.ts` — `test(api)`
+- [ ] T057 [US4] Prueba del script de rollback `scripts/rollback.sh` (valida `ref` y `environment`, rechaza refs inexistentes y construye la invocación de `deploy.yml` y de `migrate-down`) en `tests/repo/rollback.test.sh` — `test(ops)`
 
 ### Implementation for User Story 4
 
-- [ ] T053 [US4] Configurar migrate-mongo (`apps/api/migrate-mongo-config.cjs`, scripts `migrate:up|down|status`) y crear la migración `apps/api/migrations/20260925000000-init-indexes.js` según data-model.md — `feat(api)`
-- [ ] T054 [US4] Job `migrations` (up/down/up) en `.github/workflows/ci.yml` y acción `migrate-down` en `.github/workflows/deploy.yml` — `ci`
-- [ ] T055 [US4] Runbook de rollback (redespliegue por tag, Rollback en el panel de Railway, `migrate-down`, verificación con `/version`) en `docs/runbooks/rollback.md` — `docs(ops)`
-- [ ] T056 [US4] Ensayo de rollback en staging: desplegar v0.1.0 y v0.1.1, volver a v0.1.0 y medir el tiempo; registrar el resultado en `docs/runbooks/rollback.md` — `docs(ops)`
+- [ ] T058 [US4] Implementar `scripts/rollback.sh` (dispara `deploy.yml` con el `ref` anterior mediante `gh workflow run` y, opcionalmente, `migrate-down`) — `feat(ops)`
+- [ ] T059 [US4] Acción `migrate-down` en `.github/workflows/deploy.yml` (`railway ssh --service api --environment <env> -- pnpm migrate:down`, con aprobación en `production`) y restauración del respaldo (`mongorestore`) para migraciones destructivas — `ci`
+- [ ] T060 [US4] Runbook de rollback en `docs/runbooks/rollback.md`: redespliegue por tag (`scripts/rollback.sh`), Rollback en el panel de Railway, `migrate-down`, restauración del respaldo si la migración era destructiva, alternativa desde la consola de Railway si `railway ssh` no está disponible, y verificación con `/version` — `docs(ops)`
+- [ ] T061 [US4] Ensayo de rollback en staging: desplegar v0.1.0 y v0.1.1 (con una migración de prueba), volver a v0.1.0 y revertir la migración midiendo el tiempo; registrar el resultado en `docs/runbooks/rollback.md` (SC-004) — `docs(ops)`
 
 **Checkpoint**: las cuatro historias funcionan de forma independiente
 
@@ -160,11 +167,10 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T057 [P] ADR del monorepo y el stack en `docs/adr/0001-monorepo-y-stack.md` (decisiones R1–R3 y R13 de research.md) — `docs(adr)`
-- [ ] T058 [P] Añadir `apps/api/src/lib/flags.ts` (lee `FEATURE_FLAGS` con `resolveFlags`) y documentar cómo crear un flag en `docs/feature-flags.md` — `feat(api)`
-- [ ] T059 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y optimizar las cachés si hace falta — `ci`
-- [ ] T060 Ejecutar quickstart.md completo en una máquina limpia y corregir el README donde falle (SC-001) — `docs(repo)`
-- [ ] T061 Actualizar la referencia al plan en `CLAUDE.md` si cambian comandos o estructura — `docs(repo)`
+- [ ] T062 [P] ADR del monorepo y el stack en `docs/adr/0001-monorepo-y-stack.md` (decisiones R1–R3 y R13 de research.md) — `docs(adr)`
+- [ ] T063 Medir los tiempos de CI (< 15 min) y de despliegue a staging (< 20 min) y optimizar las cachés si hace falta (SC-002, SC-003) — `ci`
+- [ ] T064 Ejecutar quickstart.md completo en una máquina limpia y corregir el README donde falle (SC-001) — `docs(repo)`
+- [ ] T065 Actualizar la referencia al plan en `CLAUDE.md` si cambian comandos o estructura — `docs(repo)`
 
 ---
 
@@ -174,27 +180,27 @@ formato Conventional Commits; el alcance sugerido va al final de cada tarea, p. 
 
 - **Setup (Phase 1)** → **Foundational (Phase 2)** → historias.
 - **US1 (P1)**: tras la Phase 2. Es la base de US2 (el job `e2e-smoke` usa el Compose y el smoke de US1).
-- **US2 (P1)**: tras US1 (T028, T033–T036).
-- **US3 (P2)**: tras US2 (el deploy se encadena a `ci.yml`).
-- **US4 (P3)**: T052–T053 pueden hacerse tras la Phase 2; T054–T056 requieren US2 y US3.
+- **US2 (P1)**: tras US1 (T032, T037–T040).
+- **US3 (P2)**: tras US2 (el deploy se encadena a `ci.yml`). T049 depende de T027 (migrate-mongo, ya en la Phase 2). T054 depende de T052 y T053.
+- **US4 (P3)**: tras US3 (usa `deploy.yml` y los Environments).
 - **Polish**: al final.
 
 ### Within Each User Story
 
-- Pruebas (en rojo) → implementación (en verde) → refactor; un commit por paso lógico.
+- Pruebas (en rojo) → implementación (en verde) → refactor; un commit por tarea.
 
 ### Parallel Opportunities
 
 - Phase 1: T002–T005 y T007–T010 en paralelo.
-- Phase 2: los pares prueba/implementación de `shared`, `api` y `analytics` en paralelo entre sí.
-- US1: T024–T028 en paralelo; luego T029, T031, T032 y T033–T035 en paralelo.
-- US3: T045–T047 en paralelo.
+- Phase 2: los pares prueba/implementación de `shared` (T012–T016), `api` (T017–T018, T021–T022, T026–T027) y `analytics` (T019–T020, T023–T024) en paralelo entre sí.
+- US1: T028–T032 en paralelo; luego T033, T035, T036 y T037–T039 en paralelo.
+- US3: T049–T051 en paralelo; T052 y T053 en paralelo.
 
 ## Parallel Example: User Story 1
 
 ```bash
 # Pruebas en paralelo (deben fallar):
-Task: "Contract test de /health de la API en apps/api/tests/contract/health.contract.test.ts"
+Task: "Contract test de /health y /health/deep de la API en apps/api/tests/contract/health.contract.test.ts"
 Task: "Contract test de /health de analytics en apps/analytics/tests/contract/test_health.py"
 Task: "Test de App en apps/web/tests/App.test.tsx"
 
@@ -218,6 +224,9 @@ cierra antes del primer despliegue a producción con datos reales.
 
 ## Notes
 
-- Tareas totales: 61 (Setup 11, Foundational 12, US1 14, US2 6, US3 8, US4 5, Polish 5).
+- Tareas totales: 65 (Setup 11, Foundational 16, US1 14, US2 6, US3 9, US4 5, Polish 4).
+- Cambios tras `/speckit-analyze`: C1 → T053; I3 → migraciones en la Phase 2 (T026–T027);
+  I4 → flags de la API en la Phase 2 (T016); X1 → T023/T024 separadas; I1/U1 → T021, T029,
+  T032, T034, T054; S1 → T049, T052, T054, T059; I2 → T047; A1 → T026, T027, T060.
 - Nunca integrar un commit que rompa `pnpm test` (Principio IV).
-- T048 y T043 requieren acceso a Railway y GitHub con permisos de administración.
+- T047, T052 y T053 requieren acceso a Railway y GitHub con permisos de administración.
