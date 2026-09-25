@@ -13,14 +13,15 @@
     "lint:py": "uv run --directory apps/analytics ruff check . && uv run --directory apps/analytics ruff format --check .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm -r run typecheck && pnpm run typecheck:e2e && pnpm run typecheck:py",
+    "typecheck": "pnpm -r run typecheck && pnpm run typecheck:e2e && tsc -p tests/repo && pnpm run typecheck:py",
     "typecheck:py": "uv run --directory apps/analytics mypy",
-    "test": "pnpm -r run test && pnpm run test:py",
-    "test:py": "uv run --directory apps/analytics pytest",
+    "test": "pnpm -r run test && pnpm run test:repo && pnpm run test:py",
+    "test:py": "uv run --directory apps/analytics pytest --cov",
     "dev:up": "docker compose -f infra/docker-compose.yml up -d --build",
     "dev:down": "docker compose -f infra/docker-compose.yml down",
     "e2e": "playwright test -c e2e/playwright.config.ts",
-    "typecheck:e2e": "tsc -p e2e"
+    "typecheck:e2e": "tsc -p e2e",
+    "test:repo": "vitest run -c tests/repo/vitest.config.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,cjs,mjs}": [
@@ -38,6 +39,9 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/lint": "^21.2.3",
+    "@commitlint/load": "^21.2.3",
+    "@commitlint/types": "^21.2.3",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.2",
@@ -48,6 +52,7 @@
     "lint-staged": "^17.5.1",
     "prettier": "^3.9.9",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
   }
 }

@@ -50,3 +50,12 @@ dev = [
     "types-jsonschema>=4.26.0.20260518",
     "types-pyyaml>=6.0.12.20260906",
 ]
+
+[tool.coverage.run]
+source = ["analytics"]
+
+[tool.coverage.report]
+# Principio III de la constitución: cobertura mínima del 70 %.
+fail_under = 70
+show_missing = true
+skip_covered = true
