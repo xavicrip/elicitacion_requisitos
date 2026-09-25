@@ -21,7 +21,7 @@
     "dev:down": "docker compose -f infra/docker-compose.yml down",
     "e2e": "playwright test -c e2e/playwright.config.ts",
     "typecheck:e2e": "tsc -p e2e",
-    "test:repo": "vitest run -c tests/repo/vitest.config.ts"
+    "test:repo": "vitest run -c tests/repo/vitest.config.ts && sh tests/repo/wait-for-health.test.sh"
   },
   "lint-staged": {
     "*.{ts,tsx,js,cjs,mjs}": [
