@@ -9,8 +9,7 @@ FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile --filter @reqcanvas/api...
+RUN pnpm install --frozen-lockfile --filter @reqcanvas/api...
 COPY packages/shared packages/shared
 COPY apps/api apps/api
 RUN pnpm --filter @reqcanvas/api build \
