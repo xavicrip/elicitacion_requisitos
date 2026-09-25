@@ -96,8 +96,13 @@ vuelve a mostrar la versión previa y que las migraciones de datos se deshacen s
 1. **Given** una versión defectuosa en producción, **When** el responsable ejecuta el
    procedimiento de reversión documentado, **Then** la versión anterior vuelve a estar
    disponible en menos de 10 minutos.
-2. **Given** una migración de datos aplicada, **When** se ejecuta su reversión, **Then** los datos
-   vuelven al esquema anterior sin pérdida.
+2. **Given** una migración de datos aplicada, **When** se ejecuta su reversión, **Then** el esquema
+   vuelve exactamente al estado anterior y los datos que existían antes de la migración se
+   conservan.
+3. **Given** una migración marcada como destructiva (elimina o transforma datos de forma que su
+   reversión no puede reconstruirlos), **When** se va a aplicar en staging o producción, **Then**
+   existe un respaldo de la base de datos tomado inmediatamente antes, y la reversión documentada
+   incluye la restauración de ese respaldo.
 
 ---
 
@@ -132,7 +137,8 @@ vuelve a mostrar la versión previa y que las migraciones de datos se deshacen s
   ejecutar pruebas de humo.
 - **FR-009**: La promoción a producción DEBE requerir aprobación manual y pruebas de humo en verde.
 - **FR-010**: DEBE existir un mecanismo de migraciones de datos con operaciones de aplicar y
-  revertir.
+  revertir; las migraciones destructivas DEBEN declararse como tales y requerir un respaldo
+  previo antes de aplicarse en staging o producción.
 - **FR-011**: DEBE existir un mecanismo de *feature flags* configurable por entorno.
 - **FR-012**: DEBE generarse automáticamente un changelog y una etiqueta de versión semántica
   en cada release.
