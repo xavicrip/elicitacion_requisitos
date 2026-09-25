@@ -49,22 +49,22 @@ las historias
 
 **⚠️ CRITICAL**: ninguna historia puede empezar hasta completar esta fase
 
-- [ ] T012 [P] Prueba unitaria del esquema de salud en `packages/shared/tests/health.test.ts` (valida los ejemplos de `contracts/health.openapi.yaml`, incluido `/health/deep`) — `test(shared)`
-- [ ] T013 Implementar el esquema zod `HealthSchema` y los tipos en `packages/shared/src/health.ts` — `feat(shared)`
-- [ ] T014 [P] Prueba unitaria de la resolución de flags (default, sobrescritura, nombre desconocido → aviso) en `packages/shared/tests/flags.test.ts` — `test(shared)`
-- [ ] T015 Implementar el registro de flags y `resolveFlags(env)` en `packages/shared/src/flags.ts` — `feat(shared)`
-- [ ] T016 Implementar `apps/api/src/lib/flags.ts` (lee `FEATURE_FLAGS` con `resolveFlags` y expone los flags activos) y documentar cómo crear un flag en `docs/feature-flags.md` — `feat(api)`
-- [ ] T017 [P] Prueba unitaria de la validación de entorno de la API (falta `MONGO_URL` → error que nombra la variable sin su valor) en `apps/api/tests/unit/env.test.ts` — `test(api)`
-- [ ] T018 Implementar `apps/api/src/config/env.ts` con zod según `contracts/env-vars.md` — `feat(api)`
-- [ ] T019 [P] Prueba unitaria de la configuración de analytics en `apps/analytics/tests/unit/test_config.py` — `test(analytics)`
-- [ ] T020 Implementar `apps/analytics/src/analytics/config.py` con pydantic-settings — `feat(analytics)`
-- [ ] T021 [P] Prueba de integración de requestId en `apps/api/tests/integration/request-id.test.ts`: la API reutiliza o genera `x-request-id`, lo devuelve, lo incluye en el log **y lo reenvía en las llamadas salientes del cliente interno** (verificado con un servidor `analytics` simulado) — `test(api)`
-- [ ] T022 Implementar el plugin de requestId + logger pino (redacción de secretos) en `apps/api/src/plugins/observability.ts` y el cliente HTTP interno que reenvía `x-request-id` en `apps/api/src/lib/http-client.ts` — `feat(api)`
-- [ ] T023 [P] Prueba de `request_id` y logs JSON de analytics (reutiliza la cabecera entrante y la incluye en cada línea) en `apps/analytics/tests/unit/test_logging.py` — `test(analytics)`
-- [ ] T024 Implementar el middleware de `request_id` y los logs JSON en `apps/analytics/src/analytics/logging.py` — `feat(analytics)`
-- [ ] T025 Registrar `@fastify/helmet` y `@fastify/cors` (desde `CORS_ORIGINS`) en `apps/api/src/app.ts` — `feat(api)`
-- [ ] T026 [P] Pruebas de migraciones en `apps/api/tests/integration/migrations.test.ts` (`up → down → up` de la migración inicial) y de política en `apps/api/tests/unit/migrations-policy.test.ts` (falla si una migración no exporta `destructive` o no implementa `down`) — `test(api)`
-- [ ] T027 Configurar migrate-mongo (`apps/api/migrate-mongo-config.cjs`, scripts `migrate:up|down|status`), la plantilla `apps/api/migrations/_template.js` (con `destructive`) y la migración `apps/api/migrations/20260925000000-init-indexes.js` según data-model.md — `feat(api)`
+- [X] T012 [P] Prueba unitaria del esquema de salud en `packages/shared/tests/health.test.ts` (valida los ejemplos de `contracts/health.openapi.yaml`, incluido `/health/deep`) — `test(shared)`
+- [X] T013 Implementar el esquema zod `HealthSchema` y los tipos en `packages/shared/src/health.ts` — `feat(shared)`
+- [X] T014 [P] Prueba unitaria de la resolución de flags (default, sobrescritura, nombre desconocido → aviso) en `packages/shared/tests/flags.test.ts` — `test(shared)`
+- [X] T015 Implementar el registro de flags y `resolveFlags(env)` en `packages/shared/src/flags.ts` — `feat(shared)`
+- [X] T016 Implementar `apps/api/src/lib/flags.ts` (lee `FEATURE_FLAGS` con `resolveFlags` y expone los flags activos) y documentar cómo crear un flag en `docs/feature-flags.md` — `feat(api)`
+- [X] T017 [P] Prueba unitaria de la validación de entorno de la API (falta `MONGO_URL` → error que nombra la variable sin su valor) en `apps/api/tests/unit/env.test.ts` — `test(api)`
+- [X] T018 Implementar `apps/api/src/config/env.ts` con zod según `contracts/env-vars.md` — `feat(api)`
+- [X] T019 [P] Prueba unitaria de la configuración de analytics en `apps/analytics/tests/unit/test_config.py` — `test(analytics)`
+- [X] T020 Implementar `apps/analytics/src/analytics/config.py` con pydantic-settings — `feat(analytics)`
+- [X] T021 [P] Prueba de integración de requestId en `apps/api/tests/integration/request-id.test.ts`: la API reutiliza o genera `x-request-id`, lo devuelve, lo incluye en el log **y lo reenvía en las llamadas salientes del cliente interno** (verificado con un servidor `analytics` simulado) — `test(api)`
+- [X] T022 Implementar el plugin de requestId + logger pino (redacción de secretos) en `apps/api/src/plugins/observability.ts` y el cliente HTTP interno que reenvía `x-request-id` en `apps/api/src/lib/http-client.ts` — `feat(api)`
+- [X] T023 [P] Prueba de `request_id` y logs JSON de analytics (reutiliza la cabecera entrante y la incluye en cada línea) en `apps/analytics/tests/unit/test_logging.py` — `test(analytics)`
+- [X] T024 Implementar el middleware de `request_id` y los logs JSON en `apps/analytics/src/analytics/logging.py` — `feat(analytics)`
+- [X] T025 Registrar `@fastify/helmet` y `@fastify/cors` (desde `CORS_ORIGINS`) en `apps/api/src/app.ts` — `feat(api)`
+- [X] T026 [P] Pruebas de migraciones en `apps/api/tests/integration/migrations.test.ts` (`up → down → up` de la migración inicial) y de política en `apps/api/tests/unit/migrations-policy.test.ts` (falla si una migración no exporta `destructive` o no implementa `down`) — `test(api)`
+- [X] T027 Configurar migrate-mongo (`apps/api/migrate-mongo-config.js` para `migrate:create`; CLI propio `apps/api/src/db/cli.ts` con lock para `migrate:up|down|status`), la plantilla `apps/api/migrations/sample-migration.js` (con `destructive`) y la migración `apps/api/migrations/20260925000000-init-indexes.js` según data-model.md — `feat(api)`
 
 **Checkpoint**: fundaciones listas
 
