@@ -1,0 +1,138 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas API - Detección asistida
+  version: 1.0.0
+servers:
+  - url: /api
+security:
+  - bearer: []
+paths:
+  /diagram-versions/{versionId}/detections:
+    parameters: [{ name: versionId, in: path, required: true, schema: { type: string } }]
+    post:
+      summary: Iniciar la detección (Admin, versión en borrador, flag detection)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                llmRefine: { type: boolean, default: true }
+                arrows: { type: boolean, default: true }
+      responses:
+        '202':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DetectionJob' }
+        '409': { description: Ya hay una detección en curso para esta versión }
+    get:
+      summary: Última detección de la versión (Admin)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DetectionJob' }
+        '404': { description: Sin detecciones }
+  /diagram-versions/{versionId}/proposals:
+    parameters: [{ name: versionId, in: path, required: true, schema: { type: string } }]
+    get:
+      summary: Propuestas pendientes (Admin)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  activities: { type: array, items: { $ref: '#/components/schemas/ActivityProposal' } }
+                  transitions: { type: array, items: { $ref: '#/components/schemas/TransitionProposal' } }
+  /diagram-versions/{versionId}/proposals/accept-high:
+    parameters: [{ name: versionId, in: path, required: true, schema: { type: string } }]
+    post:
+      summary: Aceptar en bloque las de confianza alta sin possible_duplicate
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { accepted: { type: integer } }
+  /proposals/{proposalId}/accept:
+    parameters: [{ name: proposalId, in: path, required: true, schema: { type: string } }]
+    post:
+      summary: Aceptar (opcionalmente con correcciones) → crea la actividad
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label: { type: string, minLength: 1, maxLength: 120 }
+                type: { type: string, enum: [action, decision, start, end] }
+                bbox:
+                  type: object
+                  properties: { x: { type: number }, y: { type: number }, w: { type: number }, h: { type: number } }
+      responses:
+        '200':
+          description: Actividad creada (esquema Activity de la 003)
+        '422': { description: 'Etiqueta vacía: hay que indicar label' }
+  /proposals/{proposalId}/discard:
+    parameters: [{ name: proposalId, in: path, required: true, schema: { type: string } }]
+    post:
+      responses:
+        '204': { description: Descartada }
+  /transition-proposals/{proposalId}/accept:
+    parameters: [{ name: proposalId, in: path, required: true, schema: { type: string } }]
+    post:
+      responses:
+        '200': { description: Transición añadida a activities.next }
+        '422': { description: Origen o destino no aceptados }
+  /transition-proposals/{proposalId}/discard:
+    parameters: [{ name: proposalId, in: path, required: true, schema: { type: string } }]
+    post:
+      responses:
+        '204': { description: Descartada }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    DetectionJob:
+      type: object
+      required: [id, status, progress, createdAt]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [queued, running, completed, failed] }
+        progress:
+          type: object
+          properties:
+            stage: { type: string }
+            pct: { type: integer, minimum: 0, maximum: 100 }
+        error:
+          type: [object, 'null']
+          properties: { code: { type: string }, message: { type: string } }
+        metrics: { type: object }
+        createdAt: { type: string, format: date-time }
+        finishedAt: { type: [string, 'null'], format: date-time }
+    ActivityProposal:
+      type: object
+      required: [id, bbox, type, label, confidence, confidenceLevel, flags, status]
+      properties:
+        id: { type: string }
+        bbox:
+          type: object
+          properties: { x: { type: number }, y: { type: number }, w: { type: number }, h: { type: number } }
+        type: { type: string, enum: [action, decision, start, end] }
+        label: { type: string }
+        confidence: { type: number }
+        confidenceLevel: { type: string, enum: [high, medium, low] }
+        flags: { type: array, items: { type: string } }
+        status: { type: string, enum: [pending, accepted, discarded, superseded] }
+    TransitionProposal:
+      type: object
+      required: [id, fromProposalId, toProposalId, confidence, status]
+      properties:
+        id: { type: string }
+        fromProposalId: { type: string }
+        toProposalId: { type: string }
+        confidence: { type: number }
+        status: { type: string, enum: [pending, accepted, discarded, superseded] }
