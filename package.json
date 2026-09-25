@@ -13,13 +13,14 @@
     "lint:py": "uv run --directory apps/analytics ruff check . && uv run --directory apps/analytics ruff format --check .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm -r run typecheck && pnpm run typecheck:py",
+    "typecheck": "pnpm -r run typecheck && pnpm run typecheck:e2e && pnpm run typecheck:py",
     "typecheck:py": "uv run --directory apps/analytics mypy",
     "test": "pnpm -r run test && pnpm run test:py",
     "test:py": "uv run --directory apps/analytics pytest",
     "dev:up": "docker compose -f infra/docker-compose.yml up -d --build",
     "dev:down": "docker compose -f infra/docker-compose.yml down",
-    "e2e": "playwright test -c e2e/playwright.config.ts"
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "typecheck:e2e": "tsc -p e2e"
   },
   "lint-staged": {
     "*.{ts,tsx,js,cjs,mjs}": [
@@ -38,6 +39,8 @@
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.12.0",
