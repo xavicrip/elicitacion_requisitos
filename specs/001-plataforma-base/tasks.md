@@ -8,11 +8,14 @@ description: "Task list for feature 001-plataforma-base"
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
 **Tests**: OBLIGATORIAS (Principio III de la constitución). Las pruebas de cada historia se
-escriben primero y deben fallar antes de implementar. Prueba e implementación van en tareas y
-commits separados.
+escriben primero y se verifica que fallan (rojo) antes de implementar. Prueba e implementación
+son tareas separadas para ordenar el trabajo.
 
-**Commits**: cada tarea es **un commit atómico** con formato Conventional Commits; el tipo y
-alcance sugeridos van al final de cada tarea, p. ej. `feat(api)`.
+**Commits**: un commit atómico con formato Conventional Commits por tarea; **cada par
+prueba + implementación se commitea junto** (el mensaje cita ambas tareas), porque el
+Principio IV exige que cada commit pase las pruebas por sí solo (un commit con la prueba en
+rojo rompería `git revert` y `git bisect`). El tipo y alcance sugeridos van al final de cada
+tarea, p. ej. `feat(api)`.
 
 ## Format: `[ID] [P?] [Story] Description`
 
