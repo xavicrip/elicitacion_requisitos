@@ -1,0 +1,117 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas - Contrato de salud y versión
+  version: 1.0.0
+  description: >
+    Contrato común que implementan los servicios `api` y `analytics`.
+    `web` solo implementa `GET /health` (respuesta estática 200).
+servers:
+  - url: http://localhost:3000
+    description: api (local)
+  - url: http://localhost:8000
+    description: analytics (local)
+paths:
+  /health:
+    get:
+      summary: Estado de salud del servicio y de sus dependencias
+      operationId: getHealth
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Todas las dependencias están disponibles
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+              example:
+                status: ok
+                service: api
+                version: 0.1.0
+                commit: a3ce1ad
+                checks:
+                  mongo: { status: up, latencyMs: 3 }
+                  redis: { status: up, latencyMs: 1 }
+                timestamp: '2026-09-25T16:00:00.000Z'
+        '503':
+          description: Al menos una dependencia no está disponible
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+              example:
+                status: degraded
+                service: api
+                version: 0.1.0
+                commit: a3ce1ad
+                checks:
+                  mongo: { status: down, latencyMs: 2000, error: 'timeout' }
+                  redis: { status: up, latencyMs: 1 }
+                timestamp: '2026-09-25T16:00:00.000Z'
+  /version:
+    get:
+      summary: Versión desplegada
+      operationId: getVersion
+      responses:
+        '200':
+          description: Versión y commit
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [service, version, commit]
+                properties:
+                  service: { type: string }
+                  version: { type: string }
+                  commit: { type: string }
+  /config:
+    get:
+      summary: Configuración pública para el frontend (solo api)
+      operationId: getPublicConfig
+      responses:
+        '200':
+          description: Flags activos y parámetros públicos
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [flags]
+                properties:
+                  flags:
+                    type: object
+                    additionalProperties: { type: boolean }
+components:
+  parameters:
+    RequestId:
+      name: x-request-id
+      in: header
+      required: false
+      description: Si se envía, el servicio lo reutiliza; si no, genera uno (UUID v7).
+      schema: { type: string, maxLength: 64 }
+  headers:
+    RequestId:
+      description: Identificador de la petición, presente en todos los logs relacionados.
+      schema: { type: string }
+  schemas:
+    Health:
+      type: object
+      required: [status, service, version, commit, checks, timestamp]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        service: { type: string, enum: [api, analytics, web] }
+        version: { type: string }
+        commit: { type: string }
+        checks:
+          type: object
+          additionalProperties:
+            type: object
+            required: [status, latencyMs]
+            properties:
+              status: { type: string, enum: [up, down] }
+              latencyMs: { type: number, minimum: 0 }
+              error: { type: string, description: Mensaje sin datos sensibles }
+        timestamp: { type: string, format: date-time }
