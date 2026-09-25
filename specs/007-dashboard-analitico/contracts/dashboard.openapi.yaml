@@ -1,0 +1,190 @@
+openapi: 3.1.0
+info:
+  title: ReqCanvas API - Dashboard analítico
+  version: 1.0.0
+  description: Todas las rutas son solo para Administradores del proyecto (Participante → 403).
+servers:
+  - url: /api
+security:
+  - bearer: []
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    ProjectId: { name: projectId, in: path, required: true, schema: { type: string } }
+    DiagramIds: { name: diagramId, in: query, schema: { type: array, items: { type: string } }, style: form, explode: true }
+    From: { name: from, in: query, schema: { type: string, format: date } }
+    To: { name: to, in: query, schema: { type: string, format: date } }
+    Types: { name: type, in: query, schema: { type: array, items: { type: string } }, style: form, explode: true }
+    Statuses: { name: status, in: query, schema: { type: array, items: { type: string } }, style: form, explode: true }
+  schemas:
+    Count:
+      type: object
+      properties:
+        key: { type: string }
+        label: { type: string }
+        count: { type: integer }
+    Descriptive:
+      type: object
+      required: [kpis, byActivity, byType, byPriority, byRole, byStatus, timeline]
+      properties:
+        kpis:
+          type: object
+          properties:
+            totalDetails: { type: integer }
+            activeParticipants: { type: integer, description: Autores o votantes en el rango }
+            coveredActivitiesPct: { type: number }
+            validatedPct: { type: number }
+        byActivity: { type: array, items: { $ref: '#/components/schemas/Count' } }
+        byType: { type: array, items: { $ref: '#/components/schemas/Count' } }
+        byPriority: { type: array, items: { $ref: '#/components/schemas/Count' } }
+        byRole: { type: array, items: { $ref: '#/components/schemas/Count' } }
+        byStatus: { type: array, items: { $ref: '#/components/schemas/Count' } }
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              created: { type: integer }
+              votes: { type: integer }
+              comments: { type: integer }
+    AnalysisRun:
+      type: object
+      required: [id, status, progress, createdAt, stale]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [queued, running, completed, partial, failed] }
+        progress:
+          type: object
+          properties: { stage: { type: string }, pct: { type: integer } }
+        trigger: { type: string, enum: [manual, scheduled] }
+        detailCount: { type: integer }
+        stale: { type: boolean, description: Calculado comparando dataFingerprint con los datos actuales }
+        newDetailsSinceRun: { type: integer }
+        createdAt: { type: string, format: date-time }
+        finishedAt: { type: [string, 'null'], format: date-time }
+        results:
+          description: Ver analysis-results.schema.json (solo en GET por id)
+          type: object
+paths:
+  /projects/{projectId}/dashboard/descriptive:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/DiagramIds'
+      - $ref: '#/components/parameters/From'
+      - $ref: '#/components/parameters/To'
+      - $ref: '#/components/parameters/Types'
+      - $ref: '#/components/parameters/Statuses'
+    get:
+      summary: KPIs, distribuciones y serie temporal
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Descriptive' }
+        '403': { description: No es Administrador }
+  /projects/{projectId}/analysis-runs:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      summary: Historial de ejecuciones (sin results)
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalysisRun' }
+    post:
+      summary: Lanzar un análisis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters: { type: object }
+      responses:
+        '202':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalysisRun' }
+        '409': { description: Ya hay un análisis en curso (devuelve su id) }
+  /projects/{projectId}/analysis-runs/latest:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      summary: Último run completado o parcial, con results
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalysisRun' }
+        '404': { description: Aún no hay análisis }
+  /analysis-runs/{runId}:
+    parameters: [{ name: runId, in: path, required: true, schema: { type: string } }]
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalysisRun' }
+  /projects/{projectId}/duplicate-decisions:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    post:
+      summary: Confirmar o rechazar un par de posibles duplicados
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pair, decision]
+              properties:
+                pair: { type: array, items: { type: string }, minItems: 2, maxItems: 2 }
+                decision: { type: string, enum: [confirmed, rejected] }
+                keep: { type: string, description: 'Si se confirma: id del original; el otro se marca como duplicado' }
+      responses:
+        '201': { description: Decisión registrada (y moderación aplicada si se confirmó) }
+  /analysis-runs/{runId}/insights/{insightId}/feedback:
+    parameters:
+      - { name: runId, in: path, required: true, schema: { type: string } }
+      - { name: insightId, in: path, required: true, schema: { type: string } }
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [useful]
+              properties: { useful: { type: boolean } }
+      responses:
+        '204': { description: Registrado }
+  /analysis-runs/{runId}/insights/regenerate:
+    parameters: [{ name: runId, in: path, required: true, schema: { type: string } }]
+    post:
+      summary: Relanzar solo la etapa insights sobre los resultados del run
+      responses:
+        '202': { description: Encolado }
+  /projects/{projectId}/analysis-settings:
+    parameters: [{ $ref: '#/components/parameters/ProjectId' }]
+    get:
+      responses:
+        '200': { description: AnalysisSettings }
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extraAmbiguousTerms: { type: array, maxItems: 100, items: { type: string } }
+                extraStopwords: { type: array, maxItems: 200, items: { type: string } }
+                schedule:
+                  type: object
+                  properties:
+                    enabled: { type: boolean }
+                    cron: { type: string }
+                    timezone: { type: string }
+      responses:
+        '200': { description: Guardado }

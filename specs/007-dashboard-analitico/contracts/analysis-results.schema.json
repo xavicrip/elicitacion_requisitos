@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reqcanvas/schemas/analysis-results/1",
+  "title": "AnalysisResults",
+  "type": "object",
+  "required": ["schemaVersion", "stages"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "enum": ["completed", "failed", "skipped"] },
+          "durationMs": { "type": "integer" },
+          "reason": { "type": "string" },
+          "error": { "type": "string" }
+        }
+      }
+    },
+    "preprocess": {
+      "type": "object",
+      "properties": {
+        "unrecognizedRatio": { "type": "number", "description": "Proporción de tokens fuera del vocabulario (edge case de otros idiomas o faltas)" }
+      }
+    },
+    "keywords": {
+      "type": "object",
+      "properties": {
+        "byActivity": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["activityKey", "terms"],
+            "properties": {
+              "activityKey": { "type": "string" },
+              "terms": { "type": "array", "items": { "$ref": "#/$defs/weightedTerm" } }
+            }
+          }
+        },
+        "wordCloud": { "type": "array", "items": { "$ref": "#/$defs/weightedTerm" } }
+      }
+    },
+    "cooccurrence": {
+      "type": "object",
+      "properties": {
+        "nodes": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "freq": { "type": "integer" }, "community": { "type": "integer" } } } },
+        "edges": { "type": "array", "items": { "type": "object", "properties": { "source": { "type": "string" }, "target": { "type": "string" }, "pmi": { "type": "number" }, "count": { "type": "integer" } } } }
+      }
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "terms", "detailIds", "activityKeys"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "terms": { "type": "array", "items": { "$ref": "#/$defs/weightedTerm" } },
+          "detailIds": { "type": "array", "items": { "type": "string" } },
+          "activityKeys": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "clusters": {
+      "type": "object",
+      "properties": {
+        "groups": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "detailIds": { "type": "array", "items": { "type": "string" } }, "representativeId": { "type": "string" } } } },
+        "points": { "type": "array", "items": { "type": "object", "properties": { "detailId": { "type": "string" }, "x": { "type": "number" }, "y": { "type": "number" }, "groupId": { "type": ["string", "null"] } } } }
+      }
+    },
+    "duplicates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pair", "similarity"],
+        "properties": {
+          "pair": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 },
+          "similarity": { "type": "number" }
+        }
+      }
+    },
+    "sentiment": {
+      "type": "object",
+      "properties": {
+        "byActivity": { "type": "array", "items": { "type": "object", "properties": { "activityKey": { "type": "string" }, "pos": { "type": "integer" }, "neu": { "type": "integer" }, "neg": { "type": "integer" } } } },
+        "mostNegative": { "type": "array", "items": { "type": "object", "properties": { "detailId": { "type": "string" }, "score": { "type": "number" } } } }
+      }
+    },
+    "quality": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["detailId", "score", "issues"],
+        "properties": {
+          "detailId": { "type": "string" },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "enum": ["ambiguous_term", "not_measurable", "too_short", "missing_verb", "vague_reference"] },
+                "field": { "enum": ["given", "when", "then"] },
+                "term": { "type": "string" },
+                "penalty": { "type": "integer" },
+                "suggestion": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "association": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "antecedent": { "type": "array", "items": { "type": "string" } },
+          "consequent": { "type": "array", "items": { "type": "string" } },
+          "support": { "type": "number" },
+          "confidence": { "type": "number" },
+          "lift": { "type": "number" },
+          "sentence": { "type": "string" }
+        }
+      }
+    },
+    "hotcold": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "activityKey": { "type": "string" },
+          "class": { "enum": ["hot", "cold", "normal"] },
+          "score": { "type": "number" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "insights": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "statement", "evidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "statement": { "type": "string" },
+          "recommendation": { "type": "string" },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["kind", "id"],
+              "properties": {
+                "kind": { "enum": ["detail", "activity", "topic", "rule", "quality", "kpi"] },
+                "id": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "weightedTerm": {
+      "type": "object",
+      "required": ["term", "weight"],
+      "properties": { "term": { "type": "string" }, "weight": { "type": "number" } }
+    }
+  }
+}
