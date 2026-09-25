@@ -27,7 +27,14 @@ sh "$SCRIPT" "http://127.0.0.1:$port/health" 20 1 >/dev/null 2>&1; code=$?
 sh "$SCRIPT" "http://127.0.0.1:$port/no-existe" 3 1 >/dev/null 2>&1; code=$?
 [ "$code" = "1" ]; check $? "un 404 no cuenta como saludable"
 
-# 4. Sin argumentos: uso incorrecto (código 2).
+# 4. Con texto esperado: espera a que el cuerpo lo contenga (p. ej., la versión nueva).
+sh "$SCRIPT" "http://127.0.0.1:$port/health" 3 1 "version-nueva" >/dev/null 2>&1; code=$?
+[ "$code" = "1" ]; check $? "falla si la respuesta no contiene el texto esperado"
+(sleep 2; echo "ok version-nueva" > "$tmp/health") &
+sh "$SCRIPT" "http://127.0.0.1:$port/health" 20 1 "version-nueva" >/dev/null 2>&1; code=$?
+[ "$code" = "0" ]; check $? "espera a que la respuesta contenga el texto esperado"
+
+# 5. Sin argumentos: uso incorrecto (código 2).
 sh "$SCRIPT" >/dev/null 2>&1; code=$?
 [ "$code" = "2" ]; check $? "sin URL termina con código 2"
 
