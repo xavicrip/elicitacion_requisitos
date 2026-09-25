@@ -1,0 +1,174 @@
+# Contrato: specs/001-plataforma-base/contracts/ci-cd-pipeline.md
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: '0'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: pnpm exec eslint .
+      - run: pnpm format:check
+      - run: pnpm lint:py
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: pnpm typecheck
+
+  commitlint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Validar los mensajes de commit del PR
+        run: >
+          pnpm exec commitlint --verbose
+          --from ${{ github.event.pull_request.base.sha }}
+          --to ${{ github.event.pull_request.head.sha }}
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test-node:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      MONGO_TEST_URL: mongodb://localhost:27017
+      REDIS_TEST_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: pnpm --filter @reqcanvas/shared test
+      - run: pnpm --filter @reqcanvas/api test:coverage
+      - run: pnpm --filter @reqcanvas/web test
+      - run: pnpm test:repo
+
+  test-python:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      MONGO_TEST_URL: mongodb://localhost:27017
+      REDIS_TEST_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: pnpm test:py
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+    env:
+      MONGO_URL: mongodb://localhost:27017
+      MONGO_DB: ci_migrations
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: up → down → up (todas las migraciones son reversibles)
+        working-directory: apps/api
+        run: |
+          pnpm migrate:up
+          while pnpm -s migrate:status | grep -q APPLIED; do pnpm migrate:down; done
+          pnpm migrate:up
+          pnpm migrate:status
+
+  build:
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: api
+            max_mb: 300
+          - service: analytics
+            max_mb: 1200
+          - service: web
+            max_mb: 150
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.service }}/Dockerfile
+          tags: reqcanvas-${{ matrix.service }}:ci
+          load: true
+          build-args: |
+            APP_VERSION=ci
+            GIT_SHA=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+      - name: Tamaño de la imagen ≤ ${{ matrix.max_mb }} MB
+        run: |
+          size=$(docker image inspect reqcanvas-${{ matrix.service }}:ci --format '{{.Size}}')
+          mb=$((size / 1024 / 1024))
+          echo "reqcanvas-${{ matrix.service }}: ${mb} MB (límite ${{ matrix.max_mb }} MB)"
+          test "$mb" -le "${{ matrix.max_mb }}"
+
+  e2e-smoke:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - uses: docker/setup-buildx-action@v3
+      - name: Levantar el stack local
+        run: docker compose -f infra/docker-compose.yml up -d --build --wait --wait-timeout 300
+        env:
+          APP_VERSION: ci
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+        env:
+          EXPECTED_VERSION: ci
+      - name: Logs de los servicios
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs --no-color
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+      - if: always()
+        run: docker compose -f infra/docker-compose.yml down -v
