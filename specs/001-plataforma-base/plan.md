@@ -17,7 +17,7 @@ revirtiendo el commit.
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x sobre Node.js 24 LTS (`web`, `api`, `shared`); Python 3.12 (`analytics`)
-**Primary Dependencies**: pnpm workspaces; Vite + React + three.js (`@react-three/fiber`) en `web`; Fastify 5 + Socket.IO (instalado, sin uso aún) + Mongoose + zod + pino en `api`; FastAPI + pydantic-settings + motor + redis-py en `analytics`; migrate-mongo
+**Primary Dependencies**: pnpm workspaces; Vite + React + three.js (`@react-three/fiber`) en `web`; Fastify 5 + Mongoose + zod + pino en `api` (Socket.IO llega con la feature 005); FastAPI + pydantic-settings + motor + redis-py en `analytics`; migrate-mongo
 **Storage**: MongoDB 7 (Railway MongoDB) y Redis 7 (Railway Redis); sin almacenamiento de objetos en esta feature
 **Testing**: Vitest (+ `fastify.inject`) en `api`/`shared`/`web`; pytest + httpx en `analytics`; Playwright para smoke/E2E
 **Target Platform**: Contenedores Linux en Railway; navegadores de escritorio actuales (Chrome, Edge, Firefox, Safari)
@@ -36,10 +36,10 @@ revirtiendo el commit.
 | II. Servicios desacoplados con contratos | Tres servicios independientes, `packages/shared` con esquemas zod; contrato de salud común en `contracts/health.openapi.yaml`; los servicios no comparten colecciones. | ✅ |
 | III. Pruebas primero | Cada historia empieza con pruebas que fallan (healthcheck, validación de config, logs); gates de cobertura ≥ 70 % en CI para `api` y `analytics`. | ✅ |
 | IV. Commits atómicos y reversibles | commitlint + Husky; migrate-mongo con `up`/`down`; feature flags; despliegue por tag que permite volver a cualquier versión; PR solo con "Rebase and merge" e historial lineal (sin squash ni merge commits). | ✅ |
-| Restricciones (v1.1.0) | Node.js 24 LTS fijado en `.nvmrc`/`engines`/imágenes/CI; despliegue solo desde GitHub Actions con `railway up --ci`, autodeploy de Railway desactivado. | ✅ |
 | V. Seguridad por defecto | Validación de config al arrancar; gitleaks en CI; secretos en GitHub Environments y Railway; Helmet y CORS restringido en `api`. | ✅ |
 | VI. Observabilidad | `GET /health` en los tres servicios; logs JSON (pino / python-json-logger) con `x-request-id` propagado. | ✅ |
 | VII. Humano en el bucle y simplicidad | Promoción a producción con aprobación manual; sin orquestador de monorepo (Turborepo/Nx) ni servicio externo de flags (YAGNI). | ✅ |
+| Restricciones (v1.1.0) | Node.js 24 LTS fijado en `.nvmrc`/`engines`/imágenes/CI; despliegue solo desde GitHub Actions con `railway up --ci`, autodeploy de Railway desactivado. | ✅ |
 
 **Resultado**: todas las gates pasan; no hay violaciones que justificar.
 **Re-evaluación post-diseño (Phase 1)**: sin cambios; el diseño de contratos y datos no introduce
@@ -76,7 +76,7 @@ apps/
 │   ├── Dockerfile
 │   ├── railway.json
 │   └── tests/
-├── api/                         # Fastify + Mongoose + Socket.IO
+├── api/                         # Fastify + Mongoose
 │   ├── src/
 │   │   ├── server.ts            # Bootstrap (escucha en "::" para la red privada IPv6)
 │   │   ├── app.ts               # buildApp() testeable
