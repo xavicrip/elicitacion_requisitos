@@ -20,7 +20,6 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       ...(options.logStream ? { stream: options.logStream } : {}),
     },
     requestIdHeader: false,
-    requestIdLogLabel: 'reqId',
     genReqId,
   });
 
