@@ -117,11 +117,16 @@ jobs:
           retention-days: 30
       - name: Desplegar api, analytics y web
         run: |
+          pids=""
           for service in analytics api web; do
             scripts/railway/deploy-service.sh "$service" "$ENVIRONMENT" \
               "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.commit }}" &
+            pids="$pids $!"
           done
-          wait
+          # `wait` sin argumentos siempre devuelve 0: se espera cada proceso para propagar fallos.
+          failed=0
+          for pid in $pids; do wait "$pid" || failed=1; done
+          exit "$failed"
       - name: Esperar a que web y api (con analytics) estén saludables
         run: |
           scripts/wait-for-health.sh "${{ vars.BASE_URL }}/health" 600 10
