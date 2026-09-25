@@ -4,8 +4,8 @@ name: ci
 on:
   pull_request:
   push:
-    # main (tras integrar) y ramas de feature de spec-kit (feedback antes de abrir el PR).
-    branches: [main, '[0-9][0-9][0-9]-*']
+    # Solo main: las ramas de feature se validan en su PR (evita ejecutar el CI dos veces).
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
