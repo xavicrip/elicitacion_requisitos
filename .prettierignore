@@ -9,3 +9,5 @@ specs/
 .claude/
 playwright-report/
 test-results/
+CLAUDE.md
+prompt.md
