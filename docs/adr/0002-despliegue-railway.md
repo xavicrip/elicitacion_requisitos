@@ -59,3 +59,32 @@ y el análisis de la spec (S1) descartó exponer MongoDB para migrar desde CI.
   entornos (se reconstruye con el mismo commit). Si se quisiera _build once, deploy many_
   estricto, habría que publicar las imágenes en un registro y desplegarlas por digest.
 - Los entornos efímeros por PR quedan fuera de esta iteración (supuesto de la spec).
+
+## Estado de la configuración (2026-09-25)
+
+Proyecto `reqcanvas` (`a2c03e32-2a46-46e8-910d-54331d424225`), creado con la CLI de Railway:
+
+| Entorno      | web                                         | api                                        |
+| ------------ | ------------------------------------------- | ------------------------------------------ |
+| `production` | https://web-production-aaa68.up.railway.app | https://api-production-6963.up.railway.app |
+| `staging`    | https://web-staging-0562.up.railway.app     | https://api-staging-e244.up.railway.app    |
+
+`analytics`, `MongoDB` y `Redis` solo tienen endpoint privado. `staging` se creó duplicando
+`production`.
+
+Diferencias respecto a lo previsto:
+
+- **Ruta del _config as code_**: la configuración de entorno de Railway acepta el campo
+  `configFile` pero lo ignora, y `railway up` solo lee un `railway.json` en la raíz del código
+  subido. Por eso los valores de `apps/<servicio>/railway.json` (builder, Dockerfile,
+  `watchPatterns`, healthcheck, reinicios, `preDeployCommand`) se aplicaron a cada servicio con
+  `railway environment edit`, generando el patch desde esos mismos archivos. Los `railway.json`
+  siguen siendo la fuente de verdad (los valida el CI); si cambian, hay que volver a aplicar el
+  patch en ambos entornos.
+- **Plantilla de MongoDB**: se desplegó sin el _TCP proxy_ público que trae por defecto (S1), sin
+  la variable `MONGO_PUBLIC_URL` que dependía de él, y con la imagen `mongo:7` en lugar de
+  `mongo:latest`, para coincidir con el CI y el entorno local.
+- **Redis**: la plantilla usa `redis:8.2` (el CI y el entorno local usan Redis 7; la API solo
+  usa comandos compatibles).
+- **`restartPolicyType`**: `ON_FAILURE` es el valor por defecto de Railway y no aparece en la
+  configuración; `restartPolicyMaxRetries: 3` sí.
