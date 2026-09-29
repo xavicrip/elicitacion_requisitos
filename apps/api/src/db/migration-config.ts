@@ -22,10 +22,14 @@ export const MIGRATIONS_DIR = findMigrationsDir(dirname(fileURLToPath(import.met
  * (`lockTtl: 0`): lanza `createIndex` sin esperar y deja promesas colgando al cerrar el
  * cliente. En su lugar, `migrations.ts` usa un lock propio.
  */
-export function migrationConfig(url: string, dbName: string): MigrateMongoConfig {
+export function migrationConfig(
+  url: string,
+  dbName: string,
+  migrationsDir = MIGRATIONS_DIR,
+): MigrateMongoConfig {
   return {
     mongodb: { url, databaseName: dbName },
-    migrationsDir: MIGRATIONS_DIR,
+    migrationsDir,
     changelogCollectionName: 'changelog',
     lockTtl: 0,
     migrationFileExtension: '.js',

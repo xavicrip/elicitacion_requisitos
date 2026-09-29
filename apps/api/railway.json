@@ -5,7 +5,7 @@
     "dockerfilePath": "apps/api/Dockerfile"
   },
   "deploy": {
-    "preDeployCommand": ["node dist/migrate.js up"],
+    "preDeployCommand": ["node dist/migrate.js auto"],
     "healthcheckPath": "/health",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",
