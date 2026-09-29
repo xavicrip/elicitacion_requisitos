@@ -23,9 +23,10 @@ en formato Conventional Commits (SC-005).
 
 | Disparador | Entorno | Pasos |
 |------------|---------|-------|
-| `workflow_run` de `ci.yml` exitoso en `main` | `staging` | 1. Si hay migraciones nuevas con `destructive: true`: job `backup` (`mongodump` vía `railway ssh`) → 2. `railway up --ci --service api/analytics/web --environment staging` (en paralelo; `api` aplica las migraciones con su `preDeployCommand`) → 3. esperar a que `web /health` y `api /health/deep` respondan `200` (`analytics` se verifica a través de `api`) → 4. Playwright smoke contra staging |
+| `workflow_run` de `ci.yml` exitoso en `main` | `staging` | 1. `MIGRATION_ACTION=up` en `api` → 2. `railway up --ci --service api/analytics/web --environment staging` (en paralelo; `api` aplica las migraciones con su `preDeployCommand` `migrate.js auto`, que respalda en el bucket antes de las `destructive: true`) → 3. esperar a que `web /health` y `api /health/deep` respondan `200` (`analytics` se verifica a través de `api`) → 4. Playwright smoke contra staging |
 | Push de tag `v*.*.*` o `workflow_dispatch` (`ref`, `environment`) | `production` | Requiere aprobación del GitHub Environment `production` → mismos pasos contra production |
-| `workflow_dispatch` con `action=migrate-down` | elegido | `railway ssh --service api --environment <env> -- pnpm migrate:down` (revierte el último lote dentro de la red privada; en `production` requiere aprobación) |
+| `workflow_dispatch` con `action=migrate-down` (`ref` = versión de destino) | elegido | Redespliega la versión actual de `api` con `MIGRATION_ACTION=down:<primera migración que ref no tiene>`; el pre-deploy las revierte dentro de la red privada (ADR 0003; en `production` requiere aprobación) |
+| `workflow_dispatch` con `action=restore-backup` (`backup_key`, por defecto `latest`) | elegido | Despliegue de `ref` con `MIGRATION_ACTION=restore:<clave>`: el pre-deploy restaura el respaldo del bucket y aplica `up` |
 
 Reglas:
 - `concurrency: deploy-${{ environment }}` con `cancel-in-progress: false` (los despliegues se

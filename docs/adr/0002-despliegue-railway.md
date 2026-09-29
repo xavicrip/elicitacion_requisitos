@@ -26,7 +26,8 @@ y el análisis de la spec (S1) descartó exponer MongoDB para migrar desde CI.
    por entorno (GitHub Environments). El **autodeploy de Railway queda desactivado** (los
    servicios no se conectan al repositorio de GitHub), así que nada llega a un entorno sin
    pasar por el CI.
-3. **Migraciones**: `preDeployCommand` de `api` (`node dist/migrate.js up`), dentro de la red
+3. **Migraciones**: `preDeployCommand` de `api` (`node dist/migrate.js auto`, ver
+   [ADR 0003](0003-migraciones-sin-ssh.md)), dentro de la red
    privada. Si falla, Railway mantiene la versión anterior.
 4. **Salud**: Railway usa `/health` de cada servicio para promover un despliegue. `api /health`
    no depende de `analytics`; los smoke tests usan `api /health/deep`.
