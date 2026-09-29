@@ -162,7 +162,7 @@ las historias
 - [X] T058 [US4] Implementar `scripts/rollback.sh` (dispara `deploy.yml` con el `ref` anterior mediante `gh workflow run` y, opcionalmente, `migrate-down`) — `feat(ops)`
 - [X] T059 [US4] Acción `migrate-down` en `.github/workflows/deploy.yml` (`railway ssh --service api --environment <env> -- pnpm migrate:down`, con aprobación en `production`) y restauración del respaldo (`mongorestore`) para migraciones destructivas — `ci` · **Rehecho 2026-09-29 sin `railway ssh`** (no funciona desde el runner): `MIGRATION_ACTION` en el pre-deploy `migrate.js auto` y respaldos en Railway Buckets (ADR 0003)
 - [X] T060 [US4] Runbook de rollback en `docs/runbooks/rollback.md`: redespliegue por tag (`scripts/rollback.sh`), Rollback en el panel de Railway, `migrate-down`, restauración del respaldo si la migración era destructiva, alternativa desde la consola de Railway si `railway ssh` no está disponible, y verificación con `/version` — `docs(ops)`
-- [ ] T061 [US4] Ensayo de rollback en staging: desplegar v0.1.0 y v0.1.1 (con una migración de prueba), volver a v0.1.0 y revertir la migración midiendo el tiempo; registrar el resultado en `docs/runbooks/rollback.md` (SC-004) — `docs(ops)`
+- [X] T061 [US4] Ensayo de rollback en staging: desplegar v0.1.0 y v0.1.1 (con una migración de prueba), volver a v0.1.0 y revertir la migración midiendo el tiempo; registrar el resultado en `docs/runbooks/rollback.md` (SC-004) — `docs(ops)` · **Ensayado 2026-09-29** en staging: B (`migrate-down`) 19 min 59 s, C (`restore-backup`) 8 min 19 s; ver el registro del runbook
 
 **Checkpoint**: las cuatro historias funcionan de forma independiente
 

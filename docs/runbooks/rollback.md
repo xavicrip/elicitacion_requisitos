@@ -101,8 +101,37 @@ curl -s "$API_URL/health/deep" | jq .status
 gh run list --workflow deploy.yml --limit 3
 ```
 
+## Activar el mecanismo en un entorno
+
+Railway no lee `apps/api/railway.json` (ADR 0002), así que en cada entorno hay que hacerlo a
+mano, **en este orden** y comprobando en el panel que el selector muestra el entorno correcto:
+
+1. Variables `BACKUP_S3_*` de `api` con referencias al bucket **de ese entorno**
+   (`reqcanvas` en `production`, `reqcanvas-staging` en `staging`; ADR 0003).
+2. Desplegar una versión que incluya `migrate.js auto`.
+3. Después, cambiar el _pre-deploy command_ de `api` a `node dist/migrate.js auto` y aplicar.
+4. Comprobar: `railway environment config --environment <entorno> --json` muestra el comando, y
+   el log del pre-deploy del siguiente despliegue dice `migraciones del despliegue`.
+
+Estado: `staging` activado el 2026-09-29; `production`, pendiente de la release que lo incluya.
+
 ## Registro de ensayos (T061)
 
-| Fecha       | Entorno | De → a | Con migración  | Duración | Resultado |
-| ----------- | ------- | ------ | -------------- | -------- | --------- |
-| _pendiente_ | staging |        | Sí (de prueba) |          |           |
+Los tiempos van desde el disparo del workflow hasta que `api /version` muestra la versión de
+destino con `/health/deep` en `ok`.
+
+| Fecha      | Entorno | De → a                              | Procedimiento                    | Duración    | Resultado                                                                                                    |
+| ---------- | ------- | ----------------------------------- | -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-09-29 | staging | `e1b79cc` → `687b250`               | B: `migrate-down` + redespliegue | 19 min 59 s | ✅ Migración de prueba revertida (`reverted=[…ensayo-t061.js]`); smoke en verde                              |
+| 2026-09-29 | staging | `8cd3992` (destructiva) → `5350d00` | C: `restore-backup` (`latest`)   | 8 min 19 s  | ✅ Respaldo tomado antes de migrar y restaurado (`changelog`, `_platform`); `MIGRATION_ACTION` vuelve a `up` |
+
+Observaciones:
+
+- **B supera el objetivo de 10 min** porque encadena dos despliegues y cada uno tarda en Railway
+  8–10 min (build incluido; el 2026-09-25 eran ~6 min). C cumple porque es un solo despliegue.
+  Para cortar el daño en menos de 10 min, usa primero D (Rollback del panel, instantáneo).
+- Sin bucket configurado, el pre-deploy **se negó a aplicar** la migración destructiva y Railway
+  mantuvo la versión anterior (primer intento del ensayo C, con referencias a un bucket con otro
+  nombre).
+- `railway up --ci` fallaba al perder el stream de logs de build aunque el build siguiera;
+  `deploy-service.sh` ahora sigue el estado del despliegue (`railway up --detach`).

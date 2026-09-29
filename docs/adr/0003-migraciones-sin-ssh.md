@@ -51,15 +51,18 @@ desde CI está descartado (S1).
 
 ## Configuración por entorno
 
-Variables de `api` (referencias al bucket `reqcanvas` del mismo entorno):
+Variables de `api`: referencias al bucket del mismo entorno. Los nombres de bucket son únicos en
+el proyecto, así que cada entorno tiene el suyo: `reqcanvas` en `production` y
+`reqcanvas-staging` en `staging` (sustituye `<bucket>`). Una referencia a un nombre que no
+existe en el entorno se resuelve **vacía**, y el pre-deploy lo trata como bucket sin configurar.
 
-| Variable                      | Valor                              |
-| ----------------------------- | ---------------------------------- |
-| `BACKUP_S3_ENDPOINT`          | `${{reqcanvas.ENDPOINT}}`          |
-| `BACKUP_S3_BUCKET`            | `${{reqcanvas.BUCKET}}`            |
-| `BACKUP_S3_REGION`            | `${{reqcanvas.REGION}}`            |
-| `BACKUP_S3_ACCESS_KEY_ID`     | `${{reqcanvas.ACCESS_KEY_ID}}`     |
-| `BACKUP_S3_SECRET_ACCESS_KEY` | `${{reqcanvas.SECRET_ACCESS_KEY}}` |
-| `MIGRATION_ACTION`            | `up` (la gestiona `deploy.yml`)    |
+| Variable                      | Valor                             |
+| ----------------------------- | --------------------------------- |
+| `BACKUP_S3_ENDPOINT`          | `${{<bucket>.ENDPOINT}}`          |
+| `BACKUP_S3_BUCKET`            | `${{<bucket>.BUCKET}}`            |
+| `BACKUP_S3_REGION`            | `${{<bucket>.REGION}}`            |
+| `BACKUP_S3_ACCESS_KEY_ID`     | `${{<bucket>.ACCESS_KEY_ID}}`     |
+| `BACKUP_S3_SECRET_ACCESS_KEY` | `${{<bucket>.SECRET_ACCESS_KEY}}` |
+| `MIGRATION_ACTION`            | `up` (la gestiona `deploy.yml`)   |
 
 _Pre-deploy command_ de `api`: `node dist/migrate.js auto`.
