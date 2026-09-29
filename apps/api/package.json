@@ -14,7 +14,7 @@
     "migrate:down": "tsx --env-file-if-exists=../../.env src/db/cli.ts down",
     "migrate:status": "tsx --env-file-if-exists=../../.env src/db/cli.ts status",
     "migrate:create": "migrate-mongo create",
-    "migrate:deploy": "node dist/migrate.js up"
+    "migrate:deploy": "node dist/migrate.js auto"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
@@ -24,6 +24,7 @@
     "vitest": "^5.0.2"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1142.0",
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
     "@reqcanvas/shared": "workspace:*",

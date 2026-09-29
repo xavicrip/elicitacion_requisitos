@@ -24,5 +24,5 @@ WORKDIR /app
 COPY --from=build --chown=node:node /out ./
 USER node
 EXPOSE 3000
-# Migraciones: `node dist/migrate.js up` (preDeployCommand de Railway).
+# Migraciones: `node dist/migrate.js auto` (preDeployCommand de Railway; ver MIGRATION_ACTION).
 CMD ["node", "dist/server.js"]

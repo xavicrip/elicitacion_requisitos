@@ -32,7 +32,7 @@ describe('railway.json', () => {
   );
 
   it('solo api ejecuta migraciones antes de desplegar (S1: sin exponer MongoDB)', () => {
-    expect(read('api').deploy.preDeployCommand).toEqual(['node dist/migrate.js up']);
+    expect(read('api').deploy.preDeployCommand).toEqual(['node dist/migrate.js auto']);
     expect(read('analytics').deploy.preDeployCommand).toBeUndefined();
     expect(read('web').deploy.preDeployCommand).toBeUndefined();
   });

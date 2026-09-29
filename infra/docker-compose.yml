@@ -60,7 +60,7 @@ services:
         APP_VERSION: ${APP_VERSION:-dev}
         GIT_SHA: ${GIT_SHA:-local}
     # Igual que el preDeployCommand de Railway: migrar antes de arrancar.
-    command: ['sh', '-c', 'node dist/migrate.js up && exec node dist/server.js']
+    command: ['sh', '-c', 'node dist/migrate.js auto && exec node dist/server.js']
     environment:
       NODE_ENV: development
       PORT: 3000
