@@ -27,6 +27,10 @@ if ! git rev-parse --verify --quiet "$REF^{commit}" >/dev/null; then
   echo "El ref '$REF' no existe en el repositorio" >&2
   exit 1
 fi
+# actions/checkout solo acepta tags, ramas o SHA completos: un SHA corto se expande.
+if ! git rev-parse --verify --quiet "refs/tags/$REF" >/dev/null; then
+  REF=$(git rev-parse "$REF^{commit}")
+fi
 
 watch_last_run() {
   sleep 5

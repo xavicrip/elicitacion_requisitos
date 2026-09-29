@@ -13,6 +13,7 @@ STUB
 chmod +x "$tmp/gh"
 export GH="$tmp/gh" GH_LOG="$tmp/calls.log"
 ref=$(git rev-parse --short HEAD)
+full=$(git rev-parse HEAD)
 
 # 1. Entorno inválido.
 : > "$GH_LOG"; sh "$SCRIPT" qa "$ref" >/dev/null 2>&1; code=$?
@@ -27,7 +28,7 @@ ref=$(git rev-parse --short HEAD)
 # 3. Rollback de código.
 : > "$GH_LOG"; sh "$SCRIPT" production "$ref" >/dev/null 2>&1; code=$?
 [ "$code" = "0" ]; check $? "rollback válido termina con código 0"
-grep -q "workflow run deploy.yml -f environment=production -f ref=$ref -f action=deploy" "$GH_LOG"; check $? "redespliega el ref en el entorno"
+grep -q "workflow run deploy.yml -f environment=production -f ref=$full -f action=deploy" "$GH_LOG"; check $? "redespliega el ref (un SHA corto se expande al completo)"
 [ "$(wc -l < "$GH_LOG" | tr -d ' ')" = "1" ]; check $? "sin --migrate-down no revierte migraciones"
 
 # 4. Con --migrate-down: revierte la migración ANTES de redesplegar el código anterior.
@@ -41,7 +42,7 @@ echo "$last" | grep -q "action=deploy"; check $? "después redespliega el códig
 # 5. Con --restore-backup: un solo despliegue del ref que restaura el respaldo.
 : > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --restore-backup >/dev/null 2>&1; code=$?
 [ "$code" = "0" ]; check $? "rollback con --restore-backup termina con código 0"
-grep -q "ref=$ref -f action=restore-backup -f backup_key=latest" "$GH_LOG"; check $? "restaura el respaldo más reciente por defecto"
+grep -q "ref=$full -f action=restore-backup -f backup_key=latest" "$GH_LOG"; check $? "restaura el respaldo más reciente por defecto"
 [ "$(grep -c 'workflow run' "$GH_LOG")" = "1" ]; check $? "la restauración es un único despliegue"
 
 : > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --restore-backup=mongo-backups/x.ndjson.gz >/dev/null 2>&1
