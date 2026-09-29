@@ -1,6 +1,8 @@
 # Contrato: specs/001-plataforma-base/contracts/ci-cd-pipeline.md
 # Los despliegues se hacen SOLO desde aquí (constitución v1.1.0); el autodeploy de Railway
-# está desactivado. Las migraciones las aplica el preDeployCommand de api en Railway.
+# está desactivado. Las migraciones las aplica el preDeployCommand de api en Railway
+# (`migrate.js auto`) según MIGRATION_ACTION: respalda en el bucket antes de las destructivas,
+# revierte (`down:<archivo>`) o restaura un respaldo (`restore:<clave>`). Sin `railway ssh`.
 name: deploy
 
 on:
@@ -14,7 +16,7 @@ on:
     inputs:
       environment: { type: string, required: true }
       ref: { type: string, required: true }
-  # Manual: redespliegue / rollback a un ref concreto, o revertir la última migración.
+  # Manual: redespliegue / rollback a un ref concreto (docs/runbooks/rollback.md).
   workflow_dispatch:
     inputs:
       environment:
@@ -26,13 +28,14 @@ on:
         type: string
         default: main
       action:
+        description: 'migrate-down: revierte las migraciones que `ref` no tiene (no despliega `ref`)'
         type: choice
         options: [deploy, migrate-down, restore-backup]
         default: deploy
-      backup_run_id:
-        description: 'restore-backup: ID de la ejecución de deploy que guardó el respaldo'
+      backup_key:
+        description: 'restore-backup: clave del respaldo en el bucket (latest = el más reciente)'
         type: string
-        default: ''
+        default: latest
 
 concurrency:
   # Los despliegues de un mismo entorno se ejecutan en orden, sin cancelarse.
@@ -70,9 +73,11 @@ jobs:
             echo "action=$action"
           } >> "$GITHUB_OUTPUT"
 
+  # deploy y restore-backup: restore-backup es un despliegue normal de `ref` cuyo
+  # preDeployCommand restaura antes el respaldo.
   deploy:
     needs: plan
-    if: needs.plan.outputs.action == 'deploy'
+    if: needs.plan.outputs.action == 'deploy' || needs.plan.outputs.action == 'restore-backup'
     runs-on: ubuntu-latest
     # production exige la aprobación de los revisores del GitHub Environment (FR-009).
     environment:
@@ -95,27 +100,17 @@ jobs:
             echo "commit=$(git rev-parse --short HEAD)"
             echo "version=$(git describe --tags --always)"
           } >> "$GITHUB_OUTPUT"
-      - name: Respaldo previo si hay migraciones destructivas nuevas
+      - name: Acción de migraciones del despliegue (MIGRATION_ACTION)
+        env:
+          ACTION: ${{ needs.plan.outputs.action }}
+          BACKUP_KEY: ${{ inputs.backup_key || 'latest' }}
         run: |
-          prev=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
-          destructive=$(scripts/destructive-migrations.sh "$prev" HEAD)
-          if [ -n "$destructive" ]; then
-            echo "Migraciones destructivas nuevas: respaldo con mongodump"
-            echo "$destructive"
-            # $MONGO_URL se expande dentro del contenedor de MongoDB en Railway, no aquí.
-            # shellcheck disable=SC2016
-            railway ssh --service MongoDB --environment "$ENVIRONMENT" -- \
-              sh -c 'mongodump --uri "$MONGO_URL" --archive --gzip' > backup.archive.gz
-            test -s backup.archive.gz
-          else
-            echo "Sin migraciones destructivas nuevas"
-          fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mongo-backup-${{ env.ENVIRONMENT }}-${{ steps.version.outputs.commit }}
-          path: backup.archive.gz
-          if-no-files-found: ignore
-          retention-days: 30
+          # Se fija en cada despliegue para que un valor anterior nunca se reutilice.
+          # El respaldo previo a las migraciones destructivas lo toma `migrate.js auto`.
+          if [ "$ACTION" = "restore-backup" ]; then value="restore:$BACKUP_KEY"; else value=up; fi
+          echo "MIGRATION_ACTION=$value"
+          railway variables --service api --environment "$ENVIRONMENT" --skip-deploys \
+            --set "MIGRATION_ACTION=$value" >/dev/null
       - name: Desplegar api, analytics y web
         run: |
           pids=""
@@ -154,6 +149,15 @@ jobs:
           name: playwright-report-${{ env.ENVIRONMENT }}
           path: playwright-report/
 
+      - name: Volver a MIGRATION_ACTION=up tras la restauración
+        if: always() && needs.plan.outputs.action == 'restore-backup'
+        run: >
+          railway variables --service api --environment "$ENVIRONMENT" --skip-deploys
+          --set MIGRATION_ACTION=up >/dev/null
+
+  # Revierte las migraciones que `ref` (la versión de destino) no tiene. Redespliega la versión
+  # ACTUAL de api, que es la que contiene sus `down`, con MIGRATION_ACTION=down:<archivo>; el
+  # preDeployCommand las revierte dentro de la red privada. Después se despliega `ref`.
   migrate-down:
     needs: plan
     if: needs.plan.outputs.action == 'migrate-down'
@@ -161,37 +165,40 @@ jobs:
     environment: ${{ needs.plan.outputs.environment }}
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-    steps:
-      - run: npm install --global @railway/cli@4
-      - name: Revertir la última migración (dentro de la red privada)
-        run: >
-          railway ssh --service api --environment "${{ needs.plan.outputs.environment }}"
-          -- node dist/migrate.js down
-
-  # Solo para migraciones destructivas: restaura el respaldo tomado antes de aplicarlas.
-  restore-backup:
-    needs: plan
-    if: needs.plan.outputs.action == 'restore-backup'
-    runs-on: ubuntu-latest
-    environment: ${{ needs.plan.outputs.environment }}
-    permissions:
-      contents: read
-      actions: read
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       ENVIRONMENT: ${{ needs.plan.outputs.environment }}
+      TARGET_REF: ${{ needs.plan.outputs.ref }}
     steps:
-      - run: npm install --global @railway/cli@4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
         with:
-          pattern: mongo-backup-${{ needs.plan.outputs.environment }}-*
-          run-id: ${{ inputs.backup_run_id }}
-          github-token: ${{ github.token }}
-          merge-multiple: true
-      - name: mongorestore (--drop) dentro de la red privada
+          fetch-depth: 0
+      - run: npm install --global @railway/cli@4
+      - name: Versión desplegada y migraciones que revertir
+        id: current
         run: |
-          test -s backup.archive.gz
-          # $MONGO_URL se expande dentro del contenedor de MongoDB en Railway, no aquí.
-          # shellcheck disable=SC2016
-          railway ssh --service MongoDB --environment "$ENVIRONMENT" -- \
-            sh -c 'mongorestore --uri "$MONGO_URL" --archive --gzip --drop' < backup.archive.gz
+          commit=$(curl -fsS "${{ vars.API_URL }}/version" | jq -r .commit)
+          git checkout --quiet "$commit"
+          file=$(scripts/first-new-migration.sh "$TARGET_REF" HEAD)
+          echo "Desplegado: $commit · revertir desde: ${file:-(ninguna)}"
+          {
+            echo "commit=$commit"
+            echo "version=$(git describe --tags --always)-migrate-down"
+            echo "file=$file"
+          } >> "$GITHUB_OUTPUT"
+      - name: Redesplegar api con MIGRATION_ACTION=down
+        if: steps.current.outputs.file != ''
+        env:
+          COMMIT: ${{ steps.current.outputs.commit }}
+          VERSION: ${{ steps.current.outputs.version }}
+          FILE: ${{ steps.current.outputs.file }}
+        run: |
+          railway variables --service api --environment "$ENVIRONMENT" --skip-deploys \
+            --set "MIGRATION_ACTION=down:$FILE" >/dev/null
+          scripts/railway/deploy-service.sh api "$ENVIRONMENT" "$VERSION" "$COMMIT"
+          # Si el `down` falla, Railway no promueve el despliegue y esta espera agota el tiempo.
+          scripts/wait-for-health.sh "${{ vars.API_URL }}/version" 600 10 "\"version\":\"$VERSION\""
+          scripts/wait-for-health.sh "${{ vars.API_URL }}/health" 120 5
+      - name: Volver a MIGRATION_ACTION=up
+        if: always()
+        run: >
+          railway variables --service api --environment "$ENVIRONMENT" --skip-deploys
+          --set MIGRATION_ACTION=up >/dev/null

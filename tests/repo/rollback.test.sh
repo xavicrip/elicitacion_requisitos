@@ -38,4 +38,18 @@ echo "$first" | grep -q "action=migrate-down"; check $? "primero revierte la mig
 grep -q "run watch" "$GH_LOG"; check $? "espera a que termine la reversión de la migración"
 echo "$last" | grep -q "action=deploy"; check $? "después redespliega el código"
 
+# 5. Con --restore-backup: un solo despliegue del ref que restaura el respaldo.
+: > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --restore-backup >/dev/null 2>&1; code=$?
+[ "$code" = "0" ]; check $? "rollback con --restore-backup termina con código 0"
+grep -q "ref=$ref -f action=restore-backup -f backup_key=latest" "$GH_LOG"; check $? "restaura el respaldo más reciente por defecto"
+[ "$(grep -c 'workflow run' "$GH_LOG")" = "1" ]; check $? "la restauración es un único despliegue"
+
+: > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --restore-backup=mongo-backups/x.ndjson.gz >/dev/null 2>&1
+grep -q "backup_key=mongo-backups/x.ndjson.gz" "$GH_LOG"; check $? "acepta una clave de respaldo concreta"
+
+# 6. Opción desconocida.
+: > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --borrar-todo >/dev/null 2>&1; code=$?
+[ "$code" = "2" ]; check $? "una opción desconocida termina con código 2"
+[ ! -s "$GH_LOG" ]; check $? "no invoca gh con una opción desconocida"
+
 [ "$fails" = "0" ] || { echo "$fails prueba(s) fallida(s)"; exit 1; }
