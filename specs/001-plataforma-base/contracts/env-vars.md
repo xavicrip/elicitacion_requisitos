@@ -19,6 +19,10 @@ se definen como referencias (`${{MongoDB.MONGO_URL}}`), no como valores copiados
 | `FEATURE_FLAGS` | No | `detection=false` | Sobrescritura de flags |
 | `GIT_SHA` | No | `${{RAILWAY_GIT_COMMIT_SHA}}` o valor inyectado por CI | Commit desplegado |
 | `APP_VERSION` | No | Inyectado por CI | Versión semver |
+| `MIGRATION_ACTION` | No | `up` (la fija `deploy.yml`) | Acción del pre-deploy: `up`, `down:<archivo>`, `restore:<clave>\|latest` (ADR 0003) |
+| `BACKUP_S3_ENDPOINT`, `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY` | Para migraciones destructivas | `${{reqcanvas.ENDPOINT}}`, `${{reqcanvas.BUCKET}}`… | Bucket de respaldos; sin él, una migración destructiva no se aplica |
+| `BACKUP_S3_REGION` | No | `${{reqcanvas.REGION}}` | Región S3 (`auto` por defecto) |
+| `BACKUP_S3_FORCE_PATH_STYLE` | No | `true` solo con RustFS/MinIO | URLs path-style en lugar de virtual-hosted |
 
 ## analytics
 
