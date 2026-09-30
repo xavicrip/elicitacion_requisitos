@@ -89,6 +89,13 @@ describe('useAutosave (FR-006)', () => {
     expect(await screen.findByText('Guardado')).toBeInTheDocument();
   });
 
+  it('muestra "Guardando…" desde el cambio hasta que el servidor lo confirma', async () => {
+    renderForm({ 'PATCH /api/activities/a1': saved({ type: 'decision' }) });
+    await userEvent.selectOptions(screen.getByLabelText('Tipo'), 'Decisión');
+    expect(screen.getByText('Guardando…')).toBeInTheDocument();
+    expect(await screen.findByText('Guardado')).toBeInTheDocument();
+  });
+
   it('el siguiente cambio usa el rev devuelto por el servidor', async () => {
     const { patches } = renderForm({
       'PATCH /api/activities/a1': [saved({ type: 'decision' }, 1), saved({ type: 'end' }, 2)],

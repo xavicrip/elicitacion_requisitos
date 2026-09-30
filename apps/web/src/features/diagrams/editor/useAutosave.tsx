@@ -33,6 +33,10 @@ function createAutosaver(
     return current;
   };
 
+  /** Hay cambios sin confirmar por el servidor en alguna actividad. */
+  const busy = () =>
+    [...pending.values()].some((item) => item.saving || Object.keys(item.patch).length > 0);
+
   async function flush(id: string) {
     const current = entry(id);
     clearTimeout(current.timer);
@@ -47,7 +51,8 @@ function createAutosaver(
       const saved = await activitiesApi.update(id, activity.rev, patch);
       // Lo que se escribió mientras tanto sigue pendiente y se conserva en pantalla.
       activityCache.update(queryClient, versionId, id, () => ({ ...saved, ...current.patch }));
-      setState((state) => ({ ...state, status: 'saved' }));
+      current.saving = false;
+      setState((state) => ({ ...state, status: busy() ? 'saving' : 'saved' }));
     } catch (error) {
       if (error instanceof ApiError && error.status === 409 && error.body) {
         current.patch = {};
@@ -79,7 +84,7 @@ function createAutosaver(
       activityCache.update(queryClient, versionId, id, (activity) => ({ ...activity, ...patch }));
       const current = entry(id);
       current.patch = { ...current.patch, ...patch };
-      setState((state) => ({ ...state, conflict: null }));
+      setState((state) => ({ ...state, status: 'saving', conflict: null }));
       schedule(id);
     },
     /** Descarta lo pendiente (p. ej., antes de eliminar la actividad). */
@@ -88,6 +93,7 @@ function createAutosaver(
       pending.delete(id);
     },
     flushAll: () => Promise.all([...pending.keys()].map(flush)),
+    busy,
     dispose() {
       for (const current of pending.values()) clearTimeout(current.timer);
     },
@@ -108,14 +114,17 @@ export function AutosaveProvider({
   const queryClient = useQueryClient();
   const [state, setState] = useState<State>({ status: 'idle', conflict: null, conflicts: 0 });
   const [saver] = useState(() => createAutosaver(queryClient, versionId, setState));
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Al recargar o cerrar la pestaña se envía lo pendiente (las peticiones van con keepalive).
+    const onUnload = () => void saver.flushAll();
+    window.addEventListener('pagehide', onUnload);
+    return () => {
+      window.removeEventListener('pagehide', onUnload);
       // Al salir del editor se guarda lo pendiente en lugar de perderlo.
       void saver.flushAll();
       saver.dispose();
-    },
-    [saver],
-  );
+    };
+  }, [saver]);
   const value: Autosave = {
     ...saver,
     ...state,

@@ -57,6 +57,8 @@ function send(path: string, { method = 'GET', body, headers: extra }: Options): 
     headers,
     credentials: 'same-origin',
     body: body === undefined ? undefined : JSON.stringify(body),
+    // Las escrituras terminan aunque se recargue la página (guardado automático, FR-006).
+    ...(method === 'GET' ? {} : { keepalive: true }),
   });
 }
 
