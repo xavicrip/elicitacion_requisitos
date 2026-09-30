@@ -78,7 +78,8 @@ describe('registro (US1 escenario 1)', () => {
 
     expect(await screen.findByRole('heading', { name: 'Mis proyectos' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/proyectos');
-    expect(screen.getByText('Todavía no tienes proyectos.')).toBeInTheDocument();
+    // La lista llega después del título: hay que esperarla (en el CI tarda más que en local).
+    expect(await screen.findByText('Todavía no tienes proyectos.')).toBeInTheDocument();
     expect(screen.getByRole('banner')).toHaveTextContent('Ana Pérez');
     expect(requests.find((r) => r.url === '/api/auth/register')?.body).toEqual({
       name: 'Ana Pérez',
