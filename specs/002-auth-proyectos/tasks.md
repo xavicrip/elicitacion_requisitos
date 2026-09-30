@@ -176,8 +176,8 @@ estado y última actividad
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T062 [P] ADR `docs/adr/0004-sesion-y-proxy.md` (research R1, R2 y plan ajustes 2–4) — `docs(adr)`
-- [ ] T063 [P] Actualizar `specs/002-auth-proyectos/quickstart.md` (servicios de prueba, `pnpm --filter @reqcanvas/api test`, `pnpm e2e --project flows`) y el README (variables nuevas y pantallas) — `docs(repo)`
+- [X] T062 [P] ADR `docs/adr/0004-sesion-y-proxy.md` (research R1, R2 y plan ajustes 2–4) — `docs(adr)`
+- [X] T063 [P] Actualizar `specs/002-auth-proyectos/quickstart.md` (servicios de prueba, `pnpm --filter @reqcanvas/api test`, `pnpm e2e --project flows`) y el README (variables nuevas y pantallas) — `docs(repo)`
 - [ ] T064 Medir en local el p95 de `POST /auth/login` (< 300 ms) y de "Mis proyectos" con 100 proyectos (< 200 ms) y anotarlo en `plan.md` — `perf(api)`
 - [ ] T065 Configurar Railway **antes de desplegar** (con el selector de entorno comprobado): `JWT_SECRET` (generado por entorno), `JWT_ACCESS_TTL`, `REFRESH_TTL_DAYS` y `APP_BASE_URL` en `api`; `API_INTERNAL_URL=http://api.railway.internal:3000` en `web`; `FEATURE_FLAGS=accounts=true` solo en `staging`; verificar `maxmemory-policy noeviction` en Redis con `/health/deep` (T021); registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [ ] T066 Recorrer quickstart.md en staging (§1–4) con dos navegadores, comprobar que el bloqueo por IP distingue clientes (el borde de Railway pone `X-Real-IP`, research R4) y registrar el resultado en `specs/002-auth-proyectos/quickstart.md` — `docs(repo)`
