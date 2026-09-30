@@ -22,6 +22,16 @@ const EnvSchema = z.object({
   FEATURE_FLAGS: z.string().optional(),
   GIT_SHA: z.string().default('unknown'),
   APP_VERSION: z.string().default('dev'),
+  // Sesión (feature 002, research R1 y R11).
+  JWT_SECRET: z.string().refine((value) => Buffer.byteLength(value, 'utf8') >= 32),
+  /** Duración del access token en formato `<n><s|m|h|d>`, p. ej. `15m`. */
+  JWT_ACCESS_TTL: z
+    .string()
+    .regex(/^\d+[smhd]$/)
+    .default('15m'),
+  REFRESH_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(7),
+  /** URL pública de `web`; base de los enlaces de invitación. */
+  APP_BASE_URL: z.url(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
