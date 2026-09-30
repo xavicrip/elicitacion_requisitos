@@ -103,9 +103,9 @@ El plan se escribió antes de implementar la 001 y la 002. Revisado contra `main
 
 1. **Imágenes servidas por `api`, no con URLs prefirmadas.** Railway Buckets admite URLs
    prefirmadas, pero no documenta CORS ni buckets públicos, y WebGL necesita CORS para usar una
-   imagen de otro origen como textura. `api` sirve `GET /projects/:id/diagrams/:did/versions/
-   :vid/{display|thumb}` leyendo el objeto del bucket en streaming, con `requireProjectRole
-   ('member')` en cada petición, `ETag` y `Cache-Control: private, max-age=31536000, immutable`
+   imagen de otro origen como textura. `api` sirve `GET /diagram-versions/:vid/image/
+   {display|thumb}` (rutas por recurso, como el resto del contrato) leyendo el objeto del bucket en streaming, con la membresía comprobada
+   en cada petición (`requireResourceProject`), `ETag` y `Cache-Control: private, max-age=31536000, immutable`
    (la clave incluye el `versionId`, así que el contenido de una URL nunca cambia). `web` las
    carga por el proxy `/api` (mismo origen, ADR 0004). Coste: el tráfico de las imágenes pasa a
    ser egress del servicio `api` (el del bucket es gratuito); la caché del navegador lo limita a
