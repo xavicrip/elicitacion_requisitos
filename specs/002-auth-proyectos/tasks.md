@@ -162,7 +162,7 @@ estado y última actividad
 - [X] T055 [P] [US3] Pruebas de integración en `apps/api/tests/integration/invitations.test.ts`: el token solo se devuelve al crear y se guarda como hash; caducada o revocada → `410`; aceptar es idempotente (no duplica, conserva el rol); retirar al último admin, degradarlo o que abandone → `409`; un miembro retirado pierde el acceso en la siguiente petición y no se borran su usuario ni los documentos que lo referencian (`audit_logs.actorId`; la 004 añade el caso con aportes); auditoría `member.role_changed`, `member.removed`, `invitation.created`, `invitation.revoked` — `test(api)`
 - [X] T056 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de miembros e invitaciones (incluidos los `409`) — `test(api)`
 - [X] T057 [P] [US3] Pruebas de `MembersPanel` (cambiar rol, retirar, generar, copiar y revocar enlaces) y de `AcceptInvitationPage` (sin sesión: registro y unión conservando el token; inválida: "Esta invitación ya no es válida") en `apps/web/tests/invitations.test.tsx` — `test(web)`
-- [ ] T058 [P] [US3] E2E en `e2e/flows/invitations.spec.ts` (dos contextos de navegador): generar enlace → registrarse desde el enlace → el proyecto aparece como Participante; el participante no puede crear invitaciones (`403`); revocar → tercera cuenta ve el mensaje; retirar → el participante deja de ver el proyecto — `test(e2e)`
+- [X] T058 [P] [US3] E2E en `e2e/flows/invitations.spec.ts` (dos contextos de navegador): generar enlace → registrarse desde el enlace → el proyecto aparece como Participante; el participante no puede crear invitaciones (`403`); revocar → tercera cuenta ve el mensaje; retirar → el participante deja de ver el proyecto — `test(e2e)`
 
 ### Implementation for User Story 3
 
