@@ -23,7 +23,7 @@ de modo que frontend y API comparten origen.
 **Target Platform**: Railway (contenedores Linux) + navegadores de escritorio y móviles actuales
 **Project Type**: Aplicación web (monorepo de la feature 001)
 **Performance Goals**: login p95 < 300 ms (argon2id con ~50 ms de coste); "Mis proyectos" p95 < 200 ms con 100 proyectos
-**Medido (T064, 2026-09-30)**: en local (Apple Silicon, Docker Compose, a través del proxy de `web`, 50 peticiones): login p50 26 ms / p95 28 ms; "Mis proyectos" con 100 proyectos p50 4 ms / p95 5 ms. Repetir en staging (T066): la CPU de Railway es más lenta, sobre todo para argon2id
+**Medido (T064, 2026-09-30)**: en local (Apple Silicon, Docker Compose, a través del proxy de `web`, 50 peticiones): login p50 26 ms / p95 28 ms; "Mis proyectos" con 100 proyectos p50 4 ms / p95 5 ms. En staging (T066), tiempo en `api` según sus logs: login p50 15 ms / p95 19 ms; "Mis proyectos" con 100 proyectos p50 5 ms / p95 8 ms (desde fuera se suma la red, ~180 ms de mediana)
 **Constraints**: autorización siempre en el servidor; los no miembros reciben 404; sin secretos en logs; todo proyecto con ≥ 1 Administrador
 **Scale/Scope**: hasta 5 000 usuarios y 1 000 proyectos en la v1; 6 pantallas nuevas en `web`
 

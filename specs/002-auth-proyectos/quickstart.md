@@ -54,3 +54,36 @@ pnpm e2e --project flows                                           # registro, p
 
 Los E2E de `flows` crean cuentas, así que solo se definen contra el stack local (plan, ajuste
 4); tras un despliegue solo corre `pnpm e2e --project smoke`.
+
+## Resultado en staging (T066, 2026-09-30)
+
+`v0.2.0-47-g7d076a0`, con `accounts=true` solo en staging. Recorrido de §1–§4 con un script de
+Playwright y navegadores independientes (Ana, Luis y una tercera persona), más comprobaciones
+por la API:
+
+| Paso | Resultado |
+| --- | --- |
+| §1.1 Registro → "Mis proyectos" vacío | ✅ 2,6 s (SC-001: < 1 min) |
+| §1.2 Email duplicado | ✅ `409` genérico, sin revelar el email |
+| §1.3 Bloqueo | ✅ fallos 1–5 → `401`; 6.º → `429` "Demasiados intentos, espera 15 minutos", `Retry-After: 899`; bloqueada, ni la contraseña correcta entra |
+| §1.4 Recargar | ✅ sesión conservada; cookie `rt` `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/auth` |
+| §2 Proyectos | ✅ Borrador/Administrador → abrir → cerrar → reabrir → eliminar con confirmación; el job borró los proyectos |
+| §3.1 Enlace de invitación | ✅ con la URL pública de web, 2,1 s después de crear el proyecto (SC-002: < 2 min) |
+| §3.2 Unirse desde el enlace | ✅ Luis se registra y entra como Participante |
+| §3.3 Enlace revocado | ✅ "Esta invitación ya no es válida" |
+| §3.4 Retirar a Luis | ✅ al recargar ve "Proyecto no encontrado" |
+| §3.5 Última Administradora | ✅ no puede degradarse |
+| §4 Control de acceso | ✅ Participante crea invitación → `403`; proyecto ajeno → `404` |
+
+**`X-Real-IP`** (research R4, ADR 0004): 25 peticiones a `/auth/refresh`, cada una con una
+`X-Real-IP` falsa distinta, dan `401` hasta la 20.ª y `429` desde la 21.ª: **el borde de Railway
+sobrescribe la cabecera**, así que el límite por IP no se puede esquivar enviándola.
+
+**Rendimiento** (tiempo en `api` según sus logs; desde fuera hay que sumar la red, ~180 ms de
+mediana hasta Railway desde el equipo de medición, igual que `/health`):
+
+| Operación | p50 | p95 | Objetivo |
+| --- | --- | --- | --- |
+| `POST /auth/login` (20 peticiones) | 15 ms | 19 ms | < 300 ms |
+| "Mis proyectos" con 100 proyectos (59) | 5 ms | 8 ms | < 200 ms |
+

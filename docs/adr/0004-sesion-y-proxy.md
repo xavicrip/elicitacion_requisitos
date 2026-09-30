@@ -49,8 +49,8 @@ así que una cookie de `api` sería de terceros y Safari y Firefox la bloquearí
   `JWT_ACCESS_TTL`, `REFRESH_TTL_DAYS`, `APP_BASE_URL`). Sin `JWT_SECRET`, `api` no arranca y
   Railway mantiene la versión anterior: hay que definirla **antes** de desplegar la 002.
 - La fiabilidad del límite por IP depende de que el borde de Railway **sobrescriba** una
-  `X-Real-IP` enviada por el cliente. Está documentado que la pone, pero no si la sobrescribe;
-  se comprueba en staging (T066). Si solo la añadiera, el límite por IP se podría esquivar (el
-  bloqueo por cuenta seguiría funcionando).
+  `X-Real-IP` enviada por el cliente. **Comprobado en staging (T066, 2026-09-30)**: con una
+  `X-Real-IP` falsa distinta en cada petición, las 20 primeras dan `401` y la 21.ª `429`; el
+  borde la sobrescribe con la IP real, así que el límite no se puede esquivar enviándola.
 - Localmente y en CI, sin borde de Railway, Caddy acepta la `X-Real-IP` del cliente: los E2E la
   usan para que cada prueba tenga sus propios contadores.
