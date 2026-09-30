@@ -110,8 +110,10 @@ a pantalla" y el minimapa, comprobando que la navegación es fluida.
 - La imagen es muy grande (p. ej., 12 000 px de ancho): el sistema la acepta si cumple el
   límite de 10 MB y genera una versión optimizada para la visualización.
 - Un SVG contiene scripts o referencias externas: se sanea o se rechaza.
-- Dos Administradores editan las zonas del mismo diagrama en borrador a la vez: se aplica la
-  última modificación y el otro recibe un aviso de que el contenido cambió.
+- Dos Administradores editan la misma zona de un diagrama en borrador a la vez: se guarda el
+  primer cambio; el segundo se rechaza, la zona se recarga con la versión actual y se avisa de
+  que otro Administrador la modificó (concurrencia optimista, research R6; ajustado tras
+  `/speckit-analyze`, I1).
 - Las zonas se superponen: se permite, y al hacer clic se selecciona la zona más pequeña bajo
   el cursor.
 - Se publica una nueva versión del diagrama: los requisitos de las actividades que se

@@ -132,7 +132,9 @@ El plan se escribió antes de implementar la 001 y la 002. Revisado contra `main
 8. **E2E sin capturas de pantalla del canvas.** `toHaveScreenshot` de WebGL no es portable: en
    local renderiza la GPU del equipo y en CI SwiftShader, así que las referencias no coinciden.
    El canvas expone su estado (cámara, zoom, selección, modo) en `window.__canvasState` solo si
-   `import.meta.env.MODE !== 'production'`, y los E2E de `flows` lo comprueban. La lógica de
+   `/config.js` trae `e2eHooks: true`, que el entrypoint de `web` escribe con `E2E_HOOKS=true`
+   (Compose y CI; nunca Railway). Se decide en ejecución porque la imagen de `web` siempre se
+   construye en modo producción (`/speckit-analyze`, C1). Los E2E de `flows` lo comprueban. La lógica de
    cámara y coordenadas se cubre con pruebas unitarias puras.
 9. **Subidas de 10 MB por el proxy**: Caddy no limita el cuerpo; `@fastify/multipart` corta el
    stream a 10 MB (`413`). Verificar en staging que el borde de Railway acepta 10 MB.

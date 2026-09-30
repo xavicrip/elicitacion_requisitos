@@ -46,11 +46,11 @@ imágenes, guards por recurso, flag y la lógica pura del canvas que usan todas 
 - [ ] T006 Implementar las variables de T005 en `apps/api/src/config/env.ts`, pasarlas a `buildApp` desde `apps/api/src/server.ts` y documentarlas en `.env.example` y `specs/001-plataforma-base/contracts/env-vars.md` (referencias al bucket de cada entorno, plan ajuste 3) — `feat(api)`
 - [ ] T007 [P] Pruebas de los esquemas `DiagramSummary`, `DiagramVersion`, `Activity`, `ActivityInput`, `ActivityType` y `BBox` (normalizada: `x, y ≥ 0`, `w, h > 0`, `x + w ≤ 1`, `y + h ≤ 1`; `label` 1–120; `next` sin duplicados) contra `contracts/diagrams.openapi.yaml` en `packages/shared/tests/diagrams.test.ts` — `test(shared)`
 - [ ] T008 Implementar `packages/shared/src/diagrams.ts` y exportarlo desde `packages/shared/src/index.ts` — `feat(shared)`
-- [ ] T009 [P] Prueba de la migración (índices únicos `{diagramId, number}` y `{versionId, key}`, parcial único `{diagramId}` con `status: published`, `{projectId}` y `{versionId}`; `destructive === false`; `down` elimina índices y conserva datos) en `apps/api/tests/integration/diagrams-migration.test.ts` — `test(api)`
+- [ ] T009 [P] Prueba de la migración (índices únicos `{diagramId, number}` y `{versionId, key}`, parciales únicos `{diagramId}` con `status: published` y con `status: draft` (un solo borrador por diagrama, también ante subidas simultáneas), `{projectId}` y `{versionId}`; `destructive === false`; `down` elimina índices y conserva datos) en `apps/api/tests/integration/diagrams-migration.test.ts` — `test(api)`
 - [ ] T010 Crear `apps/api/migrations/20261008000000-diagrams-indexes.js` (plan, ajuste 7) — `feat(api)`
 - [ ] T011 [P] Modelos Mongoose `apps/api/src/modules/diagrams/models/{diagram,version,activity}.ts` sobre `app.mongo`, con `autoIndex: false` y `rev` para la concurrencia optimista, y una prueba de serialización en `apps/api/tests/integration/diagrams-models.test.ts` — `feat(api)`
-- [ ] T012 [P] Pruebas del almacenamiento contra RustFS en `apps/api/tests/integration/storage.test.ts`: `put`, `getStream` (con `ETag` y tamaño), `deletePrefix` (paginado e idempotente), `ensureBucket` solo con `S3_CREATE_BUCKET` — `test(api)`
-- [ ] T013 Implementar `apps/api/src/lib/storage.ts` (`@aws-sdk/client-s3`, cliente único por app) y el plugin que lo decora en `app.storage` — `feat(api)`
+- [ ] T012 [P] Pruebas del almacenamiento contra RustFS en `apps/api/tests/integration/storage.test.ts`: `put`, `getStream` (con `ETag` y tamaño), `deletePrefix` (paginado e idempotente), `ensureBucket` solo con `S3_CREATE_BUCKET`, y el check `storage` de `/health/deep` (no de `/health`: una caída del bucket no debe bloquear los despliegues; constitución VI) — `test(api)`
+- [ ] T013 Implementar `apps/api/src/lib/storage.ts` (`@aws-sdk/client-s3`, cliente único por app), el plugin que lo decora en `app.storage`, el check `storage` de `/health/deep` y la configuración S3 de RustFS en el helper `apps/api/tests/helpers/app.ts` — `feat(api)`
 - [ ] T014 [P] Pruebas del procesamiento en `apps/api/tests/unit/image-pipeline.test.ts` con las fixtures de T003: PNG y JPEG detectados por *magic bytes* (no por la extensión); PDF y un ejecutable renombrado a `.png` → `UNSUPPORTED_FORMAT`; SVG rasterizado a PNG sin conservar el script ni la referencia externa; `display` WebP con el lado mayor ≤ 8192 px, sin EXIF y con la orientación aplicada; `thumb` de 512 px; `width`/`height` de la versión display; duración registrada — `test(api)`
 - [ ] T015 Implementar `apps/api/src/lib/image-pipeline.ts` (`file-type` → `sharp`, research R2) — `feat(api)`
 - [ ] T016 [P] Pruebas de los guards en `apps/api/tests/integration/authorization-guard.test.ts`: `requireProjectStatus(['draft', 'open'])` → `409` en `closed` (plan, ajuste 5) y `requireResourceProject(loader)` para rutas por recurso (`/diagram-versions/:id`, `/activities/:id`): carga el recurso, deduce su proyecto y aplica la membresía (404 si el recurso no existe o no es miembro, igual que en proyectos) — `test(api)`
@@ -61,7 +61,7 @@ imágenes, guards por recurso, flag y la lógica pura del canvas que usan todas 
 - [ ] T021 Implementar el registro de T020 en `apps/api/src/modules/diagrams/dependents.ts` — `feat(api)`
 - [ ] T022 [P] Pruebas puras de `apps/web/src/features/diagrams/workspace/camera/zoom.ts` en `apps/web/tests/camera.test.ts`: `fitZoom(viewport, image)`, zoom limitado al 10 %–800 % del ajuste, `screenToImage`/`imageToScreen` (ida y vuelta), `clampPan`, rectángulo del viewport en el minimapa y `centerOn(point)` — `test(web)`
 - [ ] T023 Implementar `apps/web/src/features/diagrams/workspace/camera/zoom.ts` (research R4) — `feat(web)`
-- [ ] T024 Implementar el store `apps/web/src/features/diagrams/workspace/store.ts` (Zustand, `WorkspaceState` de `contracts/canvas-ui.md`) y su exposición en `window.__canvasState` solo si `import.meta.env.MODE !== 'production'` (plan, ajuste 8), con prueba en `apps/web/tests/workspace-store.test.ts` — `feat(web)`
+- [ ] T024 Implementar el store `apps/web/src/features/diagrams/workspace/store.ts` (Zustand, `WorkspaceState` de `contracts/canvas-ui.md`) y su exposición en `window.__canvasState` solo si `/config.js` trae `e2eHooks: true` (decisión en tiempo de ejecución: la imagen de `web` siempre se construye en modo producción, también en el Compose del CI; plan ajuste 8). `apps/web/docker-entrypoint.sh` escribe `e2eHooks` solo con `E2E_HOOKS=true`, que definen `infra/docker-compose.yml` y el CI y nunca Railway; pruebas en `apps/web/tests/workspace-store.test.ts` y `apps/web/tests/entrypoint.test.sh` — `feat(web)`
 
 **Checkpoint**: fundaciones listas; `pnpm test`, `pnpm e2e --project smoke` y el despliegue siguen en verde con el flag desactivado
 
@@ -77,19 +77,19 @@ trabajo en *borrador*; se valida el contenido real
 ### Tests for User Story 1 ⚠️
 
 - [ ] T025 [P] [US1] Pruebas de contrato de `GET/POST /projects/:id/diagrams` (multipart), `POST /diagrams/:id/versions`, `GET /diagram-versions/:id` y `GET /diagram-versions/:id/image/{display|thumb}` en `apps/api/tests/contract/diagrams.contract.test.ts` — `test(api)`
-- [ ] T026 [P] [US1] Pruebas de integración en `apps/api/tests/integration/diagrams-upload.test.ts`: 3 MB PNG → versión 1 en `draft` con sus objetos en `projects/{id}/diagrams/{versionId}/`; > 10 MB → `413` "Máximo 10 MB" sin escribir en el bucket; PDF → `415` con los formatos admitidos; SVG con script → solo se sirve `display.webp`; 12 000 px → display ≤ 8192 px; segunda versión mientras hay un borrador → `409`; Participante → `403`; proyecto `closed` → `409`; `lastActivityAt` y auditoría `diagram.created`/`diagram.version_uploaded` — `test(api)`
+- [ ] T026 [P] [US1] Pruebas de integración en `apps/api/tests/integration/diagrams-upload.test.ts`: 3 MB PNG → versión 1 en `draft` con sus objetos en `projects/{id}/diagrams/{versionId}/`; > 10 MB → `413` "Máximo 10 MB" sin escribir en el bucket; PDF → `415` con los formatos admitidos; SVG con script → solo se sirve `display.webp`; 12 000 px → display ≤ 8192 px; segunda versión mientras hay un borrador → `409`, también con dos subidas simultáneas (índice parcial único); Participante → `403`; proyecto `closed` → `409`; `lastActivityAt` y auditoría `diagram.created`/`diagram.version_uploaded` — `test(api)`
 - [ ] T027 [P] [US1] Pruebas de las imágenes en `apps/api/tests/integration/diagram-images.test.ts` (plan, ajuste 1): solo miembros (404 a los demás); un Participante solo ve versiones publicadas; `Cache-Control: private, max-age=31536000, immutable`, `ETag` y `304` con `If-None-Match`; `Content-Type: image/webp` — `test(api)`
 - [ ] T028 [P] [US1] Prueba de la cascada en `apps/api/tests/integration/diagrams-cascade.test.ts`: borrar el proyecto elimina diagramas, versiones, actividades y los objetos bajo `projects/{id}/`, también si se reintenta (plan, ajuste 6) — `test(api)`
 - [ ] T029 [P] [US1] Pruebas de `DiagramListPage` y `UploadDialog` (comprobación previa de tamaño y tipo en el navegador, errores de la API, progreso, lista con miniaturas) en `apps/web/tests/diagrams-upload.test.tsx` — `test(web)`
-- [ ] T030 [P] [US1] E2E en `e2e/flows/diagram-upload.spec.ts`: subir `compra-simple.png` → espacio de trabajo en *Borrador* con la imagen cargada (`__canvasState`); PDF y 15 MB rechazados con su mensaje; `con-script.svg` → la red solo descarga `display.webp` — `test(e2e)`
+- [ ] T030 [P] [US1] E2E en `e2e/flows/diagram-upload.spec.ts`: subir `compra-simple.png` → espacio de trabajo en *Borrador* con la imagen cargada (`__canvasState`); PDF y 15 MB rechazados con su mensaje; `con-script.svg` → la red solo descarga `display.webp`; recargar sirve la imagen desde caché (`304` o caché del navegador) **a través del proxy de `web`** — `test(e2e)`
 
 ### Implementation for User Story 1
 
-- [ ] T031 [US1] Implementar la subida en `apps/api/src/modules/diagrams/service.ts` (multipart con `limits.fileSize` de 10 MB, pipeline, objetos en el bucket, documentos, `lastActivityAt`, auditoría; si falla a medias, borra lo subido) — `feat(api)`
+- [ ] T031 [US1] Implementar la subida en `apps/api/src/modules/diagrams/service.ts` (multipart con `limits.fileSize` de 10 MB, pipeline, objetos en el bucket, documentos, `lastActivityAt`, auditoría, log de la subida con tamaño, dimensiones y duración junto al `requestId`; si falla a medias, borra lo subido) — `feat(api)`
 - [ ] T032 [US1] Implementar `apps/api/src/modules/diagrams/routes.ts` (diagramas, versiones, lectura de versión con sus actividades) y `image.routes.ts` (streaming desde el bucket con caché y `ETag`), y registrarlas en `apps/api/src/app.ts` — `feat(api)`
 - [ ] T033 [US1] Registrar la cascada `app.registerProjectCascade('diagrams', …)` en `apps/api/src/modules/diagrams/cascade.ts` — `feat(api)`
 - [ ] T034 [US1] Implementar `DiagramListPage.tsx` y `UploadDialog.tsx` en `apps/web/src/features/diagrams/` y la ruta `/proyectos/:projectId/diagramas` (detrás del flag) — `feat(web)`
-- [ ] T035 [US1] Implementar el espacio de trabajo mínimo: `WorkspacePage.tsx` y `DiagramCanvas.tsx` (`<Canvas orthographic frameloop="demand">`, plano con la textura servida por `/api`, `MapControls` con zoom y desplazamiento básicos, aviso sin WebGL 2) en `apps/web/src/features/diagrams/workspace/`, ruta `/proyectos/:projectId/diagramas/:diagramId` — `feat(web)`
+- [ ] T035 [US1] Implementar el espacio de trabajo mínimo: `WorkspacePage.tsx` y `DiagramCanvas.tsx` (`<Canvas orthographic frameloop="demand">`, plano con la textura servida por `/api`, `MapControls` con zoom y desplazamiento básicos, aviso sin WebGL 2) en `apps/web/src/features/diagrams/workspace/`, ruta `/proyectos/:projectId/diagramas/:diagramId`; excluir `image/*` del `encode` de `apps/web/Caddyfile` (no recomprimir WebP ni debilitar el `ETag`) — `feat(web)`
 
 **Checkpoint**: US1 funcional; quickstart §1 en verde
 
@@ -136,7 +136,7 @@ versiones copian las actividades conservando su `key`
 
 ### Implementation for User Story 3
 
-- [ ] T048 [US3] Implementar la publicación y la copia de actividades al subir una versión nueva en `apps/api/src/modules/diagrams/service.ts`, con sus rutas — `feat(api)`
+- [ ] T048 [US3] Implementar la publicación (condicionada al `rev` de la versión: dos publicaciones simultáneas no se pisan) y la copia de actividades al subir una versión nueva en `apps/api/src/modules/diagrams/service.ts`, con sus rutas — `feat(api)`
 - [ ] T049 [US3] Implementar en `web` la publicación, el estado de cada versión y la vista de solo lectura del Participante — `feat(web)`
 
 **Checkpoint**: US1–US3 funcionan; quickstart §3 en verde
@@ -167,7 +167,7 @@ selección, teclado y móvil en solo lectura
 ## Phase 7: Polish & Cross-Cutting Concerns
 
 - [ ] T054 [P] ADR `docs/adr/0005-imagenes-y-canvas.md` (imágenes servidas por `api` en lugar de URLs prefirmadas, bucket compartido con prefijos, pipeline de `sharp`, three.js con renderizado bajo demanda, estado expuesto para los E2E) — `docs(adr)`
-- [ ] T055 [P] Actualizar `specs/003-diagramas-canvas/quickstart.md` y el README (pantallas, variables `S3_*`, RustFS local) — `docs(repo)`
+- [ ] T055 [P] Actualizar `specs/003-diagramas-canvas/quickstart.md` (incluidos los comandos de prueba con `@reqcanvas/api`), `research.md` (R1 y R9: RustFS, variables reales) y el README (pantallas, variables `S3_*`, RustFS local) — `docs(repo)`
 - [ ] T056 Medir en local, con Playwright y `cien-actividades.png`, los FPS durante zoom y desplazamiento (≥ 50, SC-002) y el tiempo hasta un diagrama navegable con la red limitada a 10 Mbps (< 3 s, SC-003), y el procesamiento de 10 MB (< 5 s); anotarlo en `plan.md` — `perf(web)`
 - [ ] T057 Configurar Railway **antes de fusionar** (con el selector de entorno comprobado): `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID` y `S3_SECRET_ACCESS_KEY` de `api` como referencias al bucket del entorno (`reqcanvas` en producción, `reqcanvas-staging` en staging); `FEATURE_FLAGS` con `diagrams=true` solo en staging; registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [ ] T058 Recorrer quickstart.md en staging (§1–§4) con dos navegadores, comprobar que el borde de Railway acepta una subida de 10 MB (plan, ajuste 9) y repetir las mediciones de T056; registrar el resultado en `quickstart.md` — `docs(repo)`
@@ -227,4 +227,8 @@ funcionalidad solo se activa con T059.
 - Nunca integrar un commit que rompa `pnpm test` (Principio IV).
 - T057 requiere acceso a Railway y lo hace el propietario del proyecto; T058 usa staging.
 - La lista de requisitos de una actividad, su conteo real y el mapa de calor llegan con la 004
-  (`registerActivityDependents`, `renderBadge`, `colorFor`).
+  (`registerActivityDependents`, `renderBadge`, `colorFor`). También la decisión sobre los
+  requisitos de actividades eliminadas al publicar una versión nueva (edge case de la spec): la
+  003 solo conserva la `key` de las actividades copiadas.
+- Cambios tras `/speckit-analyze`: C1 → T024; I1 → spec; C2 y U4 → T012, T013; U1 → T009,
+  T026; U2 → T030, T035; U3 → T031; U5 → T048; I2 → contrato; I3 → T055; X1 → estas notas.
