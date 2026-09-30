@@ -33,6 +33,15 @@ const app = await buildApp({
       secureCookies: env.NODE_ENV !== 'development',
       appBaseUrl: env.APP_BASE_URL,
     },
+    storage: {
+      endpoint: env.S3_ENDPOINT,
+      bucket: env.S3_BUCKET,
+      region: env.S3_REGION,
+      accessKeyId: env.S3_ACCESS_KEY_ID,
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+      forcePathStyle: env.S3_FORCE_PATH_STYLE,
+      createBucket: env.S3_CREATE_BUCKET,
+    },
   },
 });
 

@@ -11,6 +11,10 @@ const valid = {
   CORS_ORIGINS: 'https://web.example.com,https://otro.example.com',
   JWT_SECRET: 's3cret-jwt-0123456789abcdef0123456789',
   APP_BASE_URL: 'https://web.example.com',
+  S3_ENDPOINT: 'https://storage.railway.app',
+  S3_BUCKET: 'reqcanvas',
+  S3_ACCESS_KEY_ID: 's3cret-key-id',
+  S3_SECRET_ACCESS_KEY: 's3cret-access-key',
 };
 
 describe('loadEnv', () => {
@@ -66,6 +70,49 @@ describe('loadEnv', () => {
       ['JWT_ACCESS_TTL', 'quince'],
       ['REFRESH_TTL_DAYS', '0'],
       ['APP_BASE_URL', 'no-es-una-url'],
+    ])('rechaza %s=%s', (name, value) => {
+      expect(() => loadEnv({ ...valid, [name]: value })).toThrow(new RegExp(name));
+    });
+  });
+
+  describe('almacenamiento S3 (feature 003)', () => {
+    it('aplica los valores por defecto', () => {
+      const env = loadEnv(valid);
+      expect(env).toMatchObject({
+        S3_ENDPOINT: 'https://storage.railway.app',
+        S3_BUCKET: 'reqcanvas',
+        S3_REGION: 'auto',
+        S3_FORCE_PATH_STYLE: false,
+        S3_CREATE_BUCKET: false,
+      });
+    });
+
+    it.each(['S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'] as const)(
+      '%s es obligatoria y el error no muestra ningún valor',
+      (name) => {
+        const { [name]: _omit, ...rest } = valid;
+        try {
+          loadEnv(rest);
+          expect.unreachable();
+        } catch (error) {
+          expect((error as ConfigError).variables).toEqual([name]);
+          expect((error as Error).message).not.toMatch(/s3cret/);
+        }
+      },
+    );
+
+    it.each([
+      ['true', true],
+      ['false', false],
+    ])('S3_FORCE_PATH_STYLE y S3_CREATE_BUCKET aceptan "%s"', (value, expected) => {
+      const env = loadEnv({ ...valid, S3_FORCE_PATH_STYLE: value, S3_CREATE_BUCKET: value });
+      expect(env.S3_FORCE_PATH_STYLE).toBe(expected);
+      expect(env.S3_CREATE_BUCKET).toBe(expected);
+    });
+
+    it.each([
+      ['S3_ENDPOINT', 'no-es-una-url'],
+      ['S3_FORCE_PATH_STYLE', 'quizá'],
     ])('rechaza %s=%s', (name, value) => {
       expect(() => loadEnv({ ...valid, [name]: value })).toThrow(new RegExp(name));
     });

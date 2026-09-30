@@ -22,6 +22,10 @@ se definen como referencias (`${{MongoDB.MONGO_URL}}`), no como valores copiados
 | `JWT_SECRET` | Sí | Secreto aleatorio por entorno (≥ 32 bytes; `openssl rand -base64 48`) | Firma de los access tokens (feature 002). Solo en Railway, nunca en el repositorio ni en GitHub |
 | `JWT_ACCESS_TTL` | No | `15m` | Duración del access token (`<n><s\|m\|h\|d>`) |
 | `REFRESH_TTL_DAYS` | No | `7` | Validez deslizante del refresh token (1–90 días) |
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Sí | `${{<bucket>.ENDPOINT}}`, `${{<bucket>.BUCKET}}`… (`reqcanvas` en producción, `reqcanvas-staging` en staging) | Bucket de las imágenes de diagramas (feature 003), prefijo `projects/`; el mismo bucket que los respaldos (ADR 0003) |
+| `S3_REGION` | No | `${{<bucket>.REGION}}` (`auto`) | Región S3 |
+| `S3_FORCE_PATH_STYLE` | No | `false` (`true` solo con RustFS) | URLs path-style |
+| `S3_CREATE_BUCKET` | No | `false` (`true` solo en local y CI) | Crear el bucket al arrancar si no existe |
 | `APP_BASE_URL` | Sí | `https://${{web.RAILWAY_PUBLIC_DOMAIN}}` | URL pública de `web`; base de los enlaces de invitación |
 | `MIGRATION_ACTION` | No | `up` (la fija `deploy.yml`) | Acción del pre-deploy: `up`, `down:<archivo>`, `restore:<clave>\|latest` (ADR 0003) |
 | `BACKUP_S3_ENDPOINT`, `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY` | Para migraciones destructivas | `${{reqcanvas.ENDPOINT}}`, `${{reqcanvas.BUCKET}}`… | Bucket de respaldos; sin él, una migración destructiva no se aplica |
