@@ -13,6 +13,13 @@ export const diagramsApi = {
     form.append('file', file);
     return apiUpload<DiagramVersion>(`/projects/${projectId}/diagrams`, form, onProgress);
   },
+  addVersion: (diagramId: string, file: File, onProgress?: (percent: number) => void) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiUpload<DiagramVersion>(`/diagrams/${diagramId}/versions`, form, onProgress);
+  },
+  publish: (versionId: string) =>
+    apiFetch<DiagramVersion>(`/diagram-versions/${versionId}/publish`, { method: 'POST' }),
 };
 
 export const diagramKeys = {

@@ -9,6 +9,8 @@ import { projectKeys, projectsApi } from '../../projects/api';
 import { diagramKeys, diagramsApi, useImageUrl } from '../api';
 import { EditorPanel } from '../editor/EditorPanel';
 import { AutosaveProvider } from '../editor/useAutosave';
+import { NewVersionDialog } from '../NewVersionDialog';
+import { PublishButton } from '../PublishButton';
 import { useWorkspaceStore } from './store';
 
 // three.js solo se descarga al abrir un diagrama.
@@ -60,20 +62,30 @@ export function WorkspacePage() {
     return <FormError>No se pudo cargar el diagrama.</FormError>;
   }
 
+  const isAdmin = project.data.myRole === 'admin';
+  const writable = isAdmin && project.data.status !== 'closed';
   return (
-    <section className="space-y-4">
-      <header>
-        <p className="text-sm text-gray-600">
-          <Link to={`/proyectos/${projectId}/diagramas`} className="underline">
-            Diagramas
-          </Link>
-        </p>
-        <h1 className="text-2xl font-semibold">{summary.name}</h1>
-        <p className="text-sm text-gray-600">
-          Versión {version.data.number} · {STATUS_LABEL[version.data.status]}
-        </p>
-      </header>
-      <AutosaveProvider key={version.data.id} versionId={version.data.id}>
+    <AutosaveProvider key={version.data.id} versionId={version.data.id}>
+      <section className="space-y-4">
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-sm text-gray-600">
+              <Link to={`/proyectos/${projectId}/diagramas`} className="underline">
+                Diagramas
+              </Link>
+            </p>
+            <h1 className="text-2xl font-semibold">{summary.name}</h1>
+            <p className="text-sm text-gray-600">
+              Versión {version.data.number} · {STATUS_LABEL[version.data.status]}
+            </p>
+          </div>
+          {writable && version.data.status === 'draft' && (
+            <PublishButton projectId={projectId} version={version.data} />
+          )}
+          {writable && !summary.draftVersionId && (
+            <NewVersionDialog projectId={projectId} diagramId={diagramId} />
+          )}
+        </header>
         <div className={editing ? 'grid gap-4 md:grid-cols-[1fr_20rem]' : ''}>
           <Workspace
             displayUrl={version.data.image.displayUrl}
@@ -83,8 +95,8 @@ export function WorkspacePage() {
           />
           {editing && <EditorPanel versionId={version.data.id} />}
         </div>
-      </AutosaveProvider>
-    </section>
+      </section>
+    </AutosaveProvider>
   );
 }
 
