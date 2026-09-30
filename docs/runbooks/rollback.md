@@ -133,7 +133,7 @@ mano, **en este orden** y comprobando en el panel que el selector muestra el ent
 4. Comprobar: `railway environment config --environment <entorno> --json` muestra el comando, y
    el log del pre-deploy del siguiente despliegue dice `migraciones del despliegue`.
 
-Estado: `staging` activado el 2026-09-29; `production`, pendiente de la release que lo incluya.
+Estado: `staging` activado el 2026-09-29; `production`, el 2026-09-30 con `v0.2.0` (bucket `reqcanvas`).
 
 ## Registro de ensayos (T061)
 
