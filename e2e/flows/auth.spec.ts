@@ -1,5 +1,4 @@
-import { randomInt } from 'node:crypto';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { newUser, registerUser } from './helpers';
 
 // US1: registro, sesión, cierre de sesión y bloqueo (quickstart §1). Solo contra el stack local.
@@ -57,9 +56,7 @@ test('el 6.º intento fallido muestra el aviso de bloqueo (US1 escenario 3)', as
   page,
   request,
 }) => {
-  // IP propia (Caddy reenvía X-Real-IP sin el borde de Railway): el bloqueo no afecta a las
-  // demás pruebas, que comparten la IP del navegador.
-  await page.setExtraHTTPHeaders({ 'x-real-ip': `198.18.${randomInt(256)}.${randomInt(256)}` });
+  // La IP de la prueba es propia (fixtures.ts): el bloqueo no afecta a las demás.
   const user = await registerUser(request);
   await page.goto('/entrar');
 

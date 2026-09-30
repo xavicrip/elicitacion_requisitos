@@ -112,7 +112,7 @@ estado y última actividad
 - [X] T042 [P] [US2] Pruebas de integración en `apps/api/tests/integration/projects.test.ts`: el creador queda como `admin` en `draft`; transiciones válidas (`open`, `close`, `reopen`) y `409` en las inválidas; auditoría `project.status_changed`; "Mis proyectos" ordenado por `lastActivityAt` con rol y estado, incluida una persona que es `admin` en un proyecto y `participant` en otro (FR-007); p95 < 200 ms con 100 proyectos — `test(api)`
 - [X] T043 [P] [US2] Pruebas del borrado en `apps/api/tests/integration/project-deletion.test.ts`: `confirmName` distinto → `400`; correcto → `202`, `status: deleting` (404 para todos) y job `project-deletion` que ejecuta los manejadores de `registerProjectCascade` de forma idempotente y reintentable, registrando `deletion.status` (`pending → running → done`, o `failed` con `attempts` y `error` tras agotar los reintentos; constitución VI) — `test(api)`
 - [X] T044 [P] [US2] Pruebas de `ProjectsPage`, `ProjectSettingsPage` y `DeleteProjectDialog` (el botón solo se activa al escribir el nombre exacto); un nombre o descripción con `<script>` se muestra como texto (constitución V, XSS); editar la descripción, forzar un `401` y guardar conserva el texto (edge case de sesión caducada) en `apps/web/tests/projects.test.tsx`; activar `react/no-danger` en `eslint.config.js` si no está — `test(web)`
-- [ ] T045 [P] [US2] E2E en `e2e/flows/projects.spec.ts`: crear → abrir → cerrar → reabrir → eliminar con confirmación — `test(e2e)`
+- [X] T045 [P] [US2] E2E en `e2e/flows/projects.spec.ts`: crear → abrir → cerrar → reabrir → eliminar con confirmación — `test(e2e)`
 
 ### Implementation for User Story 2
 
