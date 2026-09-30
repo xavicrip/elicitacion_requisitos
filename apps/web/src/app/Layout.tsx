@@ -1,5 +1,7 @@
 import { Link, Outlet } from 'react-router';
+import { SessionMenu, SessionRestorer } from '../features/auth/session';
 import { getConfig } from '../lib/config';
+import { FlagGate } from '../lib/flags';
 
 /** Estructura común: cabecera, contenido de la ruta y versión desplegada. */
 export function Layout() {
@@ -10,6 +12,10 @@ export function Layout() {
         <Link to="/" className="text-lg font-semibold">
           ReqCanvas
         </Link>
+        <FlagGate flag="accounts">
+          <SessionRestorer />
+          <SessionMenu />
+        </FlagGate>
       </header>
       <main className="flex-1 py-8">
         <Outlet />

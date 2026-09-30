@@ -1,9 +1,22 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
+import { LoginPage } from '../features/auth/LoginPage';
+import { RegisterPage } from '../features/auth/RegisterPage';
+import { requireSession } from '../features/auth/session';
+import { ProjectsPage } from '../features/projects/ProjectsPage';
+import { FlagGate } from '../lib/flags';
+import '../lib/zod';
 import { HomePage } from './HomePage';
 import { Layout } from './Layout';
 import { NotFoundPage } from './NotFoundPage';
+
+/** Rutas de la feature 002: con el flag `accounts` desactivado, no existen (constitución IV). */
+const accounts = (element: ReactNode) => (
+  <FlagGate flag="accounts" fallback={<NotFoundPage />}>
+    {element}
+  </FlagGate>
+);
 
 /** Rutas de la app (React Router 7, modo librería; research R10). */
 export const routes: RouteObject[] = [
@@ -11,6 +24,9 @@ export const routes: RouteObject[] = [
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'entrar', element: accounts(<LoginPage />) },
+      { path: 'registro', element: accounts(<RegisterPage />) },
+      { path: 'proyectos', loader: requireSession, element: accounts(<ProjectsPage />) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

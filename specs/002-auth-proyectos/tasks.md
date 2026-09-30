@@ -84,7 +84,7 @@ separación de los E2E, que usan todas las historias
 - [X] T031 [P] [US1] Pruebas unitarias de `apps/api/src/modules/auth/tokens.ts` (access token de 15 min; refresh opaco de 32 bytes guardado solo como hash SHA-256) en `apps/api/tests/unit/tokens.test.ts` — `test(api)`
 - [X] T032 [P] [US1] Pruebas de contrato de `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout` y `GET /me` contra `contracts/auth-projects.openapi.yaml` (cookie `rt` `httpOnly; SameSite=Strict; Path=/api/auth` y `Secure` salvo en `development`) en `apps/api/tests/contract/auth.contract.test.ts` — `test(api)`
 - [X] T033 [P] [US1] Pruebas de integración en `apps/api/tests/integration/auth.test.ts`: email duplicado → `409` genérico con tiempo similar (research R5); los intentos fallidos 1–5 en 15 min (por email o por IP) responden `401` genérico y a partir del 6.º `429` con `Retry-After` durante 15 min y evento `auth.login_failed` en auditoría; rotación del refresh; reutilizar un refresh rotado revoca todo el `sid`; logout revoca la sesión; `passwordHash` nunca aparece en respuestas ni logs — `test(api)`
-- [ ] T034 [P] [US1] Pruebas de `LoginPage` y `RegisterPage` (validación con los esquemas de `@reqcanvas/shared`, mensaje genérico, redirección a "Mis proyectos") y de la restauración de sesión al cargar en `apps/web/tests/auth.test.tsx` — `test(web)`
+- [X] T034 [P] [US1] Pruebas de `LoginPage` y `RegisterPage` (validación con los esquemas de `@reqcanvas/shared`, mensaje genérico, redirección a "Mis proyectos") y de la restauración de sesión al cargar en `apps/web/tests/auth.test.tsx` — `test(web)`
 - [ ] T035 [P] [US1] E2E en `e2e/flows/auth.spec.ts`: registro → "Mis proyectos" vacío; recargar conserva la sesión; logout bloquea las rutas protegidas; 6.º intento fallido muestra el aviso de bloqueo — `test(e2e)`
 
 ### Implementation for User Story 1
@@ -93,7 +93,7 @@ separación de los E2E, que usan todas las historias
 - [X] T037 [US1] Implementar `apps/api/src/modules/auth/tokens.ts` — `feat(api)`
 - [X] T038 [US1] Implementar `apps/api/src/modules/auth/service.ts` (registro con hash ficticio si el email existe, login con contadores Redis `login:fail:{emailHash}` y `login:fail:{ip}` (IP de `clientIp`, research R4), rotación y detección de reutilización, logout, `lastLoginAt`) — `feat(api)`
 - [X] T039 [US1] Implementar `apps/api/src/modules/auth/routes.ts` y `GET /me`, y registrar los plugins de auth y rate limit y las rutas en `apps/api/src/app.ts` — `feat(api)`
-- [ ] T040 [US1] Implementar `apps/web/src/features/auth/LoginPage.tsx`, `RegisterPage.tsx`, la ruta protegida (loader que llama a `/api/auth/refresh`), el botón de cierre de sesión y una `ProjectsPage` inicial vacía en `apps/web/src/features/projects/ProjectsPage.tsx` — `feat(web)`
+- [X] T040 [US1] Implementar `apps/web/src/features/auth/LoginPage.tsx`, `RegisterPage.tsx`, la ruta protegida (loader que llama a `/api/auth/refresh`), el botón de cierre de sesión y una `ProjectsPage` inicial vacía en `apps/web/src/features/projects/ProjectsPage.tsx` — `feat(web)`
 
 **Checkpoint**: US1 funcional; quickstart §1 en verde con `pnpm dev:up`
 
