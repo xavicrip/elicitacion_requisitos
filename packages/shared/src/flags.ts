@@ -30,6 +30,12 @@ export const FLAGS = defineFlags({
     default: false,
     owner: '002-auth-proyectos',
   },
+  diagrams: {
+    description:
+      'Diagramas de actividades y espacio de trabajo (subida, canvas, zonas y versiones); oculto hasta completar la feature',
+    default: false,
+    owner: '003-diagramas-canvas',
+  },
 });
 
 /**

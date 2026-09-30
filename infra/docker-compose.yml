@@ -85,7 +85,7 @@ services:
       CORS_ORIGINS: http://localhost:5173
       LOG_LEVEL: info
       # En local y en CI, `accounts` activado para desarrollar y probar la feature 002.
-      FEATURE_FLAGS: ${FEATURE_FLAGS:-accounts=true}
+      FEATURE_FLAGS: ${FEATURE_FLAGS:-accounts=true,diagrams=true}
       # Solo para desarrollo local; en Railway es un secreto por entorno.
       JWT_SECRET: dev-only-jwt-secret-not-for-production-use
       APP_BASE_URL: http://localhost:5173
