@@ -26,6 +26,12 @@ const app = await buildApp({
     version: env.APP_VERSION,
     commit: env.GIT_SHA,
     featureFlags: env.FEATURE_FLAGS,
+    auth: {
+      jwtSecret: env.JWT_SECRET,
+      accessTtl: env.JWT_ACCESS_TTL,
+      refreshTtlDays: env.REFRESH_TTL_DAYS,
+      secureCookies: env.NODE_ENV !== 'development',
+    },
   },
 });
 
