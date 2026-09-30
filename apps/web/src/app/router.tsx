@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
 import { LoginPage } from '../features/auth/LoginPage';
+import { AcceptInvitationPage } from '../features/invitations/AcceptInvitationPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
 import { ProjectSettingsPage } from '../features/projects/ProjectSettingsPage';
@@ -33,6 +34,7 @@ export const routes: RouteObject[] = [
         loader: requireSession,
         element: accounts(<ProjectSettingsPage />),
       },
+      { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

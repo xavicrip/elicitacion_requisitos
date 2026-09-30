@@ -8,6 +8,7 @@ import { applyApiError, Field, FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
 import { projectKeys, projectsApi } from './api';
 import { DeleteProjectDialog } from './DeleteProjectDialog';
+import { MembersPanel } from './MembersPanel';
 import { ProjectNotFound } from './ProjectNotFound';
 import { ROLE_LABEL, STATUS_ACTION, STATUS_LABEL } from './labels';
 
@@ -42,6 +43,7 @@ export function ProjectSettingsPage() {
         </p>
         {!isAdmin && project.description && <p>{project.description}</p>}
       </header>
+      <MembersPanel project={project} />
       {isAdmin && (
         <>
           <StatusActions project={project} />
