@@ -1,8 +1,9 @@
 # Quickstart: Autenticación, roles y gestión de proyectos
 
-Requiere el entorno de la feature 001 (`pnpm dev:up`) y las nuevas variables `JWT_SECRET` y
-`APP_BASE_URL` en `.env`. La app se abre en `http://localhost:5173`; la API responde en
-`/api` a través del proxy de Caddy.
+Requiere el entorno de la feature 001: `pnpm dev:up`. Docker Compose ya define las variables
+nuevas (`JWT_SECRET` de desarrollo, `APP_BASE_URL`, `API_INTERNAL_URL`) y activa el flag
+`accounts`; fuera de Docker, cópialas de `.env.example`. La app se abre en
+`http://localhost:5173` y la API responde en `/api` a través del proxy de Caddy.
 
 ## 1. Registro, login y logout (US1)
 
@@ -32,8 +33,12 @@ Requiere el entorno de la feature 001 (`pnpm dev:up`) y las nuevas variables `JW
 
 ## 4. Control de acceso (US4)
 
+El access token solo vive en la memoria de la página; para probar la API directamente, obtén
+uno iniciando sesión con `curl`:
+
 ```bash
-# Con el token de Luis (Participante), obtenido desde las herramientas de desarrollo:
+TOKEN_LUIS=$(curl -s localhost:5173/api/auth/login -H 'content-type: application/json' \
+  -d '{"email":"luis@example.com","password":"<su contraseña>"}' | jq -r .accessToken)
 curl -i -X POST localhost:5173/api/projects/<id>/invitations -H "Authorization: Bearer $TOKEN_LUIS"   # 403
 curl -i localhost:5173/api/projects/<id-de-otro-proyecto> -H "Authorization: Bearer $TOKEN_LUIS"     # 404
 ```
@@ -41,6 +46,11 @@ curl -i localhost:5173/api/projects/<id-de-otro-proyecto> -H "Authorization: Bea
 ## 5. Pruebas automatizadas
 
 ```bash
-pnpm --filter api test -- authorization.matrix   # matriz completa en verde (SC-003)
-pnpm e2e -- auth invitations access-control
+pnpm test:services:up                                              # MongoDB, Redis y S3 de prueba
+pnpm --filter @reqcanvas/api exec vitest run authorization.matrix  # matriz completa (SC-003)
+pnpm --filter @reqcanvas/api test                                  # todas las pruebas de api
+pnpm e2e --project flows                                           # registro, proyectos, invitaciones, acceso
 ```
+
+Los E2E de `flows` crean cuentas, así que solo se definen contra el stack local (plan, ajuste
+4); tras un despliegue solo corre `pnpm e2e --project smoke`.

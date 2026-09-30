@@ -65,6 +65,25 @@ curl -s -w "\n%{http_code}\n" localhost:3000/health   # 503, checks.mongo.status
 docker compose -f infra/docker-compose.yml start mongodb
 ```
 
+### Cuentas y proyectos (feature 002)
+
+En local, `accounts` está activado: en `http://localhost:5173` puedes crear una cuenta
+(`/registro`), iniciar sesión (`/entrar`), crear proyectos en "Mis proyectos" (`/proyectos`),
+gestionar miembros e invitar con un enlace (`/invitacion/<token>`). `web` reenvía `/api/*` a
+`api` (mismo origen: la cookie de sesión funciona con `SameSite=Strict`); ver
+[ADR 0004](docs/adr/0004-sesion-y-proxy.md) y el
+[quickstart de la 002](specs/002-auth-proyectos/quickstart.md).
+
+| Servicio | Variable           | Obligatoria | Uso                                                           |
+| -------- | ------------------ | ----------- | ------------------------------------------------------------- |
+| `api`    | `JWT_SECRET`       | Sí          | Firma de los access tokens (≥ 32 bytes, distinto por entorno) |
+| `api`    | `APP_BASE_URL`     | Sí          | URL pública de `web`; base de los enlaces de invitación       |
+| `api`    | `JWT_ACCESS_TTL`   | No (`15m`)  | Duración del access token                                     |
+| `api`    | `REFRESH_TTL_DAYS` | No (`7`)    | Validez deslizante de la sesión                               |
+| `web`    | `API_INTERNAL_URL` | Sí          | Destino del proxy `/api` (`http://api:3000` en Compose)       |
+
+Referencia completa: [`env-vars.md`](specs/001-plataforma-base/contracts/env-vars.md).
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash
