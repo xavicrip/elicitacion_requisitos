@@ -34,6 +34,19 @@ export type ServicesConfig = {
   auth?: AuthConfig;
   /** Job de borrado de proyectos (feature 002, research R9). */
   deletion?: DeletionConfig;
+  /** Bucket S3 de las imágenes de diagramas (feature 003). */
+  storage?: StorageConfig;
+};
+
+export type StorageConfig = {
+  endpoint: string;
+  bucket: string;
+  region: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  forcePathStyle: boolean;
+  /** Crear el bucket al arrancar si no existe (solo local y CI). */
+  createBucket: boolean;
 };
 
 export type DeletionConfig = {

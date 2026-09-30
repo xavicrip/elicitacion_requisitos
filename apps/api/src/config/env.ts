@@ -32,6 +32,16 @@ const EnvSchema = z.object({
   REFRESH_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(7),
   /** URL pública de `web`; base de los enlaces de invitación. */
   APP_BASE_URL: z.url(),
+  // Almacenamiento S3 (feature 003, plan ajustes 2 y 3): referencias al bucket del entorno.
+  S3_ENDPOINT: z.url(),
+  S3_BUCKET: z.string().min(1),
+  S3_REGION: z.string().min(1).default('auto'),
+  S3_ACCESS_KEY_ID: z.string().min(1),
+  S3_SECRET_ACCESS_KEY: z.string().min(1),
+  /** URLs path-style; `true` solo con RustFS en local y CI. */
+  S3_FORCE_PATH_STYLE: z.stringbool().default(false),
+  /** Crear el bucket al arrancar si no existe; solo local y CI (RustFS no lo crea). */
+  S3_CREATE_BUCKET: z.stringbool().default(false),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
