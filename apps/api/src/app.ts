@@ -18,6 +18,7 @@ import { mongoPlugin } from './plugins/mongo.js';
 import { genReqId, observability, REDACT_PATHS } from './plugins/observability.js';
 import { rateLimitPlugin } from './plugins/rate-limit.js';
 import { redisPlugin } from './plugins/redis.js';
+import { storagePlugin } from './plugins/storage.js';
 import { healthRoutes } from './routes/health.js';
 
 export type ServicesConfig = {
@@ -114,6 +115,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       timeoutMs: checkTimeoutMs,
     });
     await app.register(redisPlugin, { url: services.redisUrl, timeoutMs: checkTimeoutMs });
+    if (services.storage) await app.register(storagePlugin, services.storage);
     await app.register(healthRoutes, {
       analyticsUrl: services.analyticsUrl,
       version: services.version,

@@ -29,7 +29,7 @@ async function runCheck(fn: () => Promise<void>, timeoutMs: number): Promise<Hea
 
 /**
  * GET /health (healthcheck de despliegue: Mongo y Redis), GET /health/deep (añade analytics,
- * que solo es accesible por la red privada), GET /version y GET /config.
+ * que solo es accesible por la red privada, y el bucket S3), GET /version y GET /config.
  */
 export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOptions) {
   const { analyticsUrl, version, commit, checkTimeoutMs, flags } = options;
@@ -50,6 +50,12 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
     }, checkTimeoutMs);
 
+  // El bucket solo cuenta en `/health/deep`: su caída no debe bloquear los despliegues.
+  const storageChecks = async (): Promise<Record<string, HealthCheck>> =>
+    app.hasDecorator('storage')
+      ? { storage: await runCheck(() => app.storage.ping(), checkTimeoutMs) }
+      : {};
+
   const respond = (checks: Record<string, HealthCheck>): Health => ({
     status: overallStatus(checks),
     service: 'api',
@@ -65,8 +71,12 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
   });
 
   app.get('/health/deep', async (_request, reply) => {
-    const [direct, analytics] = await Promise.all([directChecks(), analyticsCheck()]);
-    const body = respond({ ...direct, analytics });
+    const [direct, analytics, storage] = await Promise.all([
+      directChecks(),
+      analyticsCheck(),
+      storageChecks(),
+    ]);
+    const body = respond({ ...direct, analytics, ...storage });
     return reply.code(body.status === 'ok' ? 200 : 503).send(body);
   });
 
