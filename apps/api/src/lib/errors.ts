@@ -13,6 +13,8 @@ export class HttpError extends Error {
     readonly headers: Record<string, string> = {},
     /** Errores por campo, como en las validaciones (p. ej., la política de contraseña). */
     readonly fields?: Record<string, string>,
+    /** Datos adicionales del cuerpo que fija el contrato (p. ej., `detailCount`). */
+    readonly extra?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'HttpError';
@@ -51,6 +53,7 @@ export function registerErrorHandlers(app: FastifyInstance): void {
           code: error.code,
           message: error.message,
           ...(error.fields ? { fields: error.fields } : {}),
+          ...error.extra,
         });
     }
     if (hasZodFastifySchemaValidationErrors(error)) {
