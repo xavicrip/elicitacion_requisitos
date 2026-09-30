@@ -29,7 +29,7 @@ sugeridos van al final de cada tarea.
 **Purpose**: dependencias, fixtures y el bucket S3 en el entorno local
 
 - [X] T001 Añadir a `apps/api/package.json` `@fastify/multipart`, `file-type` y `sharp`; comprobar que `docker build -f apps/api/Dockerfile .` usa los binarios de `sharp` para Alpine (musl) y sigue por debajo de 300 MB (plan, ajuste 10) — `chore(api)`
-- [ ] T002 [P] Añadir `@react-three/drei` 10 a `apps/web/package.json` (compatible con `@react-three/fiber` 9 y React 19, ya instalados) — `chore(web)`
+- [X] T002 [P] Añadir `@react-three/drei` 10 a `apps/web/package.json` (compatible con `@react-three/fiber` 9 y React 19, ya instalados) — `chore(web)`
 - [ ] T003 [P] Generar los diagramas de prueba con un script reproducible `scripts/fixtures/diagrams.mjs` (usa `sharp`): `compra-simple.png` (6 actividades dibujadas), `grande-4000x3000.png`, `cien-actividades.png` (100 cajas en rejilla, con sus coordenadas en un JSON), `con-script.svg` (con `<script>` y una referencia externa), `enorme-12000.png` (≤ 10 MB) y `quince-mb.png` (> 10 MB), en `e2e/fixtures/diagrams/`; copias pequeñas para las pruebas de `api` en `apps/api/tests/fixtures/images/` — `test(e2e)`
 - [ ] T004 [P] Añadir el servicio `s3` (RustFS, mismas credenciales que `infra/docker-compose.test.yml`) a `infra/docker-compose.yml`, con las variables `S3_*` y `S3_CREATE_BUCKET=true` en `api` (plan, ajuste 2) — `chore(infra)`
 

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
     "@reqcanvas/shared": "workspace:*",
     "@tanstack/react-query": "^5.104.0",
