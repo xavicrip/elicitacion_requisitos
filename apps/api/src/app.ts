@@ -6,9 +6,13 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { authRoutes } from './modules/auth/routes.js';
+import { authPlugin } from './plugins/auth.js';
+import { authorizationPlugin } from './plugins/authorization.js';
 import { featureGatePlugin } from './plugins/flags.js';
 import { mongoPlugin } from './plugins/mongo.js';
 import { genReqId, observability, REDACT_PATHS } from './plugins/observability.js';
+import { rateLimitPlugin } from './plugins/rate-limit.js';
 import { redisPlugin } from './plugins/redis.js';
 import { healthRoutes } from './routes/health.js';
 
@@ -22,6 +26,19 @@ export type ServicesConfig = {
   featureFlags: string | undefined;
   /** Timeout de cada check de salud (2 s por defecto). */
   checkTimeoutMs?: number;
+  /** Autenticación, proyectos e invitaciones (feature 002). Sin ella no se montan sus rutas. */
+  auth?: AuthConfig;
+};
+
+export type AuthConfig = {
+  jwtSecret: string;
+  /** `JWT_ACCESS_TTL`, p. ej. `15m`. */
+  accessTtl: string;
+  refreshTtlDays: number;
+  /** Cookie `rt` con `Secure`; `false` solo en desarrollo (Compose sirve por http). */
+  secureCookies: boolean;
+  /** Prefijo de las claves de Redis (rate limit y bloqueo); las pruebas usan uno propio. */
+  redisNameSpace?: string;
 };
 
 export type BuildAppOptions = {
@@ -75,6 +92,14 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       checkTimeoutMs,
       flags,
     });
+
+    if (services.auth) {
+      const { jwtSecret, accessTtl, redisNameSpace = '' } = services.auth;
+      await app.register(authPlugin, { secret: jwtSecret, accessTtl });
+      await app.register(rateLimitPlugin, { nameSpace: `${redisNameSpace}rate-limit:` });
+      await app.register(authorizationPlugin);
+      await app.register(authRoutes, { ...services.auth, redisNameSpace });
+    }
   }
 
   return app;
