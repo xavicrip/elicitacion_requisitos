@@ -120,6 +120,8 @@ services:
       API_INTERNAL_URL: http://api:3000
       API_PUBLIC_URL: http://localhost:3000
       APP_VERSION: ${APP_VERSION:-dev}
+      # window.__canvasState para los E2E (feature 003, plan ajuste 8); nunca en Railway.
+      E2E_HOOKS: 'true'
     ports:
       - '5173:8080'
     depends_on:

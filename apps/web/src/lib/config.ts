@@ -1,5 +1,10 @@
 /** Configuración de ejecución que el contenedor escribe en `/config.js` al arrancar. */
-export type RuntimeConfig = { apiUrl: string; version: string };
+export type RuntimeConfig = {
+  apiUrl: string;
+  version: string;
+  /** Ganchos de los E2E (`window.__canvasState`); solo con `E2E_HOOKS=true`. */
+  e2eHooks: boolean;
+};
 
 declare global {
   interface Window {
@@ -12,6 +17,7 @@ export function getConfig(): RuntimeConfig {
   return {
     apiUrl: injected?.apiUrl ?? '/api',
     version: injected?.version ?? 'dev',
+    e2eHooks: injected?.e2eHooks === true,
   };
 }
 
