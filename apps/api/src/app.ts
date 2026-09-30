@@ -8,6 +8,9 @@ import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
+import { activityDependentsPlugin } from './modules/diagrams/dependents.js';
+import { imageRoutes } from './modules/diagrams/image.routes.js';
+import { diagramRoutes } from './modules/diagrams/routes.js';
 import { invitationRoutes } from './modules/invitations/routes.js';
 import { memberRoutes } from './modules/projects/member-routes.js';
 import { projectRoutes } from './modules/projects/routes.js';
@@ -137,6 +140,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await app.register(projectRoutes);
       await app.register(memberRoutes);
       await app.register(invitationRoutes, { appBaseUrl: services.auth.appBaseUrl });
+
+      // Diagramas (feature 003): requieren el bucket de las imágenes.
+      if (services.storage) {
+        await app.register(activityDependentsPlugin);
+        await app.register(diagramRoutes);
+        await app.register(imageRoutes);
+      }
     }
   }
 
