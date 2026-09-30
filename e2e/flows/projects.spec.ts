@@ -17,16 +17,18 @@ test('crear → abrir → cerrar → reabrir → eliminar con confirmación', as
   await page.getByLabel('Descripción').fill('Ventas por internet');
   await page.getByRole('button', { name: 'Crear proyecto' }).click();
   await expect(page.getByRole('heading', { name })).toBeVisible();
-  await expect(page.getByText('Borrador')).toBeVisible();
-  await expect(page.getByText('Administrador')).toBeVisible();
+  // Cabecera del proyecto: el panel de miembros también contiene "Administrador" (su selector).
+  const header = page.getByRole('main').locator('header');
+  await expect(header.getByText('Borrador')).toBeVisible();
+  await expect(header.getByText('Administrador')).toBeVisible();
 
   // Ciclo de estados (FR-006).
   await page.getByRole('button', { name: 'Abrir proyecto' }).click();
-  await expect(page.getByText('Abierto')).toBeVisible();
+  await expect(header.getByText('Abierto')).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar proyecto' }).click();
-  await expect(page.getByText('Cerrado')).toBeVisible();
+  await expect(header.getByText('Cerrado')).toBeVisible();
   await page.getByRole('button', { name: 'Reabrir proyecto' }).click();
-  await expect(page.getByText('Abierto')).toBeVisible();
+  await expect(header.getByText('Abierto')).toBeVisible();
 
   // "Mis proyectos" refleja el estado.
   await page.getByRole('link', { name: 'Mis proyectos' }).click();
