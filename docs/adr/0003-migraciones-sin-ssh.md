@@ -38,6 +38,12 @@ desde CI está descartado (S1).
 
 - Revertir y restaurar no necesitan credenciales de MongoDB ni acceso interactivo, y siguen el
   mismo pipeline (aprobación en `production`, healthchecks, `/version`).
+- Cada acción es un despliegue con build en Railway (8–10 min en el ensayo T061), y revertir
+  migraciones encadena dos. Por eso **SC-004 (< 10 min) se cumple con el Rollback del panel de
+  Railway**, que reutiliza la imagen; `migrate-down` y `restore-backup` completan después el
+  rollback de datos (`--migrate-down=<versión mala>` si el panel ya volvió a la anterior).
+  Desplegar imágenes por digest desde un registro quitaría el build del rollback; queda como
+  mejora futura.
 - El respaldo se construye en memoria: adecuado mientras la base mida decenas de MB. Si crece,
   habrá que pasar a subida en streaming (multipart).
 - Railway Buckets no admite reglas de ciclo de vida: los respaldos (solo se crean antes de

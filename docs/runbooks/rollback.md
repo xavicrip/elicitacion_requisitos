@@ -17,14 +17,27 @@ lee la variable `MIGRATION_ACTION` ([ADR 0003](../adr/0003-migraciones-sin-ssh.m
 `deploy.yml` fija la variable en cada ejecución y la devuelve a `up` al terminar, así que no hay
 que tocarla a mano.
 
-## 1. Decidir el tipo de rollback
+## 1. Cortar el daño: Rollback del panel (SC-004)
 
-| Situación                                                   | Procedimiento                                                                                        |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| La versión nueva falla y **no** incluía migraciones         | [A. Solo código](#a-solo-código)                                                                     |
-| Incluía migraciones **no destructivas**                     | [B. Código + migración](#b-código--migración)                                                        |
-| Incluía una migración **destructiva** (`destructive: true`) | [C. Restaurar el respaldo](#c-migración-destructiva-restaurar-el-respaldo)                           |
-| Emergencia: hay que cortar el daño en segundos              | [D. Rollback inmediato en Railway](#d-rollback-inmediato-desde-el-panel-de-railway) y luego A, B o C |
+El objetivo de SC-004 (< 10 min) se cumple con el **Rollback del panel de Railway**
+([D](#d-rollback-inmediato-desde-el-panel-de-railway)): reutiliza la imagen ya construida y
+tarda segundos. Los procedimientos A, B y C pasan por `deploy.yml`, que reconstruye en Railway
+(8–10 min por despliegue; B encadena dos, ver el [registro de ensayos](#registro-de-ensayos-t061)),
+así que sirven para **completar** el rollback, no para cortar el daño.
+
+1. Haz el Rollback del panel en los servicios afectados (`api`, `web`, `analytics`).
+2. Verifica con `curl -s "$API_URL/version"` y `/health/deep`.
+3. Continúa según la tabla.
+
+## 2. Completar el rollback
+
+| La versión revertida…                                       | Después del Rollback del panel                                                                                                                                           |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **no** incluía migraciones                                  | Nada más. Opcional: [A](#a-solo-código) para que el último despliegue de `deploy.yml` coincida con lo que corre                                                          |
+| incluía migraciones **no destructivas**                     | Si el código anterior funciona con el esquema nuevo (lo habitual: `down` conserva los datos), puedes dejarlas y corregir hacia delante. Si no: [B](#b-código--migración) |
+| incluía una migración **destructiva** (`destructive: true`) | [C. Restaurar el respaldo](#c-migración-destructiva-restaurar-el-respaldo)                                                                                               |
+
+Sin urgencia (p. ej., en staging), A, B y C pueden usarse directamente, sin el paso 1.
 
 Para saber qué migraciones trae una versión:
 
@@ -45,15 +58,22 @@ smoke tests y aprobación en `production`).
 ## B. Código + migración
 
 ```bash
-scripts/rollback.sh production v0.1.0 --migrate-down
+scripts/rollback.sh production v0.1.0 --migrate-down            # la versión mala sigue desplegada
+scripts/rollback.sh production v0.1.0 --migrate-down=v0.1.1     # tras el Rollback del panel
 ```
 
-1. `deploy.yml` (`action=migrate-down`) lee el commit desplegado en `api /version`, calcula la
-   migración más antigua que `v0.1.0` no tiene (`scripts/first-new-migration.sh`) y redespliega
-   **la versión actual** de `api` (la que contiene los `down`) con
-   `MIGRATION_ACTION=down:<archivo>`. Todas las migraciones nuevas se revierten en ese único
-   despliegue; `/version` muestra `<versión>-migrate-down` cuando termina.
-2. Después, el script redespliega `v0.1.0` (acción `deploy`).
+1. `deploy.yml` (`action=migrate-down`) toma la versión que contiene los `down`: la desplegada
+   (`api /version`) o la indicada con `=<desde>`. Tras el Rollback del panel, `api` ya sirve
+   `v0.1.0`, así que **hay que indicarla**; sin ella no encontraría nada que revertir.
+2. Calcula la migración más antigua que `v0.1.0` no tiene (`scripts/first-new-migration.sh`) y
+   redespliega esa versión de `api` con `MIGRATION_ACTION=down:<archivo>`. Todas las
+   migraciones nuevas se revierten en ese único despliegue; `/version` muestra
+   `<versión>-migrate-down` cuando termina.
+3. Después, el script redespliega `v0.1.0` (acción `deploy`).
+
+> Mientras dura el paso 3 (8–10 min), `api` vuelve a servir la versión mala, ahora con el
+> esquema anterior. Si eso no es aceptable, deja las migraciones aplicadas y corrige hacia
+> delante (sección 2).
 
 Si el `down` falla, Railway no promueve el despliegue: sigue sirviendo la versión anterior, el
 job agota la espera y el log del pre-deploy (panel de Railway → `api` → despliegue fallido)
@@ -127,9 +147,11 @@ destino con `/health/deep` en `ok`.
 
 Observaciones:
 
-- **B supera el objetivo de 10 min** porque encadena dos despliegues y cada uno tarda en Railway
-  8–10 min (build incluido; el 2026-09-25 eran ~6 min). C cumple porque es un solo despliegue.
-  Para cortar el daño en menos de 10 min, usa primero D (Rollback del panel, instantáneo).
+- **B supera los 10 min** porque encadena dos despliegues y cada uno tarda en Railway 8–10 min
+  (build incluido; el 2026-09-25 eran ~6 min). C cumple porque es un solo despliegue.
+  **Decisión (2026-09-29)**: SC-004 se cumple con el Rollback del panel (sección 1); A, B y C
+  completan el rollback de datos. Pendiente para más adelante: publicar las imágenes en un
+  registro y desplegar por digest, para que el rollback por `deploy.yml` no reconstruya.
 - Sin bucket configurado, el pre-deploy **se negó a aplicar** la migración destructiva y Railway
   mantuvo la versión anterior (primer intento del ensayo C, con referencias a un bucket con otro
   nombre).
