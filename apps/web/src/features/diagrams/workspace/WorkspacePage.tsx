@@ -4,8 +4,11 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import { FormError } from '../../../components/form';
 import { supportsWebGL2 } from '../../../lib/config';
+import { useMediaQuery } from '../../../lib/media';
 import { projectKeys, projectsApi } from '../../projects/api';
 import { diagramKeys, diagramsApi, useImageUrl } from '../api';
+import { EditorPanel } from '../editor/EditorPanel';
+import { AutosaveProvider } from '../editor/useAutosave';
 import { useWorkspaceStore } from './store';
 
 // three.js solo se descarga al abrir un diagrama.
@@ -39,9 +42,17 @@ export function WorkspacePage() {
     enabled: Boolean(versionId),
   });
   const open = useWorkspaceStore((state) => state.open);
+  // Modo edit (contracts/canvas-ui.md): Administrador, versión en borrador, proyecto no
+  // cerrado y pantalla de al menos 768 px (FR-010: en móvil, solo lectura).
+  const wide = useMediaQuery('(min-width: 768px)');
+  const editing =
+    project.data?.myRole === 'admin' &&
+    project.data.status !== 'closed' &&
+    version.data?.status === 'draft' &&
+    wide;
   useEffect(() => {
-    if (versionId) open(versionId, 'view');
-  }, [versionId, open]);
+    if (versionId) open(versionId, editing ? 'edit' : 'view');
+  }, [versionId, editing, open]);
 
   if (project.isLoading || diagrams.isLoading || version.isLoading) return <p>Cargando…</p>;
   if (diagrams.data && !versionId) return <p>Diagrama no encontrado</p>;
@@ -62,10 +73,17 @@ export function WorkspacePage() {
           Versión {version.data.number} · {STATUS_LABEL[version.data.status]}
         </p>
       </header>
-      <Workspace
-        displayUrl={version.data.image.displayUrl}
-        image={{ width: version.data.image.width, height: version.data.image.height }}
-      />
+      <AutosaveProvider key={version.data.id} versionId={version.data.id}>
+        <div className={editing ? 'grid gap-4 md:grid-cols-[1fr_20rem]' : ''}>
+          <Workspace
+            displayUrl={version.data.image.displayUrl}
+            image={{ width: version.data.image.width, height: version.data.image.height }}
+            versionId={version.data.id}
+            editing={editing}
+          />
+          {editing && <EditorPanel versionId={version.data.id} />}
+        </div>
+      </AutosaveProvider>
     </section>
   );
 }
@@ -73,9 +91,13 @@ export function WorkspacePage() {
 function Workspace({
   displayUrl,
   image,
+  versionId,
+  editing,
 }: {
   displayUrl: string;
   image: { width: number; height: number };
+  versionId: string;
+  editing: boolean;
 }) {
   const imageUrl = useImageUrl(displayUrl);
   const imageStatus = useWorkspaceStore((state) => state.imageStatus);
@@ -92,7 +114,12 @@ function Workspace({
     <div className="relative h-[70vh] overflow-hidden rounded border">
       {imageUrl && (
         <Suspense fallback={null}>
-          <DiagramCanvas imageUrl={imageUrl} image={image} />
+          <DiagramCanvas
+            imageUrl={imageUrl}
+            image={image}
+            versionId={versionId}
+            editing={editing}
+          />
         </Suspense>
       )}
       {imageStatus === 'loading' && (

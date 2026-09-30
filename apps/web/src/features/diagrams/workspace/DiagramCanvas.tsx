@@ -1,7 +1,8 @@
 import { MapControls, useTexture } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Component, Suspense, useEffect, useRef, type ComponentRef, type ReactNode } from 'react';
-import { SRGBColorSpace } from 'three';
+import { MOUSE, SRGBColorSpace } from 'three';
+import { EditorLayer } from '../editor/EditorLayer';
 import { fitZoom, MAX_ZOOM_FACTOR, MIN_ZOOM_FACTOR, type Size } from './camera/zoom';
 import { useWorkspaceStore } from './store';
 
@@ -30,7 +31,7 @@ function DiagramImage({ url, image }: { url: string; image: Size }) {
 }
 
 /** Ajusta la cámara a la imagen al abrirla y limita el zoom al 10 %–800 % del ajuste (R4). */
-function CameraRig({ image }: { image: Size }) {
+function CameraRig({ image, editing }: { image: Size; editing: boolean }) {
   const { camera, size, invalidate } = useThree();
   const controls = useRef<ComponentRef<typeof MapControls>>(null);
   const setCamera = useWorkspaceStore((state) => state.setCamera);
@@ -56,6 +57,13 @@ function CameraRig({ image }: { image: Size }) {
   return (
     <MapControls
       ref={controls}
+      makeDefault
+      // Al editar, el botón izquierdo dibuja y mueve zonas; se desplaza con el derecho o la rueda.
+      mouseButtons={
+        editing
+          ? { LEFT: -1 as MOUSE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
+          : { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
+      }
       enableRotate={false}
       zoomToCursor
       screenSpacePanning
@@ -84,7 +92,17 @@ class TextureErrorBoundary extends Component<
 }
 
 /** Canvas three.js del diagrama (research R3): ortográfico y renderizado bajo demanda. */
-export default function DiagramCanvas({ imageUrl, image }: { imageUrl: string; image: Size }) {
+export default function DiagramCanvas({
+  imageUrl,
+  image,
+  versionId,
+  editing,
+}: {
+  imageUrl: string;
+  image: Size;
+  versionId: string;
+  editing: boolean;
+}) {
   const setImageStatus = useWorkspaceStore((state) => state.setImageStatus);
   return (
     <Canvas
@@ -100,7 +118,8 @@ export default function DiagramCanvas({ imageUrl, image }: { imageUrl: string; i
           <DiagramImage url={imageUrl} image={image} />
         </Suspense>
       </TextureErrorBoundary>
-      <CameraRig image={image} />
+      {editing && <EditorLayer versionId={versionId} image={image} />}
+      <CameraRig image={image} editing={editing} />
     </Canvas>
   );
 }

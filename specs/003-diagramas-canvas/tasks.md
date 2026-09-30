@@ -113,8 +113,8 @@ zonas, con guardado automático y control de concurrencia
 ### Implementation for User Story 2
 
 - [X] T041 [US2] Implementar `apps/api/src/modules/diagrams/activities.service.ts` y `activities.routes.ts` (con `requireResourceProject` y `requireProjectStatus(['draft', 'open'])`) — `feat(api)`
-- [ ] T042 [US2] Implementar la geometría pura `apps/web/src/features/diagrams/editor/geometry.ts`, `EditorLayer.tsx` (dibujar, mover, redimensionar, teclado) y `useAutosave.ts` — `feat(web)`
-- [ ] T043 [US2] Implementar `ActivityForm.tsx` y `TransitionArrows.tsx` en `apps/web/src/features/diagrams/editor/` y el modo `edit` del espacio de trabajo (solo Admin, versión en borrador, viewport ≥ 768 px) — `feat(web)`
+- [X] T042 [US2] Implementar la geometría pura `apps/web/src/features/diagrams/editor/geometry.ts`, `EditorLayer.tsx` (dibujar, mover, redimensionar, teclado) y `useAutosave.ts` — `feat(web)`
+- [X] T043 [US2] Implementar `ActivityForm.tsx` y `TransitionArrows.tsx` en `apps/web/src/features/diagrams/editor/` y el modo `edit` del espacio de trabajo (solo Admin, versión en borrador, viewport ≥ 768 px) — `feat(web)`
 
 **Checkpoint**: US1 y US2 funcionan; quickstart §2 en verde
 
