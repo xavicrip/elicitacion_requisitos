@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-rou
 import { LoginPage } from '../features/auth/LoginPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
+import { ProjectSettingsPage } from '../features/projects/ProjectSettingsPage';
 import { ProjectsPage } from '../features/projects/ProjectsPage';
 import { FlagGate } from '../lib/flags';
 import '../lib/zod';
@@ -27,6 +28,11 @@ export const routes: RouteObject[] = [
       { path: 'entrar', element: accounts(<LoginPage />) },
       { path: 'registro', element: accounts(<RegisterPage />) },
       { path: 'proyectos', loader: requireSession, element: accounts(<ProjectsPage />) },
+      {
+        path: 'proyectos/:projectId',
+        loader: requireSession,
+        element: accounts(<ProjectSettingsPage />),
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

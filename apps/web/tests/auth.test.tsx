@@ -26,6 +26,7 @@ beforeEach(() => {
   handlers = {
     'GET /api/config': () => json(200, { flags: { accounts: true } }),
     'POST /api/auth/refresh': () => json(401, { code: 'SESSION_EXPIRED', message: 'Caducada' }),
+    'GET /api/projects': () => json(200, []),
   };
   vi.stubGlobal(
     'fetch',
