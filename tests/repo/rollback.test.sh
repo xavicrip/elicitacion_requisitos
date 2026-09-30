@@ -38,6 +38,14 @@ first=$(sed -n 1p "$GH_LOG"); last=$(tail -n 1 "$GH_LOG")
 echo "$first" | grep -q "action=migrate-down"; check $? "primero revierte la migración"
 grep -q "run watch" "$GH_LOG"; check $? "espera a que termine la reversión de la migración"
 echo "$last" | grep -q "action=deploy"; check $? "después redespliega el código"
+echo "$first" | grep -q "from_ref=$"; check $? "sin =<desde> revierte desde la versión desplegada"
+
+# 4b. --migrate-down=<desde> (tras un Rollback del panel): pasa la versión mala expandida.
+: > "$GH_LOG"; sh "$SCRIPT" staging "$ref" "--migrate-down=$ref" >/dev/null 2>&1; code=$?
+[ "$code" = "0" ]; check $? "rollback con --migrate-down=<desde> termina con código 0"
+sed -n 1p "$GH_LOG" | grep -q "action=migrate-down -f from_ref=$full"; check $? "pasa la versión que contiene los down"
+: > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --migrate-down=no-existe >/dev/null 2>&1; code=$?
+[ "$code" = "1" ] && [ ! -s "$GH_LOG" ]; check $? "una versión <desde> inexistente termina con 1 sin invocar gh"
 
 # 5. Con --restore-backup: un solo despliegue del ref que restaura el respaldo.
 : > "$GH_LOG"; sh "$SCRIPT" staging "$ref" --restore-backup >/dev/null 2>&1; code=$?
