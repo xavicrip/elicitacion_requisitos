@@ -91,7 +91,7 @@ separación de los E2E, que usan todas las historias
 
 - [ ] T036 [US1] Implementar `apps/api/src/modules/auth/password.ts` (carga la lista de `apps/api/data/` buscándola hacia arriba, como `MIGRATIONS_DIR`) — `feat(api)`
 - [ ] T037 [US1] Implementar `apps/api/src/modules/auth/tokens.ts` — `feat(api)`
-- [ ] T038 [US1] Implementar `apps/api/src/modules/auth/service.ts` (registro con hash ficticio si el email existe, login con contadores Redis `login:fail:{emailHash}` y `login:fail:{ip}`, rotación y detección de reutilización, logout, `lastLoginAt`) — `feat(api)`
+- [ ] T038 [US1] Implementar `apps/api/src/modules/auth/service.ts` (registro con hash ficticio si el email existe, login con contadores Redis `login:fail:{emailHash}` y `login:fail:{ip}` (IP de `clientIp`, research R4), rotación y detección de reutilización, logout, `lastLoginAt`) — `feat(api)`
 - [ ] T039 [US1] Implementar `apps/api/src/modules/auth/routes.ts` y `GET /me`, y registrar los plugins de auth y rate limit y las rutas en `apps/api/src/app.ts` — `feat(api)`
 - [ ] T040 [US1] Implementar `apps/web/src/features/auth/LoginPage.tsx`, `RegisterPage.tsx`, la ruta protegida (loader que llama a `/api/auth/refresh`), el botón de cierre de sesión y una `ProjectsPage` inicial vacía en `apps/web/src/features/projects/ProjectsPage.tsx` — `feat(web)`
 
@@ -180,7 +180,7 @@ estado y última actividad
 - [ ] T063 [P] Actualizar `specs/002-auth-proyectos/quickstart.md` (servicios de prueba, `pnpm --filter @reqcanvas/api test`, `pnpm e2e --project flows`) y el README (variables nuevas y pantallas) — `docs(repo)`
 - [ ] T064 Medir en local el p95 de `POST /auth/login` (< 300 ms) y de "Mis proyectos" con 100 proyectos (< 200 ms) y anotarlo en `plan.md` — `perf(api)`
 - [ ] T065 Configurar Railway **antes de desplegar** (con el selector de entorno comprobado): `JWT_SECRET` (generado por entorno), `JWT_ACCESS_TTL`, `REFRESH_TTL_DAYS` y `APP_BASE_URL` en `api`; `API_INTERNAL_URL=http://api.railway.internal:3000` en `web`; `FEATURE_FLAGS=accounts=true` solo en `staging`; verificar `maxmemory-policy noeviction` en Redis con `/health/deep` (T021); registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
-- [ ] T066 Recorrer quickstart.md en staging (§1–4) con dos navegadores y registrar el resultado en `specs/002-auth-proyectos/quickstart.md` — `docs(repo)`
+- [ ] T066 Recorrer quickstart.md en staging (§1–4) con dos navegadores, comprobar que el bloqueo por IP distingue clientes (el borde de Railway pone `X-Real-IP`, research R4) y registrar el resultado en `specs/002-auth-proyectos/quickstart.md` — `docs(repo)`
 - [ ] T067 Activar `accounts` por defecto (`default: true` en `packages/shared/src/flags.ts`) cuando las cuatro historias y T066 estén en verde, para que entre en la siguiente release; retirar el flag y sus comprobaciones en un commit posterior y separado (constitución IV) — `feat(shared)`
 
 ---

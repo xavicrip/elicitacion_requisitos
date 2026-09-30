@@ -42,6 +42,20 @@ describe('rate limit de /auth/* (research R4)', () => {
     expect((await hit('10.0.0.3', '/libre')).statusCode).toBe(200);
   });
 
+  it('detrás del proxy de web, identifica al cliente por X-Real-IP y no por la IP de web', async () => {
+    const viaProxy = (clientIp: string) =>
+      app.inject({
+        method: 'POST',
+        url: '/auth/prueba',
+        remoteAddress: '10.9.9.9', // contenedor web: la misma para todos los clientes
+        headers: { 'x-real-ip': clientIp },
+      });
+    for (let i = 0; i < 20; i++) expect((await viaProxy('203.0.113.1')).statusCode).toBe(200);
+    expect((await viaProxy('203.0.113.1')).statusCode).toBe(429);
+    // Otro cliente detrás del mismo proxy no hereda el límite del primero.
+    expect((await viaProxy('203.0.113.2')).statusCode).toBe(200);
+  });
+
   it('guarda los contadores en Redis (compartidos entre réplicas de api)', async () => {
     const keys = await app.redis.keys('rl-test-*');
     expect(keys.length).toBeGreaterThan(0);

@@ -48,6 +48,10 @@
   mensaje genérico ("Email o contraseña incorrectos").
 - **Rationale**: FR-004; el contador por email y por IP frena tanto la fuerza bruta dirigida
   como el *credential stuffing*.
+- **IP del cliente** (2026-09-30, al implementar el proxy): detrás de Caddy, `api` ve la IP del
+  contenedor `web`. El borde de Railway pone la IP del cliente en `X-Real-IP`; Caddy la reenvía
+  (o pone la de quien conecta, sin borde) y `api` la usa (`src/lib/client-ip.ts`) en el rate
+  limit y en el bloqueo por IP. Se verifica en staging (T066).
 
 ## R5. Registro sin enumeración de cuentas
 
