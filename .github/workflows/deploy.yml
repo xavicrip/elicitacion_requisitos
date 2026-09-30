@@ -32,6 +32,10 @@ on:
         type: choice
         options: [deploy, migrate-down, restore-backup]
         default: deploy
+      from_ref:
+        description: 'migrate-down: versión cuyas migraciones revertir (vacío = la de api /version)'
+        type: string
+        default: ''
       backup_key:
         description: 'restore-backup: clave del respaldo en el bucket (latest = el más reciente)'
         type: string
@@ -167,18 +171,22 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       ENVIRONMENT: ${{ needs.plan.outputs.environment }}
       TARGET_REF: ${{ needs.plan.outputs.ref }}
+      FROM_REF: ${{ inputs.from_ref }}
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: npm install --global @railway/cli@4
-      - name: Versión desplegada y migraciones que revertir
+      - name: Versión con las migraciones que revertir
         id: current
         run: |
-          commit=$(curl -fsS "${{ vars.API_URL }}/version" | jq -r .commit)
-          git checkout --quiet "$commit"
+          # Por defecto, la versión desplegada. Tras un Rollback del panel de Railway, api ya sirve
+          # la versión anterior y hay que indicar la versión mala en from_ref.
+          from="${FROM_REF:-$(curl -fsS "${{ vars.API_URL }}/version" | jq -r .commit)}"
+          git checkout --quiet "$from"
+          commit=$(git rev-parse --short HEAD)
           file=$(scripts/first-new-migration.sh "$TARGET_REF" HEAD)
-          echo "Desplegado: $commit · revertir desde: ${file:-(ninguna)}"
+          echo "Versión con los down: $commit · revertir desde: ${file:-(ninguna)}"
           {
             echo "commit=$commit"
             echo "version=$(git describe --tags --always)-migrate-down"
