@@ -20,6 +20,21 @@
 		respond `{"status":"ok","service":"web"}` 200
 	}
 
+	# IP del cliente para api (rate limit y bloqueo por origen, FR-004): el borde de Railway la
+	# envía en X-Real-IP; sin él (Compose, CI) se usa la IP de quien conecta.
+	map {http.request.header.X-Real-IP} {client_real_ip} {
+		"" {remote_host}
+		default {http.request.header.X-Real-IP}
+	}
+
+	# Proxy de la API por la red privada (feature 002, research R2): web y api comparten origen
+	# y la cookie de sesión funciona con SameSite=Strict. handle_path quita el prefijo /api.
+	handle_path /api/* {
+		reverse_proxy {$API_INTERNAL_URL} {
+			header_up X-Real-IP {client_real_ip}
+		}
+	}
+
 	handle {
 		root * /srv
 		# La configuración cambia por entorno: nunca en caché.

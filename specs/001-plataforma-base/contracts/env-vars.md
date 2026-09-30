@@ -45,7 +45,8 @@ se definen como referencias (`${{MongoDB.MONGO_URL}}`), no como valores copiados
 | Variable | Obligatoria | Ejemplo | Descripción |
 |----------|-------------|---------|-------------|
 | `PORT` | Sí | Asignada por Railway | Puerto de Caddy |
-| `API_PUBLIC_URL` | Sí | `https://${{api.RAILWAY_PUBLIC_DOMAIN}}` | Se escribe en `/config.js` al arrancar |
+| `API_INTERNAL_URL` | Sí | `http://api.railway.internal:3000` (Compose: `http://api:3000`) | Destino del proxy `/api/*` de Caddy (feature 002, research R2) |
+| `API_PUBLIC_URL` | No | `https://${{api.RAILWAY_PUBLIC_DOMAIN}}` | Se escribe en `/config.js`; opcional desde la feature 002 (el frontend usa rutas relativas `/api`) |
 
 ## GitHub (secrets y variables por Environment)
 

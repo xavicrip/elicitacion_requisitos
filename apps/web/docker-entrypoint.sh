@@ -4,6 +4,7 @@
 set -eu
 
 WEB_ROOT="${WEB_ROOT:-/srv}"
+API_INTERNAL_URL="${API_INTERNAL_URL:-}"
 API_PUBLIC_URL="${API_PUBLIC_URL:-}"
 APP_VERSION="${APP_VERSION:-dev}"
 
@@ -12,9 +13,17 @@ fail() {
   exit 1
 }
 
-[ -n "$API_PUBLIC_URL" ] || fail "Configuración incompleta" "API_PUBLIC_URL"
-# Solo URLs http(s) sin comillas, espacios ni barras invertidas: se inyectan en JavaScript.
-echo "$API_PUBLIC_URL" | grep -Eq '^https?://[^"\\ <>]+$' || fail "Valor inválido" "API_PUBLIC_URL"
+# Solo URLs http(s) sin comillas, espacios ni barras invertidas.
+valid_url() { echo "$1" | grep -Eq '^https?://[^"\\ <>]+$'; }
+
+# Destino del proxy /api (Caddyfile): red privada de Railway o servicio `api` de Compose.
+[ -n "$API_INTERNAL_URL" ] || fail "Configuración incompleta" "API_INTERNAL_URL"
+valid_url "$API_INTERNAL_URL" || fail "Valor inválido" "API_INTERNAL_URL"
+
+# Opcional desde la feature 002: el frontend llama a la API con rutas relativas (/api).
+if [ -n "$API_PUBLIC_URL" ]; then
+  valid_url "$API_PUBLIC_URL" || fail "Valor inválido" "API_PUBLIC_URL"
+fi
 echo "$APP_VERSION" | grep -Eq '^[A-Za-z0-9._+-]+$' || fail "Valor inválido" "APP_VERSION"
 
 printf 'window.__REQCANVAS_CONFIG__={"apiUrl":"%s","version":"%s"};\n' \

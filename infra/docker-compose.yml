@@ -94,6 +94,8 @@ services:
         APP_VERSION: ${APP_VERSION:-dev}
     environment:
       PORT: 8080
+      # Proxy /api → api por la red de Compose (feature 002).
+      API_INTERNAL_URL: http://api:3000
       API_PUBLIC_URL: http://localhost:3000
       APP_VERSION: ${APP_VERSION:-dev}
     ports:

@@ -16,6 +16,12 @@ test('web /health responde 200', async ({ request }) => {
   expect(await response.json()).toMatchObject({ status: 'ok', service: 'web' });
 });
 
+test('el proxy de web llega a api (/api/health, feature 002)', async ({ request }) => {
+  const response = await request.get('/api/health');
+  expect(response.status(), await response.text()).toBe(200);
+  expect(await response.json()).toMatchObject({ service: 'api' });
+});
+
 test('api /health/deep responde 200 con mongo, redis y analytics arriba', async ({ request }) => {
   const response = await request.get(`${API_URL}/health/deep`, {
     headers: { 'x-request-id': `smoke-${Date.now()}` },
