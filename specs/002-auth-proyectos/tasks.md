@@ -181,7 +181,7 @@ estado y última actividad
 - [X] T064 Medir en local el p95 de `POST /auth/login` (< 300 ms) y de "Mis proyectos" con 100 proyectos (< 200 ms) y anotarlo en `plan.md` — `perf(api)`
 - [X] T065 Configurar Railway **antes de desplegar** (con el selector de entorno comprobado): `JWT_SECRET` (generado por entorno), `JWT_ACCESS_TTL`, `REFRESH_TTL_DAYS` y `APP_BASE_URL` en `api`; `API_INTERNAL_URL=http://api.railway.internal:3000` en `web`; `FEATURE_FLAGS=accounts=true` solo en `staging`; verificar `maxmemory-policy noeviction` en Redis con `/health/deep` (T021); registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [X] T066 Recorrer quickstart.md en staging (§1–4) con dos navegadores, repetir las mediciones de T064, comprobar que el bloqueo por IP distingue clientes (el borde de Railway pone `X-Real-IP`, research R4) y registrar el resultado en `specs/002-auth-proyectos/quickstart.md` — `docs(repo)`
-- [ ] T067 Activar `accounts` por defecto (`default: true` en `packages/shared/src/flags.ts`) cuando las cuatro historias y T066 estén en verde, para que entre en la siguiente release; retirar el flag y sus comprobaciones en un commit posterior y separado (constitución IV) — `feat(shared)`
+- [X] T067 Activar `accounts` por defecto (`default: true` en `packages/shared/src/flags.ts`) cuando las cuatro historias y T066 estén en verde, para que entre en la siguiente release; retirar el flag y sus comprobaciones en un commit posterior y separado (constitución IV) — `feat(shared)`
 
 ---
 
