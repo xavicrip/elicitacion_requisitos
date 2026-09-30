@@ -7,20 +7,38 @@ import { z } from 'zod';
 export const PASSWORD_MIN_LENGTH = 10;
 export const PASSWORD_MAX_LENGTH = 128;
 
-const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());
+const EmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email({ error: 'Escribe un email válido.' }));
 
 /** Cuerpo de POST /auth/register (contracts/auth-projects.openapi.yaml). */
 export const RegisterInputSchema = z.object({
-  name: z.string().trim().min(1).max(80),
+  name: z
+    .string()
+    .trim()
+    .min(1, { error: 'Escribe tu nombre.' })
+    .max(80, { error: 'El nombre admite como máximo 80 caracteres.' }),
   email: EmailSchema,
   // Sin trim: los espacios forman parte de la contraseña.
-  password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+  password: z
+    .string()
+    .min(PASSWORD_MIN_LENGTH, {
+      error: `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`,
+    })
+    .max(PASSWORD_MAX_LENGTH, {
+      error: `La contraseña admite como máximo ${PASSWORD_MAX_LENGTH} caracteres.`,
+    }),
 });
 
 /** Cuerpo de POST /auth/login. No aplica la política: solo se comprueba el hash. */
 export const LoginInputSchema = z.object({
   email: EmailSchema,
-  password: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+  password: z
+    .string()
+    .min(1, { error: 'Escribe tu contraseña.' })
+    .max(PASSWORD_MAX_LENGTH, { error: 'Email o contraseña incorrectos' }),
 });
 
 /** Usuario de la sesión (`User` del contrato). Nunca incluye datos de la credencial. */
