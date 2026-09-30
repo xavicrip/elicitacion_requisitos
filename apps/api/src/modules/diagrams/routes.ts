@@ -83,6 +83,19 @@ export async function diagramRoutes(app: FastifyInstance) {
     },
   );
 
+  routes.post(
+    '/diagram-versions/:id/publish',
+    {
+      preHandler: [
+        app.requireAuth,
+        app.requireResourceProject(diagrams.loadVersion, 'admin'),
+        app.requireProjectStatus([...WRITABLE]),
+      ],
+      schema: { params: IdParams, response: { 200: DiagramVersionSchema } },
+    },
+    async (request) => diagrams.publish(request.resource as DiagramVersion, request.user.id),
+  );
+
   routes.get(
     '/diagram-versions/:id',
     {
