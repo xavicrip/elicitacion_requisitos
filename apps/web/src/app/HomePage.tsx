@@ -1,5 +1,10 @@
-import { CanvasPreview } from '../components/CanvasPreview';
+import { lazy, Suspense } from 'react';
 import { supportsWebGL2 } from '../lib/config';
+
+// three.js en un chunk aparte: no bloquea la carga inicial de la app.
+const CanvasPreview = lazy(() =>
+  import('../components/CanvasPreview').then((module) => ({ default: module.CanvasPreview })),
+);
 
 export function HomePage() {
   return (
@@ -7,7 +12,9 @@ export function HomePage() {
       <h1 className="text-3xl font-semibold">ReqCanvas</h1>
       <p>Levantamiento colaborativo de requisitos sobre diagramas UML de actividades.</p>
       {supportsWebGL2() ? (
-        <CanvasPreview />
+        <Suspense fallback={null}>
+          <CanvasPreview />
+        </Suspense>
       ) : (
         <p role="status">
           Tu navegador no soporta WebGL 2. Usa una versión reciente de Chrome, Edge, Firefox o
