@@ -112,6 +112,7 @@ export type BBox = z.infer<typeof BBoxSchema>;
 export type ActivityInput = z.infer<typeof ActivityInputSchema>;
 export type ActivityPatch = z.infer<typeof ActivityPatchSchema>;
 export type Activity = z.infer<typeof ActivitySchema>;
+export type DiagramInput = z.infer<typeof DiagramInputSchema>;
 export type DiagramSummary = z.infer<typeof DiagramSummarySchema>;
 export type DiagramVersion = z.infer<typeof DiagramVersionSchema>;
 export type VersionWithActivities = z.infer<typeof VersionWithActivitiesSchema>;

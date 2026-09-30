@@ -96,3 +96,57 @@ export async function apiFetch<T>(path: string, options: Options = {}): Promise<
   const text = await response.text();
   return (text ? JSON.parse(text) : undefined) as T;
 }
+
+/**
+ * Lee un recurso binario de la API (imágenes de diagramas) con la sesión: `<img>` y las
+ * texturas no pueden enviar el access token. `url` es la ruta del contrato (`/api/…`).
+ */
+export async function apiBlob(url: string): Promise<Blob> {
+  const path = url.startsWith(API_BASE) ? url.slice(API_BASE.length) : url;
+  let response = await send(path, {});
+  if (response.status === 401 && (await refreshSession())) response = await send(path, {});
+  if (!response.ok) throw await toApiError(response);
+  return response.blob();
+}
+
+function xhrUpload(
+  path: string,
+  form: FormData,
+  onProgress?: (percent: number) => void,
+): Promise<{ status: number; text: string }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE}${path}`);
+    const token = useAuthStore.getState().accessToken;
+    if (token) xhr.setRequestHeader('authorization', `Bearer ${token}`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100));
+    };
+    xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
+    xhr.onerror = () =>
+      reject(
+        new ApiError(
+          0,
+          'NETWORK_ERROR',
+          'No se pudo conectar con el servidor. Inténtalo de nuevo.',
+        ),
+      );
+    xhr.send(form);
+  });
+}
+
+/** Subida `multipart/form-data` con progreso (`fetch` no lo informa); refresca tras un 401. */
+export async function apiUpload<T>(
+  path: string,
+  form: FormData,
+  onProgress?: (percent: number) => void,
+): Promise<T> {
+  let result = await xhrUpload(path, form, onProgress);
+  if (result.status === 401 && (await refreshSession())) {
+    result = await xhrUpload(path, form, onProgress);
+  }
+  if (result.status < 200 || result.status >= 300) {
+    throw await toApiError(new Response(result.text || null, { status: result.status }));
+  }
+  return JSON.parse(result.text) as T;
+}
