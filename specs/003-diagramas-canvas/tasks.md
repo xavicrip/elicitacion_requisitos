@@ -89,7 +89,7 @@ trabajo en *borrador*; se valida el contenido real
 - [X] T032 [US1] Implementar `apps/api/src/modules/diagrams/routes.ts` (diagramas, versiones, lectura de versión con sus actividades) y `image.routes.ts` (streaming desde el bucket con caché y `ETag`), y registrarlas en `apps/api/src/app.ts` — `feat(api)`
 - [X] T033 [US1] Registrar la cascada `app.registerProjectCascade('diagrams', …)` en `apps/api/src/modules/diagrams/cascade.ts` — `feat(api)`
 - [X] T034 [US1] Implementar `DiagramListPage.tsx` y `UploadDialog.tsx` en `apps/web/src/features/diagrams/` y la ruta `/proyectos/:projectId/diagramas` (detrás del flag) — `feat(web)`
-- [ ] T035 [US1] Implementar el espacio de trabajo mínimo: `WorkspacePage.tsx` y `DiagramCanvas.tsx` (`<Canvas orthographic frameloop="demand">`, plano con la textura servida por `/api`, `MapControls` con zoom y desplazamiento básicos, aviso sin WebGL 2) en `apps/web/src/features/diagrams/workspace/`, ruta `/proyectos/:projectId/diagramas/:diagramId`; excluir `image/*` del `encode` de `apps/web/Caddyfile` (no recomprimir WebP ni debilitar el `ETag`) — `feat(web)`
+- [X] T035 [US1] Implementar el espacio de trabajo mínimo: `WorkspacePage.tsx` y `DiagramCanvas.tsx` (`<Canvas orthographic frameloop="demand">`, plano con la textura servida por `/api`, `MapControls` con zoom y desplazamiento básicos, aviso sin WebGL 2) en `apps/web/src/features/diagrams/workspace/`, ruta `/proyectos/:projectId/diagramas/:diagramId`; excluir `image/*` del `encode` de `apps/web/Caddyfile` (no recomprimir WebP ni debilitar el `ETag`) — `feat(web)`
 
 **Checkpoint**: US1 funcional; quickstart §1 en verde
 
