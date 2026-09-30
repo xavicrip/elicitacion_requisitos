@@ -31,13 +31,12 @@ describe('migraciones', () => {
       ),
     ).toBe(true);
 
-    await runMigrations('down', { url: MONGO_TEST_URL, dbName });
+    // `down` revierte una migración cada vez: se revierten todas, de la última a la primera.
+    const target = { url: MONGO_TEST_URL, dbName };
+    while ((await migrationsStatus(target)).some((m) => m.appliedAt !== 'PENDING')) {
+      await runMigrations('down', target);
+    }
     expect(await schemaDoc()).toBeNull();
-    expect(
-      (await migrationsStatus({ url: MONGO_TEST_URL, dbName })).some(
-        (m) => m.appliedAt === 'PENDING',
-      ),
-    ).toBe(true);
 
     await runMigrations('up', { url: MONGO_TEST_URL, dbName });
     expect(await schemaDoc()).toMatchObject({ version: 1 });
