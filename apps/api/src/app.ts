@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { featureGatePlugin } from './plugins/flags.js';
 import { mongoPlugin } from './plugins/mongo.js';
 import { genReqId, observability, REDACT_PATHS } from './plugins/observability.js';
 import { redisPlugin } from './plugins/redis.js';
@@ -59,6 +60,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   const services = options.services;
   if (services) {
     const checkTimeoutMs = services.checkTimeoutMs ?? 2000;
+    const flags = loadFlags(services.featureFlags, (message) => app.log.warn(message));
+    await app.register(featureGatePlugin, { flags });
     await app.register(mongoPlugin, {
       url: services.mongoUrl,
       dbName: services.mongoDb,
@@ -70,7 +73,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       version: services.version,
       commit: services.commit,
       checkTimeoutMs,
-      flags: loadFlags(services.featureFlags, (message) => app.log.warn(message)),
+      flags,
     });
   }
 

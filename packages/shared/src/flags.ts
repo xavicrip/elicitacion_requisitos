@@ -17,7 +17,14 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
  * Registro de flags del proyecto. Cada feature añade aquí los suyos (nombre en kebab-case).
  * Ver docs/feature-flags.md.
  */
-export const FLAGS = defineFlags({});
+export const FLAGS = defineFlags({
+  accounts: {
+    description:
+      'Cuentas, proyectos e invitaciones (registro, login y "Mis proyectos"); oculto hasta completar la feature',
+    default: false,
+    owner: '002-auth-proyectos',
+  },
+});
 
 /**
  * Resuelve los flags a partir de `FEATURE_FLAGS` (`nombre=true|false`, separados por comas).

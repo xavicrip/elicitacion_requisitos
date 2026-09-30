@@ -24,6 +24,15 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 2. Léelo en la API con `loadFlags(process.env.FEATURE_FLAGS)` (`apps/api/src/lib/flags.ts`).
    El frontend recibe los flags activos en `GET /config`.
 
+## Flags actuales
+
+| Flag       | Por defecto | Feature              | Qué oculta                                                                                                                                            |
+| ---------- | ----------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accounts` | `false`     | `002-auth-proyectos` | Registro, login, "Mis proyectos" e invitaciones: las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra |
+
+En local y en CI, Compose activa `accounts` (`infra/docker-compose.yml`); en Railway, solo
+`staging` hasta completar la feature.
+
 ## Activarlo por entorno
 
 Variable `FEATURE_FLAGS` en Railway (o en `.env` en local):

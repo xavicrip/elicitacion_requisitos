@@ -9,7 +9,10 @@ export const TEST_JWT_SECRET = 'secreto-de-prueba-de-al-menos-32-bytes!!';
  * App con MongoDB (base de datos única, ya migrada) y Redis reales, sin montar las rutas de
  * negocio: cada prueba registra los plugins y rutas que necesita antes de `ready()`.
  */
-export async function buildTestApp(prefix: string): Promise<{
+export async function buildTestApp(
+  prefix: string,
+  options: { featureFlags?: string } = {},
+): Promise<{
   app: FastifyInstance;
   dbName: string;
 }> {
@@ -24,7 +27,8 @@ export async function buildTestApp(prefix: string): Promise<{
       analyticsUrl: 'http://127.0.0.1:9',
       version: 'test',
       commit: 'test',
-      featureFlags: undefined,
+      // Las pruebas de la 002 necesitan el flag `accounts`; '' deja los valores por defecto.
+      featureFlags: options.featureFlags ?? 'accounts=true',
     },
   });
   await app.mongo.asPromise();
