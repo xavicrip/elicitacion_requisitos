@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.3.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.2.0...v0.3.0) (2026-09-30)
+
+
+### Funcionalidades
+
+* **api:** add project create, list, edit and status endpoints ([c4da218](https://github.com/xavicrip/elicitacion_requisitos/commit/c4da218612eaa27f4221e9fac9f108ef934d1339))
+* **api:** add project members and invitation links ([0d7c759](https://github.com/xavicrip/elicitacion_requisitos/commit/0d7c759d956ef725bed6912b65f7566a9c654862))
+* **api:** add project role and status guards ([75530d0](https://github.com/xavicrip/elicitacion_requisitos/commit/75530d090238a8731dd8622e21e83fbec148f84a))
+* **api:** add refresh token and session helpers ([03acc58](https://github.com/xavicrip/elicitacion_requisitos/commit/03acc5828068c5193adf7c40bf8d3716d7be1ee9))
+* **api:** add register, login, refresh, logout and me endpoints ([041eec0](https://github.com/xavicrip/elicitacion_requisitos/commit/041eec0e3195c072ef5e873a9c1f2849c6e3442d))
+* **api:** add session environment variables ([320c3b9](https://github.com/xavicrip/elicitacion_requisitos/commit/320c3b9375dd377851db9e96dd6776c64c8388a0))
+* **api:** add the audit log service ([6ba19d7](https://github.com/xavicrip/elicitacion_requisitos/commit/6ba19d7611dc11ea7036862b3edcb9fcaff9322d))
+* **api:** add the auth and projects indexes migration ([f75467a](https://github.com/xavicrip/elicitacion_requisitos/commit/f75467a054c709d355951ca986ddedb912926766))
+* **api:** add the JWT authentication plugin ([9c265b7](https://github.com/xavicrip/elicitacion_requisitos/commit/9c265b7f88be9f998a20c3d50bd0c14349e541da))
+* **api:** add the Redis-backed rate limit for auth routes ([0067b1e](https://github.com/xavicrip/elicitacion_requisitos/commit/0067b1eff8ed5fc42caa9a1e9754bfe58a35dcf1))
+* **api:** add users, projects, invitations, refresh token and audit models ([861b2b4](https://github.com/xavicrip/elicitacion_requisitos/commit/861b2b4480b3a9ac3001d1a575bb2fda7ac8a8c3))
+* **api:** delete projects asynchronously with a BullMQ cascade job ([5aea66a](https://github.com/xavicrip/elicitacion_requisitos/commit/5aea66ae6a4c32acbaafd062d155254e6b5ebb16))
+* **api:** hash passwords with argon2id and check the password policy ([d1afe25](https://github.com/xavicrip/elicitacion_requisitos/commit/d1afe25f37d8b69e3190212375c6aa8115d41f47))
+* **api:** validate with zod and answer errors in the contract format ([3e8ac08](https://github.com/xavicrip/elicitacion_requisitos/commit/3e8ac080b0dd5b4f104fa340f079c57bd1b5a2bb))
+* **api:** warn when Redis does not use the noeviction policy ([5bab0e6](https://github.com/xavicrip/elicitacion_requisitos/commit/5bab0e63041b31d0f2e0fd87bf7732e625717862))
+* **shared:** add auth and project schemas ([8e0ebb7](https://github.com/xavicrip/elicitacion_requisitos/commit/8e0ebb7129017117d39ae8631f52e687dc49bf38))
+* **shared:** hide the 002 feature behind the accounts flag ([bdcf885](https://github.com/xavicrip/elicitacion_requisitos/commit/bdcf8853551ab2b115c7ae8c6916b7275a3231e4))
+* **shared:** turn the accounts flag on by default ([39e69fc](https://github.com/xavicrip/elicitacion_requisitos/commit/39e69fc47c434543de57daf4ce6495a722961917))
+* **web:** add sign-up, login, logout and the empty "Mis proyectos" page ([ce16bce](https://github.com/xavicrip/elicitacion_requisitos/commit/ce16bce902cab418536b5cda8aa94fbd988329cd))
+* **web:** add the API client and in-memory session store ([3c11e50](https://github.com/xavicrip/elicitacion_requisitos/commit/3c11e50bd39a90b407f7590aebda387cfd326fca))
+* **web:** add the members panel and the invitation page ([1efe023](https://github.com/xavicrip/elicitacion_requisitos/commit/1efe02361b0d155ba0b25d2aec4a3e321451b34f))
+* **web:** add the project not found view and test role-based actions ([0e5e7b9](https://github.com/xavicrip/elicitacion_requisitos/commit/0e5e7b93daea9202e8ee6fbe167ea315591e1106))
+* **web:** add the router, query client and layout ([bae2290](https://github.com/xavicrip/elicitacion_requisitos/commit/bae229017b3402cb2ca77bd072548c4c3d37411a))
+* **web:** list, create, edit, change status and delete projects ([7cfc259](https://github.com/xavicrip/elicitacion_requisitos/commit/7cfc259e1a46e483aa74453986346cb1da2a087d))
+* **web:** proxy /api to the api service through the private network ([fcd1d8b](https://github.com/xavicrip/elicitacion_requisitos/commit/fcd1d8b4c6390efec847de439861a3f6159bd46b))
+
+
+### Correcciones
+
+* **api:** rate limit by the client IP instead of the proxy's ([a14b9e9](https://github.com/xavicrip/elicitacion_requisitos/commit/a14b9e96570118791574c9c7ae10b07a153ab546))
+
+
+### Rendimiento
+
+* **api:** record local login and project list latency ([8b55543](https://github.com/xavicrip/elicitacion_requisitos/commit/8b555438e2b191ac868c6f0159c4906d8cb3c7e3))
+
+
+### CI/CD
+
+* pin gitleaks to the version that understands our allowlist ([69574bd](https://github.com/xavicrip/elicitacion_requisitos/commit/69574bd5beeb02797ad87fee0a6c1ffc4259cf75))
+* split E2E into read-only smoke and data-creating flows ([29bfd98](https://github.com/xavicrip/elicitacion_requisitos/commit/29bfd988971fed7a16848339267620198e65dfcd))
+
 ## [0.2.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.1.0...v0.2.0) (2026-09-30)
 
 
