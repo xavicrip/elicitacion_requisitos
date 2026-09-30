@@ -71,7 +71,12 @@ describe(`migración ${FILE} (data-model.md §Migración)`, () => {
   });
 
   it('down elimina los índices pero conserva los datos (rollback sin pérdida)', async () => {
-    await runMigrations('down', target);
+    // `down` revierte una migración cada vez: las posteriores a esta también se revierten.
+    while (
+      (await migrationsStatus(target)).find((m) => m.fileName === FILE)?.appliedAt !== 'PENDING'
+    ) {
+      await runMigrations('down', target);
+    }
 
     for (const name of ['users', 'projects', 'invitations', 'refresh_tokens', 'audit_logs']) {
       expect(await indexes(name)).toEqual({});

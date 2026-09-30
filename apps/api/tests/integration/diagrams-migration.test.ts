@@ -93,7 +93,12 @@ describe(`migración ${FILE} (data-model.md §Migración)`, () => {
   });
 
   it('down elimina los índices y conserva los datos; up → down → up es repetible', async () => {
-    await runMigrations('down', target);
+    // `down` revierte una migración cada vez: las posteriores a esta también se revierten.
+    while (
+      (await migrationsStatus(target)).find((m) => m.fileName === FILE)?.appliedAt !== 'PENDING'
+    ) {
+      await runMigrations('down', target);
+    }
     for (const name of ['diagrams', 'diagram_versions', 'activities']) {
       expect(await indexes(name)).toEqual({});
     }
