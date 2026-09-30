@@ -1,5 +1,6 @@
 import fastifyRateLimit from '@fastify/rate-limit';
 import fp from 'fastify-plugin';
+import { clientIp } from '../lib/client-ip.js';
 import { HttpError } from '../lib/errors.js';
 
 /** Límite de las rutas `/auth/*`: 20 peticiones por minuto e IP (research R4). */
@@ -22,6 +23,8 @@ export const rateLimitPlugin = fp<RateLimitOptions>(
       redis: app.redis,
       nameSpace,
       skipOnError: true,
+      // Detrás del proxy de web todas las peticiones llegan desde su IP: se usa X-Real-IP.
+      keyGenerator: clientIp,
       errorResponseBuilder: (_request, context) =>
         new HttpError(
           429,
