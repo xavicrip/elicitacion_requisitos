@@ -138,7 +138,7 @@ estado y última actividad
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T050 [US4] Matriz parametrizada (anónimo, no miembro, participante, administrador × filas de proyectos de `contracts/authorization-matrix.md`, más proyecto en `deleting`) en `apps/api/tests/integration/authorization.matrix.test.ts`, con un helper de siembra en `apps/api/tests/helpers/seed.ts`, y las correcciones que requiera en `apps/api/src/modules/projects/routes.ts` y `apps/api/src/plugins/authorization.ts` (un solo commit; si la matriz pasa a la primera, se registra en el mensaje) — `test(api)`
+- [X] T050 [US4] Matriz parametrizada (anónimo, no miembro, participante, administrador × filas de proyectos de `contracts/authorization-matrix.md`, más proyecto en `deleting`) en `apps/api/tests/integration/authorization.matrix.test.ts`, con un helper de siembra en `apps/api/tests/helpers/seed.ts`, y las correcciones que requiera en `apps/api/src/modules/projects/routes.ts` y `apps/api/src/plugins/authorization.ts` (un solo commit; si la matriz pasa a la primera, se registra en el mensaje) — `test(api)`
 - [ ] T051 [P] [US4] Pruebas de `web`: un proyecto inexistente o ajeno muestra "Proyecto no encontrado"; un participante no ve las acciones de administración en `apps/web/tests/access-control.test.tsx` — `test(web)`
 - [ ] T052 [P] [US4] E2E en `e2e/flows/access-control.spec.ts`: una segunda cuenta que abre la URL de un proyecto ajeno ve "no encontrado" y la API responde `404` por petición directa — `test(e2e)`
 
