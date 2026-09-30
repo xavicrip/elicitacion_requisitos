@@ -1,0 +1,238 @@
+---
+description: "Task list for feature 002-auth-proyectos"
+---
+
+# Tasks: Autenticación, roles y gestión de proyectos
+
+**Input**: Design documents from `/specs/002-auth-proyectos/`
+**Prerequisites**: plan.md (incluidos los "Ajustes tras implementar la 001"), spec.md,
+research.md, data-model.md, contracts/, quickstart.md
+
+**Tests**: OBLIGATORIAS (Principio III de la constitución). Las pruebas de cada historia se
+escriben primero y se verifica que fallan (rojo) antes de implementar. Las de integración usan
+MongoDB y Redis reales (`pnpm test:services:up` en local; `services` en CI).
+
+**Commits**: Conventional Commits, un commit atómico por tarea; **cada par prueba +
+implementación va en el mismo commit** (Principio IV: todo commit pasa `pnpm test`). El tipo y
+alcance sugeridos van al final de cada tarea.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: se puede hacer en paralelo (archivos distintos, sin dependencias pendientes)
+- **[Story]**: historia de usuario de spec.md (US1–US4)
+
+---
+
+## Phase 1: Setup (Shared Infrastructure)
+
+**Purpose**: dependencias y datos estáticos
+
+- [ ] T001 Añadir a `apps/api/package.json` `@fastify/jwt`, `@fastify/cookie`, `@fastify/rate-limit`, `@node-rs/argon2`, `bullmq` y un `fastify-type-provider-zod` compatible con zod 4; comprobar que `docker build -f apps/api/Dockerfile .` sigue por debajo de 300 MB (límite del CI) — `chore(api)`
+- [ ] T002 [P] Añadir a `apps/web/package.json` `react-router` 7, `@tanstack/react-query` 5, `zustand`, `react-hook-form`, `@hookform/resolvers`, `tailwindcss` 4 y `@tailwindcss/vite`; registrar el plugin en `apps/web/vite.config.ts` y crear `apps/web/src/index.css` con `@import "tailwindcss"` — `chore(web)`
+- [ ] T003 [P] Añadir la lista de las 10 000 contraseñas más comunes en `apps/api/data/common-passwords.txt` (fuera de `src/`, que el `Dockerfile` elimina de la imagen), con su origen y licencia en la cabecera — `chore(api)`
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**Purpose**: configuración, esquemas compartidos, modelos, migración, guards, proxy y
+separación de los E2E, que usan todas las historias
+
+**⚠️ CRITICAL**: ninguna historia puede empezar hasta completar esta fase
+
+- [ ] T004 [P] Pruebas de `loadEnv` para `JWT_SECRET` (obligatoria, ≥ 32 bytes; el error nombra la variable sin mostrar el valor), `JWT_ACCESS_TTL` (defecto `15m`), `REFRESH_TTL_DAYS` (defecto `7`) y `APP_BASE_URL` (URL obligatoria) en `apps/api/tests/unit/env.test.ts` — `test(api)`
+- [ ] T005 Implementar las variables de T004 en `apps/api/src/config/env.ts`; añadirlas a `.env.example`, al servicio `api` de `infra/docker-compose.yml` (valores de desarrollo) y a `specs/001-plataforma-base/contracts/env-vars.md` (solo servicio `api` de Railway, plan ajuste 6) — `feat(api)`
+- [ ] T006 [P] Pruebas de los esquemas zod `RegisterInput`, `LoginInput`, `SessionUser` y de la política de contraseña (≥ 10 caracteres) en `packages/shared/tests/auth.test.ts`, y de `Project`, `ProjectStatus`, `Role`, `ProjectInput` (nombre 1–100, descripción ≤ 2 000) e `Invitation` en `packages/shared/tests/projects.test.ts` — `test(shared)`
+- [ ] T007 Implementar `packages/shared/src/auth.ts` y `packages/shared/src/projects.ts` y exportarlos desde `packages/shared/src/index.ts` — `feat(shared)`
+- [ ] T008 [P] Prueba de integración de la migración (up crea los índices únicos y TTL de data-model.md; down los elimina; `destructive === false`) en `apps/api/tests/integration/auth-projects-migration.test.ts` — `test(api)`
+- [ ] T009 Crear `apps/api/migrations/20261001000000-auth-projects-indexes.js` con `destructive = false`, `up` y `down` según data-model.md §Migración — `feat(api)`
+- [ ] T010 [P] Modelos Mongoose sobre la conexión `app.mongo`: `apps/api/src/modules/users/model.ts` (`passwordHash` con `select: false` y excluido de `toJSON`), `apps/api/src/modules/projects/model.ts`, `apps/api/src/modules/invitations/model.ts`, `apps/api/src/modules/auth/refresh-token.model.ts` y `apps/api/src/modules/audit/model.ts` — `feat(api)`
+- [ ] T011 [P] Pruebas del servicio de auditoría (`record(action, {actorId, projectId, entity, diff})`, sin secretos en `diff`) en `apps/api/tests/integration/audit.test.ts` — `test(api)`
+- [ ] T012 Implementar `apps/api/src/modules/audit/service.ts` — `feat(api)`
+- [ ] T013 Registrar `fastify-type-provider-zod` (validator y serializer) en `apps/api/src/app.ts` y un manejador de errores con el formato `ValidationError` del contrato (`contracts/auth-projects.openapi.yaml`); prueba en `apps/api/tests/unit/validation-errors.test.ts` — `feat(api)`
+- [ ] T014 [P] Pruebas del plugin de autenticación (`@fastify/jwt` HS256 con `JWT_SECRET`, claims `sub`/`sid`, `requireAuth` → 401 sin token, con token caducado o con firma inválida; `userId` añadido al contexto de log) en `apps/api/tests/unit/auth-plugin.test.ts` — `test(api)`
+- [ ] T015 Implementar `apps/api/src/plugins/auth.ts` (`@fastify/jwt`, `@fastify/cookie`, decorador `request.user`, `requireAuth`) y añadir `userId` en `apps/api/src/lib/request-context.ts` — `feat(api)`
+- [ ] T016 [P] Pruebas de `requireProjectRole('member' | 'admin')`: 404 si no es miembro o el proyecto está en `deleting`, 403 si le falta el rol, `request.project` cargado una sola vez, membresía consultada en cada petición (no se cachea en el JWT) en `apps/api/tests/integration/authorization-guard.test.ts` — `test(api)`
+- [ ] T017 Implementar `apps/api/src/plugins/authorization.ts` — `feat(api)`
+- [ ] T018 [P] Pruebas del plugin de rate limit (20 peticiones/min por IP en `/auth/*` con almacén Redis; `429` con `Retry-After`) en `apps/api/tests/integration/rate-limit.test.ts` — `test(api)`
+- [ ] T019 Implementar `apps/api/src/plugins/rate-limit.ts` (`@fastify/rate-limit` sobre `app.redis`) — `feat(api)`
+- [ ] T020 [P] Prueba de la comprobación de Redis para BullMQ (si `maxmemory-policy` no es `noeviction`, log `error` al arrancar y `checks.redis.warning` en `/health/deep`) en `apps/api/tests/integration/redis-policy.test.ts` — `test(api)`
+- [ ] T021 Implementar la comprobación de T020 en `apps/api/src/plugins/redis.ts` y fijar `--maxmemory-policy noeviction` en el Redis de `infra/docker-compose.yml` e `infra/docker-compose.test.yml` (plan, ajuste 7) — `feat(api)`
+- [ ] T022 [P] Pruebas del proxy en `tests/repo/web-proxy.test.sh`: el `Caddyfile` tiene `handle_path /api/*` con `reverse_proxy {$API_INTERNAL_URL}` antes del `handle` de la SPA; `docker-entrypoint.sh` arranca sin `API_PUBLIC_URL` y falla (código 1, nombrando la variable) sin `API_INTERNAL_URL` — `test(web)`
+- [ ] T023 Implementar el proxy (plan, ajuste 2) en `apps/web/Caddyfile` y `apps/web/docker-entrypoint.sh` (`API_PUBLIC_URL` opcional); `API_INTERNAL_URL: http://api:3000` en `infra/docker-compose.yml`; `server.proxy['/api']` (quitando el prefijo) en `apps/web/vite.config.ts`; añadir la prueba a `test:repo` en `package.json` y la variable a `contracts/env-vars.md` de la 001 — `feat(web)`
+- [ ] T024 Separar los E2E (plan, ajuste 4): proyectos `smoke` (`e2e/smoke.spec.ts`) y `flows` (`e2e/flows/**/*.spec.ts`) en `e2e/playwright.config.ts`; `pnpm exec playwright test --project smoke` en `.github/workflows/deploy.yml`; el job `e2e-smoke` de `.github/workflows/ci.yml` ejecuta ambos; helper `e2e/flows/helpers.ts` (registro de un usuario único por prueba vía `/api/auth/register`) — `ci`
+- [ ] T025 [P] Prueba del cliente HTTP de `web` (rutas relativas `/api`, `Authorization: Bearer` con el token en memoria, un único reintento tras `401` refrescando con `/api/auth/refresh`, peticiones concurrentes comparten un solo refresh) en `apps/web/tests/api-client.test.ts` — `test(web)`
+- [ ] T026 Implementar `apps/web/src/lib/api-client.ts` y `apps/web/src/lib/auth-store.ts` (Zustand, access token solo en memoria) — `feat(web)`
+- [ ] T027 Estructura de la app en `apps/web/src/app/router.tsx` (React Router 7 en modo librería, `QueryClientProvider`, layout con Tailwind, ruta raíz que conserva la vista actual con la versión) y `apps/web/src/main.tsx`; actualizar `apps/web/tests/App.test.tsx` — `feat(web)`
+
+**Checkpoint**: fundaciones listas; `pnpm test`, `pnpm e2e --project smoke` y el despliegue siguen en verde
+
+---
+
+## Phase 3: User Story 1 - Registro e inicio de sesión (Priority: P1) 🎯 MVP
+
+**Goal**: una persona se registra, inicia y cierra sesión, y la sesión se renueva sola
+
+**Independent Test**: quickstart.md §1 (registro → "Mis proyectos" vacío → logout → login)
+
+### Tests for User Story 1 ⚠️
+
+- [ ] T028 [P] [US1] Pruebas unitarias de `apps/api/src/modules/auth/password.ts` (argon2id con los parámetros de research R3, verificación, rechazo de < 10 caracteres y de contraseñas de `data/common-passwords.txt`) en `apps/api/tests/unit/password.test.ts` — `test(api)`
+- [ ] T029 [P] [US1] Pruebas unitarias de `apps/api/src/modules/auth/tokens.ts` (access token de 15 min; refresh opaco de 32 bytes guardado solo como hash SHA-256) en `apps/api/tests/unit/tokens.test.ts` — `test(api)`
+- [ ] T030 [P] [US1] Pruebas de contrato de `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout` y `GET /me` contra `contracts/auth-projects.openapi.yaml` (cookie `rt` `httpOnly; SameSite=Strict; Path=/api/auth` y `Secure` salvo en `development`) en `apps/api/tests/contract/auth.contract.test.ts` — `test(api)`
+- [ ] T031 [P] [US1] Pruebas de integración en `apps/api/tests/integration/auth.test.ts`: email duplicado → `409` genérico con tiempo similar (research R5); 5 fallos en 15 min por email o IP → `429` con `Retry-After` y evento `auth.login_failed` en auditoría; rotación del refresh; reutilizar un refresh rotado revoca todo el `sid`; logout revoca la sesión; `passwordHash` nunca aparece en respuestas ni logs — `test(api)`
+- [ ] T032 [P] [US1] Pruebas de `LoginPage` y `RegisterPage` (validación con los esquemas de `@reqcanvas/shared`, mensaje genérico, redirección a "Mis proyectos") y de la restauración de sesión al cargar en `apps/web/tests/auth.test.tsx` — `test(web)`
+- [ ] T033 [P] [US1] E2E en `e2e/flows/auth.spec.ts`: registro → "Mis proyectos" vacío; recargar conserva la sesión; logout bloquea las rutas protegidas; 6.º intento fallido muestra el aviso de bloqueo — `test(e2e)`
+
+### Implementation for User Story 1
+
+- [ ] T034 [US1] Implementar `apps/api/src/modules/auth/password.ts` (carga la lista de `apps/api/data/` buscándola hacia arriba, como `MIGRATIONS_DIR`) — `feat(api)`
+- [ ] T035 [US1] Implementar `apps/api/src/modules/auth/tokens.ts` — `feat(api)`
+- [ ] T036 [US1] Implementar `apps/api/src/modules/auth/service.ts` (registro con hash ficticio si el email existe, login con contadores Redis `login:fail:{emailHash}` y `login:fail:{ip}`, rotación y detección de reutilización, logout, `lastLoginAt`) — `feat(api)`
+- [ ] T037 [US1] Implementar `apps/api/src/modules/auth/routes.ts` y `GET /me`, y registrar los plugins de auth y rate limit y las rutas en `apps/api/src/app.ts` — `feat(api)`
+- [ ] T038 [US1] Implementar `apps/web/src/features/auth/LoginPage.tsx`, `RegisterPage.tsx`, la ruta protegida (loader que llama a `/api/auth/refresh`), el botón de cierre de sesión y una `ProjectsPage` inicial vacía en `apps/web/src/features/projects/ProjectsPage.tsx` — `feat(web)`
+
+**Checkpoint**: US1 funcional; quickstart §1 en verde con `pnpm dev:up`
+
+---
+
+## Phase 4: User Story 2 - Crear y gestionar proyectos (Priority: P1)
+
+**Goal**: crear, editar, cambiar de estado y eliminar proyectos; "Mis proyectos" con rol,
+estado y última actividad
+
+**Independent Test**: quickstart.md §2
+
+### Tests for User Story 2 ⚠️
+
+- [ ] T039 [P] [US2] Pruebas de contrato de `GET/POST /projects`, `GET/PATCH/DELETE /projects/:id` y `POST /projects/:id/status` en `apps/api/tests/contract/projects.contract.test.ts` — `test(api)`
+- [ ] T040 [P] [US2] Pruebas de integración en `apps/api/tests/integration/projects.test.ts`: el creador queda como `admin` en `draft`; transiciones válidas (`open`, `close`, `reopen`) y `409` en las inválidas; auditoría `project.status_changed`; "Mis proyectos" ordenado por `lastActivityAt` con rol y estado; p95 < 200 ms con 100 proyectos — `test(api)`
+- [ ] T041 [P] [US2] Pruebas del borrado en `apps/api/tests/integration/project-deletion.test.ts`: `confirmName` distinto → `400`; correcto → `202`, `status: deleting` (404 para todos) y job `project-deletion` que ejecuta los manejadores de `registerProjectCascade` de forma idempotente y reintentable — `test(api)`
+- [ ] T042 [P] [US2] Pruebas de `ProjectsPage`, `ProjectSettingsPage` y `DeleteProjectDialog` (el botón solo se activa al escribir el nombre exacto) en `apps/web/tests/projects.test.tsx` — `test(web)`
+- [ ] T043 [P] [US2] E2E en `e2e/flows/projects.spec.ts`: crear → abrir → cerrar → reabrir → eliminar con confirmación — `test(e2e)`
+
+### Implementation for User Story 2
+
+- [ ] T044 [US2] Implementar `apps/api/src/modules/projects/service.ts` (crear, listar, editar, transiciones con auditoría, `lastActivityAt`) — `feat(api)`
+- [ ] T045 [US2] Implementar `apps/api/src/modules/projects/cascade.ts` (`registerProjectCascade`) y el worker BullMQ `apps/api/src/jobs/project-deletion.ts` (conexión propia con `maxRetriesPerRequest: null`, arranca y se cierra con la app) — `feat(api)`
+- [ ] T046 [US2] Implementar `apps/api/src/modules/projects/routes.ts` con `requireAuth` y `requireProjectRole` y registrarlas en `apps/api/src/app.ts` — `feat(api)`
+- [ ] T047 [US2] Implementar en `apps/web/src/features/projects/` la lista, el formulario de creación, `ProjectSettingsPage.tsx` (edición y cambios de estado) y `DeleteProjectDialog.tsx` con TanStack Query — `feat(web)`
+
+**Checkpoint**: US1 y US2 funcionan de forma independiente
+
+---
+
+## Phase 5: User Story 4 - Control de acceso por rol (Priority: P1)
+
+**Goal**: nadie ve ni hace más de lo que su rol permite, por URL ni por petición directa
+
+**Independent Test**: quickstart.md §4 y la matriz de autorización en verde (SC-003)
+
+> Se ejecuta antes de la US3 (P2) por prioridad. Cubre las filas de proyectos de
+> `contracts/authorization-matrix.md` sembrando miembros directamente en la base de datos; la
+> US3 añade las filas de miembros e invitaciones (T055).
+
+### Tests for User Story 4 ⚠️
+
+- [ ] T048 [P] [US4] Matriz parametrizada (anónimo, no miembro, participante, administrador × filas de proyectos de `contracts/authorization-matrix.md`, más proyecto en `deleting`) en `apps/api/tests/integration/authorization.matrix.test.ts`, con un helper de siembra en `apps/api/tests/helpers/seed.ts` — `test(api)`
+- [ ] T049 [P] [US4] Pruebas de `web`: un proyecto inexistente o ajeno muestra "Proyecto no encontrado"; un participante no ve las acciones de administración en `apps/web/tests/access-control.test.tsx` — `test(web)`
+- [ ] T050 [P] [US4] E2E en `e2e/flows/access-control.spec.ts`: una segunda cuenta que abre la URL de un proyecto ajeno ve "no encontrado" y la API responde `404` por petición directa — `test(e2e)`
+
+### Implementation for User Story 4
+
+- [ ] T051 [US4] Corregir en `apps/api/src/modules/projects/routes.ts` y `apps/api/src/plugins/authorization.ts` cualquier fila de la matriz que falle (T048) — `fix(api)`
+- [ ] T052 [US4] Implementar en `web` la vista "Proyecto no encontrado" (`apps/web/src/features/projects/ProjectNotFound.tsx`) y ocultar las acciones de administración según `role` en `apps/web/src/features/projects/` — `feat(web)`
+
+**Checkpoint**: las filas de proyectos de la matriz, al 100 % en verde
+
+---
+
+## Phase 6: User Story 3 - Invitar participantes (Priority: P2)
+
+**Goal**: enlaces de invitación multiuso de 7 días; el Administrador gestiona miembros y roles
+
+**Independent Test**: quickstart.md §3
+
+### Tests for User Story 3 ⚠️
+
+- [ ] T053 [P] [US3] Pruebas de contrato de `/projects/:id/members[/:uid]`, `/projects/:id/invitations[/:iid]`, `GET /invitations/:token` y `POST /invitations/:token/accept` en `apps/api/tests/contract/invitations.contract.test.ts` — `test(api)`
+- [ ] T054 [P] [US3] Pruebas de integración en `apps/api/tests/integration/invitations.test.ts`: el token solo se devuelve al crear y se guarda como hash; caducada o revocada → `410`; aceptar es idempotente (no duplica, conserva el rol); retirar al último admin, degradarlo o que abandone → `409`; un miembro retirado pierde el acceso en la siguiente petición y sus aportes conservan la autoría; auditoría `member.role_changed`, `member.removed`, `invitation.created`, `invitation.revoked` — `test(api)`
+- [ ] T055 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de miembros e invitaciones (incluidos los `409`) — `test(api)`
+- [ ] T056 [P] [US3] Pruebas de `MembersPanel` (cambiar rol, retirar, generar, copiar y revocar enlaces) y de `AcceptInvitationPage` (sin sesión: registro y unión conservando el token; inválida: "Esta invitación ya no es válida") en `apps/web/tests/invitations.test.tsx` — `test(web)`
+- [ ] T057 [P] [US3] E2E en `e2e/flows/invitations.spec.ts` (dos contextos de navegador): generar enlace → registrarse desde el enlace → el proyecto aparece como Participante; el participante no puede crear invitaciones (`403`); revocar → tercera cuenta ve el mensaje; retirar → el participante deja de ver el proyecto — `test(e2e)`
+
+### Implementation for User Story 3
+
+- [ ] T058 [US3] Implementar `apps/api/src/modules/invitations/service.ts` y `routes.ts` (token de 32 bytes en base64url, URL con `APP_BASE_URL` + `/invitacion/{token}`, flag `invite-email` desactivado) — `feat(api)`
+- [ ] T059 [US3] Implementar la gestión de miembros en `apps/api/src/modules/projects/members.ts` (actualizaciones condicionales atómicas para "≥ 1 admin", research R6) y sus rutas — `feat(api)`
+- [ ] T060 [US3] Implementar `apps/web/src/features/projects/MembersPanel.tsx` y `apps/web/src/features/invitations/AcceptInvitationPage.tsx` (ruta `/invitacion/:token`) — `feat(web)`
+
+**Checkpoint**: las cuatro historias funcionan; la matriz completa, al 100 % en verde (SC-003)
+
+---
+
+## Phase 7: Polish & Cross-Cutting Concerns
+
+- [ ] T061 [P] ADR `docs/adr/0004-sesion-y-proxy.md` (research R1, R2 y plan ajustes 2–4) — `docs(adr)`
+- [ ] T062 [P] Actualizar `specs/002-auth-proyectos/quickstart.md` (servicios de prueba, `pnpm --filter @reqcanvas/api test`, `pnpm e2e --project flows`) y el README (variables nuevas y pantallas) — `docs(repo)`
+- [ ] T063 Medir en local el p95 de `POST /auth/login` (< 300 ms) y de "Mis proyectos" con 100 proyectos (< 200 ms) y anotarlo en `plan.md` — `perf(api)`
+- [ ] T064 Configurar Railway **antes de desplegar** (con el selector de entorno comprobado): `JWT_SECRET` (generado por entorno), `JWT_ACCESS_TTL`, `REFRESH_TTL_DAYS` y `APP_BASE_URL` en `api`; `API_INTERNAL_URL=http://api.railway.internal:3000` en `web`; verificar `maxmemory-policy noeviction` en Redis con `/health/deep` (T021); registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
+- [ ] T065 Recorrer quickstart.md en staging (§1–4) con dos navegadores y registrar el resultado en `specs/002-auth-proyectos/quickstart.md` — `docs(repo)`
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Setup (Phase 1)** → **Foundational (Phase 2)** → historias.
+- **US1 (P1)**: tras la Phase 2. Base de las demás (sesión y "Mis proyectos").
+- **US2 (P1)**: tras US1 (usa la sesión y amplía `ProjectsPage`).
+- **US4 (P1)**: tras US2 (sus filas cubren los endpoints de proyectos).
+- **US3 (P2)**: tras US4 (amplía la matriz con sus filas en T055).
+- **Polish**: al final; T064 antes del primer despliegue a staging que incluya T005 (sin `JWT_SECRET`, `api` no arranca y Railway mantiene la versión anterior).
+
+### Within Each User Story
+
+- Pruebas (en rojo) → implementación (en verde) → refactor; cada par se integra en un commit.
+- Modelos (Phase 2) → servicios → rutas → `web` → E2E en verde.
+
+### Parallel Opportunities
+
+- Phase 1: T002 y T003 en paralelo con T001.
+- Phase 2: los pares T004–T005, T006–T007, T008–T009, T011–T012, T014–T015, T016–T017, T018–T019, T020–T021, T022–T023 y T025–T026 son independientes entre sí; T010 en paralelo con todos ellos.
+- Cada historia: todas sus pruebas [P] a la vez; en la US1, T034 y T035 en paralelo.
+
+## Parallel Example: User Story 1
+
+```bash
+# Pruebas en paralelo (deben fallar):
+Task: "Pruebas de password.ts en apps/api/tests/unit/password.test.ts"
+Task: "Pruebas de tokens.ts en apps/api/tests/unit/tokens.test.ts"
+Task: "Contrato de /auth/* y /me en apps/api/tests/contract/auth.contract.test.ts"
+Task: "Integración de auth en apps/api/tests/integration/auth.test.ts"
+Task: "LoginPage y RegisterPage en apps/web/tests/auth.test.tsx"
+Task: "E2E en e2e/flows/auth.spec.ts"
+
+# Implementación en paralelo:
+Task: "password.ts en apps/api/src/modules/auth/password.ts"
+Task: "tokens.ts en apps/api/src/modules/auth/tokens.ts"
+```
+
+## Implementation Strategy
+
+### MVP First
+
+1. Phases 1 y 2 → 2. US1 → **validar con quickstart §1** → desplegar a staging (T064 antes).
+
+### Incremental Delivery
+
+US2 → US4 → US3, cada una desplegable en staging por separado. La release a producción se
+hace con las cuatro historias completas (la US3 es necesaria para el uso colaborativo).
+
+## Notes
+
+- Tareas totales: 65 (Setup 3, Foundational 24, US1 11, US2 9, US4 5, US3 8, Polish 5).
+- Nunca integrar un commit que rompa `pnpm test` (Principio IV).
+- T064 requiere acceso a Railway y lo hace el propietario del proyecto; el resto no requiere
+  permisos externos.
