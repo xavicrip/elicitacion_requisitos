@@ -43,7 +43,8 @@
 
 - **Decision**: `@fastify/rate-limit` con almacén Redis: 20 peticiones/min por IP en `/auth/*`.
   Bloqueo de cuenta: contador Redis `login:fail:{emailHash}` y `login:fail:{ip}` con TTL de
-  15 min; al 5.º fallo se responde `429` con `Retry-After` durante 15 min. Siempre el mismo
+  15 min; los fallos 1–5 responden `401` con el mensaje genérico y, a partir del 6.º intento,
+  `429` con `Retry-After` durante 15 min. Siempre el mismo
   mensaje genérico ("Email o contraseña incorrectos").
 - **Rationale**: FR-004; el contador por email y por IP frena tanto la fuerza bruta dirigida
   como el *credential stuffing*.
