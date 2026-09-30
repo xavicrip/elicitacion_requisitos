@@ -8,6 +8,7 @@ import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
+import { registerDiagramsCascade } from './modules/diagrams/cascade.js';
 import { activityDependentsPlugin } from './modules/diagrams/dependents.js';
 import { imageRoutes } from './modules/diagrams/image.routes.js';
 import { diagramRoutes } from './modules/diagrams/routes.js';
@@ -146,6 +147,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(activityDependentsPlugin);
         await app.register(diagramRoutes);
         await app.register(imageRoutes);
+        registerDiagramsCascade(app);
       }
     }
   }
