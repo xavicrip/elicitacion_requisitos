@@ -3,7 +3,11 @@ import { Types } from 'mongoose';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { invitationsModel } from '../../src/modules/invitations/model';
 import { newRefreshToken } from '../../src/modules/auth/tokens';
+import { activitiesModel } from '../../src/modules/diagrams/models/activity';
+import { diagramsModel } from '../../src/modules/diagrams/models/diagram';
+import { versionsModel, type VersionImage } from '../../src/modules/diagrams/models/version';
 import { buildTestApp, closeTestApp } from '../helpers/app';
+import { DIAGRAM_FLAGS, multipart, fixture, uploadDiagram } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -155,7 +159,7 @@ let app: FastifyInstance;
 let users: { admin: TestUser; participant: TestUser; other: TestUser; outsider: TestUser };
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('matrix', { withAuth: true }));
+  ({ app } = await buildTestApp('matrix', { withAuth: true, featureFlags: DIAGRAM_FLAGS }));
   await app.ready();
   users = {
     admin: await registerTestUser(app, 'Admin'),
@@ -273,5 +277,276 @@ describe('matriz de autorización (SC-003)', () => {
       payload: { role: 'participant' },
     });
     expect(response.statusCode).toBe(409);
+  });
+});
+
+// --- Diagramas, versiones, imágenes y actividades (feature 003, T046)
+
+/** Proyecto con un diagrama publicado (v1) con borrador (v2) y otro solo publicado. */
+type DiagramContext = {
+  projectId: string;
+  diagramId: string;
+  /** Diagrama sin borrador: admite subir una versión nueva. */
+  publishedOnlyDiagramId: string;
+  publishedVersionId: string;
+  draftVersionId: string;
+  publishedActivityId: string;
+  draftActivityId: string;
+};
+
+type DiagramOperation = {
+  name: string;
+  request: (ctx: DiagramContext) => {
+    method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+    url: string;
+    headers?: Record<string, string>;
+    payload?: unknown;
+  };
+  expected: Record<Actor, number>;
+  /** Respuesta del Administrador con el proyecto cerrado (solo lectura). */
+  closedAdmin: number;
+};
+
+const bbox = { x: 0.1, y: 0.1, w: 0.2, h: 0.1 };
+const upload = (fields: Record<string, string>) => {
+  const body = multipart(fields, { buffer: fixture('compra-simple.png'), filename: 'd.png' });
+  return { headers: body.headers, payload: body.payload };
+};
+
+const DIAGRAM_OPERATIONS: DiagramOperation[] = [
+  {
+    name: 'GET /projects/:id/diagrams',
+    request: (c) => ({ method: 'GET', url: `/projects/${c.projectId}/diagrams` }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 200, administrador: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'POST /projects/:id/diagrams',
+    request: (c) => ({
+      method: 'POST',
+      url: `/projects/${c.projectId}/diagrams`,
+      ...upload({ name: 'Nuevo' }),
+    }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 201 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'POST /diagrams/:id/versions',
+    request: (c) => ({
+      method: 'POST',
+      url: `/diagrams/${c.publishedOnlyDiagramId}/versions`,
+      ...upload({}),
+    }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 201 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'GET /diagram-versions/:id (publicada)',
+    request: (c) => ({ method: 'GET', url: `/diagram-versions/${c.publishedVersionId}` }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 200, administrador: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'GET /diagram-versions/:id (borrador)',
+    request: (c) => ({ method: 'GET', url: `/diagram-versions/${c.draftVersionId}` }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 404, administrador: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'GET /diagram-versions/:id/image/display (publicada)',
+    request: (c) => ({
+      method: 'GET',
+      url: `/diagram-versions/${c.publishedVersionId}/image/display`,
+    }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 200, administrador: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'GET /diagram-versions/:id/image/thumb (borrador)',
+    request: (c) => ({ method: 'GET', url: `/diagram-versions/${c.draftVersionId}/image/thumb` }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 404, administrador: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'POST /diagram-versions/:id/publish',
+    request: (c) => ({ method: 'POST', url: `/diagram-versions/${c.draftVersionId}/publish` }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 200 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'POST /diagram-versions/:id/activities',
+    request: (c) => ({
+      method: 'POST',
+      url: `/diagram-versions/${c.draftVersionId}/activities`,
+      payload: { label: 'Nueva', type: 'action', bbox },
+    }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 201 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'PATCH /activities/:id (borrador)',
+    request: (c) => ({
+      method: 'PATCH',
+      url: `/activities/${c.draftActivityId}`,
+      headers: { 'if-match': '"0"' },
+      payload: { label: 'Editada' },
+    }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 200 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'PATCH /activities/:id (publicada: no editable)',
+    request: (c) => ({
+      method: 'PATCH',
+      url: `/activities/${c.publishedActivityId}`,
+      headers: { 'if-match': '"0"' },
+      payload: { label: 'Editada' },
+    }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 409 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'DELETE /activities/:id (borrador)',
+    request: (c) => ({ method: 'DELETE', url: `/activities/${c.draftActivityId}` }),
+    expected: { anónimo: 401, 'no miembro': 404, participante: 403, administrador: 204 },
+    closedAdmin: 409,
+  },
+];
+
+let baseImage: VersionImage;
+
+/** Imagen de una subida real, compartida por las versiones sembradas de la matriz. */
+async function sharedImage(): Promise<VersionImage> {
+  if (baseImage) return baseImage;
+  const projectId = await seedProject(app, { members: [[users.admin, 'admin']] });
+  const { id } = (await uploadDiagram(app, authHeaders(users.admin), projectId)).json();
+  baseImage = (await versionsModel(app.mongo).findById(id).lean())!.image;
+  return baseImage;
+}
+
+async function diagramContext(status: 'open' | 'closed' | 'deleting'): Promise<DiagramContext> {
+  const image = await sharedImage();
+  const projectId = await seedProject(app, {
+    status,
+    members: [
+      [users.admin, 'admin'],
+      [users.participant, 'participant'],
+    ],
+  });
+  const project = new Types.ObjectId(projectId);
+  const createdBy = new Types.ObjectId(users.admin.id);
+  const [diagram, publishedOnly] = await diagramsModel(app.mongo).create([
+    { projectId: project, name: 'Compra', order: 0 },
+    { projectId: project, name: 'Devoluciones', order: 1 },
+  ]);
+  const [published, draft, onlyPublished] = await versionsModel(app.mongo).create([
+    {
+      diagramId: diagram!._id,
+      projectId: project,
+      number: 1,
+      status: 'published',
+      publishedAt: new Date(),
+      image,
+      createdBy,
+    },
+    { diagramId: diagram!._id, projectId: project, number: 2, status: 'draft', image, createdBy },
+    {
+      diagramId: publishedOnly!._id,
+      projectId: project,
+      number: 1,
+      status: 'published',
+      publishedAt: new Date(),
+      image,
+      createdBy,
+    },
+  ]);
+  await diagramsModel(app.mongo).bulkWrite([
+    {
+      updateOne: { filter: { _id: diagram!._id }, update: { publishedVersionId: published!._id } },
+    },
+    {
+      updateOne: {
+        filter: { _id: publishedOnly!._id },
+        update: { publishedVersionId: onlyPublished!._id },
+      },
+    },
+  ]);
+  const activity = (versionId: Types.ObjectId) => ({
+    versionId,
+    diagramId: diagram!._id,
+    projectId: project,
+    label: 'Validar pago',
+    type: 'action' as const,
+    bbox,
+  });
+  const [publishedActivity, draftActivity] = await activitiesModel(app.mongo).create([
+    activity(published!._id),
+    activity(draft!._id),
+  ]);
+  return {
+    projectId,
+    diagramId: diagram!._id.toHexString(),
+    publishedOnlyDiagramId: publishedOnly!._id.toHexString(),
+    publishedVersionId: published!._id.toHexString(),
+    draftVersionId: draft!._id.toHexString(),
+    publishedActivityId: publishedActivity!._id.toHexString(),
+    draftActivityId: draftActivity!._id.toHexString(),
+  };
+}
+
+async function runDiagram(operation: DiagramOperation, actor: Actor, ctx: DiagramContext) {
+  const { headers, ...request } = operation.request(ctx);
+  return app.inject({
+    ...request,
+    headers: { ...headersOf(actor), ...headers },
+    payload: request.payload as string | object | undefined,
+  });
+}
+
+describe('matriz de autorización: diagramas (003)', () => {
+  it.each(
+    DIAGRAM_OPERATIONS.flatMap((operation) =>
+      ACTORS.map((actor) => [operation.name, actor, operation.expected[actor], operation] as const),
+    ),
+  )('%s — %s → %i', async (_name, actor, expected, operation) => {
+    const response = await runDiagram(operation, actor, await diagramContext('open'));
+    expect(response.statusCode, response.body).toBe(expected);
+  });
+
+  it.each(
+    DIAGRAM_OPERATIONS.map(
+      (operation) => [operation.name, operation.closedAdmin, operation] as const,
+    ),
+  )(
+    'proyecto cerrado (solo lectura): %s — administrador → %i',
+    async (_name, expected, operation) => {
+      const response = await runDiagram(operation, 'administrador', await diagramContext('closed'));
+      expect(response.statusCode, response.body).toBe(expected);
+    },
+  );
+
+  it.each(DIAGRAM_OPERATIONS.map((operation) => [operation.name, operation] as const))(
+    'un proyecto en deleting responde 404: %s — administrador',
+    async (_name, operation) => {
+      const response = await runDiagram(
+        operation,
+        'administrador',
+        await diagramContext('deleting'),
+      );
+      expect(response.statusCode).toBe(404);
+    },
+  );
+
+  it('un 404 de una versión ajena es idéntico al de una inexistente', async () => {
+    const ctx = await diagramContext('open');
+    const foreign = await app.inject({
+      url: `/diagram-versions/${ctx.publishedVersionId}`,
+      headers: headersOf('no miembro'),
+    });
+    const missing = await app.inject({
+      url: `/diagram-versions/${new Types.ObjectId().toHexString()}`,
+      headers: headersOf('no miembro'),
+    });
+    expect(foreign.json()).toEqual(missing.json());
   });
 });

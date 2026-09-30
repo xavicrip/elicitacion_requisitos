@@ -131,7 +131,7 @@ versiones copian las actividades conservando su `key`
 
 - [X] T044 [P] [US3] Pruebas de contrato de `POST /diagram-versions/:id/publish` en `apps/api/tests/contract/publish.contract.test.ts` — `test(api)`
 - [X] T045 [P] [US3] Pruebas de integración en `apps/api/tests/integration/diagrams-publish.test.ts`: sin actividades → `422` con la explicación; publicar deja la versión `published`, archiva la anterior y actualiza `publishedVersionId` de forma atómica (índice parcial único); un Participante solo lista y abre versiones publicadas (un borrador → 404); una nueva versión copia las actividades de la última con la misma `key`, nuevos `_id` y `rev` reiniciado (FR-008); el Participante sigue viendo la versión 1 hasta que se publica la 2; auditoría `diagram.published` — `test(api)`
-- [ ] T046 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de diagramas, versiones, imágenes y actividades (anónimo, no miembro, participante, administrador; proyecto `closed`; borrador frente a publicado) — `test(api)`
+- [X] T046 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de diagramas, versiones, imágenes y actividades (anónimo, no miembro, participante, administrador; proyecto `closed`; borrador frente a publicado) — `test(api)`
 - [ ] T047 [P] [US3] Pruebas de `web`: botón "Publicar" (deshabilitado sin actividades, con la explicación), y un Participante ve el diagrama publicado sin herramientas de edición, en `apps/web/tests/diagrams-publish.test.tsx` — `test(web)`
 
 ### Implementation for User Story 3
