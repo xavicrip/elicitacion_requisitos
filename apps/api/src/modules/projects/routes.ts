@@ -55,6 +55,15 @@ export async function projectRoutes(app: FastifyInstance) {
       projects.update(request.project!, request.membership!, request.body, request.user.id),
   );
 
+  routes.delete(
+    '/projects/:projectId',
+    { preHandler: admin, schema: { params: Params, body: z.object({ confirmName: z.string() }) } },
+    async (request, reply) => {
+      await projects.requestDeletion(request.project!, request.body.confirmName, request.user.id);
+      return reply.code(202).send();
+    },
+  );
+
   routes.post(
     '/projects/:projectId/status',
     {
