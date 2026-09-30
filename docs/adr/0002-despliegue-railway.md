@@ -95,3 +95,19 @@ Diferencias respecto a lo previsto:
 - **Espera por versión**: `railway up --ci` termina al acabar el build y la versión anterior sigue
   sirviendo hasta que la nueva pasa su healthcheck; `deploy.yml` espera a que `api /version` y
   `web /config.js` muestren el commit nuevo antes de los smoke tests.
+
+## Variables de la feature 002 (2026-09-30)
+
+Configuradas en ambos entornos antes de integrar la 002 (T065; ADR 0004), con `--skip-deploys`:
+
+| Servicio | Variable           | Staging                                    | Producción                               |
+| -------- | ------------------ | ------------------------------------------ | ---------------------------------------- |
+| `api`    | `JWT_SECRET`       | Secreto propio (`openssl rand -base64 48`) | Secreto propio, distinto del de staging  |
+| `api`    | `APP_BASE_URL`     | `https://${{web.RAILWAY_PUBLIC_DOMAIN}}`   | `https://${{web.RAILWAY_PUBLIC_DOMAIN}}` |
+| `api`    | `FEATURE_FLAGS`    | `accounts=true`                            | Sin definir (`accounts` desactivado)     |
+| `web`    | `API_INTERNAL_URL` | `http://api.railway.internal:3000`         | `http://api.railway.internal:3000`       |
+
+`JWT_ACCESS_TTL` y `REFRESH_TTL_DAYS` usan sus valores por defecto (15 min y 7 días). Sin
+`JWT_SECRET` o `APP_BASE_URL`, `api` no arranca y Railway mantiene la versión anterior. Tras el
+primer despliegue de la 002 se comprueba en `/health/deep` que Redis no avisa de
+`maxmemory-policy` (BullMQ exige `noeviction`).
