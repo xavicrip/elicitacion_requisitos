@@ -16,8 +16,8 @@ así que una cookie de `api` sería de terceros y Safari y Firefox la bloquearí
    - Access token JWT HS256 de 15 min (`JWT_ACCESS_TTL`), con `sub` y `sid`, **solo en
      memoria** en `web` y enviado como `Authorization: Bearer`. No lleva roles: la membresía se
      consulta en cada petición, así que retirar a alguien surte efecto de inmediato.
-   - Refresh token opaco de 32 bytes en la cookie `rt` (`HttpOnly; SameSite=Strict;
-Path=/api/auth`; `Secure` salvo en desarrollo), válido 7 días deslizantes. Se rota en cada
+   - Refresh token opaco de 32 bytes en la cookie `rt` (`HttpOnly`, `SameSite=Strict`,
+     `Path=/api/auth` y `Secure` salvo en desarrollo), válido 7 días deslizantes. Se rota en cada
      uso y en la base de datos solo se guarda su SHA-256. Reutilizar un token ya rotado revoca
      toda la familia (`sid`), salvo en los 10 s siguientes a la rotación (dos pestañas que
      refrescan a la vez).
