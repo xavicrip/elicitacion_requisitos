@@ -60,6 +60,7 @@ describe('almacenamiento S3 (lib/storage)', () => {
     await Promise.all(keys.map((key) => storage.put(key, Buffer.from('x'), 'text/plain')));
     await storage.put('projects/p2/diagrams/otro.txt', Buffer.from('y'), 'text/plain');
 
+    expect(await storage.listKeys('projects/p1/')).toHaveLength(1005);
     expect(await storage.deletePrefix('projects/p1/')).toBe(1005);
     expect(await storage.deletePrefix('projects/p1/')).toBe(0);
     expect(await storage.getStream('projects/p1/diagrams/0.txt')).toBeNull();

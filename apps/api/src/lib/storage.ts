@@ -25,6 +25,8 @@ export type Storage = {
   put(key: string, body: Buffer, contentType: string): Promise<{ etag: string }>;
   /** `null` si el objeto no existe. */
   getStream(key: string): Promise<StoredObject | null>;
+  /** Claves bajo el prefijo (paginando). */
+  listKeys(prefix: string): Promise<string[]>;
   /** Borra todos los objetos del prefijo (paginando); devuelve cuántos borró. */
   deletePrefix(prefix: string): Promise<number>;
   /** Crea el bucket si no existe (solo local y CI: `S3_CREATE_BUCKET`). */
@@ -49,6 +51,18 @@ export function createStorage(config: StorageConfig): Storage {
     credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
     maxAttempts: 2,
   });
+
+  /** Claves del prefijo por páginas de hasta 1000, el mismo límite que DeleteObjects. */
+  async function* pages(prefix: string): AsyncGenerator<string[]> {
+    let token: string | undefined;
+    do {
+      const page = await client.send(
+        new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix, ContinuationToken: token }),
+      );
+      yield (page.Contents ?? []).flatMap(({ Key }) => (Key ? [Key] : []));
+      token = page.IsTruncated ? page.NextContinuationToken : undefined;
+    } while (token);
+  }
 
   return {
     bucket,
@@ -75,26 +89,24 @@ export function createStorage(config: StorageConfig): Storage {
       }
     },
 
+    async listKeys(prefix) {
+      const keys: string[] = [];
+      for await (const page of pages(prefix)) keys.push(...page);
+      return keys;
+    },
+
     async deletePrefix(prefix) {
       let deleted = 0;
-      let token: string | undefined;
-      do {
-        // Máximo 1000 claves por página, el mismo límite que DeleteObjects.
-        const page = await client.send(
-          new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix, ContinuationToken: token }),
+      for await (const keys of pages(prefix)) {
+        if (keys.length === 0) continue;
+        await client.send(
+          new DeleteObjectsCommand({
+            Bucket: bucket,
+            Delete: { Objects: keys.map((Key) => ({ Key })), Quiet: true },
+          }),
         );
-        const keys = (page.Contents ?? []).flatMap(({ Key }) => (Key ? [{ Key }] : []));
-        if (keys.length > 0) {
-          await client.send(
-            new DeleteObjectsCommand({
-              Bucket: bucket,
-              Delete: { Objects: keys, Quiet: true },
-            }),
-          );
-          deleted += keys.length;
-        }
-        token = page.IsTruncated ? page.NextContinuationToken : undefined;
-      } while (token);
+        deleted += keys.length;
+      }
       return deleted;
     },
 
