@@ -20,8 +20,8 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
 export const FLAGS = defineFlags({
   accounts: {
     description:
-      'Cuentas, proyectos e invitaciones (registro, login y "Mis proyectos"); oculto hasta completar la feature',
-    default: false,
+      'Cuentas, proyectos e invitaciones (registro, login y "Mis proyectos"). Activado al completar la 002; se retirará en un commit aparte',
+    default: true,
     owner: '002-auth-proyectos',
   },
   'invite-email': {

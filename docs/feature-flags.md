@@ -26,12 +26,13 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag       | Por defecto | Feature              | Qué oculta                                                                                                                                            |
-| ---------- | ----------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accounts` | `false`     | `002-auth-proyectos` | Registro, login, "Mis proyectos" e invitaciones: las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra |
+| Flag       | Por defecto | Feature              | Qué oculta                                                                                                                                                         |
+| ---------- | ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `accounts` | `true`      | `002-auth-proyectos` | Registro, login, "Mis proyectos" e invitaciones. Desactivado, las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra |
 
-En local y en CI, Compose activa `accounts` (`infra/docker-compose.yml`); en Railway, solo
-`staging` hasta completar la feature.
+Activado por defecto desde que se completó la 002 (T067, 2026-09-30). Para ocultarlo en un
+entorno: `FEATURE_FLAGS=accounts=false`. Se retirará, con sus comprobaciones, en un commit
+aparte.
 
 ## Activarlo por entorno
 

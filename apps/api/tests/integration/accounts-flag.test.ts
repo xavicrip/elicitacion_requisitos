@@ -17,17 +17,17 @@ async function appWithFlags(featureFlags: string): Promise<FastifyInstance> {
 }
 
 describe('registro del flag', () => {
-  it('accounts está registrado, desactivado por defecto y es de la 002', () => {
+  it('accounts está registrado, activado por defecto desde T067 y es de la 002', () => {
     expect(FLAGS).toHaveProperty('accounts');
-    expect(FLAGS.accounts).toMatchObject({ default: false, owner: '002-auth-proyectos' });
+    expect(FLAGS.accounts).toMatchObject({ default: true, owner: '002-auth-proyectos' });
     expect(FLAGS.accounts.description).not.toBe('');
   });
 });
 
-describe('flag accounts desactivado (valor por defecto)', () => {
+describe('flag accounts desactivado (FEATURE_FLAGS=accounts=false)', () => {
   let app: FastifyInstance;
   beforeAll(async () => {
-    app = await appWithFlags('');
+    app = await appWithFlags('accounts=false');
   });
   afterAll(() => closeTestApp(app));
 
@@ -46,10 +46,10 @@ describe('flag accounts desactivado (valor por defecto)', () => {
   });
 });
 
-describe('flag accounts activado', () => {
+describe('flag accounts activado (valor por defecto)', () => {
   let app: FastifyInstance;
   beforeAll(async () => {
-    app = await appWithFlags('accounts=true');
+    app = await appWithFlags('');
   });
   afterAll(() => closeTestApp(app));
 
