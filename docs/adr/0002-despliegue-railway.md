@@ -111,3 +111,23 @@ Configuradas en ambos entornos antes de integrar la 002 (T065; ADR 0004), con `-
 `JWT_SECRET` o `APP_BASE_URL`, `api` no arranca y Railway mantiene la versión anterior. Tras el
 primer despliegue de la 002 se comprueba en `/health/deep` que Redis no avisa de
 `maxmemory-policy` (BullMQ exige `noeviction`).
+
+## Variables de la feature 003 (2026-09-30)
+
+Configuradas en ambos entornos antes de integrar la 003 (T057), como referencias al bucket del
+entorno: el mismo que los respaldos de migraciones (ADR 0003), con las imágenes bajo el prefijo
+`projects/`. Comprobado que coinciden con `BACKUP_S3_*` sin mostrar sus valores.
+
+| Servicio | Variable               | Staging                                    | Producción                           |
+| -------- | ---------------------- | ------------------------------------------ | ------------------------------------ |
+| `api`    | `S3_ENDPOINT`          | `${{reqcanvas-staging.ENDPOINT}}`          | `${{reqcanvas.ENDPOINT}}`            |
+| `api`    | `S3_BUCKET`            | `${{reqcanvas-staging.BUCKET}}`            | `${{reqcanvas.BUCKET}}`              |
+| `api`    | `S3_REGION`            | `${{reqcanvas-staging.REGION}}`            | `${{reqcanvas.REGION}}`              |
+| `api`    | `S3_ACCESS_KEY_ID`     | `${{reqcanvas-staging.ACCESS_KEY_ID}}`     | `${{reqcanvas.ACCESS_KEY_ID}}`       |
+| `api`    | `S3_SECRET_ACCESS_KEY` | `${{reqcanvas-staging.SECRET_ACCESS_KEY}}` | `${{reqcanvas.SECRET_ACCESS_KEY}}`   |
+| `api`    | `FEATURE_FLAGS`        | `accounts=true,diagrams=true`              | Sin definir (`diagrams` desactivado) |
+
+`S3_FORCE_PATH_STYLE` y `S3_CREATE_BUCKET` quedan en `false` (solo RustFS los necesita) y
+`E2E_HOOKS` no se define nunca en Railway. Sin las `S3_*`, `api` no arranca y Railway mantiene la
+versión anterior; una caída del bucket solo se refleja en `/health/deep` (check `storage`), no en
+el healthcheck de despliegue.
