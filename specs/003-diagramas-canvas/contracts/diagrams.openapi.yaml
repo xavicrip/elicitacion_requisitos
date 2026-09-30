@@ -186,7 +186,7 @@ components:
         order: { type: integer }
         publishedVersionId: { type: [string, 'null'] }
         draftVersionId: { type: [string, 'null'], description: Solo para Admin }
-        thumbUrl: { type: string, format: uri }
+        thumbUrl: { type: string, description: 'Ruta relativa servida por api (plan, ajuste 1)' }
     DiagramVersion:
       type: object
       required: [id, diagramId, number, status, image]
@@ -199,8 +199,10 @@ components:
           type: object
           required: [displayUrl, thumbUrl, width, height]
           properties:
-            displayUrl: { type: string, format: uri, description: Presigned URL (1 h) }
-            thumbUrl: { type: string, format: uri }
+            displayUrl:
+              type: string
+              description: 'Ruta relativa /api/projects/{id}/diagrams/{did}/versions/{vid}/display, servida por api con el mismo origen (plan, ajuste 1)'
+            thumbUrl: { type: string, description: 'Ruta relativa …/thumb (plan, ajuste 1)' }
             width: { type: integer }
             height: { type: integer }
         publishedAt: { type: [string, 'null'], format: date-time }
