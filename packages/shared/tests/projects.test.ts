@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  InvitationCreatedSchema,
+  InvitationPreviewSchema,
   InvitationSchema,
   InvitationStatusSchema,
   ProjectInputSchema,
   ProjectSchema,
   ProjectStatusSchema,
   ProjectSummarySchema,
+  RoleChangeSchema,
   RoleSchema,
   StatusActionSchema,
   nextStatus,
@@ -108,5 +111,29 @@ describe('respuestas', () => {
       token: 'no-debe-salir',
     });
     expect(invitation).not.toHaveProperty('token');
+  });
+});
+
+describe('invitaciones y miembros', () => {
+  it('al crear una invitación, la respuesta añade la URL con el token', () => {
+    const created = InvitationCreatedSchema.parse({
+      id: 'i1',
+      status: 'active',
+      expiresAt: '2026-10-07T10:00:00.000Z',
+      uses: 0,
+      url: 'https://web.example.com/invitacion/abc',
+    });
+    expect(created.url).toContain('/invitacion/');
+  });
+
+  it('la vista previa pública solo expone el nombre del proyecto', () => {
+    expect(InvitationPreviewSchema.parse({ projectName: 'Tienda', members: [] })).toEqual({
+      projectName: 'Tienda',
+    });
+  });
+
+  it('un cambio de rol solo admite admin o participant', () => {
+    expect(RoleChangeSchema.safeParse({ role: 'participant' }).success).toBe(true);
+    expect(RoleChangeSchema.safeParse({ role: 'owner' }).success).toBe(false);
   });
 });

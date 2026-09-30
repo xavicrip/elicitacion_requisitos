@@ -31,6 +31,7 @@ const app = await buildApp({
       accessTtl: env.JWT_ACCESS_TTL,
       refreshTtlDays: env.REFRESH_TTL_DAYS,
       secureCookies: env.NODE_ENV !== 'development',
+      appBaseUrl: env.APP_BASE_URL,
     },
   },
 });

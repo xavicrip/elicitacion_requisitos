@@ -24,6 +24,12 @@ export const FLAGS = defineFlags({
     default: false,
     owner: '002-auth-proyectos',
   },
+  'invite-email': {
+    description:
+      'Enviar las invitaciones por email; requiere un servicio de correo (hasta entonces se copia el enlace)',
+    default: false,
+    owner: '002-auth-proyectos',
+  },
 });
 
 /**
