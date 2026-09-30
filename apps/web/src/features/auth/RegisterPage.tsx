@@ -2,13 +2,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterInputSchema, type RegisterInput, type Session } from '@reqcanvas/shared';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { applyApiError, Field, FormError } from '../../components/form';
 import { apiFetch } from '../../lib/api-client';
 import { useAuthStore } from '../../lib/auth-store';
+import { safeRedirect } from './redirect';
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const [formError, setFormError] = useState('');
   const {
     register,
@@ -22,7 +24,8 @@ export function RegisterPage() {
     try {
       const session = await apiFetch<Session>('/auth/register', { method: 'POST', body: input });
       useAuthStore.getState().setSession(session);
-      navigate('/proyectos');
+      // Desde una invitación, vuelve al enlace para completar la unión (US3 escenario 2).
+      navigate(safeRedirect(params.get('redirect')));
     } catch (error) {
       setFormError(applyApiError(error, setError));
     }
@@ -58,7 +61,12 @@ export function RegisterPage() {
         </button>
       </form>
       <p className="text-sm">
-        ¿Ya tienes cuenta? <Link to="/entrar">Inicia sesión</Link>
+        ¿Ya tienes cuenta?{' '}
+        <Link
+          to={`/entrar${params.get('redirect') ? `?redirect=${encodeURIComponent(params.get('redirect')!)}` : ''}`}
+        >
+          Inicia sesión
+        </Link>
       </p>
     </section>
   );

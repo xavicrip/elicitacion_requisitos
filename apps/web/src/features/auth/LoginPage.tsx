@@ -6,11 +6,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { applyApiError, Field, FormError } from '../../components/form';
 import { apiFetch } from '../../lib/api-client';
 import { useAuthStore } from '../../lib/auth-store';
-
-/** Solo rutas internas: evita redirigir a otro sitio con `?redirect=https://…`. */
-function safeRedirect(target: string | null): string {
-  return target && target.startsWith('/') && !target.startsWith('//') ? target : '/proyectos';
-}
+import { safeRedirect } from './redirect';
 
 export function LoginPage() {
   const navigate = useNavigate();
