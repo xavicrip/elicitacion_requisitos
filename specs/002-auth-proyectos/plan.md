@@ -78,8 +78,8 @@ apps/api/
 │   │   ├── projects/{routes,service,model}.ts
 │   │   ├── invitations/{routes,service,model}.ts
 │   │   └── audit/{service,model}.ts
-│   ├── jobs/project-deletion.ts # Worker BullMQ para el borrado en cascada
-│   └── data/common-passwords.txt
+│   └── jobs/project-deletion.ts # Worker BullMQ para el borrado en cascada
+├── data/common-passwords.txt   # fuera de src/: el Dockerfile elimina src/ de la imagen
 ├── migrations/20261001000000-auth-projects-indexes.js
 └── tests/{unit,contract,integration}/{auth,projects,invitations,authorization}.*.test.ts
 apps/web/
@@ -90,7 +90,7 @@ apps/web/
     ├── features/auth/{LoginPage,RegisterPage}.tsx
     ├── features/projects/{ProjectsPage,ProjectSettingsPage,MembersPanel,DeleteProjectDialog}.tsx
     └── features/invitations/AcceptInvitationPage.tsx
-e2e/{auth.spec.ts,invitations.spec.ts,access-control.spec.ts}
+e2e/flows/{auth,projects,access-control,invitations}.spec.ts   # proyecto `flows` (ajuste 4)
 ```
 
 **Structure Decision**: módulos por dominio dentro de `apps/api/src/modules/` (rutas, servicio y
@@ -128,6 +128,14 @@ El plan se escribió antes de implementar la 001. Revisado contra el código de 
 7. **Redis para BullMQ**: BullMQ exige `maxmemory-policy noeviction`. Verificar la plantilla
    Redis de Railway (8.2) en ambos entornos y el Redis de Compose y de CI antes de implementar
    R9.
+8. **Flag `accounts`** (constitución IV, `/speckit-analyze` C1): las historias se integran en
+   `main` una a una, así que toda la funcionalidad de la 002 queda detrás del flag `accounts`
+   (`default: false`). Con el flag desactivado, las rutas nuevas de `api` responden `404` y
+   `web` no muestra registro ni login. Se activa en staging con `FEATURE_FLAGS`, y en
+   producción (`default: true`) al completar las cuatro historias; el flag se retira después.
+9. **Estado del borrado** (constitución VI, `/speckit-analyze` C2): el job `project-deletion`
+   registra `projects.deletion.status` (`pending`, `running`, `done`, `failed`), `attempts` y
+   `error`.
 
 ## Complexity Tracking
 

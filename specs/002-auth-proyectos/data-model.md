@@ -24,6 +24,7 @@
 | `ownerId` | ObjectId → users | Creador (informativo) |
 | `members` | `[{ userId, role: "admin" \| "participant", joinedAt }]` | ≥ 1 `admin`; `userId` único dentro del array |
 | `lastActivityAt` | Date | Se actualiza con cualquier aporte (features 003–005) |
+| `deletion` | `{ status: pending \| running \| done \| failed, attempts, error? }`? | Solo en `deleting`; estado consultable del job (constitución VI) |
 | `createdAt`, `updatedAt` | Date | |
 
 **Índices**: `{ "members.userId": 1, lastActivityAt: -1 }` (Mis proyectos), `{ status: 1 }`.
