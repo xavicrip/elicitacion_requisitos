@@ -129,14 +129,14 @@ versiones copian las actividades conservando su `key`
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T044 [P] [US3] Pruebas de contrato de `POST /diagram-versions/:id/publish` en `apps/api/tests/contract/publish.contract.test.ts` — `test(api)`
-- [ ] T045 [P] [US3] Pruebas de integración en `apps/api/tests/integration/diagrams-publish.test.ts`: sin actividades → `422` con la explicación; publicar deja la versión `published`, archiva la anterior y actualiza `publishedVersionId` de forma atómica (índice parcial único); un Participante solo lista y abre versiones publicadas (un borrador → 404); una nueva versión copia las actividades de la última con la misma `key`, nuevos `_id` y `rev` reiniciado (FR-008); el Participante sigue viendo la versión 1 hasta que se publica la 2; auditoría `diagram.published` — `test(api)`
+- [X] T044 [P] [US3] Pruebas de contrato de `POST /diagram-versions/:id/publish` en `apps/api/tests/contract/publish.contract.test.ts` — `test(api)`
+- [X] T045 [P] [US3] Pruebas de integración en `apps/api/tests/integration/diagrams-publish.test.ts`: sin actividades → `422` con la explicación; publicar deja la versión `published`, archiva la anterior y actualiza `publishedVersionId` de forma atómica (índice parcial único); un Participante solo lista y abre versiones publicadas (un borrador → 404); una nueva versión copia las actividades de la última con la misma `key`, nuevos `_id` y `rev` reiniciado (FR-008); el Participante sigue viendo la versión 1 hasta que se publica la 2; auditoría `diagram.published` — `test(api)`
 - [ ] T046 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de diagramas, versiones, imágenes y actividades (anónimo, no miembro, participante, administrador; proyecto `closed`; borrador frente a publicado) — `test(api)`
 - [ ] T047 [P] [US3] Pruebas de `web`: botón "Publicar" (deshabilitado sin actividades, con la explicación), y un Participante ve el diagrama publicado sin herramientas de edición, en `apps/web/tests/diagrams-publish.test.tsx` — `test(web)`
 
 ### Implementation for User Story 3
 
-- [ ] T048 [US3] Implementar la publicación (condicionada al `rev` de la versión: dos publicaciones simultáneas no se pisan) y la copia de actividades al subir una versión nueva en `apps/api/src/modules/diagrams/service.ts`, con sus rutas — `feat(api)`
+- [X] T048 [US3] Implementar la publicación (condicionada al `rev` de la versión: dos publicaciones simultáneas no se pisan) y la copia de actividades al subir una versión nueva en `apps/api/src/modules/diagrams/service.ts`, con sus rutas — `feat(api)`
 - [ ] T049 [US3] Implementar en `web` la publicación, el estado de cada versión y la vista de solo lectura del Participante — `feat(web)`
 
 **Checkpoint**: US1–US3 funcionan; quickstart §3 en verde

@@ -7,7 +7,7 @@ import { auditService } from '../audit/service.js';
 import type { Member, Project } from '../projects/model.js';
 import { projectsModel } from '../projects/model.js';
 import { imageUrl, toActivityDto, toVersionDto } from './dto.js';
-import { activitiesModel } from './models/activity.js';
+import { activitiesModel, type Activity } from './models/activity.js';
 import { diagramsModel, type Diagram } from './models/diagram.js';
 import { versionsModel, type DiagramVersion } from './models/version.js';
 
@@ -22,6 +22,9 @@ const draftExists = () =>
     'DRAFT_EXISTS',
     'Este diagrama ya tiene una versión en borrador. Publícala antes de subir otra.',
   );
+
+const versionNotDraft = () =>
+  new HttpError(409, 'VERSION_NOT_DRAFT', 'Esta versión ya no está en borrador.');
 
 const isDuplicateKey = (error: unknown) => (error as { code?: number }).code === 11000;
 
@@ -101,6 +104,22 @@ export function diagramsService(app: FastifyInstance) {
     }
   }
 
+  /**
+   * FR-008: la versión nueva parte de las actividades de la anterior, con la misma `key` (el
+   * ancla de los requisitos de la 004), `_id` nuevos y `rev` reiniciado.
+   */
+  async function copyActivities(from: Types.ObjectId, to: Types.ObjectId) {
+    const activities = await Activities.find({ versionId: from }).lean<Activity[]>();
+    if (activities.length === 0) return;
+    await Activities.insertMany(
+      activities.map(({ _id: _omit, createdAt: _c, updatedAt: _u, ...activity }) => ({
+        ...activity,
+        versionId: to,
+        rev: 0,
+      })),
+    );
+  }
+
   const touchProject = (projectId: Types.ObjectId) =>
     Projects.updateOne({ _id: projectId }, { $set: { lastActivityAt: new Date() } });
 
@@ -163,10 +182,11 @@ export function diagramsService(app: FastifyInstance) {
       if (await Versions.exists({ diagramId: diagram._id, status: 'draft' })) throw draftExists();
       const last = await Versions.findOne({ diagramId: diagram._id }, { number: 1 })
         .sort({ number: -1 })
-        .lean<Pick<DiagramVersion, 'number'>>();
+        .lean<Pick<DiagramVersion, '_id' | 'number'>>();
       const number = (last?.number ?? 0) + 1;
       // Una subida simultánea choca con el índice de borrador o con el del número: 409.
       const version = await createVersion(diagram, number, file, context);
+      if (last) await copyActivities(last._id, version._id);
       await touchProject(diagram.projectId);
       await audit.record('diagram.version_uploaded', {
         actorId: new Types.ObjectId(context.actorId),
@@ -175,6 +195,50 @@ export function diagramsService(app: FastifyInstance) {
         diff: { diagramId: diagram._id.toHexString(), number },
       });
       return toVersionDto(version);
+    },
+
+    /**
+     * Publica el borrador (FR-007): exige al menos una actividad, archiva la versión publicada
+     * anterior y apunta el diagrama a esta. La reclama antes con su `rev`, así que de dos
+     * publicaciones simultáneas solo una sigue adelante (la otra, 409).
+     */
+    async publish(version: DiagramVersion, actorId: string) {
+      if (version.status !== 'draft') throw versionNotDraft();
+      if (!(await Activities.exists({ versionId: version._id }))) {
+        throw new HttpError(
+          422,
+          'NO_ACTIVITIES',
+          'Marca al menos una actividad antes de publicar el diagrama.',
+        );
+      }
+      const claimed = await Versions.updateOne(
+        { _id: version._id, status: 'draft', rev: version.rev },
+        { $inc: { rev: 1 } },
+      );
+      if (claimed.modifiedCount === 0) throw versionNotDraft();
+
+      await Versions.updateMany(
+        { diagramId: version.diagramId, status: 'published' },
+        { $set: { status: 'archived' } },
+      );
+      const published = await Versions.findOneAndUpdate(
+        { _id: version._id, status: 'draft' },
+        { $set: { status: 'published', publishedAt: new Date() } },
+        { new: true },
+      ).lean<DiagramVersion>();
+      if (!published) throw versionNotDraft();
+      await Diagrams.updateOne(
+        { _id: version.diagramId },
+        { $set: { publishedVersionId: version._id } },
+      );
+      await touchProject(version.projectId);
+      await audit.record('diagram.published', {
+        actorId: new Types.ObjectId(actorId),
+        projectId: version.projectId,
+        entity: { type: 'diagram_version', id: version._id.toHexString() },
+        diff: { diagramId: version.diagramId.toHexString(), number: version.number },
+      });
+      return toVersionDto(published);
     },
 
     async withActivities(version: DiagramVersion): Promise<VersionWithActivities> {
