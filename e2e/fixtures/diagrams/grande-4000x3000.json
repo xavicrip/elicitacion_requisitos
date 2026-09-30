@@ -1,0 +1,246 @@
+{
+  "width": 4000,
+  "height": 3000,
+  "activities": [
+    {
+      "label": "Actividad 1",
+      "type": "action",
+      "bbox": {
+        "x": 0.05,
+        "y": 0.0833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 2",
+      "type": "action",
+      "bbox": {
+        "x": 0.205,
+        "y": 0.0833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 3",
+      "type": "action",
+      "bbox": {
+        "x": 0.36,
+        "y": 0.0833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 4",
+      "type": "action",
+      "bbox": {
+        "x": 0.515,
+        "y": 0.0833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 5",
+      "type": "action",
+      "bbox": {
+        "x": 0.67,
+        "y": 0.0833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 6",
+      "type": "action",
+      "bbox": {
+        "x": 0.825,
+        "y": 0.0833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 7",
+      "type": "action",
+      "bbox": {
+        "x": 0.05,
+        "y": 0.3167,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 8",
+      "type": "action",
+      "bbox": {
+        "x": 0.205,
+        "y": 0.3167,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 9",
+      "type": "action",
+      "bbox": {
+        "x": 0.36,
+        "y": 0.3167,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 10",
+      "type": "action",
+      "bbox": {
+        "x": 0.515,
+        "y": 0.3167,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 11",
+      "type": "action",
+      "bbox": {
+        "x": 0.67,
+        "y": 0.3167,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 12",
+      "type": "action",
+      "bbox": {
+        "x": 0.825,
+        "y": 0.3167,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 13",
+      "type": "action",
+      "bbox": {
+        "x": 0.05,
+        "y": 0.55,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 14",
+      "type": "action",
+      "bbox": {
+        "x": 0.205,
+        "y": 0.55,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 15",
+      "type": "action",
+      "bbox": {
+        "x": 0.36,
+        "y": 0.55,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 16",
+      "type": "action",
+      "bbox": {
+        "x": 0.515,
+        "y": 0.55,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 17",
+      "type": "action",
+      "bbox": {
+        "x": 0.67,
+        "y": 0.55,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 18",
+      "type": "action",
+      "bbox": {
+        "x": 0.825,
+        "y": 0.55,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 19",
+      "type": "action",
+      "bbox": {
+        "x": 0.05,
+        "y": 0.7833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 20",
+      "type": "action",
+      "bbox": {
+        "x": 0.205,
+        "y": 0.7833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 21",
+      "type": "action",
+      "bbox": {
+        "x": 0.36,
+        "y": 0.7833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 22",
+      "type": "action",
+      "bbox": {
+        "x": 0.515,
+        "y": 0.7833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 23",
+      "type": "action",
+      "bbox": {
+        "x": 0.67,
+        "y": 0.7833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    },
+    {
+      "label": "Actividad 24",
+      "type": "action",
+      "bbox": {
+        "x": 0.825,
+        "y": 0.7833,
+        "w": 0.105,
+        "h": 0.0533
+      }
+    }
+  ]
+}

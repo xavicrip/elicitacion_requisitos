@@ -1,0 +1,66 @@
+{
+  "width": 900,
+  "height": 1200,
+  "activities": [
+    {
+      "label": "Inicio",
+      "type": "start",
+      "bbox": {
+        "x": 0.3333,
+        "y": 0.05,
+        "w": 0.3333,
+        "h": 0.075
+      }
+    },
+    {
+      "label": "Seleccionar producto",
+      "type": "action",
+      "bbox": {
+        "x": 0.3333,
+        "y": 0.2083,
+        "w": 0.3333,
+        "h": 0.075
+      }
+    },
+    {
+      "label": "Validar pago",
+      "type": "decision",
+      "bbox": {
+        "x": 0.3333,
+        "y": 0.3667,
+        "w": 0.3333,
+        "h": 0.075
+      }
+    },
+    {
+      "label": "Emitir factura",
+      "type": "action",
+      "bbox": {
+        "x": 0.3333,
+        "y": 0.525,
+        "w": 0.3333,
+        "h": 0.075
+      }
+    },
+    {
+      "label": "Enviar pedido",
+      "type": "action",
+      "bbox": {
+        "x": 0.3333,
+        "y": 0.6833,
+        "w": 0.3333,
+        "h": 0.075
+      }
+    },
+    {
+      "label": "Fin",
+      "type": "end",
+      "bbox": {
+        "x": 0.3333,
+        "y": 0.8417,
+        "w": 0.3333,
+        "h": 0.075
+      }
+    }
+  ]
+}

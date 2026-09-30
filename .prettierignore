@@ -14,3 +14,6 @@ prompt.md
 # Generados por release-please
 CHANGELOG.md
 .release-please-manifest.json
+
+# Diagramas de prueba generados por scripts/fixtures/diagrams.mjs (su salida es la canónica)
+e2e/fixtures/
