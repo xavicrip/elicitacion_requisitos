@@ -2,7 +2,14 @@ import type { Writable } from 'node:stream';
 import type { FastifyInstance } from 'fastify';
 import { buildApp, type AuthConfig, type DeletionConfig } from '../../src/app';
 import { runMigrations } from '../../src/db/migrations';
-import { MONGO_TEST_URL, REDIS_TEST_URL, uniqueDbName } from './services';
+import {
+  MONGO_TEST_URL,
+  REDIS_TEST_URL,
+  S3_TEST_BUCKET,
+  S3_TEST_CREDENTIALS,
+  S3_TEST_URL,
+  uniqueDbName,
+} from './services';
 
 export const TEST_JWT_SECRET = 'secreto-de-prueba-de-al-menos-32-bytes!!';
 
@@ -57,6 +64,15 @@ export async function buildTestApp(
         // Colas propias: los jobs no se mezclan entre pruebas.
         queuePrefix: `bull-test-${dbName}`,
         ...options.deletion,
+      },
+      // Bucket compartido: las claves llevan el projectId, único en cada prueba.
+      storage: {
+        endpoint: S3_TEST_URL,
+        bucket: S3_TEST_BUCKET,
+        region: 'us-east-1',
+        forcePathStyle: true,
+        createBucket: true,
+        ...S3_TEST_CREDENTIALS,
       },
     },
   });
