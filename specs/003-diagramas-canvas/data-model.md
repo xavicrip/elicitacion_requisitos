@@ -61,4 +61,5 @@ El manejador de cascada de proyectos (002) borra el prefijo `projects/{projectId
 ## Migración
 
 `20261008000000-diagrams-indexes.js`: índices únicos `{diagramId, number}`, `{versionId, key}`
-y el índice parcial único `{diagramId: 1}` con `status: "published"`. `down` los elimina.
+y los índices parciales únicos `{diagramId: 1}` con `status: "published"` y con `status: "draft"`
+(un solo borrador por diagrama). `down` los elimina y conserva los datos.

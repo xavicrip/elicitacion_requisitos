@@ -58,7 +58,7 @@ paths:
   /diagram-versions/{versionId}:
     parameters: [{ $ref: '#/components/parameters/VersionId' }]
     get:
-      summary: Versión con URLs firmadas y actividades (Participantes solo si está publicada)
+      summary: Versión con las rutas de sus imágenes y sus actividades (Participantes solo si está publicada)
       responses:
         '200':
           content:
