@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   HANDLES,
   MIN_SIDE_PX,
+  arrowBetween,
   boxFromDrag,
+  hitTest,
   moveBox,
   nudgeBox,
   resizeBox,
@@ -95,4 +97,62 @@ describe('teclado', () => {
 
 it('toPixels convierte a píxeles de imagen', () => {
   expect(toPixels(box, image)).toEqual({ x: 200, y: 100, width: 200, height: 200 });
+});
+
+describe('hitTest (qué hay bajo el puntero)', () => {
+  const zones = [
+    { key: 'grande', bbox: { x: 0.1, y: 0.1, w: 0.6, h: 0.6 } },
+    { key: 'pequeña', bbox: { x: 0.2, y: 0.2, w: 0.1, h: 0.1 } },
+  ];
+
+  it('con zonas superpuestas elige la más pequeña', () => {
+    expect(hitTest(zones, { x: 250, y: 125 }, null, 1, image)).toEqual({
+      kind: 'zone',
+      key: 'pequeña',
+    });
+    expect(hitTest(zones, { x: 600, y: 300 }, null, 1, image)).toEqual({
+      kind: 'zone',
+      key: 'grande',
+    });
+  });
+
+  it('fuera de las zonas no hay nada', () => {
+    expect(hitTest(zones, { x: 900, y: 450 }, null, 1, image)).toBeNull();
+  });
+
+  it('los handles de la zona seleccionada tienen prioridad, con tolerancia en px de pantalla', () => {
+    // Esquina inferior derecha de "grande": (700, 350).
+    expect(hitTest(zones, { x: 704, y: 346 }, 'grande', 1, image)).toEqual({
+      kind: 'handle',
+      key: 'grande',
+      handle: 'se',
+    });
+    // Con zoom 0,5, 8 px de pantalla son 16 px de imagen.
+    expect(hitTest(zones, { x: 714, y: 350 }, 'grande', 0.5, image)).toMatchObject({
+      handle: 'se',
+    });
+    expect(hitTest(zones, { x: 400, y: 50 }, 'grande', 1, image)).toMatchObject({ handle: 'n' });
+    // Sin seleccionar, no hay handles.
+    expect(hitTest(zones, { x: 696, y: 346 }, null, 1, image)).toMatchObject({ kind: 'zone' });
+  });
+});
+
+describe('arrowBetween (transiciones)', () => {
+  it('va del borde de la zona origen al borde de la destino', () => {
+    const from = { x: 0.1, y: 0.1, w: 0.2, h: 0.2 }; // 100–300, 50–150
+    const to = { x: 0.6, y: 0.1, w: 0.2, h: 0.2 }; // 600–800, 50–150
+    const arrow = arrowBetween(from, to, image);
+    expect(arrow.start.x).toBeCloseTo(300);
+    expect(arrow.start.y).toBeCloseTo(100);
+    expect(arrow.end.x).toBeCloseTo(600);
+    expect(arrow.end.y).toBeCloseTo(100);
+  });
+
+  it('en vertical sale por abajo y entra por arriba', () => {
+    const from = { x: 0.1, y: 0.1, w: 0.2, h: 0.2 };
+    const to = { x: 0.1, y: 0.6, w: 0.2, h: 0.2 }; // 300–400 de alto
+    const arrow = arrowBetween(from, to, image);
+    expect(arrow.start).toEqual({ x: 200, y: 150 });
+    expect(arrow.end).toEqual({ x: 200, y: 300 });
+  });
 });

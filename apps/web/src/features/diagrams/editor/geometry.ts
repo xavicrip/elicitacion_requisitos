@@ -92,3 +92,75 @@ export function nudgeBox(box: BBox, key: string, shift: boolean, image: Size): B
   const step = shift ? 10 : 1;
   return moveBox(box, { x: direction.x * step, y: direction.y * step }, image);
 }
+
+/** Tolerancia de los handles, en píxeles de pantalla. */
+export const HANDLE_TOLERANCE_PX = 8;
+
+export type Hit =
+  { kind: 'handle'; key: string; handle: Handle } | { kind: 'zone'; key: string } | null;
+
+function handlePoints(box: BBox, image: Size): Record<Handle, Point> {
+  const { left, top, right, bottom } = edgesOf(box, image);
+  const midX = (left + right) / 2;
+  const midY = (top + bottom) / 2;
+  return {
+    nw: { x: left, y: top },
+    n: { x: midX, y: top },
+    ne: { x: right, y: top },
+    e: { x: right, y: midY },
+    se: { x: right, y: bottom },
+    s: { x: midX, y: bottom },
+    sw: { x: left, y: bottom },
+    w: { x: left, y: midY },
+  };
+}
+
+/**
+ * Qué hay bajo el puntero (en px de imagen): primero los handles de la zona seleccionada;
+ * después, la zona más pequeña que lo contiene (edge case de zonas superpuestas, research R5).
+ */
+export function hitTest(
+  zones: Array<{ key: string; bbox: BBox }>,
+  point: Point,
+  selectedKey: string | null,
+  zoom: number,
+  image: Size,
+): Hit {
+  const selected = zones.find((zone) => zone.key === selectedKey);
+  if (selected) {
+    const tolerance = HANDLE_TOLERANCE_PX / zoom;
+    for (const [handle, at] of Object.entries(handlePoints(selected.bbox, image))) {
+      if (Math.abs(at.x - point.x) <= tolerance && Math.abs(at.y - point.y) <= tolerance) {
+        return { kind: 'handle', key: selected.key, handle: handle as Handle };
+      }
+    }
+  }
+  const containing = zones
+    .filter((zone) => {
+      const { left, top, right, bottom } = edgesOf(zone.bbox, image);
+      return point.x >= left && point.x <= right && point.y >= top && point.y <= bottom;
+    })
+    .sort((a, b) => a.bbox.w * a.bbox.h - b.bbox.w * b.bbox.h);
+  return containing[0] ? { kind: 'zone', key: containing[0].key } : null;
+}
+
+/** Punto del borde de `box` en la dirección `(dx, dy)` desde su centro. */
+function borderPoint(box: BBox, dx: number, dy: number, image: Size): Point {
+  const { x, y, width, height } = toPixels(box, image);
+  const center = { x: x + width / 2, y: y + height / 2 };
+  if (dx === 0 && dy === 0) return center;
+  const scale = Math.min(
+    dx === 0 ? Infinity : width / 2 / Math.abs(dx),
+    dy === 0 ? Infinity : height / 2 / Math.abs(dy),
+  );
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
+}
+
+/** Flecha de una transición: de borde a borde, en la línea que une los centros. */
+export function arrowBetween(from: BBox, to: BBox, image: Size): { start: Point; end: Point } {
+  const a = toPixels(from, image);
+  const b = toPixels(to, image);
+  const dx = b.x + b.width / 2 - (a.x + a.width / 2);
+  const dy = b.y + b.height / 2 - (a.y + a.height / 2);
+  return { start: borderPoint(from, dx, dy, image), end: borderPoint(to, -dx, -dy, image) };
+}

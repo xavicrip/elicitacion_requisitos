@@ -4,7 +4,7 @@ import {
   type VersionWithActivities,
 } from '@reqcanvas/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { FormError } from '../../../components/form';
 import { ApiError } from '../../../lib/api-client';
 import { diagramKeys } from '../api';
@@ -53,6 +53,20 @@ export function ActivityForm({
   const [error, setError] = useState('');
 
   const activity = version?.activities.find((candidate) => candidate.key === activityKey);
+
+  // `Supr` elimina la actividad seleccionada (contracts/canvas-ui.md), fuera de los campos.
+  const removeRef = useRef<(confirm: boolean) => Promise<void>>(async () => {});
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const field =
+        event.target instanceof HTMLElement &&
+        ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName);
+      if (event.key === 'Delete' && !field) void removeRef.current(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   if (!version || !activity) return null;
   const others = version.activities.filter((candidate) => candidate.key !== activityKey);
 
@@ -73,6 +87,8 @@ export function ActivityForm({
       }
     }
   };
+
+  removeRef.current = remove;
 
   return (
     <form className="space-y-4" onSubmit={(event) => event.preventDefault()} aria-label="Actividad">
