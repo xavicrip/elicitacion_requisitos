@@ -142,7 +142,8 @@ jobs:
           scripts/wait-for-health.sh "${{ vars.API_URL }}/health/deep" 120 5
       - run: pnpm exec playwright install --with-deps chromium
       - name: Smoke tests contra ${{ env.ENVIRONMENT }}
-        run: pnpm e2e
+        # Solo lectura: los E2E de `flows` crean datos y nunca corren contra un entorno.
+        run: pnpm e2e --project smoke
         env:
           BASE_URL: ${{ vars.BASE_URL }}
           API_URL: ${{ vars.API_URL }}
