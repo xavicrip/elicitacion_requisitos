@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.1.0...v0.2.0) (2026-09-30)
+
+
+### Funcionalidades
+
+* **api:** run deploy migrations with backups and MIGRATION_ACTION ([c72c54b](https://github.com/xavicrip/elicitacion_requisitos/commit/c72c54b8038ffa7ceb899766daee6d1755b1172d))
+* **ci:** allow migrate-down after a Railway panel rollback ([c6333bf](https://github.com/xavicrip/elicitacion_requisitos/commit/c6333bfd0f7bbda1ec243162eff64956e1eaaa28))
+
+
+### Correcciones
+
+* **ci:** detect destructive migrations without false positives ([58401c6](https://github.com/xavicrip/elicitacion_requisitos/commit/58401c6fbbbec36664e5c10bfa1ed2339fb895f9))
+* **ci:** expand short SHAs in rollback.sh ([81e1a91](https://github.com/xavicrip/elicitacion_requisitos/commit/81e1a91d90b8b29a130886f2a41c63c445363b2a))
+* **ci:** follow Railway deployment status instead of the build log stream ([4c44e17](https://github.com/xavicrip/elicitacion_requisitos/commit/4c44e175ed47e54f8ad9789ec19d2ecad003b16b))
+* **ci:** roll back migrations and restore backups by redeploying ([88539b5](https://github.com/xavicrip/elicitacion_requisitos/commit/88539b55e1305ad123ba56154e4361b3f93baa2c))
+* **ci:** wait for the web version instead of the commit ([6b9f2ea](https://github.com/xavicrip/elicitacion_requisitos/commit/6b9f2ea0ba362974c81afe1dab103d55dee47fe1))
+
 ## 0.1.0 (2026-09-25)
 
 
