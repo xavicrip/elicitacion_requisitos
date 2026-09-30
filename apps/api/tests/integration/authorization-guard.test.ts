@@ -10,6 +10,7 @@ let app: FastifyInstance;
 const admin = new Types.ObjectId();
 const participant = new Types.ObjectId();
 const outsider = new Types.ObjectId();
+const resources = new Map<string, { projectId: Types.ObjectId; label: string }>();
 const ids: Record<Project['status'], Types.ObjectId> = {
   draft: new Types.ObjectId(),
   open: new Types.ObjectId(),
@@ -38,6 +39,41 @@ beforeAll(async () => {
   app.get('/projects/:projectId/ver', member, echo);
   app.get('/projects/:projectId/admin', adminOnly, echo);
   app.post('/projects/:projectId/aporte', writable, echo);
+  app.post(
+    '/projects/:projectId/diagrama',
+    {
+      preHandler: [
+        app.requireAuth,
+        app.requireProjectRole('admin'),
+        app.requireProjectStatus(['draft', 'open']),
+      ],
+    },
+    echo,
+  );
+
+  // Rutas por recurso: el recurso trae su proyecto (p. ej., /activities/:id).
+  const loadResource = async (id: string) => resources.get(id) ?? null;
+  const resourceEcho = async (request: {
+    project?: Project;
+    membership?: { role: string };
+    resource?: unknown;
+  }) => ({ ...(await echo(request)), resource: request.resource });
+  app.get(
+    '/recursos/:id',
+    { preHandler: [app.requireAuth, app.requireResourceProject(loadResource)] },
+    resourceEcho,
+  );
+  app.patch(
+    '/recursos/:id',
+    {
+      preHandler: [
+        app.requireAuth,
+        app.requireResourceProject(loadResource, 'admin'),
+        app.requireProjectStatus(['draft', 'open']),
+      ],
+    },
+    resourceEcho,
+  );
   await app.ready();
 
   const members = [
@@ -56,6 +92,12 @@ beforeAll(async () => {
 });
 
 afterAll(() => closeTestApp(app));
+
+const resourceIn = (status: Project['status']) => {
+  const id = new Types.ObjectId().toHexString();
+  resources.set(id, { projectId: ids[status], label: `recurso ${status}` });
+  return id;
+};
 
 const as = (user: Types.ObjectId) => ({
   authorization: `Bearer ${app.signAccessToken(user.toHexString(), 'sid')}`,
@@ -135,5 +177,60 @@ describe('requireProjectStatus (spec US2 escenario 3)', () => {
     await call('POST', participant, `/projects/${ids.open}/aporte`);
     expect(findOne).toHaveBeenCalledTimes(1);
     findOne.mockRestore();
+  });
+});
+
+describe('requireProjectStatus con lista (003, plan ajuste 5)', () => {
+  it.each(['draft', 'open'] as const)('permite escribir en un proyecto %s', async (status) => {
+    expect((await call('POST', admin, `/projects/${ids[status]}/diagrama`)).statusCode).toBe(200);
+  });
+
+  it('un proyecto cerrado queda en solo lectura: 409 PROJECT_CLOSED', async () => {
+    const response = await call('POST', admin, `/projects/${ids.closed}/diagrama`);
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({ code: 'PROJECT_CLOSED' });
+  });
+});
+
+describe('requireResourceProject (rutas por recurso)', () => {
+  it('carga el recurso, deduce su proyecto y aplica la membresía', async () => {
+    const id = resourceIn('open');
+    const response = await call('GET', participant, `/recursos/${id}`);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      name: 'Proyecto open',
+      role: 'participant',
+      resource: { projectId: ids.open.toHexString(), label: 'recurso open' },
+    });
+  });
+
+  it('un no miembro recibe 404, igual que si el recurso no existiera', async () => {
+    const response = await call('GET', outsider, `/recursos/${resourceIn('open')}`);
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({ code: 'NOT_FOUND' });
+  });
+
+  it.each([
+    ['inexistente', () => new Types.ObjectId().toHexString()],
+    ['mal formado', () => 'no-es-un-id'],
+    ['de un proyecto en deleting', () => resourceIn('deleting')],
+  ])('un recurso %s responde 404', async (_caso, id) => {
+    expect((await call('GET', admin, `/recursos/${id()}`)).statusCode).toBe(404);
+  });
+
+  it('exige el rol pedido: un participante recibe 403', async () => {
+    const response = await app.inject({
+      method: 'PATCH',
+      url: `/recursos/${resourceIn('open')}`,
+      headers: as(participant),
+    });
+    expect(response.statusCode).toBe(403);
+  });
+
+  it('se combina con requireProjectStatus: 409 si el proyecto del recurso está cerrado', async () => {
+    const patch = (id: string) =>
+      app.inject({ method: 'PATCH', url: `/recursos/${id}`, headers: as(admin) });
+    expect((await patch(resourceIn('draft'))).statusCode).toBe(200);
+    expect((await patch(resourceIn('closed'))).statusCode).toBe(409);
   });
 });
