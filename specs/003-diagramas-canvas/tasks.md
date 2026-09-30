@@ -81,7 +81,7 @@ trabajo en *borrador*; se valida el contenido real
 - [X] T027 [P] [US1] Pruebas de las imágenes en `apps/api/tests/integration/diagram-images.test.ts` (plan, ajuste 1): solo miembros (404 a los demás); un Participante solo ve versiones publicadas; `Cache-Control: private, max-age=31536000, immutable`, `ETag` y `304` con `If-None-Match`; `Content-Type: image/webp` — `test(api)`
 - [X] T028 [P] [US1] Prueba de la cascada en `apps/api/tests/integration/diagrams-cascade.test.ts`: borrar el proyecto elimina diagramas, versiones, actividades y los objetos bajo `projects/{id}/`, también si se reintenta (plan, ajuste 6) — `test(api)`
 - [X] T029 [P] [US1] Pruebas de `DiagramListPage` y `UploadDialog` (comprobación previa de tamaño y tipo en el navegador, errores de la API, progreso, lista con miniaturas) en `apps/web/tests/diagrams-upload.test.tsx` — `test(web)`
-- [ ] T030 [P] [US1] E2E en `e2e/flows/diagram-upload.spec.ts`: subir `compra-simple.png` → espacio de trabajo en *Borrador* con la imagen cargada (`__canvasState`); PDF y 15 MB rechazados con su mensaje; `con-script.svg` → la red solo descarga `display.webp`; recargar sirve la imagen desde caché (`304` o caché del navegador) **a través del proxy de `web`** — `test(e2e)`
+- [X] T030 [P] [US1] E2E en `e2e/flows/diagram-upload.spec.ts`: subir `compra-simple.png` → espacio de trabajo en *Borrador* con la imagen cargada (`__canvasState`); PDF y 15 MB rechazados con su mensaje; `con-script.svg` → la red solo descarga `display.webp`; recargar sirve la imagen desde caché (`304` o caché del navegador) **a través del proxy de `web`** — `test(e2e)`
 
 ### Implementation for User Story 1
 
