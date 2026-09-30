@@ -108,7 +108,7 @@ zonas, con guardado automático y control de concurrencia
 - [X] T037 [P] [US2] Pruebas de integración en `apps/api/tests/integration/activities.test.ts`: `bbox` inválida → `400`; solo en versión `draft` (`409` si no); sin `If-Match` → `428`; `rev` desactualizado → `409` con la versión actual; `next` solo hacia actividades de la misma versión, sin autoenlaces ni duplicados; eliminar retira su `key` de los `next` de las demás; con dependientes registrados (T021), eliminar sin `?confirm=true` → `409` con el conteo y con confirmación los elimina; Participante → `403`; auditoría y `lastActivityAt` — `test(api)`
 - [X] T038 [P] [US2] Pruebas puras de la geometría del editor en `apps/web/tests/editor-geometry.test.ts`: dibujar, mover y redimensionar con los 8 *handles* produce `bbox` normalizadas y limitadas a la imagen; teclado (1 px y 10 px con `Shift`) — `test(web)`
 - [X] T039 [P] [US2] Pruebas de `useAutosave` (debounce de 500 ms, `If-Match`, un `409` recarga la actividad y avisa "Otro administrador modificó esta actividad") y de `ActivityForm` (nombre, tipo, transiciones, confirmación de borrado con conteo) en `apps/web/tests/editor.test.tsx` — `test(web)`
-- [ ] T040 [P] [US2] E2E en `e2e/flows/diagram-editor.spec.ts`: marcar 5 actividades con nombre y tipo, conectar dos, recargar y comprobar que se conservan; dos pestañas de Admin mueven la misma zona → la segunda ve el aviso de conflicto — `test(e2e)`
+- [X] T040 [P] [US2] E2E en `e2e/flows/diagram-editor.spec.ts`: marcar 5 actividades con nombre y tipo, conectar dos, recargar y comprobar que se conservan; dos pestañas de Admin mueven la misma zona → la segunda ve el aviso de conflicto — `test(e2e)`
 
 ### Implementation for User Story 2
 
