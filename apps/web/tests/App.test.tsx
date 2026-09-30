@@ -1,30 +1,39 @@
 import { render, screen } from '@testing-library/react';
+import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
-import { App } from '../src/App';
+import { AppProviders, routes } from '../src/app/router';
 
 afterEach(() => {
   delete window.__REQCANVAS_CONFIG__;
 });
 
-describe('App', () => {
-  it('muestra el nombre del producto', () => {
-    render(<App />);
-    expect(screen.getByRole('heading', { name: 'ReqCanvas' })).toBeInTheDocument();
+function renderHome() {
+  render(
+    <AppProviders>
+      <RouterProvider router={createMemoryRouter(routes, { initialEntries: ['/'] })} />
+    </AppProviders>,
+  );
+}
+
+describe('página inicial', () => {
+  it('muestra el nombre del producto', async () => {
+    renderHome();
+    expect(await screen.findByRole('heading', { name: 'ReqCanvas' })).toBeInTheDocument();
   });
 
-  it('muestra la versión inyectada en /config.js', () => {
-    window.__REQCANVAS_CONFIG__ = { apiUrl: 'https://api.example.com', version: '0.1.0' };
-    render(<App />);
-    expect(screen.getByText(/v0\.1\.0/)).toBeInTheDocument();
+  it('muestra la versión inyectada en /config.js', async () => {
+    window.__REQCANVAS_CONFIG__ = { apiUrl: '', version: '0.1.0' };
+    renderHome();
+    expect(await screen.findByText(/v0\.1\.0/)).toBeInTheDocument();
   });
 
-  it('muestra "dev" si no hay configuración inyectada', () => {
-    render(<App />);
-    expect(screen.getByText(/vdev/)).toBeInTheDocument();
+  it('muestra "dev" si no hay configuración inyectada', async () => {
+    renderHome();
+    expect(await screen.findByText(/vdev/)).toBeInTheDocument();
   });
 
-  it('avisa si el navegador no soporta WebGL (jsdom no lo soporta)', () => {
-    render(<App />);
-    expect(screen.getByRole('status')).toHaveTextContent(/WebGL/);
+  it('avisa si el navegador no soporta WebGL (jsdom no lo soporta)', async () => {
+    renderHome();
+    expect(await screen.findByRole('status')).toHaveTextContent(/WebGL/);
   });
 });
