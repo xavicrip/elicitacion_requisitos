@@ -85,7 +85,7 @@ separación de los E2E, que usan todas las historias
 - [X] T032 [P] [US1] Pruebas de contrato de `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout` y `GET /me` contra `contracts/auth-projects.openapi.yaml` (cookie `rt` `httpOnly; SameSite=Strict; Path=/api/auth` y `Secure` salvo en `development`) en `apps/api/tests/contract/auth.contract.test.ts` — `test(api)`
 - [X] T033 [P] [US1] Pruebas de integración en `apps/api/tests/integration/auth.test.ts`: email duplicado → `409` genérico con tiempo similar (research R5); los intentos fallidos 1–5 en 15 min (por email o por IP) responden `401` genérico y a partir del 6.º `429` con `Retry-After` durante 15 min y evento `auth.login_failed` en auditoría; rotación del refresh; reutilizar un refresh rotado revoca todo el `sid`; logout revoca la sesión; `passwordHash` nunca aparece en respuestas ni logs — `test(api)`
 - [X] T034 [P] [US1] Pruebas de `LoginPage` y `RegisterPage` (validación con los esquemas de `@reqcanvas/shared`, mensaje genérico, redirección a "Mis proyectos") y de la restauración de sesión al cargar en `apps/web/tests/auth.test.tsx` — `test(web)`
-- [ ] T035 [P] [US1] E2E en `e2e/flows/auth.spec.ts`: registro → "Mis proyectos" vacío; recargar conserva la sesión; logout bloquea las rutas protegidas; 6.º intento fallido muestra el aviso de bloqueo — `test(e2e)`
+- [X] T035 [P] [US1] E2E en `e2e/flows/auth.spec.ts`: registro → "Mis proyectos" vacío; recargar conserva la sesión; logout bloquea las rutas protegidas; 6.º intento fallido muestra el aviso de bloqueo — `test(e2e)`
 
 ### Implementation for User Story 1
 
