@@ -79,19 +79,23 @@ docker compose -f infra/docker-compose.yml logs api analytics | grep prueba-456
 | `pnpm lint`                                                                   | ESLint + Ruff (Python)                                                      |
 | `pnpm format:check` / `pnpm format`                                           | Prettier                                                                    |
 | `pnpm typecheck`                                                              | TypeScript (todos los paquetes y `e2e/`) + mypy                             |
+| `pnpm test:services:up` / `test:services:down`                                | MongoDB, Redis y S3 (RustFS) para las pruebas de integración                |
 | `pnpm test`                                                                   | Vitest (shared, api, web) + pytest (analytics)                              |
 | `pnpm e2e`                                                                    | Pruebas de humo contra `BASE_URL` / `API_URL` (por defecto, el stack local) |
 | `pnpm --filter @reqcanvas/api migrate:up` / `migrate:down` / `migrate:status` | Migraciones (lee `MONGO_URL` y `MONGO_DB`)                                  |
 | `pnpm --filter @reqcanvas/api migrate:create <nombre>`                        | Nueva migración a partir de `migrations/sample-migration.js`                |
 
-Las pruebas de integración necesitan MongoDB y Redis. Por defecto usan `localhost:27017` y
-`localhost:6379`; para usar otros, define `MONGO_TEST_URL` y `REDIS_TEST_URL`, p. ej.:
+Las pruebas de integración necesitan MongoDB, Redis y un S3 (para los respaldos de migraciones).
+El stack de `pnpm dev:up` no los publica en el host; levántalos con:
 
 ```bash
-docker run -d --rm --name rc-test-mongo -p 27018:27017 mongo:7
-docker run -d --rm --name rc-test-redis -p 6380:6379 redis:7
-MONGO_TEST_URL=mongodb://localhost:27018 REDIS_TEST_URL=redis://localhost:6380 pnpm test
+pnpm test:services:up      # infra/docker-compose.test.yml: :27017, :6379 y :9000
+pnpm test
+pnpm test:services:down
 ```
+
+Para usar otros, define `MONGO_TEST_URL`, `REDIS_TEST_URL` y `S3_TEST_URL`. Antes de la primera
+ejecución de `pnpm e2e`, instala el navegador: `pnpm exec playwright install chromium`.
 
 Para ejecutar un servicio fuera de Docker, copia `.env.example` a `.env` y usa
 `pnpm --filter @reqcanvas/api dev`.

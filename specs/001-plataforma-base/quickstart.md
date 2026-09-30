@@ -67,8 +67,11 @@ Fuera de Docker: `pnpm --filter @reqcanvas/api migrate:up|down|status` (lee `MON
 ## 6. Pruebas y calidad (US2)
 
 ```bash
+pnpm test:services:up                      # MongoDB, Redis y S3 (RustFS) para las pruebas
 pnpm lint && pnpm typecheck && pnpm test   # incluye pytest de analytics y las pruebas de scripts
+pnpm exec playwright install chromium      # solo la primera vez
 pnpm e2e                                   # smoke contra el stack local (incluye p95 de /health)
+pnpm test:services:down
 git commit --allow-empty -m "cambios varios"   # Husky + commitlint lo rechazan
 ```
 
@@ -83,6 +86,7 @@ git commit --allow-empty -m "cambios varios"   # Husky + commitlint lo rechazan
 
 ## 8. Rollback (US4, SC-004)
 
-Seguir `docs/runbooks/rollback.md`: `scripts/rollback.sh production v<anterior>`
-(añade `--migrate-down` si la versión traía migraciones); verificar con `/version` que se sirve
-la versión anterior en < 10 min.
+Seguir `docs/runbooks/rollback.md`: el Rollback del panel de Railway devuelve la versión
+anterior en segundos (SC-004, verificar con `/version`); después, si la versión traía
+migraciones, `scripts/rollback.sh production v<anterior> --migrate-down=v<mala>` o
+`--restore-backup` para las destructivas (ADR 0003).
