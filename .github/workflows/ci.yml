@@ -57,6 +57,9 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # La action descarga por defecto la 8.24.3, que ignora `[[allowlists]]` (sintaxis de la
+          # 8.25+) en .gitleaks.toml. Misma versión que valida la configuración en local.
+          GITLEAKS_VERSION: 8.30.1
 
   test-node:
     runs-on: ubuntu-latest
