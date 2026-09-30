@@ -27,7 +27,7 @@ alcance sugeridos van al final de cada tarea.
 
 **Purpose**: dependencias y datos estáticos
 
-- [ ] T001 Añadir a `apps/api/package.json` `@fastify/jwt`, `@fastify/cookie`, `@fastify/rate-limit`, `@node-rs/argon2`, `bullmq` y un `fastify-type-provider-zod` compatible con zod 4; comprobar que `docker build -f apps/api/Dockerfile .` sigue por debajo de 300 MB (límite del CI) — `chore(api)`
+- [X] T001 Añadir a `apps/api/package.json` `@fastify/jwt`, `@fastify/cookie`, `@fastify/rate-limit`, `@node-rs/argon2`, `bullmq` y un `fastify-type-provider-zod` compatible con zod 4; comprobar que `docker build -f apps/api/Dockerfile .` sigue por debajo de 300 MB (límite del CI) — `chore(api)`
 - [ ] T002 [P] Añadir a `apps/web/package.json` `react-router` 7, `@tanstack/react-query` 5, `zustand`, `react-hook-form`, `@hookform/resolvers`, `tailwindcss` 4 y `@tailwindcss/vite`; registrar el plugin en `apps/web/vite.config.ts` y crear `apps/web/src/index.css` con `@import "tailwindcss"` — `chore(web)`
 - [ ] T003 [P] Añadir la lista de las 10 000 contraseñas más comunes en `apps/api/data/common-passwords.txt` (fuera de `src/`, que el `Dockerfile` elimina de la imagen), con su origen y licencia en la cabecera — `chore(api)`
 
