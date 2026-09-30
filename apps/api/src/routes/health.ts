@@ -39,6 +39,8 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
       runCheck(() => pingMongo(app.mongo), checkTimeoutMs),
       runCheck(async () => void (await app.redis.ping()), checkTimeoutMs),
     ]);
+    // Aviso informativo: no cambia el estado (Redis responde), pero BullMQ podría perder trabajos.
+    if (app.redisPolicyWarning) redis.warning = app.redisPolicyWarning;
     return { mongo, redis };
   };
 

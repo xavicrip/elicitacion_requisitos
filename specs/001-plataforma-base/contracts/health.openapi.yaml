@@ -146,4 +146,7 @@ components:
               status: { type: string, enum: [up, down] }
               latencyMs: { type: number, minimum: 0 }
               error: { type: string, description: Mensaje sin datos sensibles }
+              warning:
+                type: string
+                description: Aviso que no cambia el estado (p. ej., maxmemory-policy de Redis distinta de noeviction; feature 002)
         timestamp: { type: string, format: date-time }

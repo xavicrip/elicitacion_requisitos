@@ -19,6 +19,8 @@ services:
 
   redis:
     image: redis:7
+    # BullMQ exige noeviction (feature 002, plan ajuste 7); es el valor por defecto de Redis.
+    command: ['redis-server', '--maxmemory-policy', 'noeviction']
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       <<: *http-healthcheck

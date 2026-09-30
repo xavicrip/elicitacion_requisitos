@@ -6,6 +6,8 @@ export const HealthCheckSchema = z.object({
   latencyMs: z.number().min(0),
   /** Mensaje sin datos sensibles. */
   error: z.string().optional(),
+  /** Aviso que no cambia el estado, p. ej., una configuración incorrecta de Redis. */
+  warning: z.string().optional(),
 });
 
 /** Respuesta de GET /health y GET /health/deep (contracts/health.openapi.yaml). */
