@@ -8,6 +8,8 @@ import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
+import { invitationRoutes } from './modules/invitations/routes.js';
+import { memberRoutes } from './modules/projects/member-routes.js';
 import { projectRoutes } from './modules/projects/routes.js';
 import { authPlugin } from './plugins/auth.js';
 import { authorizationPlugin } from './plugins/authorization.js';
@@ -51,6 +53,8 @@ export type AuthConfig = {
   secureCookies: boolean;
   /** Prefijo de las claves de Redis (rate limit y bloqueo); las pruebas usan uno propio. */
   redisNameSpace?: string;
+  /** `APP_BASE_URL`: URL pública de web, base de los enlaces de invitación. */
+  appBaseUrl: string;
 };
 
 export type BuildAppOptions = {
@@ -116,6 +120,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         ...services.deletion,
       });
       await app.register(projectRoutes);
+      await app.register(memberRoutes);
+      await app.register(invitationRoutes, { appBaseUrl: services.auth.appBaseUrl });
     }
   }
 

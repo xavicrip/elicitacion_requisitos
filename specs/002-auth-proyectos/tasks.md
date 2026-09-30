@@ -158,16 +158,16 @@ estado y última actividad
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T054 [P] [US3] Pruebas de contrato de `/projects/:id/members[/:uid]`, `/projects/:id/invitations[/:iid]`, `GET /invitations/:token` y `POST /invitations/:token/accept` en `apps/api/tests/contract/invitations.contract.test.ts` — `test(api)`
-- [ ] T055 [P] [US3] Pruebas de integración en `apps/api/tests/integration/invitations.test.ts`: el token solo se devuelve al crear y se guarda como hash; caducada o revocada → `410`; aceptar es idempotente (no duplica, conserva el rol); retirar al último admin, degradarlo o que abandone → `409`; un miembro retirado pierde el acceso en la siguiente petición y no se borran su usuario ni los documentos que lo referencian (`audit_logs.actorId`; la 004 añade el caso con aportes); auditoría `member.role_changed`, `member.removed`, `invitation.created`, `invitation.revoked` — `test(api)`
-- [ ] T056 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de miembros e invitaciones (incluidos los `409`) — `test(api)`
+- [X] T054 [P] [US3] Pruebas de contrato de `/projects/:id/members[/:uid]`, `/projects/:id/invitations[/:iid]`, `GET /invitations/:token` y `POST /invitations/:token/accept` en `apps/api/tests/contract/invitations.contract.test.ts` — `test(api)`
+- [X] T055 [P] [US3] Pruebas de integración en `apps/api/tests/integration/invitations.test.ts`: el token solo se devuelve al crear y se guarda como hash; caducada o revocada → `410`; aceptar es idempotente (no duplica, conserva el rol); retirar al último admin, degradarlo o que abandone → `409`; un miembro retirado pierde el acceso en la siguiente petición y no se borran su usuario ni los documentos que lo referencian (`audit_logs.actorId`; la 004 añade el caso con aportes); auditoría `member.role_changed`, `member.removed`, `invitation.created`, `invitation.revoked` — `test(api)`
+- [X] T056 [P] [US3] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de miembros e invitaciones (incluidos los `409`) — `test(api)`
 - [ ] T057 [P] [US3] Pruebas de `MembersPanel` (cambiar rol, retirar, generar, copiar y revocar enlaces) y de `AcceptInvitationPage` (sin sesión: registro y unión conservando el token; inválida: "Esta invitación ya no es válida") en `apps/web/tests/invitations.test.tsx` — `test(web)`
 - [ ] T058 [P] [US3] E2E en `e2e/flows/invitations.spec.ts` (dos contextos de navegador): generar enlace → registrarse desde el enlace → el proyecto aparece como Participante; el participante no puede crear invitaciones (`403`); revocar → tercera cuenta ve el mensaje; retirar → el participante deja de ver el proyecto — `test(e2e)`
 
 ### Implementation for User Story 3
 
-- [ ] T059 [US3] Implementar `apps/api/src/modules/invitations/service.ts` y `routes.ts` (token de 32 bytes en base64url, URL con `APP_BASE_URL` + `/invitacion/{token}`; flag `invite-email` registrado en `packages/shared/src/flags.ts` con `default: false`) — `feat(api)`
-- [ ] T060 [US3] Implementar la gestión de miembros en `apps/api/src/modules/projects/members.ts` (actualizaciones condicionales atómicas para "≥ 1 admin", research R6) y sus rutas — `feat(api)`
+- [X] T059 [US3] Implementar `apps/api/src/modules/invitations/service.ts` y `routes.ts` (token de 32 bytes en base64url, URL con `APP_BASE_URL` + `/invitacion/{token}`; flag `invite-email` registrado en `packages/shared/src/flags.ts` con `default: false`) — `feat(api)`
+- [X] T060 [US3] Implementar la gestión de miembros en `apps/api/src/modules/projects/members.ts` (actualizaciones condicionales atómicas para "≥ 1 admin", research R6) y sus rutas — `feat(api)`
 - [ ] T061 [US3] Implementar `apps/web/src/features/projects/MembersPanel.tsx` y `apps/web/src/features/invitations/AcceptInvitationPage.tsx` (ruta `/invitacion/:token`) — `feat(web)`
 
 **Checkpoint**: las cuatro historias funcionan; la matriz completa, al 100 % en verde (SC-003)

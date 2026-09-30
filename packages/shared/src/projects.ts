@@ -51,6 +51,15 @@ export const InvitationSchema = z.object({
   uses: z.number().int().min(0),
 });
 
+/** Respuesta de POST /projects/:id/invitations: la única vez que se devuelve el token (en la URL). */
+export const InvitationCreatedSchema = InvitationSchema.extend({ url: z.url() });
+
+/** Vista previa pública de una invitación válida (GET /invitations/:token). */
+export const InvitationPreviewSchema = z.object({ projectName: z.string() });
+
+/** Cuerpo de PATCH /projects/:id/members/:userId. */
+export const RoleChangeSchema = z.object({ role: RoleSchema });
+
 export type Role = z.infer<typeof RoleSchema>;
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
 export type StatusAction = z.infer<typeof StatusActionSchema>;
@@ -60,6 +69,8 @@ export type Project = z.infer<typeof ProjectSchema>;
 export type Member = z.infer<typeof MemberSchema>;
 export type InvitationStatus = z.infer<typeof InvitationStatusSchema>;
 export type Invitation = z.infer<typeof InvitationSchema>;
+export type InvitationCreated = z.infer<typeof InvitationCreatedSchema>;
+export type InvitationPreview = z.infer<typeof InvitationPreviewSchema>;
 
 const TRANSITIONS: Record<ProjectStatus, Partial<Record<StatusAction, ProjectStatus>>> = {
   draft: { open: 'open' },

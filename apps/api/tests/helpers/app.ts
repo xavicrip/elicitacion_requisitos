@@ -32,6 +32,7 @@ export async function buildTestApp(
         accessTtl: '15m',
         refreshTtlDays: 7,
         secureCookies: true,
+        appBaseUrl: 'https://web.example.com',
         // Claves de Redis propias: los contadores no se comparten entre pruebas.
         redisNameSpace: `test-${dbName}:`,
         ...(typeof options.withAuth === 'object' ? options.withAuth : {}),
