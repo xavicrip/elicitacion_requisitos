@@ -1,38 +1,9 @@
-import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
+import { canvasState, fixturePath as fixture, imageReady, login, openProject } from './diagrams';
 import { expect, test } from './fixtures';
-import { registerUser, type TestUser } from './helpers';
+import { registerUser } from './helpers';
 
 // US1: subir un diagrama (quickstart §1). Solo contra el stack local, con E2E_HOOKS=true.
-
-const fixture = (name: string) =>
-  fileURLToPath(new URL(`../fixtures/diagrams/${name}`, import.meta.url));
-
-declare global {
-  interface Window {
-    __canvasState?: { versionId: string; mode: string; imageStatus: string };
-  }
-}
-
-async function login(page: Page, user: TestUser) {
-  await page.goto('/entrar');
-  await page.getByLabel('Email').fill(user.email);
-  await page.getByLabel('Contraseña').fill(user.password);
-  await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page.getByRole('heading', { name: 'Mis proyectos' })).toBeVisible();
-}
-
-/** Proyecto abierto del usuario, creado por la API a través del proxy de web. */
-async function openProject(page: Page, accessToken: string): Promise<string> {
-  const headers = { authorization: `Bearer ${accessToken}` };
-  const created = await page.request.post('/api/projects', {
-    headers,
-    data: { name: `Diagramas ${Date.now()}` },
-  });
-  const { id } = (await created.json()) as { id: string };
-  await page.request.post(`/api/projects/${id}/status`, { headers, data: { action: 'open' } });
-  return id;
-}
 
 async function startUpload(page: Page, projectId: string, name: string) {
   await page.goto(`/proyectos/${projectId}/diagramas`);
@@ -41,9 +12,6 @@ async function startUpload(page: Page, projectId: string, name: string) {
   await dialog.getByLabel('Nombre').fill(name);
   return dialog;
 }
-
-const imageReady = (page: Page) =>
-  expect.poll(() => page.evaluate(() => window.__canvasState?.imageStatus)).toBe('ready');
 
 test('subir compra-simple.png abre el espacio de trabajo en borrador con la imagen', async ({
   page,
@@ -61,7 +29,8 @@ test('subir compra-simple.png abre el espacio de trabajo en borrador con la imag
   await expect(page.getByRole('heading', { name: 'Proceso de compra' })).toBeVisible();
   await expect(page.getByText('Versión 1 · Borrador')).toBeVisible();
   await imageReady(page);
-  expect(await page.evaluate(() => window.__canvasState?.mode)).toBe('view');
+  // Admin, borrador y pantalla de escritorio: el espacio de trabajo abre en modo edit (US2).
+  expect((await canvasState(page))?.mode).toBe('edit');
 });
 
 test('un PDF y un archivo de 15 MB se rechazan con su mensaje', async ({ page, request }) => {
