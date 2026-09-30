@@ -11,6 +11,8 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly fields: Record<string, string> = {},
+    /** Cuerpo de la respuesta: p. ej., la actividad actual en un 409 por `rev` desactualizado. */
+    readonly body?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -20,28 +22,33 @@ export class ApiError extends Error {
 type Options = {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
+  headers?: Record<string, string>;
 };
 
 async function toApiError(response: Response): Promise<ApiError> {
+  let body: unknown;
   try {
-    const { code, message, fields } = (await response.json()) as {
-      code: string;
-      message: string;
-      fields?: Record<string, string>;
-    };
-    if (code && message) return new ApiError(response.status, code, message, fields);
+    body = await response.json();
   } catch {
     // Sin cuerpo JSON: p. ej., el proxy no llega a la API.
   }
+  const { code, message, fields } = (body ?? {}) as {
+    code?: string;
+    message?: string;
+    fields?: Record<string, string>;
+  };
+  if (code && message) return new ApiError(response.status, code, message, fields, body);
   return new ApiError(
     response.status,
-    'NETWORK_ERROR',
+    body === undefined ? 'NETWORK_ERROR' : 'HTTP_ERROR',
     'No se pudo conectar con el servidor. Inténtalo de nuevo.',
+    {},
+    body,
   );
 }
 
-function send(path: string, { method = 'GET', body }: Options): Promise<Response> {
-  const headers = new Headers();
+function send(path: string, { method = 'GET', body, headers: extra }: Options): Promise<Response> {
+  const headers = new Headers(extra);
   const token = useAuthStore.getState().accessToken;
   if (token) headers.set('authorization', `Bearer ${token}`);
   if (body !== undefined) headers.set('content-type', 'application/json');
