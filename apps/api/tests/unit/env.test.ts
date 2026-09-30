@@ -9,6 +9,8 @@ const valid = {
   REDIS_URL: 'redis://default:s3cret-redis@redis:6379',
   ANALYTICS_URL: 'http://analytics.railway.internal:8000',
   CORS_ORIGINS: 'https://web.example.com,https://otro.example.com',
+  JWT_SECRET: 's3cret-jwt-0123456789abcdef0123456789',
+  APP_BASE_URL: 'https://web.example.com',
 };
 
 describe('loadEnv', () => {
@@ -29,6 +31,44 @@ describe('loadEnv', () => {
 
   it('trata una variable vacía como ausente', () => {
     expect(() => loadEnv({ ...valid, MONGO_URL: '' })).toThrow(/MONGO_URL/);
+  });
+
+  describe('sesión (feature 002)', () => {
+    it('aplica los valores por defecto de las duraciones', () => {
+      const env = loadEnv(valid);
+      expect(env.JWT_ACCESS_TTL).toBe('15m');
+      expect(env.REFRESH_TTL_DAYS).toBe(7);
+      expect(env.APP_BASE_URL).toBe('https://web.example.com');
+    });
+
+    it.each(['JWT_SECRET', 'APP_BASE_URL'] as const)('%s es obligatoria', (name) => {
+      const { [name]: _omit, ...rest } = valid;
+      expect(() => loadEnv(rest)).toThrow(new RegExp(name));
+    });
+
+    it('rechaza un JWT_SECRET de menos de 32 bytes sin mostrarlo', () => {
+      try {
+        loadEnv({ ...valid, JWT_SECRET: 's3cret-corto' });
+        expect.unreachable();
+      } catch (error) {
+        expect((error as ConfigError).variables).toEqual(['JWT_SECRET']);
+        expect((error as Error).message).not.toMatch(/s3cret/);
+      }
+    });
+
+    it('cuenta los bytes, no los caracteres, del JWT_SECRET', () => {
+      // 16 caracteres de 2 bytes en UTF-8 = 32 bytes.
+      expect(() => loadEnv({ ...valid, JWT_SECRET: 'ñ'.repeat(16) })).not.toThrow();
+      expect(() => loadEnv({ ...valid, JWT_SECRET: 'ñ'.repeat(15) })).toThrow(/JWT_SECRET/);
+    });
+
+    it.each([
+      ['JWT_ACCESS_TTL', 'quince'],
+      ['REFRESH_TTL_DAYS', '0'],
+      ['APP_BASE_URL', 'no-es-una-url'],
+    ])('rechaza %s=%s', (name, value) => {
+      expect(() => loadEnv({ ...valid, [name]: value })).toThrow(new RegExp(name));
+    });
   });
 
   it('lista todas las variables inválidas y nunca incluye valores', () => {

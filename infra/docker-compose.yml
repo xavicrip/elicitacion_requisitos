@@ -71,6 +71,9 @@ services:
       CORS_ORIGINS: http://localhost:5173
       LOG_LEVEL: info
       FEATURE_FLAGS: ${FEATURE_FLAGS:-}
+      # Solo para desarrollo local; en Railway es un secreto por entorno.
+      JWT_SECRET: dev-only-jwt-secret-not-for-production-use
+      APP_BASE_URL: http://localhost:5173
     ports:
       - '3000:3000'
     depends_on:
