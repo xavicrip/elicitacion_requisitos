@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
 import { authRoutes } from './modules/auth/routes.js';
+import { projectRoutes } from './modules/projects/routes.js';
 import { authPlugin } from './plugins/auth.js';
 import { authorizationPlugin } from './plugins/authorization.js';
 import { featureGatePlugin } from './plugins/flags.js';
@@ -99,6 +100,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await app.register(rateLimitPlugin, { nameSpace: `${redisNameSpace}rate-limit:` });
       await app.register(authorizationPlugin);
       await app.register(authRoutes, { ...services.auth, redisNameSpace });
+      await app.register(projectRoutes);
     }
   }
 
