@@ -92,6 +92,7 @@ export async function apiFetch<T>(path: string, options: Options = {}): Promise<
     if (await refreshSession()) response = await send(path, options);
   }
   if (!response.ok) throw await toApiError(response);
-  if (response.status === 204) return undefined as T;
-  return (await response.json()) as T;
+  // 204, o 202 del borrado de un proyecto: respuestas sin cuerpo.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

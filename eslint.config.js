@@ -31,5 +31,19 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Constitución V (XSS): el texto de usuario solo se muestra como texto. Equivale a
+    // `react/no-danger`; eslint-plugin-react aún no admite ESLint 10.
+    files: ['apps/web/**/*.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message: 'No uses dangerouslySetInnerHTML: muestra el texto de usuario como texto.',
+        },
+      ],
+    },
+  },
   prettier,
 );
