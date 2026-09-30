@@ -22,6 +22,8 @@
 - **Decision**: Caddy (`web`) sirve el frontend y hace `reverse_proxy` de `/api/*` y
   `/socket.io/*` hacia `api.railway.internal:${PORT}` (red privada IPv6). El frontend usa
   rutas relativas (`/api/...`). `API_PUBLIC_URL` pasa a ser opcional (solo para los smoke tests).
+  *Concretado el 2026-09-30 (plan, ajuste 2)*: `handle_path /api/*` → `{$API_INTERNAL_URL}`;
+  `/socket.io/*` se deja para la 005.
 - **Rationale**: los subdominios `*.up.railway.app` son sitios distintos (el dominio está en la
   Public Suffix List), así que una cookie de la API sería de terceros y Safari/Firefox la
   bloquearían. Con el mismo origen, `SameSite=Strict` funciona y desaparece el CORS.
@@ -105,4 +107,5 @@
 
 `JWT_SECRET` (≥ 32 bytes, obligatoria), `JWT_ACCESS_TTL` (por defecto `15m`),
 `REFRESH_TTL_DAYS` (por defecto `7`), `APP_BASE_URL` (para construir los enlaces de invitación).
-Se añaden a `contracts/env-vars.md` de la 001 y a los GitHub Environments / Railway.
+Se añaden a `contracts/env-vars.md` de la 001 y al servicio `api` de Railway (no a los GitHub
+Environments; plan, ajuste 6). En `web`, `API_INTERNAL_URL` (ajuste 2).

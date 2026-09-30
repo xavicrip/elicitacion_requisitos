@@ -17,9 +17,9 @@ de modo que frontend y API comparten origen.
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x sobre Node.js 24 LTS
-**Primary Dependencies**: `api`: Fastify 5, `fastify-type-provider-zod`, `@fastify/jwt`, `@fastify/cookie`, `@fastify/rate-limit` (almacén Redis), `@node-rs/argon2`, Mongoose 8, BullMQ. `web`: React Router 7 (modo librería), TanStack Query 5, Zustand, react-hook-form + zod, Tailwind CSS 4
+**Primary Dependencies**: `api`: Fastify 5, `fastify-type-provider-zod`, `@fastify/jwt`, `@fastify/cookie`, `@fastify/rate-limit` (almacén Redis), `@node-rs/argon2`, Mongoose 9 (driver `mongodb` 7, los de la 001), BullMQ. `web`: React Router 7 (modo librería), TanStack Query 5, Zustand, react-hook-form + zod, Tailwind CSS 4
 **Storage**: MongoDB (`users`, `projects`, `invitations`, `refresh_tokens`, `audit_logs`); Redis (contadores de intentos, rate limit, cola `project-deletion`)
-**Testing**: Vitest + `fastify.inject` (unitarias, contrato, integración con MongoDB/Redis reales en CI); Playwright (E2E de registro, invitación y acceso denegado)
+**Testing**: Vitest + `fastify.inject` (unitarias, contrato, integración con MongoDB/Redis reales: `pnpm test:services:up` en local, `services` en CI); Playwright: E2E funcionales de registro, invitación y acceso denegado **solo contra el stack local/CI**, separados del smoke post-despliegue (ver ajustes)
 **Target Platform**: Railway (contenedores Linux) + navegadores de escritorio y móviles actuales
 **Project Type**: Aplicación web (monorepo de la feature 001)
 **Performance Goals**: login p95 < 300 ms (argon2id con ~50 ms de coste); "Mis proyectos" p95 < 200 ms con 100 proyectos
@@ -96,6 +96,38 @@ e2e/{auth.spec.ts,invitations.spec.ts,access-control.spec.ts}
 **Structure Decision**: módulos por dominio dentro de `apps/api/src/modules/` (rutas, servicio y
 modelo juntos), que es el patrón que seguirán las features 003–008. En `web`, carpetas por
 feature bajo `src/features/`.
+
+## Ajustes tras implementar la 001 (2026-09-30)
+
+El plan se escribió antes de implementar la 001. Revisado contra el código de `v0.2.0`:
+
+1. **Dependencias reales**: Mongoose 9, `mongodb` 7 y zod 4 (no Mongoose 8). El *type provider*
+   de Fastify debe ser una versión compatible con zod 4. BullMQ abre sus propias conexiones
+   Redis con `maxRetriesPerRequest: null`; no reutiliza el cliente `ioredis` del plugin `redis`.
+2. **Proxy `/api` en Caddy**: `handle_path /api/*` (quita el prefijo) → `reverse_proxy
+   {$API_INTERNAL_URL}`. Nueva variable de `web`: `API_INTERNAL_URL`
+   (`http://api.railway.internal:3000` en Railway, `http://api:3000` en Compose); en
+   desarrollo con Vite, `server.proxy['/api']`. Las rutas de `api` **no** llevan el prefijo
+   `/api` (`/auth/login`, `/projects`…) y `/health`, `/version` siguen en la raíz: `deploy.yml`
+   las consulta por el dominio público de `api`, que se mantiene. `/socket.io/*` se añade en la
+   005, no ahora.
+3. **Cookie `rt`**: `Secure` salvo con `NODE_ENV=development` (Compose sirve por `http`);
+   `Path=/api/auth` es la ruta vista por el navegador, así que es correcta con el proxy.
+4. **E2E sin datos en producción**: el smoke de `deploy.yml` ejecuta todo `e2e/`. Se separan dos
+   proyectos de Playwright: `smoke` (`e2e/smoke.spec.ts`, solo lectura; el único que corre tras
+   desplegar, con `--project smoke`) y `flows` (`e2e/flows/*.spec.ts`: registro, invitaciones,
+   acceso denegado), que solo corre contra el stack local y el job `e2e-smoke` del CI.
+5. **Migración** `20261001000000-auth-projects-indexes.js`: `destructive = false` (solo crea
+   colecciones e índices; `down` los elimina), así que el pre-deploy `migrate.js auto` no
+   necesita respaldo. Rollback compatible: `v0.2.0` ignora las colecciones nuevas, por lo que el
+   Rollback del panel de Railway es seguro (ADR 0003).
+6. **Variables** (R11): `JWT_SECRET`, `JWT_ACCESS_TTL`, `REFRESH_TTL_DAYS` y `APP_BASE_URL` van
+   **solo en el servicio `api` de Railway** (no en los GitHub Environments: el pipeline no las
+   usa). `JWT_SECRET` se genera por entorno y debe existir **antes** del primer despliegue que
+   la exija (si falta, `api` no arranca y Railway mantiene la versión anterior).
+7. **Redis para BullMQ**: BullMQ exige `maxmemory-policy noeviction`. Verificar la plantilla
+   Redis de Railway (8.2) en ambos entornos y el Redis de Compose y de CI antes de implementar
+   R9.
 
 ## Complexity Tracking
 
