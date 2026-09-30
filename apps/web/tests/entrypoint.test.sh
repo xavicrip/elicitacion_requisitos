@@ -38,4 +38,13 @@ env -i PATH="$PATH" WEB_ROOT="$tmp" "$INTERNAL" API_PUBLIC_URL="https://api.exam
 grep -q '"apiUrl":"https://api.example.com"' "$tmp/config.js"; check $? "config.js contiene apiUrl"
 grep -q '"version":"0.1.0"' "$tmp/config.js"; check $? "config.js contiene la versión"
 
+grep -q '"e2eHooks":false' "$tmp/config.js"; check $? "sin E2E_HOOKS, los ganchos de los E2E quedan desactivados"
+rm -f "$tmp/config.js"
+
+# 6. E2E_HOOKS=true (Compose y CI) activa los ganchos; otro valor no.
+env -i PATH="$PATH" WEB_ROOT="$tmp" "$INTERNAL" E2E_HOOKS=true sh "$SCRIPT" true
+grep -q '"e2eHooks":true' "$tmp/config.js"; check $? "E2E_HOOKS=true activa los ganchos"
+env -i PATH="$PATH" WEB_ROOT="$tmp" "$INTERNAL" E2E_HOOKS='1;alert(1)' sh "$SCRIPT" true
+grep -q '"e2eHooks":false' "$tmp/config.js"; check $? "otro valor de E2E_HOOKS no los activa ni se inyecta"
+
 [ "$fails" = "0" ] || { echo "$fails prueba(s) fallida(s)"; exit 1; }
