@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
 import { LoginPage } from '../features/auth/LoginPage';
+import { DiagramListPage } from '../features/diagrams/DiagramListPage';
 import { AcceptInvitationPage } from '../features/invitations/AcceptInvitationPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
@@ -20,6 +21,14 @@ const accounts = (element: ReactNode) => (
   </FlagGate>
 );
 
+/** Rutas de la feature 003: detrás del flag `diagrams` (plan ajuste 4). */
+const diagrams = (element: ReactNode) =>
+  accounts(
+    <FlagGate flag="diagrams" fallback={<NotFoundPage />}>
+      {element}
+    </FlagGate>,
+  );
+
 /** Rutas de la app (React Router 7, modo librería; research R10). */
 export const routes: RouteObject[] = [
   {
@@ -33,6 +42,11 @@ export const routes: RouteObject[] = [
         path: 'proyectos/:projectId',
         loader: requireSession,
         element: accounts(<ProjectSettingsPage />),
+      },
+      {
+        path: 'proyectos/:projectId/diagramas',
+        loader: requireSession,
+        element: diagrams(<DiagramListPage />),
       },
       { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
       { path: '*', element: <NotFoundPage /> },
