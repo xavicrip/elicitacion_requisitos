@@ -70,19 +70,27 @@ describe('registro (US1, FR-001, FR-002)', () => {
   });
 
   it('un email duplicado responde 409 genérico y tarda lo mismo que un registro (research R5)', async () => {
-    const user = newUser();
-    let started = performance.now();
-    await post('/auth/register', user);
-    const firstMs = performance.now() - started;
+    const timed = async (payload: Record<string, string>) => {
+      const started = performance.now();
+      const response = await post('/auth/register', payload);
+      return { response, ms: performance.now() - started };
+    };
+    const median = (values: number[]) => [...values].sort((a, b) => a - b)[1]!;
+    // Calentamiento: la primera petición paga el JIT y las conexiones, no el hash.
+    await post('/auth/register', newUser());
 
-    started = performance.now();
-    const duplicate = await post('/auth/register', { ...user, name: 'Otra persona' });
-    const duplicateMs = performance.now() - started;
-
-    expect(duplicate.statusCode).toBe(409);
-    expect(duplicate.body).not.toContain(user.email);
+    const users = [newUser(), newUser(), newUser()];
+    const registers: number[] = [];
+    for (const user of users) registers.push((await timed(user)).ms);
+    const duplicates: number[] = [];
+    for (const user of users) {
+      const { response, ms } = await timed({ ...user, name: 'Otra persona' });
+      expect(response.statusCode).toBe(409);
+      expect(response.body).not.toContain(user.email);
+      duplicates.push(ms);
+    }
     // Sin el hash ficticio, el duplicado respondería en ~1 ms frente a los ~50 ms de argon2id.
-    expect(duplicateMs).toBeGreaterThan(firstMs * 0.4);
+    expect(median(duplicates)).toBeGreaterThan(median(registers) * 0.4);
   });
 });
 
