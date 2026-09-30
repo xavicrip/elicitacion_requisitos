@@ -9,10 +9,10 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
    ```ts
    export const FLAGS = defineFlags({
-     'diagram-editor': {
-       description: 'Editor de zonas de actividad',
+     detection: {
+       description: 'Detección asistida de actividades',
        default: false,
-       owner: '003-diagramas-canvas',
+       owner: '006-deteccion-asistida',
      },
    });
    ```
@@ -26,20 +26,24 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag       | Por defecto | Feature              | Qué oculta                                                                                                                                                         |
-| ---------- | ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `accounts` | `true`      | `002-auth-proyectos` | Registro, login, "Mis proyectos" e invitaciones. Desactivado, las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra |
+| Flag       | Por defecto | Feature                | Qué oculta                                                                                                                                                         |
+| ---------- | ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `accounts` | `true`      | `002-auth-proyectos`   | Registro, login, "Mis proyectos" e invitaciones. Desactivado, las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra |
+| `diagrams` | `false`     | `003-diagramas-canvas` | Diagramas y espacio de trabajo: `/projects/:id/diagrams`, `/diagrams`, `/diagram-versions` y `/activities` de `api` responden 404 y `web` oculta la sección        |
 
-Activado por defecto desde que se completó la 002 (T067, 2026-09-30). Para ocultarlo en un
-entorno: `FEATURE_FLAGS=accounts=false`. Se retirará, con sus comprobaciones, en un commit
-aparte.
+`accounts` está activado por defecto desde que se completó la 002 (T067, 2026-09-30). Para
+ocultarlo en un entorno: `FEATURE_FLAGS=accounts=false`. Se retirará, con sus comprobaciones,
+en un commit aparte.
+
+En local y en CI, Compose activa `diagrams` (`infra/docker-compose.yml`); en Railway, solo en
+`staging` hasta completar la feature.
 
 ## Activarlo por entorno
 
 Variable `FEATURE_FLAGS` en Railway (o en `.env` en local):
 
 ```text
-FEATURE_FLAGS=diagram-editor=true,detection=false
+FEATURE_FLAGS=diagrams=true,detection=false
 ```
 
 Un nombre desconocido o un valor distinto de `true`/`false` genera un aviso en el log y no
