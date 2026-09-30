@@ -1,6 +1,6 @@
 import type { Writable } from 'node:stream';
 import type { FastifyInstance } from 'fastify';
-import { buildApp, type AuthConfig } from '../../src/app';
+import { buildApp, type AuthConfig, type DeletionConfig } from '../../src/app';
 import { runMigrations } from '../../src/db/migrations';
 import { MONGO_TEST_URL, REDIS_TEST_URL, uniqueDbName } from './services';
 
@@ -14,6 +14,8 @@ type TestAppOptions = {
    * cada prueba registra los plugins y rutas que necesita antes de `ready()`.
    */
   withAuth?: boolean | Partial<AuthConfig>;
+  /** Reintentos del job de borrado (por defecto, rápidos para las pruebas). */
+  deletion?: DeletionConfig;
   logStream?: Writable;
 };
 
@@ -48,6 +50,13 @@ export async function buildTestApp(
       // Las pruebas de la 002 necesitan el flag `accounts`; '' deja los valores por defecto.
       featureFlags: options.featureFlags ?? 'accounts=true',
       auth,
+      deletion: {
+        attempts: 3,
+        backoffMs: 10,
+        // Colas propias: los jobs no se mezclan entre pruebas.
+        queuePrefix: `bull-test-${dbName}`,
+        ...options.deletion,
+      },
     },
   });
   await app.mongo.asPromise();

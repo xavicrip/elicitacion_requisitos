@@ -102,6 +102,34 @@ export function projectsService(app: FastifyInstance) {
       return toProjectDto(updated, membership);
     },
 
+    /**
+     * Borrado (US2 escenario 4): exige escribir el nombre exacto, marca el proyecto como
+     * `deleting` (404 para todos desde ese momento) y encola el borrado en cascada.
+     */
+    async requestDeletion(project: Project, confirmName: string, actorId: string): Promise<void> {
+      if (confirmName !== project.name) {
+        throw new HttpError(
+          400,
+          'CONFIRMATION_MISMATCH',
+          'Escribe el nombre exacto del proyecto para confirmar.',
+        );
+      }
+      const marked = await Projects.updateOne(
+        { _id: project._id, status: { $ne: 'deleting' } },
+        { $set: { status: 'deleting', deletion: { status: 'pending', attempts: 0 } } },
+      );
+      if (marked.modifiedCount === 0) {
+        throw new HttpError(404, 'NOT_FOUND', 'Proyecto no encontrado');
+      }
+      await audit.record('project.deletion_requested', {
+        actorId: new Types.ObjectId(actorId),
+        projectId: project._id,
+        entity: { type: 'project', id: project._id.toHexString() },
+        diff: { name: project.name },
+      });
+      await app.enqueueProjectDeletion(project._id.toHexString());
+    },
+
     /** Ciclo borrador → abierto → cerrado → abierto (FR-006), con auditoría (FR-013). */
     async changeStatus(
       project: Project,

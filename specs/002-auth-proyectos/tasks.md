@@ -110,14 +110,14 @@ estado y última actividad
 
 - [X] T041 [P] [US2] Pruebas de contrato de `GET/POST /projects`, `GET/PATCH/DELETE /projects/:id` y `POST /projects/:id/status` en `apps/api/tests/contract/projects.contract.test.ts` — `test(api)`
 - [X] T042 [P] [US2] Pruebas de integración en `apps/api/tests/integration/projects.test.ts`: el creador queda como `admin` en `draft`; transiciones válidas (`open`, `close`, `reopen`) y `409` en las inválidas; auditoría `project.status_changed`; "Mis proyectos" ordenado por `lastActivityAt` con rol y estado, incluida una persona que es `admin` en un proyecto y `participant` en otro (FR-007); p95 < 200 ms con 100 proyectos — `test(api)`
-- [ ] T043 [P] [US2] Pruebas del borrado en `apps/api/tests/integration/project-deletion.test.ts`: `confirmName` distinto → `400`; correcto → `202`, `status: deleting` (404 para todos) y job `project-deletion` que ejecuta los manejadores de `registerProjectCascade` de forma idempotente y reintentable, registrando `deletion.status` (`pending → running → done`, o `failed` con `attempts` y `error` tras agotar los reintentos; constitución VI) — `test(api)`
+- [X] T043 [P] [US2] Pruebas del borrado en `apps/api/tests/integration/project-deletion.test.ts`: `confirmName` distinto → `400`; correcto → `202`, `status: deleting` (404 para todos) y job `project-deletion` que ejecuta los manejadores de `registerProjectCascade` de forma idempotente y reintentable, registrando `deletion.status` (`pending → running → done`, o `failed` con `attempts` y `error` tras agotar los reintentos; constitución VI) — `test(api)`
 - [ ] T044 [P] [US2] Pruebas de `ProjectsPage`, `ProjectSettingsPage` y `DeleteProjectDialog` (el botón solo se activa al escribir el nombre exacto); un nombre o descripción con `<script>` se muestra como texto (constitución V, XSS); editar la descripción, forzar un `401` y guardar conserva el texto (edge case de sesión caducada) en `apps/web/tests/projects.test.tsx`; activar `react/no-danger` en `eslint.config.js` si no está — `test(web)`
 - [ ] T045 [P] [US2] E2E en `e2e/flows/projects.spec.ts`: crear → abrir → cerrar → reabrir → eliminar con confirmación — `test(e2e)`
 
 ### Implementation for User Story 2
 
 - [X] T046 [US2] Implementar `apps/api/src/modules/projects/service.ts` (crear, listar, editar, transiciones con auditoría, `lastActivityAt`) — `feat(api)`
-- [ ] T047 [US2] Implementar `apps/api/src/modules/projects/cascade.ts` (`registerProjectCascade`) y el worker BullMQ `apps/api/src/jobs/project-deletion.ts` (conexión propia con `maxRetriesPerRequest: null`, arranca y se cierra con la app, actualiza `deletion.status` y lo registra en el log) — `feat(api)`
+- [X] T047 [US2] Implementar `apps/api/src/modules/projects/cascade.ts` (`registerProjectCascade`) y el worker BullMQ `apps/api/src/jobs/project-deletion.ts` (conexión propia con `maxRetriesPerRequest: null`, arranca y se cierra con la app, actualiza `deletion.status` y lo registra en el log) — `feat(api)`
 - [X] T048 [US2] Implementar `apps/api/src/modules/projects/routes.ts` con `requireAuth` y `requireProjectRole` y registrarlas en `apps/api/src/app.ts` — `feat(api)`
 - [ ] T049 [US2] Implementar en `apps/web/src/features/projects/` la lista, el formulario de creación, `ProjectSettingsPage.tsx` (edición y cambios de estado) y `DeleteProjectDialog.tsx` con TanStack Query — `feat(web)`
 

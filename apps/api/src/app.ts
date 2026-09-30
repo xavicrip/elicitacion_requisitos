@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { projectRoutes } from './modules/projects/routes.js';
 import { authPlugin } from './plugins/auth.js';
@@ -29,6 +30,16 @@ export type ServicesConfig = {
   checkTimeoutMs?: number;
   /** Autenticación, proyectos e invitaciones (feature 002). Sin ella no se montan sus rutas. */
   auth?: AuthConfig;
+  /** Job de borrado de proyectos (feature 002, research R9). */
+  deletion?: DeletionConfig;
+};
+
+export type DeletionConfig = {
+  /** Reintentos del job (por defecto 5, con espera exponencial desde `backoffMs`). */
+  attempts?: number;
+  backoffMs?: number;
+  /** Prefijo de las colas en Redis; las pruebas usan uno propio. */
+  queuePrefix?: string;
 };
 
 export type AuthConfig = {
@@ -100,6 +111,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await app.register(rateLimitPlugin, { nameSpace: `${redisNameSpace}rate-limit:` });
       await app.register(authorizationPlugin);
       await app.register(authRoutes, { ...services.auth, redisNameSpace });
+      await app.register(projectDeletionPlugin, {
+        redisUrl: services.redisUrl,
+        ...services.deletion,
+      });
       await app.register(projectRoutes);
     }
   }

@@ -128,3 +128,27 @@ describe('/projects/{projectId}/status', () => {
     expect(response.statusCode).toBe(400);
   });
 });
+
+describe('DELETE /projects/{projectId}', () => {
+  it('400 con el formato de error si confirmName no coincide', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/projects/${projectId}`,
+      headers: admin,
+      payload: { confirmName: 'otro nombre' },
+    });
+    expect(response.statusCode).toBe(400);
+    ErrorSchema.parse(response.json());
+  });
+
+  it('202 sin cuerpo con el nombre exacto', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/projects/${projectId}`,
+      headers: admin,
+      payload: { confirmName: 'Tienda en línea' },
+    });
+    expect(response.statusCode).toBe(202);
+    expect(response.body).toBe('');
+  });
+});
