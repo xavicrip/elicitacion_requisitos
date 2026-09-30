@@ -1,6 +1,6 @@
 # Quickstart: Diagramas de actividades y espacio de trabajo interactivo
 
-Requiere 001 + 002 en marcha (`pnpm dev:up`, que ya incluye MinIO) y un proyecto propio
+Requiere 001 + 002 en marcha (`pnpm dev:up`, que incluye RustFS como bucket S3 local; plan, ajuste 2) y un proyecto propio
 en estado *Abierto*. Diagramas de ejemplo en `e2e/fixtures/diagrams/`
 (`compra-simple.png`, `grande-4000x3000.png`, `con-script.svg`).
 
@@ -42,5 +42,5 @@ en estado *Abierto*. Diagramas de ejemplo en `e2e/fixtures/diagrams/`
 ```bash
 pnpm --filter api test -- diagrams
 pnpm --filter web test -- camera
-pnpm e2e -- diagram-upload diagram-editor workspace-navigation
+pnpm e2e --project flows
 ```

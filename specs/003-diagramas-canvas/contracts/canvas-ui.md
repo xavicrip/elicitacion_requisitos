@@ -7,7 +7,7 @@ Este contrato fija el comportamiento que las features 004–006 extienden sin ro
 | Modo | Quién | Disponible si |
 |------|-------|---------------|
 | `view` | Todos los miembros | Siempre |
-| `edit` | Administrador | Versión `draft`, viewport ≥ 768 px, flag `diagram-editor` |
+| `edit` | Administrador | Versión `draft`, viewport ≥ 768 px, flag `diagrams` (plan, ajuste 4) |
 
 ## Controles
 

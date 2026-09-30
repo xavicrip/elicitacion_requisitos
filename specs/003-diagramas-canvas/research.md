@@ -8,6 +8,9 @@
   configurable. En Railway se usa un **Railway Bucket**; en local y en CI, **MinIO** (servicio
   en `docker-compose.yml` y en el job de CI). El bucket es privado; `web` recibe **presigned
   GET URLs** de 1 h desde la API.
+  *Revisado el 2026-09-30 (plan, ajustes 1–3)*: las imágenes las sirve `api` por el proxy de
+  `web` (mismo origen: Railway Buckets no documenta CORS y WebGL lo exige para las texturas),
+  y en local y en CI se usa **RustFS** en lugar de MinIO.
 - **Rationale**: el cliente S3 funciona igual con Railway, R2 y MinIO; las URLs firmadas evitan
   pasar los bytes de la imagen por la API en cada visualización.
 - **Alternatives considered**: Railway Volume montado en `api` (acopla el estado a una
