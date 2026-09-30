@@ -8,9 +8,13 @@ import { applyApiError, Field, FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
 import { projectKeys, projectsApi } from './api';
 import { DeleteProjectDialog } from './DeleteProjectDialog';
+import { ProjectNotFound } from './ProjectNotFound';
 import { ROLE_LABEL, STATUS_ACTION, STATUS_LABEL } from './labels';
 
-/** Página de un proyecto: datos, estado y, para el Administrador, edición y borrado. */
+/**
+ * Página de un proyecto: datos y estado. Las acciones de administración (estado, edición y
+ * borrado) solo se muestran al Administrador; la API las rechaza igualmente (US4, 403).
+ */
 export function ProjectSettingsPage() {
   const { projectId = '' } = useParams();
   const {
@@ -24,14 +28,7 @@ export function ProjectSettingsPage() {
   });
 
   if (isLoading) return <p>Cargando…</p>;
-  if (error instanceof ApiError && error.status === 404) {
-    return (
-      <section className="space-y-2">
-        <h1 className="text-2xl font-semibold">Proyecto no encontrado</h1>
-        <p>El proyecto no existe o no tienes acceso a él.</p>
-      </section>
-    );
-  }
+  if (error instanceof ApiError && error.status === 404) return <ProjectNotFound />;
   if (!project) return <FormError>No se pudo cargar el proyecto.</FormError>;
 
   const isAdmin = project.myRole === 'admin';
