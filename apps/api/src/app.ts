@@ -2,6 +2,9 @@ import type { Writable } from 'node:stream';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import Fastify, { type FastifyInstance } from 'fastify';
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import { z } from 'zod';
+import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
 import { mongoPlugin } from './plugins/mongo.js';
 import { genReqId, observability, REDACT_PATHS } from './plugins/observability.js';
@@ -30,6 +33,9 @@ export type BuildAppOptions = {
   services?: ServicesConfig;
 };
 
+// Mensajes de validación en español (constitución VI).
+z.config(z.locales.es());
+
 export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -40,6 +46,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     requestIdHeader: false,
     genReqId,
   });
+
+  // Esquemas zod de `@reqcanvas/shared` para validar entradas y serializar respuestas.
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
+  registerErrorHandlers(app);
 
   await app.register(observability);
   await app.register(helmet);
