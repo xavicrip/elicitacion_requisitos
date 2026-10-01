@@ -177,7 +177,7 @@ con motivo; el panel se filtra y ordena; los detalles huérfanos se reasignan
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T047 [P] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de detalles, votos, comentarios, cobertura, facets y huérfanos (anónimo, no miembro, autor, otro participante, administrador; proyecto `closed`, también para moderar y reasignar; detalle `validated`) — `test(api)`
+- [X] T047 [P] Ampliar `apps/api/tests/integration/authorization.matrix.test.ts` con las filas de detalles, votos, comentarios, cobertura, facets y huérfanos (anónimo, no miembro, autor, otro participante, administrador; proyecto `closed`, también para moderar y reasignar; detalle `validated`) — `test(api)`
 - [ ] T048 [P] Medir SC-003 (panel de una actividad con 200 detalles en < 1 s) y la cobertura de 100 actividades con 5 000 detalles (< 200 ms p95) con `e2e/perf` y una prueba de rendimiento de `api`; anotarlo en `plan.md` — `perf(api)`
 - [ ] T049 [P] ADR `docs/adr/0006-detalles-de-requisitos.md` (ancla por la `activityKey` de una versión publicada, vigente o archivada, y los huérfanos como estado temporal que resuelve el Administrador, en lugar de borrar: así se lee el Principio I; concurrencia con `rev`, contadores de votos con índice único, eventos de dominio en proceso) — `docs(adr)`
 - [ ] T050 [P] Actualizar el README (sección de detalles de requisitos: pantallas, flag `details`) y revisar que `quickstart.md` siga al día con lo construido — `docs(repo)`

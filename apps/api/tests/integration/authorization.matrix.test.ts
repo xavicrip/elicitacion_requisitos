@@ -3,7 +3,10 @@ import { Types } from 'mongoose';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { invitationsModel } from '../../src/modules/invitations/model';
 import { newRefreshToken } from '../../src/modules/auth/tokens';
+import { projectsModel } from '../../src/modules/projects/model';
 import { activitiesModel } from '../../src/modules/diagrams/models/activity';
+import { commentsModel } from '../../src/modules/details/models/comment';
+import { detailsModel } from '../../src/modules/details/models/detail';
 import { diagramsModel } from '../../src/modules/diagrams/models/diagram';
 import { versionsModel, type VersionImage } from '../../src/modules/diagrams/models/version';
 import { buildTestApp, closeTestApp } from '../helpers/app';
@@ -159,7 +162,10 @@ let app: FastifyInstance;
 let users: { admin: TestUser; participant: TestUser; other: TestUser; outsider: TestUser };
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('matrix', { withAuth: true, featureFlags: DIAGRAM_FLAGS }));
+  ({ app } = await buildTestApp('matrix', {
+    withAuth: true,
+    featureFlags: `${DIAGRAM_FLAGS},details=true`,
+  }));
   await app.ready();
   users = {
     admin: await registerTestUser(app, 'Admin'),
@@ -549,4 +555,291 @@ describe('matriz de autorización: diagramas (003)', () => {
     });
     expect(foreign.json()).toEqual(missing.json());
   });
+});
+
+// --- Detalles, votos, comentarios, cobertura, facets y huérfanos (feature 004, T047)
+
+/** El autor del detalle es un Participante; "participante" es otro Participante. */
+type DetailActor = Actor | 'autor';
+const DETAIL_ACTORS: DetailActor[] = [...ACTORS, 'autor'];
+
+type DetailContext = DiagramContext & {
+  /** Detalle pendiente del autor en la actividad publicada. */
+  detailId: string;
+  /** Detalle validado del autor. */
+  validatedId: string;
+  /** Detalle huérfano (su key no está en la versión publicada). */
+  orphanId: string;
+  /** Comentario de "participante" sobre `detailId`. */
+  commentId: string;
+  activityKey: string;
+  otherKey: string;
+};
+
+type DetailOperation = {
+  name: string;
+  request: (ctx: DetailContext) => {
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    url: string;
+    headers?: Record<string, string>;
+    payload?: unknown;
+  };
+  expected: Record<DetailActor, number>;
+  /** Respuesta del Administrador con el proyecto cerrado (solo lectura, FR-013). */
+  closedAdmin: number;
+};
+
+const scenarioPayload = {
+  given: 'el cliente tiene productos',
+  when: 'paga con tarjeta',
+  then: 'confirma el pago',
+  type: 'functional',
+};
+const members = { 'no miembro': 404, anónimo: 401 } as const;
+
+const DETAIL_OPERATIONS: DetailOperation[] = [
+  {
+    name: 'GET /diagrams/:id/activities/:key/details',
+    request: (c) => ({
+      method: 'GET',
+      url: `/diagrams/${c.diagramId}/activities/${c.activityKey}/details`,
+    }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'POST /diagrams/:id/activities/:key/details',
+    request: (c) => ({
+      method: 'POST',
+      url: `/diagrams/${c.diagramId}/activities/${c.activityKey}/details`,
+      payload: scenarioPayload,
+    }),
+    expected: { ...members, participante: 201, administrador: 201, autor: 201 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'PATCH /details/:id (pendiente)',
+    request: (c) => ({
+      method: 'PATCH',
+      url: `/details/${c.detailId}`,
+      headers: { 'if-match': '"0"' },
+      payload: { then: 'otra cosa distinta' },
+    }),
+    expected: { ...members, participante: 403, administrador: 200, autor: 200 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'PATCH /details/:id (validado)',
+    request: (c) => ({
+      method: 'PATCH',
+      url: `/details/${c.validatedId}`,
+      headers: { 'if-match': '"0"' },
+      payload: { then: 'otra cosa distinta' },
+    }),
+    expected: { ...members, participante: 403, administrador: 200, autor: 403 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'DELETE /details/:id',
+    request: (c) => ({ method: 'DELETE', url: `/details/${c.detailId}` }),
+    expected: { ...members, participante: 403, administrador: 204, autor: 204 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'GET /details/:id/history',
+    request: (c) => ({ method: 'GET', url: `/details/${c.detailId}/history` }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'POST /details/:id/status',
+    request: (c) => ({
+      method: 'POST',
+      url: `/details/${c.detailId}/status`,
+      payload: { status: 'validated' },
+    }),
+    expected: { ...members, participante: 403, administrador: 200, autor: 403 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'POST /details/:id/reassign (huérfano)',
+    request: (c) => ({
+      method: 'POST',
+      url: `/details/${c.orphanId}/reassign`,
+      payload: { diagramId: c.diagramId, activityKey: c.otherKey },
+    }),
+    expected: { ...members, participante: 403, administrador: 200, autor: 403 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'GET /projects/:id/details/orphans',
+    request: (c) => ({ method: 'GET', url: `/projects/${c.projectId}/details/orphans` }),
+    expected: { ...members, participante: 403, administrador: 200, autor: 403 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'GET /projects/:id/details/facets',
+    request: (c) => ({ method: 'GET', url: `/projects/${c.projectId}/details/facets` }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'GET /diagram-versions/:id/coverage (publicada)',
+    request: (c) => ({ method: 'GET', url: `/diagram-versions/${c.publishedVersionId}/coverage` }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'GET /diagram-versions/:id/coverage (borrador)',
+    request: (c) => ({ method: 'GET', url: `/diagram-versions/${c.draftVersionId}/coverage` }),
+    expected: { ...members, participante: 404, administrador: 200, autor: 404 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'PUT /details/:id/vote',
+    request: (c) => ({ method: 'PUT', url: `/details/${c.detailId}/vote` }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 403 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'DELETE /details/:id/vote',
+    request: (c) => ({ method: 'DELETE', url: `/details/${c.detailId}/vote` }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 200 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'GET /details/:id/comments',
+    request: (c) => ({ method: 'GET', url: `/details/${c.detailId}/comments` }),
+    expected: { ...members, participante: 200, administrador: 200, autor: 200 },
+    closedAdmin: 200,
+  },
+  {
+    name: 'POST /details/:id/comments',
+    request: (c) => ({
+      method: 'POST',
+      url: `/details/${c.detailId}/comments`,
+      payload: { text: 'un comentario' },
+    }),
+    expected: { ...members, participante: 201, administrador: 201, autor: 201 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'PATCH /comments/:id (de "participante")',
+    request: (c) => ({
+      method: 'PATCH',
+      url: `/comments/${c.commentId}`,
+      payload: { text: 'editado' },
+    }),
+    expected: { ...members, participante: 200, administrador: 403, autor: 403 },
+    closedAdmin: 409,
+  },
+  {
+    name: 'DELETE /comments/:id (de "participante")',
+    request: (c) => ({ method: 'DELETE', url: `/comments/${c.commentId}` }),
+    expected: { ...members, participante: 204, administrador: 204, autor: 403 },
+    closedAdmin: 409,
+  },
+];
+
+/** "participante" es `users.other`; el autor de los detalles, `users.participant`. */
+const detailUserOf = (actor: DetailActor) =>
+  actor === 'autor' ? users.participant : actor === 'participante' ? users.other : userOf(actor);
+
+async function detailContext(status: 'open' | 'closed' | 'deleting'): Promise<DetailContext> {
+  const ctx = await diagramContext(status);
+  const project = new Types.ObjectId(ctx.projectId);
+  // `diagramContext` crea los miembros admin y participante; se añade `other`.
+  await projectsModel(app.mongo).updateOne(
+    { _id: project },
+    {
+      $push: {
+        members: {
+          userId: new Types.ObjectId(users.other.id),
+          role: 'participant',
+          joinedAt: new Date(),
+        },
+      },
+    },
+  );
+  const published = await activitiesModel(app.mongo)
+    .findOne({ versionId: new Types.ObjectId(ctx.publishedVersionId) })
+    .lean();
+  const other = await activitiesModel(app.mongo).create({
+    versionId: new Types.ObjectId(ctx.publishedVersionId),
+    diagramId: new Types.ObjectId(ctx.diagramId),
+    projectId: project,
+    label: 'Emitir factura',
+    type: 'action',
+    bbox: { x: 0.5, y: 0.5, w: 0.2, h: 0.1 },
+  });
+  const base = {
+    projectId: project,
+    diagramId: new Types.ObjectId(ctx.diagramId),
+    authorId: new Types.ObjectId(users.participant.id),
+    ...scenarioPayload,
+    type: 'functional' as const,
+  };
+  const [detail, validated, orphan] = await detailsModel(app.mongo).create([
+    { ...base, activityKey: published!.key },
+    { ...base, activityKey: published!.key, status: 'validated' },
+    { ...base, activityKey: crypto.randomUUID() },
+  ]);
+  const comment = await commentsModel(app.mongo).create({
+    detailId: detail!._id,
+    projectId: project,
+    authorId: new Types.ObjectId(users.other.id),
+    text: 'un comentario',
+  });
+  return {
+    ...ctx,
+    detailId: detail!._id.toHexString(),
+    validatedId: validated!._id.toHexString(),
+    orphanId: orphan!._id.toHexString(),
+    commentId: comment._id.toHexString(),
+    activityKey: published!.key,
+    otherKey: other.key,
+  };
+}
+
+async function runDetail(operation: DetailOperation, actor: DetailActor, ctx: DetailContext) {
+  const { headers, ...request } = operation.request(ctx);
+  const user = detailUserOf(actor);
+  return app.inject({
+    ...request,
+    headers: { ...(user ? authHeaders(user) : {}), ...headers },
+    payload: request.payload as object | undefined,
+  });
+}
+
+describe('matriz de autorización: detalles (004)', () => {
+  it.each(
+    DETAIL_OPERATIONS.flatMap((operation) =>
+      DETAIL_ACTORS.map(
+        (actor) => [operation.name, actor, operation.expected[actor], operation] as const,
+      ),
+    ),
+  )('%s — %s → %i', async (_name, actor, expected, operation) => {
+    const response = await runDetail(operation, actor, await detailContext('open'));
+    expect(response.statusCode, response.body).toBe(expected);
+  });
+
+  it.each(
+    DETAIL_OPERATIONS.map(
+      (operation) => [operation.name, operation.closedAdmin, operation] as const,
+    ),
+  )(
+    'proyecto cerrado (solo lectura, FR-013): %s — administrador → %i',
+    async (_name, expected, operation) => {
+      const response = await runDetail(operation, 'administrador', await detailContext('closed'));
+      expect(response.statusCode, response.body).toBe(expected);
+    },
+  );
+
+  it.each(DETAIL_OPERATIONS.map((operation) => [operation.name, operation] as const))(
+    'un proyecto en deleting responde 404: %s — administrador',
+    async (_name, operation) => {
+      const response = await runDetail(operation, 'administrador', await detailContext('deleting'));
+      expect(response.statusCode).toBe(404);
+    },
+  );
 });
