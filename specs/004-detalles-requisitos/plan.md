@@ -90,6 +90,56 @@ e2e/{details-create,details-edit,votes-comments,moderation,coverage}.spec.ts
 workspace de la 003 mediante los puntos de extensión de `contracts/canvas-ui.md`
 (`sidePanel`, `renderBadge`, `colorFor`, `overlays.heatmap`).
 
+## Ajustes tras implementar la 002 y la 003 (2026-10-01)
+
+1. **Versiones reales**: Mongoose 9 y zod 4 (no Mongoose 8); errores con `HttpError` y el
+   formato `{code, message, fields}` de la 002 (`apps/api/src/lib/errors.ts`, con `extra` para
+   datos como `detailCount`).
+2. **Toda la feature detrás de un flag `details`** (como `accounts` y `diagrams`; constitución
+   IV), no solo los indicadores: sustituye a `coverage-overlay`. Prefijos en
+   `apps/api/src/plugins/flags.ts`: `/diagrams/:id/activities/:key/details`, `/details`,
+   `/comments`, `/diagram-versions/:id/coverage` y `/projects/:id/details`. Se activa por
+   defecto al cerrar la feature.
+3. **Autorización con los guards de la 003**: las rutas por recurso (`/details/:id`,
+   `/comments/:id`, `/diagram-versions/:id/coverage`) usan `requireResourceProject(loader,
+   role)`; las rutas usan el parámetro `:id` que espera el guard. Las escrituras de detalles,
+   votos y comentarios son aportes de los miembros: `requireProjectStatus('open')`, que ya
+   responde **`409 PROJECT_NOT_OPEN`** (no `423 Locked` como decía research R5). La moderación
+   y la reasignación, solo Admin.
+4. **Ancla y huérfanos con las versiones de la 003**: un detalle se crea sobre una `activityKey`
+   de la versión **publicada** (`404` si el diagrama no tiene versión publicada o la clave no
+   está en ella). Al borrar en un borrador una actividad cuya `key` tiene detalles, **no se
+   borran**: quedan huérfanos al publicar y el Administrador los reasigna. Por eso el
+   dependiente `details` de `registerActivityDependents` (003) solo **cuenta**, su `remove` no
+   borra nada, y el aviso del editor de la 003 cambia a "Tiene N requisito(s) asociado(s):
+   quedarán sin actividad al publicar esta versión y podrás reasignarlos" (hoy dice que se
+   eliminarán).
+5. **Cascada** con `app.registerProjectCascade('details', …)`: borra `details`,
+   `detail_votes`, `detail_comments` y `detail_history` del proyecto, de forma idempotente.
+6. **Concurrencia como en las actividades de la 003**: `rev` + `If-Match` (`428` sin él, `409`
+   con el detalle actual en el cuerpo); `parseIfMatch` se mueve a `apps/api/src/lib/` para
+   compartirlo. En `web`, `ApiError.body` ya trae el detalle actual para el `ConflictDialog`.
+7. **Rate limit por usuario**: el plugin de la 002 limita por IP; las escrituras de esta
+   feature usan `config.rateLimit` con `keyGenerator` por `request.user.id` (60/min).
+8. **Integración en el espacio de trabajo de la 003**: un `DetailsWorkspacePage` envuelve
+   `WorkspacePage` con `sidePanel`, `renderBadge` y `colorFor` y sustituye a `WorkspacePage` en
+   la ruta `/proyectos/:projectId/diagramas/:diagramId`. El panel solo aparece en modo vista;
+   como el Administrador abre el borrador en modo edición, la página le ofrece cambiar entre
+   *Borrador* y *Publicada* cuando existen ambas, para poder ver los detalles mientras prepara
+   una versión nueva. Por debajo de 768 px el panel va debajo del canvas.
+9. **Rendimiento de los indicadores**: `renderBadge` crea un `Html` de drei por zona. Con
+   `cien-actividades.png` hay que mantener ≥ 50 FPS (SC-002 de la 003): `pnpm e2e:perf` se
+   amplía con los indicadores y el mapa de calor activos; si no se cumple, los contadores se
+   dibujan como sprites en lugar de DOM.
+10. **Índices**: el de ordenación del panel lleva el diagrama, `{diagramId, activityKey,
+    voteCount: -1, createdAt: -1}`; migración `20261015000000-details-indexes.js` con
+    `destructive = false` y `down` que conserva los datos.
+11. **E2E en `e2e/flows/`** con los helpers de la 003 (`flows/diagrams.ts`: subir, marcar
+    actividades y publicar por la API) y un Participante invitado por la API; `__canvasState`
+    solo con `E2E_HOOKS`.
+12. **Última actividad y auditoría**: crear, editar, moderar o comentar actualiza
+    `projects.lastActivityAt`; los eventos de dominio se consumen en la auditoría (R10).
+
 ## Complexity Tracking
 
 Sin violaciones.
