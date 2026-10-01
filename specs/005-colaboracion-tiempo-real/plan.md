@@ -19,9 +19,9 @@ actividad.
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x sobre Node.js 24 LTS
-**Primary Dependencies**: `socket.io` 4, `@socket.io/redis-adapter`, `ioredis`; `socket.io-client` en `web`; Artillery con el motor `socket.io` para las pruebas de carga
+**Primary Dependencies**: `socket.io` 4, `@socket.io/redis-adapter`, `ioredis`; `socket.io-client` en `web` y en las pruebas
 **Storage**: Redis (pub/sub del adaptador, presencia `presence:{versionId}`); sin colecciones nuevas en MongoDB
-**Testing**: Vitest con servidor Socket.IO real y varios clientes (autorización de salas, fan-out, presencia, revocación); prueba de dos réplicas de `api` con Docker Compose; Playwright con dos contextos de navegador; Artillery (50 usuarios)
+**Testing**: Vitest con servidor Socket.IO real y varios clientes (autorización de salas, fan-out, presencia, revocación); dos instancias de la app sobre el mismo Redis para el reparto entre réplicas; Playwright con varios contextos de navegador; un script de `socket.io-client` con 50 clientes en `e2e/perf` (ajustes 5 y 12)
 **Target Platform**: Web; `api` escalable a N réplicas en Railway
 **Project Type**: Aplicación web
 **Performance Goals**: p95 < 500 ms extremo a extremo (SC-001, RNF-02); 50 usuarios por diagrama (SC-002)
@@ -38,10 +38,10 @@ actividad.
 | II. Servicios desacoplados | Contrato de eventos en `contracts/socket-events.md` y tipado en `packages/shared/src/realtime.ts`; la lógica de negocio sigue en REST y el socket solo notifica. | ✅ |
 | III. Pruebas primero | Pruebas de integración con varios clientes y dos réplicas, y E2E multi-contexto, antes de implementar. | ✅ |
 | IV. Commits atómicos y reversibles | Todo detrás del flag `realtime`: sin él, la app funciona como en la 004 (recarga al abrir el panel). | ✅ |
-| V. Seguridad por defecto | Autenticación con el JWT en el *handshake*, pertenencia verificada al unirse a cada sala y en cada evento de cliente, rate limit por socket, validación zod de los payloads. | ✅ |
+| V. Seguridad por defecto | Autenticación con el JWT en el *handshake* (el socket se desconecta si el token caduca sin renovarse), pertenencia verificada al unirse a cada sala y en cada evento de cliente, rate limit por socket, validación zod de los payloads. | ✅ |
 | VI. Observabilidad | Métricas en log de conexiones por réplica, latencia de *ping* y eventos descartados por rate limit. | ✅ |
 | VII. Simplicidad | Resincronizar invalidando las consultas (en lugar de reenviar eventos perdidos); sin CRDT. | ✅ |
-| Restricciones (v1.1.0) | Node 24; Socket.IO; el despliegue desde GitHub Actions no cambia (réplicas configuradas en `railway.json`). | ✅ |
+| Restricciones (v1.1.0) | Node 24; Socket.IO; el despliegue desde GitHub Actions no cambia (las réplicas las configura el propietario en Railway). | ✅ |
 
 **Re-evaluación post-diseño**: sin violaciones.
 
