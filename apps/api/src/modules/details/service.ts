@@ -16,12 +16,12 @@ import { activitiesModel } from '../diagrams/models/activity.js';
 import type { Diagram } from '../diagrams/models/diagram.js';
 import type { Member, Project } from '../projects/model.js';
 import { projectsModel } from '../projects/model.js';
-import { usersModel } from '../users/model.js';
 import { toDetailDto } from './dto.js';
 import { commentsModel } from './models/comment.js';
 import { detailsModel, type Detail } from './models/detail.js';
 import { historyModel, type DetailHistory, type HistoryChange } from './models/history.js';
 import { votesModel } from './models/vote.js';
+import { userNames, userRef } from './names.js';
 import { detailPermissions } from './permissions.js';
 
 export type Viewer = { project: Project; membership: Member };
@@ -69,9 +69,6 @@ function snapshotOf(detail: Detail): Record<string, unknown> {
   );
 }
 
-/** Nombre de usuario que se muestra si la cuenta ya no existe. */
-const UNKNOWN_USER = 'Usuario eliminado';
-
 export function detailsService(app: FastifyInstance) {
   const Details = detailsModel(app.mongo);
   const Votes = votesModel(app.mongo);
@@ -79,21 +76,14 @@ export function detailsService(app: FastifyInstance) {
   const History = historyModel(app.mongo);
   const Activities = activitiesModel(app.mongo);
   const Projects = projectsModel(app.mongo);
-  const Users = usersModel(app.mongo);
-
-  /** Nombres de usuario por id (también de miembros retirados: la cuenta sigue existiendo). */
-  async function userNames(ids: Types.ObjectId[]): Promise<Map<string, string>> {
-    const unique = [...new Set(ids.map((id) => id.toHexString()))];
-    const users = await Users.find({ _id: { $in: unique } }, { name: 1 }).lean<
-      Array<{ _id: Types.ObjectId; name: string }>
-    >();
-    return new Map(users.map((user) => [user._id.toHexString(), user.name]));
-  }
 
   /** Detalles listos para un miembro concreto: autor, si ya votó y sus permisos. */
   async function present(details: Detail[], viewer: Viewer): Promise<DetailDto[]> {
     if (details.length === 0) return [];
-    const names = await userNames(details.map((d) => d.authorId));
+    const names = await userNames(
+      app,
+      details.map((d) => d.authorId),
+    );
     const voted = new Set(
       (
         await Votes.find(
@@ -102,14 +92,13 @@ export function detailsService(app: FastifyInstance) {
         ).lean<Array<{ detailId: Types.ObjectId }>>()
       ).map((vote) => vote.detailId.toHexString()),
     );
-    return details.map((detail) => {
-      const authorId = detail.authorId.toHexString();
-      return toDetailDto(detail, {
-        author: { id: authorId, name: names.get(authorId) ?? UNKNOWN_USER },
+    return details.map((detail) =>
+      toDetailDto(detail, {
+        author: userRef(names, detail.authorId),
         votedByMe: voted.has(detail._id.toHexString()),
         permissions: detailPermissions(detail, viewer.membership, viewer.project),
-      });
-    });
+      }),
+    );
   }
 
   /** Votos propios más los de sus duplicados (research R6). */
@@ -210,14 +199,14 @@ export function detailsService(app: FastifyInstance) {
       const entries = await History.find({ detailId: detail._id })
         .sort({ rev: -1, editedAt: -1 })
         .lean<DetailHistory[]>();
-      const names = await userNames(entries.map((entry) => entry.editedBy));
+      const names = await userNames(
+        app,
+        entries.map((entry) => entry.editedBy),
+      );
       return entries.map((entry) => ({
         rev: entry.rev,
         change: entry.change,
-        editedBy: {
-          id: entry.editedBy.toHexString(),
-          name: names.get(entry.editedBy.toHexString()) ?? UNKNOWN_USER,
-        },
+        editedBy: userRef(names, entry.editedBy),
         editedAt: entry.editedAt.toISOString(),
         snapshot: entry.snapshot,
       }));
