@@ -74,7 +74,7 @@ afterEach(() => {
 
 function renderWorkspace(handlers: Record<string, Handler | Handler[]>) {
   const api = mockApi({
-    'GET /api/config': () => json(200, { flags: { accounts: true, diagrams: true } }),
+    'GET /api/config': () => json(200, { flags: { accounts: true } }),
     'GET /api/diagram-versions/v1': () => json(200, version('v1', 1, 'published', [activity])),
     ...handlers,
   });

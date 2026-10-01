@@ -6,7 +6,7 @@ import { activitiesModel } from '../../src/modules/diagrams/models/activity';
 import { diagramsModel } from '../../src/modules/diagrams/models/diagram';
 import { versionsModel } from '../../src/modules/diagrams/models/version';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, uploadDiagram, uploadVersion } from '../helpers/diagrams';
+import { uploadDiagram, uploadVersion } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -21,7 +21,6 @@ const bbox = { x: 0.1, y: 0.1, w: 0.2, h: 0.1 };
 beforeAll(async () => {
   ({ app } = await buildTestApp('diagramspublish', {
     withAuth: true,
-    featureFlags: DIAGRAM_FLAGS,
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');

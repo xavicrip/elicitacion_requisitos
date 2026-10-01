@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, uploadDiagram } from '../helpers/diagrams';
+import { uploadDiagram } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser } from '../helpers/users';
 
@@ -17,7 +17,6 @@ let projectId: string;
 beforeAll(async () => {
   ({ app } = await buildTestApp('publishcontract', {
     withAuth: true,
-    featureFlags: DIAGRAM_FLAGS,
   }));
   await app.ready();
   const user = await registerTestUser(app);

@@ -23,14 +23,6 @@ const accounts = (element: ReactNode) => (
   </FlagGate>
 );
 
-/** Rutas de la feature 003: detrás del flag `diagrams` (plan ajuste 4). */
-const diagrams = (element: ReactNode) =>
-  accounts(
-    <FlagGate flag="diagrams" fallback={<NotFoundPage />}>
-      {element}
-    </FlagGate>,
-  );
-
 /** Rutas de la app (React Router 7, modo librería; research R10). */
 export const routes: RouteObject[] = [
   {
@@ -48,17 +40,17 @@ export const routes: RouteObject[] = [
       {
         path: 'proyectos/:projectId/diagramas',
         loader: requireSession,
-        element: diagrams(<DiagramListPage />),
+        element: accounts(<DiagramListPage />),
       },
       {
         path: 'proyectos/:projectId/diagramas/:diagramId',
         loader: requireSession,
-        element: diagrams(<DetailsWorkspacePage />),
+        element: accounts(<DetailsWorkspacePage />),
       },
       {
         path: 'proyectos/:projectId/requisitos-huerfanos',
         loader: requireSession,
-        element: diagrams(<OrphansPage />),
+        element: accounts(<OrphansPage />),
       },
       { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
       { path: '*', element: <NotFoundPage /> },

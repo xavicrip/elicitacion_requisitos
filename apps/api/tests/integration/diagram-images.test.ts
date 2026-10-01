@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, markPublished, uploadDiagram } from '../helpers/diagrams';
+import { markPublished, uploadDiagram } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser } from '../helpers/users';
 
@@ -15,7 +15,7 @@ let draftId: string;
 let publishedId: string;
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('diagramimages', { withAuth: true, featureFlags: DIAGRAM_FLAGS }));
+  ({ app } = await buildTestApp('diagramimages', { withAuth: true }));
   await app.ready();
   const ana = await registerTestUser(app, 'Ana');
   const pablo = await registerTestUser(app, 'Pablo');

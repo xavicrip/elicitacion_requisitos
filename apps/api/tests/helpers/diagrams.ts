@@ -5,9 +5,6 @@ import type { FastifyInstance } from 'fastify';
 import { Types } from 'mongoose';
 import { versionsModel } from '../../src/modules/diagrams/models/version';
 
-/** Flags de las pruebas de la 003. */
-export const DIAGRAM_FLAGS = 'accounts=true,diagrams=true';
-
 /** Diagramas de ejemplo de `e2e/fixtures/diagrams/` (scripts/fixtures/diagrams.mjs). */
 export const fixture = (name: string): Buffer =>
   readFileSync(

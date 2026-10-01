@@ -87,8 +87,7 @@ Referencia completa: [`env-vars.md`](specs/001-plataforma-base/contracts/env-var
 
 ### Diagramas y espacio de trabajo (feature 003)
 
-Detrás del flag `diagrams` (activado en Compose). Desde un proyecto, _Diagramas_ lista sus
-diagramas con miniatura; el Administrador sube un PNG, JPG o SVG de hasta 10 MB, marca sus
+Desde un proyecto, _Diagramas_ lista sus diagramas con miniatura; el Administrador sube un PNG, JPG o SVG de hasta 10 MB, marca sus
 actividades arrastrando sobre la imagen (nombre, tipo y transiciones, con guardado automático) y
 publica la versión. Todos los miembros navegan el diagrama publicado en un canvas three.js: zoom
 con la rueda o `+`/`-`, `0` para ajustar, minimapa, selección por clic o con el teclado (`Tab` +

@@ -136,7 +136,7 @@ describe('filtros y orden del panel (FR-012)', () => {
 describe('requisitos huérfanos (edge case de la spec)', () => {
   it('el Administrador los reasigna a una actividad publicada', async () => {
     const api = mockApi({
-      'GET /api/config': () => json(200, { flags: { accounts: true, diagrams: true } }),
+      'GET /api/config': () => json(200, { flags: { accounts: true } }),
       'GET /api/projects/p1': () => json(200, project({ myRole: 'admin' })),
       'GET /api/projects/p1/details/orphans': [
         () => json(200, [detail({ activityKey: 'perdida' })]),

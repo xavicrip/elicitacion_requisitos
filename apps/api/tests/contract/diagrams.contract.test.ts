@@ -7,7 +7,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, markPublished, uploadDiagram, uploadVersion } from '../helpers/diagrams';
+import { markPublished, uploadDiagram, uploadVersion } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser } from '../helpers/users';
 
@@ -22,7 +22,6 @@ let version: z.infer<typeof DiagramVersionSchema>;
 beforeAll(async () => {
   ({ app } = await buildTestApp('diagramscontract', {
     withAuth: true,
-    featureFlags: DIAGRAM_FLAGS,
   }));
   await app.ready();
   const user = await registerTestUser(app);

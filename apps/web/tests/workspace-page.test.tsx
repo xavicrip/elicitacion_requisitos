@@ -54,7 +54,7 @@ afterEach(() => {
 
 function renderWorkspace(role: string, diagrams = [summary]) {
   mockApi({
-    'GET /api/config': () => json(200, { flags: { accounts: true, diagrams: true } }),
+    'GET /api/config': () => json(200, { flags: { accounts: true } }),
     'GET /api/projects/p1': () => json(200, project(role)),
     'GET /api/projects/p1/diagrams': () =>
       json(200, role === 'admin' ? diagrams : diagrams.map(({ draftVersionId: _, ...d }) => d)),
