@@ -28,19 +28,22 @@
 
 - **Decision**: `bridge.ts` se suscribe a los eventos de dominio de la 004 y hace
   `io.to('project:{id}').emit(evento, payload)`. El emisor también recibe su propio evento
-  (idempotente en el cliente, que compara por `id` y `rev`). El cliente aplica `setQueryData`
-  sobre las consultas afectadas (panel de la actividad, cobertura) o invalida si no las tiene
-  en caché. Cambios del diagrama publicado (`diagram.published`) → invalidar la versión.
+  (idempotente en el cliente, que compara por `id` y `rev`). El cliente aplica el payload con `setQueryData`
+  sobre la lista de la actividad (`detailKeys.activity`) en lugar de volver a pedirla, porque con
+  ~185 ms de ida y vuelta a staging la entrega más una petición rozaría los 500 ms de SC-001; la
+  cobertura se invalida en segundo plano. Cambios del diagrama publicado (`diagram.published`) →
+  invalidar `diagramKeys.version` y `diagramKeys.list` (plan, ajuste 6).
 - **Rationale**: el flujo REST sigue siendo la única vía de escritura (una sola fuente de
   verdad); el socket solo notifica.
 
 ## R4. Reconexión y resincronización
 
 - **Decision**: al reconectar (`socket.io` reintenta con backoff exponencial de 0,5 a 5 s), el
-  cliente vuelve a unirse a las salas y ejecuta `queryClient.invalidateQueries({queryKey:
-  ['diagram', versionId]})`, que vuelve a pedir la cobertura y el panel abierto. Durante la
+  cliente vuelve a unirse a las salas e invalida `detailKeys.all`, `diagramKeys.version(versionId)`,
+  `diagramKeys.list(projectId)` y `projectKeys.detail(projectId)`, que vuelven a pedir la
+  cobertura, el panel abierto y el estado del proyecto (plan, ajuste 6). Durante la
   desconexión se muestra `ConnectionBanner` y se deshabilitan los botones de guardar.
-  Los borradores del formulario se guardan en `localStorage` (`draft:{versionId}:{activityKey}`)
+  Los borradores del formulario se guardan en `localStorage` (`draft:{diagramId}:{activityKey}`)
   en cada cambio, con debounce de 300 ms, y se restauran al volver.
 - **Rationale**: SC-003 (el 100 % de los cambios se refleja al volver) sin guardar un
   historial de eventos en el servidor; una recarga completa del estado de un diagrama cuesta
@@ -72,15 +75,18 @@
 
 ## R7. Revocación inmediata
 
-- **Decision**: la 002 emite los eventos de dominio `member.removed` y
-  `project.status_changed`. `revocation.ts`: en `member.removed`,
+- **Decision**: la 002 solo audita estos cambios; esta feature añade los eventos de dominio
+  `member.removed`, `member.left`, `project.status_changed` y `project.deleted` al bus de la 004
+  (plan, ajuste 4). `revocation.ts`: en `member.removed`,
   `io.in('user:{uid}').socketsLeave('project:{pid}')` y emite `access:revoked`; en `closed`,
   emite `project:closed` a la sala (el cliente pasa a solo lectura).
 - **Rationale**: FR-008.
 
 ## R8. Medición de latencia y carga
 
-- **Decision**: cada evento de dominio incluye `at` (hora del servidor); la prueba E2E mide
-  `recepción - at` con relojes sincronizados en el mismo host. El escenario de Artillery simula
-  50 usuarios que se unen, mueven el cursor a 20 Hz y crean 1 detalle cada 30 s durante 5 min;
-  el umbral es p95 < 500 ms. Se ejecuta en un job `load` manual del CI contra staging.
+- **Decision**: cada evento de dominio incluye `at` (hora del servidor); la prueba mide
+  `recepción - at` con relojes sincronizados en el mismo host. Un script de `socket.io-client` en
+  `e2e/perf` (sin dependencia nueva; plan, ajuste 12) simula 50 usuarios que se unen, mueven el
+  cursor a 20 Hz y crean 1 detalle cada 30 s; el umbral es p95 < 500 ms y cada evento debe
+  llegar exactamente una vez (SC-004). Se ejecuta bajo demanda en local y se repite la medida
+  en staging (T046).

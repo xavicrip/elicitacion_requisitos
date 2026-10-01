@@ -34,7 +34,7 @@ Gestionado por `@socket.io/redis-adapter` (prefijo `socket.io#`). Sin datos pers
 
 ## Borrador local (cliente, `localStorage`)
 
-- **Clave**: `draft:{versionId}:{activityKey}`. **Valor**: `{given, when, then, type, priority,
+- **Clave**: `draft:{diagramId}:{activityKey}` (la `activityKey` se conserva entre versiones). **Valor**: `{given, when, then, type, priority,
   authorRole, tags, detailId?, rev?, savedAt}`.
 - Se elimina al guardar con éxito. Se ignora si tiene más de 7 días. Todo acceso está envuelto
   en `try/catch` (navegación privada).

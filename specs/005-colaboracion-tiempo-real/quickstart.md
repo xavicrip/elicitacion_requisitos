@@ -1,7 +1,7 @@
 # Quickstart: Colaboración en tiempo real
 
-Requiere 001–004 con el flag `realtime=true`. Para probar el escalado horizontal:
-`pnpm dev:up -- --scale api=2` (Caddy reparte las conexiones entre las dos réplicas).
+Requiere 001–004 con el flag `realtime=true` (Compose lo activa). El reparto entre réplicas se
+prueba en `api` con dos instancias de la app sobre el mismo Redis, y en staging con 2 réplicas.
 
 ## 1. Sincronización (US1)
 
@@ -9,8 +9,8 @@ Requiere 001–004 con el flag `realtime=true`. Para probar el escalado horizont
 2. Luis crea un detalle en "Validar pago" → en < 1 s, Ana ve el contador +1 y, si tiene el
    panel abierto, el detalle nuevo.
 3. Ana vota y valida el detalle → Luis ve el voto y el estado sin recargar.
-4. Con `--scale api=2`, repetir el paso 2 comprobando en los logs que Ana y Luis están en
-   réplicas distintas.
+4. En staging, con 2 réplicas, repetir el paso 2 comprobando en los logs que Ana y Luis están
+   en réplicas distintas.
 
 ## 2. Presencia (US2)
 
@@ -36,8 +36,8 @@ Requiere 001–004 con el flag `realtime=true`. Para probar el escalado horizont
 ## 5. Pruebas y carga
 
 ```bash
-pnpm --filter api test -- realtime
-pnpm e2e -- realtime-sync presence reconnect
-# Carga (manual, contra staging; SC-001/SC-002):
-gh workflow run load.yml -f target=staging
+pnpm test:services:up
+pnpm --filter @reqcanvas/api exec vitest run realtime presence revocation cursors socket-events
+pnpm dev:up && pnpm e2e --project flows
+pnpm e2e --project perf -g realtime                         # 50 clientes (SC-001, SC-002, SC-004)
 ```
