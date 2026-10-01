@@ -12,7 +12,10 @@ export type ActivityRef = {
 
 export type ActivityDependents = {
   count(ref: ActivityRef): Promise<number>;
-  /** Idempotente: se llama al eliminar la actividad con `?confirm=true`. */
+  /**
+   * Idempotente: se llama al eliminar la actividad con `?confirm=true`. Cada dependiente decide
+   * qué hacer; los requisitos de la 004 no se borran (quedan huérfanos y se reasignan).
+   */
   remove(ref: ActivityRef): Promise<void>;
 };
 

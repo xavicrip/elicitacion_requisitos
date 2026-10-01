@@ -115,7 +115,8 @@ export function activitiesService(app: FastifyInstance) {
 
     /**
      * Elimina la actividad y retira su `key` de las transiciones de las demás. Si otros datos
-     * dependen de ella (requisitos, 004), exige `confirm` y los elimina primero.
+     * dependen de ella (requisitos, 004), exige `confirm` y avisa a cada dependiente con
+     * `remove`; los requisitos se conservan y quedan huérfanos al publicar (plan de la 004).
      */
     async remove(activity: Activity, confirm: boolean, { actorId }: Actor) {
       await draftOf(activity.versionId);
@@ -130,7 +131,7 @@ export function activitiesService(app: FastifyInstance) {
         throw new HttpError(
           409,
           'HAS_DEPENDENTS',
-          `Esta actividad tiene ${total} elemento(s) asociado(s). Confirma para eliminarlos también.`,
+          `Esta actividad tiene ${total} requisito(s) asociado(s). Si la eliminas, quedarán sin actividad al publicar esta versión y podrás reasignarlos.`,
           {},
           undefined,
           { detailCount: total },
