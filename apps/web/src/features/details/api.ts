@@ -1,4 +1,10 @@
-import type { Detail, DetailInput, Facets, HistoryEntry } from '@reqcanvas/shared';
+import type {
+  ActivityCoverage,
+  Detail,
+  DetailInput,
+  Facets,
+  HistoryEntry,
+} from '@reqcanvas/shared';
 import { apiFetch } from '../../lib/api-client';
 
 export type DetailsQuery = { sort: 'votes' | 'recent' };
@@ -24,10 +30,17 @@ export const detailsApi = {
   remove: (id: string) => apiFetch<void>(`/details/${id}`, { method: 'DELETE' }),
   history: (id: string) => apiFetch<HistoryEntry[]>(`/details/${id}/history`),
   facets: (projectId: string) => apiFetch<Facets>(`/projects/${projectId}/details/facets`),
+  coverage: (versionId: string) =>
+    apiFetch<ActivityCoverage[]>(`/diagram-versions/${versionId}/coverage`),
 };
 
+/**
+ * Claves de TanStack Query. Todo lo que depende de los detalles empieza por `details`: tras
+ * crear, editar, moderar o eliminar se invalida `all` y se refrescan lista y cobertura.
+ */
 export const detailKeys = {
   all: ['details'] as const,
+  coverage: (versionId: string) => ['details', 'coverage', versionId] as const,
   list: (diagramId: string, activityKey: string, query: DetailsQuery) =>
     ['details', diagramId, activityKey, query] as const,
   activity: (diagramId: string, activityKey: string) =>

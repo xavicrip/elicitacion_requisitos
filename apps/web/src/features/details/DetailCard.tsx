@@ -40,9 +40,7 @@ export function DetailCard({
     mutationFn: () => detailsApi.remove(detail.id),
     onSuccess: async () => {
       setConfirming(false);
-      await queryClient.invalidateQueries({
-        queryKey: detailKeys.activity(detail.diagramId, detail.activityKey),
-      });
+      await queryClient.invalidateQueries({ queryKey: detailKeys.all });
     },
     onError: (err) => {
       setConfirming(false);

@@ -18,6 +18,7 @@ const Hotspot = memo(function Hotspot({
   selected,
   hovered,
   color,
+  filled,
   badge,
 }: {
   activity: Activity;
@@ -25,8 +26,11 @@ const Hotspot = memo(function Hotspot({
   selected: boolean;
   hovered: boolean;
   color: string;
+  /** Con `colorFor` (mapa de calor) la zona se rellena con opacidad 0,45 (research R8 de la 004). */
+  filled: boolean;
   badge: ReactNode;
 }) {
+  const base = filled ? 0.45 : 0.06;
   const { x, y, width } = toPixels(activity.bbox, image);
   return (
     <group>
@@ -34,7 +38,7 @@ const Hotspot = memo(function Hotspot({
         bbox={activity.bbox}
         image={image}
         color={color}
-        opacity={selected ? 0.3 : hovered ? 0.2 : 0.06}
+        opacity={selected ? base + 0.25 : hovered ? base + 0.15 : base}
         borderOpacity={selected || hovered ? 1 : 0.35}
       />
       {badge && (
@@ -114,6 +118,7 @@ export function ActivityHotspots({
           selected={activity.key === selectedKey}
           hovered={activity.key === hoveredKey}
           color={colorFor?.(activity) ?? DEFAULT_COLOR}
+          filled={Boolean(colorFor)}
           badge={renderBadge?.(activity)}
         />
       ))}

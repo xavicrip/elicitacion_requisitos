@@ -156,7 +156,7 @@ export function DetailForm({
 
   const refresh = () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: detailKeys.activity(diagramId, activityKey) }),
+      queryClient.invalidateQueries({ queryKey: detailKeys.all }),
       queryClient.invalidateQueries({ queryKey: detailKeys.facets(projectId) }),
     ]);
 

@@ -3,6 +3,8 @@ import type { SidePanelContext } from '../diagrams/workspace/WorkspacePage';
 import { detailKeys, detailsApi, type DetailsQuery } from './api';
 import { DetailCard } from './DetailCard';
 import { DetailForm } from './DetailForm';
+import type { HeatmapScale } from './overlays/Heatmap';
+import { HeatmapLegend } from './overlays/HeatmapLegend';
 
 const DEFAULT_QUERY: DetailsQuery = { sort: 'votes' };
 
@@ -15,7 +17,12 @@ export function DetailsPanel({
   project,
   diagramId,
   version,
-}: SidePanelContext & { activityKey: string | null }) {
+  heatmap,
+}: SidePanelContext & {
+  activityKey: string | null;
+  /** Capa del mapa de calor (FR-011): se activa desde el panel, que muestra su leyenda. */
+  heatmap?: { on: boolean; toggle: () => void; legend?: HeatmapScale['legend'] };
+}) {
   const activity = version.activities.find((candidate) => candidate.key === activityKey);
   const details = useQuery({
     queryKey: detailKeys.list(diagramId, activityKey ?? '', DEFAULT_QUERY),
@@ -31,6 +38,19 @@ export function DetailsPanel({
 
   return (
     <aside aria-label="Requisitos" className="space-y-3">
+      {heatmap && (
+        <div className="space-y-2 border-b pb-2">
+          <button
+            type="button"
+            aria-pressed={heatmap.on}
+            onClick={heatmap.toggle}
+            className="rounded border px-3 py-1 text-sm aria-pressed:bg-orange-100"
+          >
+            Mapa de calor
+          </button>
+          {heatmap.on && heatmap.legend && <HeatmapLegend legend={heatmap.legend} />}
+        </div>
+      )}
       {!activity ? (
         <p className="text-sm text-gray-600">
           Selecciona una actividad del diagrama para ver y registrar sus requisitos.
