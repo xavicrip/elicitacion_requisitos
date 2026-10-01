@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyCameraCommand,
   centerOn,
   clampPan,
   clampZoom,
@@ -111,5 +112,37 @@ describe('minimapa', () => {
   it('se recorta a los bordes de la imagen', () => {
     const rect = viewportRect({ zoom: 1, center: { x: 0, y: 0 } }, viewport, image);
     expectRect(rect, { x: 0, y: 0, w: 500 / 4000, h: 250 / 3000 });
+  });
+});
+
+describe('applyCameraCommand (teclado, minimapa y lista accesible)', () => {
+  const fit = fitZoom(viewport, image);
+  const camera: Camera = { zoom: fit * 2, center: { x: 1000, y: 1000 } };
+
+  it('fit vuelve a "ajustar a pantalla"', () => {
+    expect(applyCameraCommand(camera, { type: 'fit' }, viewport, image)).toEqual(
+      fitCamera(viewport, image),
+    );
+  });
+
+  it('zoom multiplica el zoom en el centro del viewport, dentro de los límites', () => {
+    const zoomed = applyCameraCommand(camera, { type: 'zoom', factor: 1.25 }, viewport, image);
+    expect(zoomed.zoom).toBeCloseTo(fit * 2.5);
+    expect(zoomed.center.x).toBeCloseTo(1000);
+    expect(
+      applyCameraCommand(camera, { type: 'zoom', factor: 100 }, viewport, image).zoom,
+    ).toBeCloseTo(fit * 8);
+  });
+
+  it('pan desplaza en píxeles de pantalla', () => {
+    const moved = applyCameraCommand(camera, { type: 'pan', dx: 100, dy: -50 }, viewport, image);
+    expect(moved.center.x).toBeCloseTo(1000 + 100 / camera.zoom);
+    expect(moved.center.y).toBeCloseTo(1000 - 50 / camera.zoom);
+  });
+
+  it('center centra en un punto de la imagen, sin salir de ella', () => {
+    expect(
+      applyCameraCommand(camera, { type: 'center', point: { x: 9999, y: 10 } }, viewport, image),
+    ).toEqual({ zoom: camera.zoom, center: { x: 4000, y: 10 } });
   });
 });

@@ -83,3 +83,40 @@ export function viewportRect(camera: Camera, viewport: Size, image: Size): Rect 
   const y1 = clamp(bottomRight.y / image.height, 0, 1);
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }
+
+/** Órdenes a la cámara desde fuera del canvas: teclado, minimapa y lista accesible. */
+export type CameraCommand =
+  | { type: 'fit' }
+  | { type: 'zoom'; factor: number }
+  /** Desplazamiento en píxeles de pantalla. */
+  | { type: 'pan'; dx: number; dy: number }
+  | { type: 'center'; point: Point };
+
+export function applyCameraCommand(
+  camera: Camera,
+  command: CameraCommand,
+  viewport: Size,
+  image: Size,
+): Camera {
+  switch (command.type) {
+    case 'fit':
+      return fitCamera(viewport, image);
+    case 'zoom': {
+      const middle = { x: viewport.width / 2, y: viewport.height / 2 };
+      return zoomAt(camera, command.factor, middle, viewport, image, fitZoom(viewport, image));
+    }
+    case 'pan':
+      return {
+        zoom: camera.zoom,
+        center: clampPan(
+          {
+            x: camera.center.x + command.dx / camera.zoom,
+            y: camera.center.y + command.dy / camera.zoom,
+          },
+          image,
+        ),
+      };
+    case 'center':
+      return centerOn(camera, command.point, image);
+  }
+}

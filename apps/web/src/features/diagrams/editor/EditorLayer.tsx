@@ -1,11 +1,12 @@
 import type { Activity, BBox, VersionWithActivities } from '@reqcanvas/shared';
-import { Line } from '@react-three/drei';
 import { useThree, type ThreeEvent } from '@react-three/fiber';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { diagramKeys } from '../api';
 import type { Point, Size } from '../workspace/camera/zoom';
 import { useWorkspaceStore } from '../workspace/store';
+import { isFormField } from '../workspace/useWorkspaceKeyboard';
+import { ZoneShape } from '../workspace/ZoneShape';
 import { activitiesApi, activityCache } from './api';
 import {
   boxFromDrag,
@@ -37,9 +38,6 @@ const CURSORS: Record<Handle, string> = {
   w: 'ew-resize',
 };
 
-const isFormField = (target: EventTarget | null) =>
-  target instanceof HTMLElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName);
-
 function Zone({
   activity,
   image,
@@ -52,13 +50,6 @@ function Zone({
   zoom: number;
 }) {
   const { x, y, width, height } = toPixels(activity.bbox, image);
-  const corners = [
-    [x, -y, 0],
-    [x + width, -y, 0],
-    [x + width, -(y + height), 0],
-    [x, -(y + height), 0],
-    [x, -y, 0],
-  ] as [number, number, number][];
   const handle = 8 / zoom;
   const handles: Record<Handle, [number, number]> = {
     nw: [x, y],
@@ -71,15 +62,17 @@ function Zone({
     w: [x, y + height / 2],
   };
   return (
-    <group position={[0, 0, 1]}>
-      <mesh position={[x + width / 2, -(y + height / 2), 0]}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#2563eb" transparent opacity={selected ? 0.3 : 0.15} />
-      </mesh>
-      <Line points={corners} color={selected ? '#1e3a8a' : '#2563eb'} lineWidth={2} />
+    <group>
+      <ZoneShape
+        bbox={activity.bbox}
+        image={image}
+        color="#2563eb"
+        opacity={selected ? 0.3 : 0.15}
+        borderColor={selected ? '#1e3a8a' : '#2563eb'}
+      />
       {selected &&
         HANDLES.map((name) => (
-          <mesh key={name} position={[handles[name][0], -handles[name][1], 0.5]}>
+          <mesh key={name} position={[handles[name][0], -handles[name][1], 1.5]}>
             <planeGeometry args={[handle, handle]} />
             <meshBasicMaterial color="#ffffff" />
           </mesh>
@@ -91,7 +84,7 @@ function Zone({
 /**
  * Editor de zonas sobre el canvas (US2): arrastrar sobre un área vacía crea una zona;
  * arrastrar una zona la mueve y sus 8 handles la redimensionan; las flechas la desplazan
- * (1 px, 10 px con Shift). Los cambios pasan por el guardado automático.
+ * (1 px, 10 px con Shift; `Esc` deselecciona en `useWorkspaceKeyboard`). Los cambios pasan por el guardado automático.
  */
 export function EditorLayer({ versionId, image }: { versionId: string; image: Size }) {
   const queryClient = useQueryClient();
@@ -114,11 +107,10 @@ export function EditorLayer({ versionId, image }: { versionId: string; image: Si
   });
   const byKey = (key: string | null) => activities.find((activity) => activity.key === key);
 
-  // Teclado: flechas para desplazar la zona seleccionada, Esc para deseleccionar.
+  // Teclado: flechas para desplazar la zona seleccionada (1 px; 10 px con Shift).
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (isFormField(event.target)) return;
-      if (event.key === 'Escape') return select(null);
       const selected = activities.find((activity) => activity.key === selectedKey);
       if (!selected || !isArrowKey(event.key)) return;
       event.preventDefault();
@@ -128,7 +120,7 @@ export function EditorLayer({ versionId, image }: { versionId: string; image: Si
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [activities, selectedKey, select, autosave, image]);
+  }, [activities, selectedKey, autosave, image]);
 
   const onPointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (event.button !== 0) return;

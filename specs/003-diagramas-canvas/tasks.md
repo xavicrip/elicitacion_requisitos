@@ -152,13 +152,13 @@ selección, teclado y móvil en solo lectura
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T050 [P] [US4] Pruebas de `ActivityHotspots` (selección de la zona más pequeña bajo el cursor), `Minimap` (un clic centra la cámara) y `A11yActivityList` (`Tab` + `Enter` selecciona y centra; `aria-live` anuncia la selección; `Esc` deselecciona) en `apps/web/tests/workspace.test.tsx` — `test(web)`
+- [X] T050 [P] [US4] Pruebas de `ActivityHotspots` (selección de la zona más pequeña bajo el cursor), `Minimap` (un clic centra la cámara) y `A11yActivityList` (`Tab` + `Enter` selecciona y centra; `aria-live` anuncia la selección; `Esc` deselecciona) en `apps/web/tests/workspace.test.tsx` — `test(web)`
 - [ ] T051 [P] [US4] E2E en `e2e/flows/workspace-navigation.spec.ts` sobre `grande-4000x3000.png` publicado, con `__canvasState`: rueda → zoom limitado al 10 %–800 %; `0` ajusta; clic en el minimapa centra; teclado (`Tab`, `Enter`, `+`, `-`, flechas); a 390 px se navega y selecciona pero no hay modo `edit` — `test(e2e)`
 
 ### Implementation for User Story 4
 
-- [ ] T052 [US4] Implementar `ActivityHotspots.tsx` (raycasting, resaltado con nombre, selección de la zona más pequeña) y los puntos de extensión `renderBadge`/`colorFor` de `contracts/canvas-ui.md` — `feat(web)`
-- [ ] T053 [US4] Implementar `Minimap.tsx`, `A11yActivityList.tsx`, los atajos de teclado, `useWorkspaceEvents()` y el modo solo lectura por debajo de 768 px y en proyectos cerrados (FR-010, FR-012) — `feat(web)`
+- [X] T052 [US4] Implementar `ActivityHotspots.tsx` (raycasting, resaltado con nombre, selección de la zona más pequeña) y los puntos de extensión `renderBadge`/`colorFor` de `contracts/canvas-ui.md` — `feat(web)`
+- [X] T053 [US4] Implementar `Minimap.tsx`, `A11yActivityList.tsx`, los atajos de teclado, `useWorkspaceEvents()` y el modo solo lectura por debajo de 768 px y en proyectos cerrados (FR-010, FR-012) — `feat(web)`
 
 **Checkpoint**: las cuatro historias funcionan; quickstart §1–§4 en verde
 

@@ -1,6 +1,6 @@
-import type { VersionStatus } from '@reqcanvas/shared';
+import type { Activity, VersionStatus } from '@reqcanvas/shared';
 import { useQuery } from '@tanstack/react-query';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { FormError } from '../../../components/form';
 import { supportsWebGL2 } from '../../../lib/config';
@@ -11,7 +11,12 @@ import { EditorPanel } from '../editor/EditorPanel';
 import { AutosaveProvider } from '../editor/useAutosave';
 import { NewVersionDialog } from '../NewVersionDialog';
 import { PublishButton } from '../PublishButton';
+import { TYPE_LABEL } from '../labels';
+import { A11yActivityList } from './A11yActivityList';
+import type { HotspotExtensions } from './ActivityHotspots';
+import { Minimap } from './Minimap';
 import { useWorkspaceStore } from './store';
+import { useWorkspaceKeyboard } from './useWorkspaceKeyboard';
 
 // three.js solo se descarga al abrir un diagrama.
 const DiagramCanvas = lazy(() => import('./DiagramCanvas'));
@@ -26,7 +31,12 @@ const STATUS_LABEL: Record<VersionStatus, string> = {
  * Espacio de trabajo de un diagrama (contracts/canvas-ui.md). El Administrador trabaja sobre el
  * borrador si lo hay; los Participantes, sobre la versión publicada.
  */
-export function WorkspacePage() {
+export type WorkspacePageProps = HotspotExtensions & {
+  /** Panel lateral en modo vista para la actividad seleccionada (la 004 monta los requisitos). */
+  sidePanel?: (selectedKey: string | null) => ReactNode;
+};
+
+export function WorkspacePage({ sidePanel, ...hotspots }: WorkspacePageProps = {}) {
   const { projectId = '', diagramId = '' } = useParams();
   const project = useQuery({
     queryKey: projectKeys.detail(projectId),
@@ -55,6 +65,8 @@ export function WorkspacePage() {
   useEffect(() => {
     if (versionId) open(versionId, editing ? 'edit' : 'view');
   }, [versionId, editing, open]);
+  useWorkspaceKeyboard();
+  const selectedKey = useWorkspaceStore((state) => state.selectedActivityKey);
 
   if (project.isLoading || diagrams.isLoading || version.isLoading) return <p>Cargando…</p>;
   if (diagrams.data && !versionId) return <p>Diagrama no encontrado</p>;
@@ -86,30 +98,67 @@ export function WorkspacePage() {
             <NewVersionDialog projectId={projectId} diagramId={diagramId} />
           )}
         </header>
-        <div className={editing ? 'grid gap-4 md:grid-cols-[1fr_20rem]' : ''}>
+        <div className={editing || sidePanel ? 'grid gap-4 md:grid-cols-[1fr_20rem]' : 'space-y-3'}>
           <Workspace
             displayUrl={version.data.image.displayUrl}
+            thumbUrl={version.data.image.thumbUrl}
             image={{ width: version.data.image.width, height: version.data.image.height }}
             versionId={version.data.id}
+            activities={version.data.activities}
             editing={editing}
+            hotspots={hotspots}
           />
           {editing && <EditorPanel versionId={version.data.id} />}
+          {!editing && sidePanel?.(selectedKey)}
+          {!editing && !sidePanel && (
+            <SelectedActivity activities={version.data.activities} selectedKey={selectedKey} />
+          )}
         </div>
       </section>
     </AutosaveProvider>
   );
 }
 
+/** Actividad seleccionada en modo vista (sin `sidePanel`). */
+function SelectedActivity({
+  activities,
+  selectedKey,
+}: {
+  activities: Activity[];
+  selectedKey: string | null;
+}) {
+  const selected = activities.find((activity) => activity.key === selectedKey);
+  if (!selected) {
+    return (
+      <p className="text-sm text-gray-600">
+        Selecciona una actividad en el diagrama o tabula hasta ella. Zoom con la rueda o con +/-, 0
+        para ajustar.
+      </p>
+    );
+  }
+  return (
+    <p className="text-sm">
+      <strong>{selected.label}</strong> · {TYPE_LABEL[selected.type]}
+    </p>
+  );
+}
+
 function Workspace({
   displayUrl,
+  thumbUrl,
   image,
   versionId,
+  activities,
   editing,
+  hotspots,
 }: {
   displayUrl: string;
+  thumbUrl: string;
   image: { width: number; height: number };
   versionId: string;
+  activities: Activity[];
   editing: boolean;
+  hotspots: HotspotExtensions;
 }) {
   const imageUrl = useImageUrl(displayUrl);
   const imageStatus = useWorkspaceStore((state) => state.imageStatus);
@@ -131,9 +180,12 @@ function Workspace({
             image={image}
             versionId={versionId}
             editing={editing}
+            hotspots={hotspots}
           />
         </Suspense>
       )}
+      {!editing && <A11yActivityList activities={activities} image={image} />}
+      <Minimap thumbUrl={thumbUrl} image={image} />
       {imageStatus === 'loading' && (
         <p className="absolute inset-0 flex items-center justify-center">Cargando imagen…</p>
       )}
