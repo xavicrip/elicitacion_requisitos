@@ -19,7 +19,6 @@ const failuresLeft = new Map<string, number>();
 beforeAll(async () => {
   ({ app } = await buildTestApp('detailscascade', {
     withAuth: true,
-    featureFlags: 'diagrams=true,details=true',
     deletion: { attempts: 3, backoffMs: 10 },
   }));
   app.registerProjectCascade('fallo-posterior', async (projectId) => {

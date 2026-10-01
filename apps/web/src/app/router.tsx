@@ -31,14 +31,6 @@ const diagrams = (element: ReactNode) =>
     </FlagGate>,
   );
 
-/** Rutas de la feature 004: además, detrás del flag `details` (plan de la 004, ajuste 2). */
-const details = (element: ReactNode) =>
-  diagrams(
-    <FlagGate flag="details" fallback={<NotFoundPage />}>
-      {element}
-    </FlagGate>,
-  );
-
 /** Rutas de la app (React Router 7, modo librería; research R10). */
 export const routes: RouteObject[] = [
   {
@@ -66,7 +58,7 @@ export const routes: RouteObject[] = [
       {
         path: 'proyectos/:projectId/requisitos-huerfanos',
         loader: requireSession,
-        element: details(<OrphansPage />),
+        element: diagrams(<OrphansPage />),
       },
       { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
       { path: '*', element: <NotFoundPage /> },

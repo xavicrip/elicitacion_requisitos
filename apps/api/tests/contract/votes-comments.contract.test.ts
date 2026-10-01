@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { createDetail, DETAIL_FLAGS, publishedDiagram } from '../helpers/details';
+import { createDetail, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser } from '../helpers/users';
 
@@ -16,7 +16,7 @@ let voter: Record<string, string>;
 let detailId: string;
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('votescontract', { withAuth: true, featureFlags: DETAIL_FLAGS }));
+  ({ app } = await buildTestApp('votescontract', { withAuth: true }));
   await app.ready();
   const ana = await registerTestUser(app, 'Ana');
   const luis = await registerTestUser(app, 'Luis');

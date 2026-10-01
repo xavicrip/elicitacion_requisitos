@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { detailsModel } from '../../src/modules/details/models/detail';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { createDetail, DETAIL_FLAGS, publishedDiagram } from '../helpers/details';
+import { createDetail, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser } from '../helpers/users';
 
@@ -19,7 +19,6 @@ let diagram: Awaited<ReturnType<typeof publishedDiagram>>;
 beforeAll(async () => {
   ({ app } = await buildTestApp('moderationcontract', {
     withAuth: true,
-    featureFlags: DETAIL_FLAGS,
   }));
   await app.ready();
   const user = await registerTestUser(app);

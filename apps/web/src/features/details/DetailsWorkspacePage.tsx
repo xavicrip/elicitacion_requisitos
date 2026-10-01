@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { WorkspacePage } from '../diagrams/workspace/WorkspacePage';
-import { useFlags } from '../../lib/flags';
 import { detailKeys, detailsApi } from './api';
 import { DetailsPanel } from './DetailsPanel';
 import { coverageHotspots, heatmapScale } from './overlays/Heatmap';
@@ -10,11 +9,9 @@ import { coverageHotspots, heatmapScale } from './overlays/Heatmap';
 /**
  * Espacio de trabajo de la 003 con los requisitos de la 004 (plan, ajuste 8): panel lateral de
  * detalles, indicadores de cobertura en las zonas (contador, «sin detalles», mapa de calor y
- * notas) y, para el Administrador, el cambio entre el borrador y la versión publicada. Sin el
- * flag `details`, es el espacio de trabajo de la 003 tal cual.
+ * notas) y, para el Administrador, el cambio entre el borrador y la versión publicada.
  */
 export function DetailsWorkspacePage() {
-  const { flags, isLoading } = useFlags();
   const [preferPublished, setPreferPublished] = useState(false);
   const [openNotes, setOpenNotes] = useState<Set<string>>(new Set());
   const versionId = useWorkspaceStore((state) => state.versionId);
@@ -24,7 +21,7 @@ export function DetailsWorkspacePage() {
   const coverage = useQuery({
     queryKey: detailKeys.coverage(versionId),
     queryFn: () => detailsApi.coverage(versionId),
-    enabled: Boolean(flags.details && versionId),
+    enabled: Boolean(versionId),
   });
   const hotspots = useMemo(
     () =>
@@ -45,8 +42,6 @@ export function DetailsWorkspacePage() {
     [coverage.data],
   );
 
-  if (isLoading) return null;
-  if (!flags.details) return <WorkspacePage />;
   return (
     <WorkspacePage
       preferPublished={preferPublished}

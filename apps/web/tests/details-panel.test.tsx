@@ -128,12 +128,6 @@ describe('panel de detalles (US1, FR-001)', () => {
     expect(within(panel).queryByRole('button', { name: 'Guardar requisito' })).toBeNull();
     expect(panel).toHaveTextContent('El proyecto está cerrado');
   });
-
-  it('con el flag details desactivado no hay panel de requisitos', async () => {
-    renderWorkspace({}, { accounts: true, diagrams: true, details: false });
-    await screen.findByText('Versión 1 · Publicado');
-    expect(screen.queryByRole('complementary', { name: 'Requisitos' })).toBeNull();
-  });
 });
 
 describe('Administrador con borrador y versión publicada (plan, ajuste 8)', () => {

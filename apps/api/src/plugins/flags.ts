@@ -16,8 +16,6 @@ declare module 'fastify' {
 const GATED_PREFIXES: Partial<Record<keyof ActiveFlags, RegExp>> = {
   accounts: /^\/(auth|me|projects|invitations)(\/|\?|$)/,
   diagrams: /^\/(projects\/[^/?]+\/diagrams|diagrams|diagram-versions|activities)(\/|\?|$)/,
-  details:
-    /^\/(diagrams\/[^/?]+\/activities\/[^/?]+\/details|details|comments|diagram-versions\/[^/?]+\/coverage|projects\/[^/?]+\/details)(\/|\?|$)/,
 };
 
 export const featureGatePlugin = fp<{ flags: ActiveFlags }>(
