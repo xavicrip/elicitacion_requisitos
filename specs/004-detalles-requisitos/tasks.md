@@ -28,7 +28,7 @@ sugeridos van al final de cada tarea.
 
 **Purpose**: dependencias y helpers de E2E
 
-- [ ] T001 Añadir `d3-scale-chromatic` y `diff` (jsdiff) con sus tipos a `apps/web/package.json`; comprobar que el bundle inicial no crece (deben ir en el chunk del espacio de trabajo, cargado en diferido como three.js) — `chore(web)`
+- [X] T001 Añadir `d3-scale-chromatic` y `diff` (jsdiff) con sus tipos a `apps/web/package.json`; comprobar que el bundle inicial no crece (deben ir en el chunk del espacio de trabajo, cargado en diferido como three.js) — `chore(web)`
 - [ ] T002 [P] Helpers de E2E en `e2e/flows/details.ts`: invitar y aceptar a un Participante por la API, publicar `compra-simple.png` con sus actividades (reutiliza `publishFixture` de `flows/diagrams.ts`) y crear detalles por la API — `test(e2e)`
 
 ---
