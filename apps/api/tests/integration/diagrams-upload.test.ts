@@ -7,13 +7,7 @@ import { auditLogsModel } from '../../src/modules/audit/model';
 import { versionsModel } from '../../src/modules/diagrams/models/version';
 import { projectsModel } from '../../src/modules/projects/model';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import {
-  DIAGRAM_FLAGS,
-  fixture,
-  multipart,
-  uploadDiagram,
-  uploadVersion,
-} from '../helpers/diagrams';
+import { fixture, multipart, uploadDiagram, uploadVersion } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -32,7 +26,6 @@ beforeAll(async () => {
   });
   ({ app } = await buildTestApp('diagramsupload', {
     withAuth: true,
-    featureFlags: DIAGRAM_FLAGS,
     logStream,
   }));
   await app.ready();

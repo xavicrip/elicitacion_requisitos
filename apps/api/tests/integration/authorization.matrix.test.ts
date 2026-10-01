@@ -10,7 +10,7 @@ import { detailsModel } from '../../src/modules/details/models/detail';
 import { diagramsModel } from '../../src/modules/diagrams/models/diagram';
 import { versionsModel, type VersionImage } from '../../src/modules/diagrams/models/version';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, multipart, fixture, uploadDiagram } from '../helpers/diagrams';
+import { multipart, fixture, uploadDiagram } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -164,7 +164,6 @@ let users: { admin: TestUser; participant: TestUser; other: TestUser; outsider: 
 beforeAll(async () => {
   ({ app } = await buildTestApp('matrix', {
     withAuth: true,
-    featureFlags: DIAGRAM_FLAGS,
   }));
   await app.ready();
   users = {

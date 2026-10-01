@@ -5,7 +5,7 @@ import { auditLogsModel } from '../../src/modules/audit/model';
 import { activitiesModel } from '../../src/modules/diagrams/models/activity';
 import { projectsModel } from '../../src/modules/projects/model';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, markPublished, uploadDiagram } from '../helpers/diagrams';
+import { markPublished, uploadDiagram } from '../helpers/diagrams';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -20,7 +20,7 @@ const bbox = { x: 0.1, y: 0.1, w: 0.2, h: 0.1 };
 const requirements = new Map<string, number>();
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('activities', { withAuth: true, featureFlags: DIAGRAM_FLAGS }));
+  ({ app } = await buildTestApp('activities', { withAuth: true }));
   app.registerActivityDependents('requirements', {
     count: async ({ key }) => requirements.get(key) ?? 0,
     remove: async ({ key }) => {

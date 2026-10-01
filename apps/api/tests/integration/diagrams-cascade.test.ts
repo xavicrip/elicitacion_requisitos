@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { activitiesModel } from '../../src/modules/diagrams/models/activity';
 import { projectsModel, type Project } from '../../src/modules/projects/model';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { DIAGRAM_FLAGS, uploadDiagram } from '../helpers/diagrams';
+import { uploadDiagram } from '../helpers/diagrams';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
 // Plan ajuste 6: la cascada de la 002 borra diagramas, versiones, actividades y objetos.
@@ -16,7 +16,6 @@ const failuresLeft = new Map<string, number>();
 beforeAll(async () => {
   ({ app } = await buildTestApp('diagramscascade', {
     withAuth: true,
-    featureFlags: DIAGRAM_FLAGS,
     deletion: { attempts: 3, backoffMs: 10 },
   }));
   // Se ejecuta después de la de diagramas: si falla, el job repite toda la cascada.
