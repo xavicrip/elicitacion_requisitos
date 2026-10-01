@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.4.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.3.0...v0.4.0) (2026-10-01)
+
+
+### Funcionalidades
+
+* **api:** add resource-scoped and multi-status authorization guards ([50f8364](https://github.com/xavicrip/elicitacion_requisitos/commit/50f83642a423b4f5aea7df14a26685a5422d640d))
+* **api:** add the activity dependents registry ([5268a2c](https://github.com/xavicrip/elicitacion_requisitos/commit/5268a2c2b83e2872093d648562288bd21ef89dc6))
+* **api:** add the diagram image pipeline ([d05364f](https://github.com/xavicrip/elicitacion_requisitos/commit/d05364f7eea2ab524dbded6228ecfcb9ddb2c4b4))
+* **api:** add the diagram, version and activity models ([4020999](https://github.com/xavicrip/elicitacion_requisitos/commit/402099983b265086794c1e0d3a543a5154ec537b))
+* **api:** add the diagrams indexes migration ([e128130](https://github.com/xavicrip/elicitacion_requisitos/commit/e1281305c51b95bda55e9c3c2b8f79f3cd720896))
+* **api:** add the S3 storage environment variables ([2e62556](https://github.com/xavicrip/elicitacion_requisitos/commit/2e6255667c37490fae41ee473b2e4510eec7305d))
+* **api:** add the S3 storage plugin and its deep health check ([d7ee043](https://github.com/xavicrip/elicitacion_requisitos/commit/d7ee0432b43e75bc4686b2698c6dc1886e165c6f))
+* **api:** create, edit and delete diagram activities ([b39310e](https://github.com/xavicrip/elicitacion_requisitos/commit/b39310e8ed1beb314d527e1b1a5e55b61aa180b7))
+* **api:** delete a project's diagrams in the deletion cascade ([f67c16f](https://github.com/xavicrip/elicitacion_requisitos/commit/f67c16feaae024b4fab393db6ad93c1e08256e17))
+* **api:** publish diagram versions and carry activities forward ([bc5c8f7](https://github.com/xavicrip/elicitacion_requisitos/commit/bc5c8f784656b6218d4d7305b4d4ce75dda17af7))
+* **api:** upload diagrams and serve their images ([abb85e9](https://github.com/xavicrip/elicitacion_requisitos/commit/abb85e97f8d7313a99fb6453ff840faac0455abc))
+* **shared:** add diagram, version and activity schemas ([43727c4](https://github.com/xavicrip/elicitacion_requisitos/commit/43727c481ce3390054ea4a2bc8744270bac78ca6))
+* **shared:** add the diagrams feature flag ([7de20be](https://github.com/xavicrip/elicitacion_requisitos/commit/7de20bee47f64f8712434e95f701426c2a941b70))
+* **shared:** turn the diagrams flag on by default ([0da4ba7](https://github.com/xavicrip/elicitacion_requisitos/commit/0da4ba703e3397ce01dab0c604b8c4b06b45eea0))
+* **web:** add the workspace camera math ([a49237f](https://github.com/xavicrip/elicitacion_requisitos/commit/a49237f73025ce5372d6fb5af863ef9de803bf1a))
+* **web:** add the workspace store and the runtime E2E hook ([fc800cb](https://github.com/xavicrip/elicitacion_requisitos/commit/fc800cb479d5d320cca2b73279a79dea518513e8))
+* **web:** add the zone editor geometry ([cd3a9ef](https://github.com/xavicrip/elicitacion_requisitos/commit/cd3a9ef1276e9829cc372284b41803ab0972f55a))
+* **web:** autosave activity edits and add the activity form ([00d314b](https://github.com/xavicrip/elicitacion_requisitos/commit/00d314b0ab0fcb6dea349805cf956828372672c3))
+* **web:** edit activity zones on the canvas ([8f1c4f9](https://github.com/xavicrip/elicitacion_requisitos/commit/8f1c4f9608af633d9b4b12cfb90b96312e562275))
+* **web:** list a project's diagrams and upload new ones ([8953da6](https://github.com/xavicrip/elicitacion_requisitos/commit/8953da600f6c22d428e1cc55f42c071fc5199aab))
+* **web:** navigate the workspace with hotspots, minimap and keyboard ([434a4b3](https://github.com/xavicrip/elicitacion_requisitos/commit/434a4b3fe7394200468907f5173622e2db6f0536))
+* **web:** open a diagram in a minimal three.js workspace ([a159b5f](https://github.com/xavicrip/elicitacion_requisitos/commit/a159b5f076dd35d06c3bdc8d6aefe701ed1c9f4e))
+* **web:** publish diagrams and upload new versions ([1b1c5fd](https://github.com/xavicrip/elicitacion_requisitos/commit/1b1c5fd48eccad10052219dd85fe89721ed0e01e))
+
+
+### Correcciones
+
+* **web:** show pending autosaves and send them when the page unloads ([7c5514d](https://github.com/xavicrip/elicitacion_requisitos/commit/7c5514ddf9def6432702f7262e43c87a68dfd9c8))
+
+
+### Rendimiento
+
+* **web:** create the WebGL canvas before the image arrives ([a3c8fd8](https://github.com/xavicrip/elicitacion_requisitos/commit/a3c8fd81f82489f46e9aa4ca386e8b7ed1676f75))
+* **web:** load the home page canvas preview lazily ([19cb1a2](https://github.com/xavicrip/elicitacion_requisitos/commit/19cb1a2d62b9292aa2f34f1dba712a6913008a06))
+* **web:** measure the workspace and keep panning at 60 FPS ([c72367b](https://github.com/xavicrip/elicitacion_requisitos/commit/c72367bb756e57fd3038660d1eeccc1809a6f915))
+* **web:** overlap the workspace's first requests ([027b923](https://github.com/xavicrip/elicitacion_requisitos/commit/027b9238785e08acb767e3f17d86e22a5ad0c3b2))
+
 ## [0.3.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.2.0...v0.3.0) (2026-09-30)
 
 
