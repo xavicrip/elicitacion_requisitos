@@ -20,7 +20,7 @@ test('un Participante registra un detalle en "Validar pago" y lo ve al recargar'
   await panel
     .getByLabel('Entonces (resultado)')
     .fill('el sistema confirma el pago en menos de 5 segundos');
-  await panel.getByLabel('Tipo').selectOption({ label: 'No funcional' });
+  await panel.getByLabel('Tipo', { exact: true }).selectOption({ label: 'No funcional' });
   await panel.getByRole('button', { name: 'Guardar requisito' }).click();
 
   const card = panel.getByRole('article');
