@@ -152,7 +152,7 @@ En local (Docker Compose, Apple M1, Chrome de Playwright con ventana), con
 |--------|----------|-----------|
 | FPS con `cien-actividades.png` (100 zonas) al hacer zoom | ≥ 50 (SC-002) | 60 FPS, p95 de 17 ms por frame |
 | FPS al desplazar con el ratón | ≥ 50 (SC-002) | 60 FPS, p95 de 18 ms |
-| Diagrama navegable con la red a 10 Mbps, sin caché | < 3 s (SC-003) | 2,1 s (566 KiB transferidos) |
+| Diagrama navegable con la red a 10 Mbps, sin caché | < 3 s (SC-003) | 2,1 s (566 KiB transferidos); 1,2 s tras los PR #21 y #22 |
 | Subir y procesar un PNG de 9,9 MB | < 5 s | 1,3 s |
 
 - Chromium headless renderiza WebGL por software (SwiftShader): ahí el desplazamiento baja a
@@ -160,7 +160,14 @@ En local (Docker Compose, Apple M1, Chrome de Playwright con ventana), con
   ejecuta.
 - Optimización tras la primera medición (42 FPS al desplazar): las zonas se memoizan y el
   resaltado no se actualiza mientras se arrastra la vista.
-- T058 repite las tres medidas contra staging.
+- En staging (T058, 2026-10-01; ~170 ms por petición desde la red del equipo de pruebas):
+  60 FPS al hacer zoom y ≥ 60 al desplazar; una subida de 10 MB (10,4 MB) por el borde de
+  Railway en 3,2 s, subida incluida; y el diagrama navegable con 10 Mbps en 3,17–3,45 s al
+  principio, **fuera de SC-003**. Las peticiones iban en serie y el canvas WebGL se creaba
+  cuando ya había llegado la imagen. Tras solapar los flags con el refresco de la sesión y
+  pedir el chunk de three.js al abrir el diagrama (PR #21), y crear el canvas antes de que
+  llegue la imagen (PR #22): **2,60–2,83 s**. `PERF_LATENCY_MS=170 pnpm e2e:perf` simula esa
+  latencia en local (1,9 s).
 
 ## Complexity Tracking
 

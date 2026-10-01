@@ -49,6 +49,28 @@ al menos 768 px.
 4. Rendimiento: con `cien-actividades.png` (100 zonas) la navegación se mantiene ≥ 50 FPS
    (`pnpm e2e:perf` lo mide; resultados en plan.md, §Mediciones).
 
+## Recorrido en staging (T058, 2026-10-01)
+
+Con dos cuentas nuevas (Administrador y Participante) en un proyecto abierto, sobre `a3c8fd8`
+(flag `diagrams` activado solo en staging). Automatizado con Playwright y la ventana visible;
+en staging no hay `__canvasState` (`e2eHooks: false`).
+
+| § | Comprobación | Resultado |
+|---|--------------|-----------|
+| 1 | Subir `compra-simple.png` | Borrador abierto; 2,4 s hasta ver la imagen |
+| 1 | PDF y PNG de 15 MB | Rechazados en el navegador con su mensaje |
+| 1 | 10 MB por el borde de Railway (plan, ajuste 9) | Aceptado (201, 3,2 s con la subida); más de 10 MB → `413 FILE_TOO_LARGE` de `api`, no del borde |
+| 1 | `con-script.svg` | Solo llega WebP; `Cache-Control: private, max-age=31536000, immutable` y `ETag` a través del proxy; al recargar, 0 bytes transferidos |
+| 2 | 5 zonas con nombre, tipo y transición | Se conservan al recargar |
+| 2 | Dos pestañas de Administrador | La segunda ve "Otro administrador modificó esta actividad" |
+| 3 | Publicar; vista del Participante | Ve el diagrama publicado, selecciona zonas y no tiene herramientas de edición |
+| 3 | Versión 2 | Mismas `key`; el Participante sigue en la v1 y el borrador le responde 404 |
+| 4 | `grande-4000x3000.png` publicado | `+`, clic en el minimapa y `0` mueven la vista; `Tab` + `Enter` anuncia la selección; a 390 px no hay editor |
+| — | Mediciones | 60 FPS (zoom) y ≥ 60 (desplazamiento) con 100 zonas; navegable con 10 Mbps en 2,60–2,83 s tras los PR #21 y #22 (antes, 3,17–3,45 s; plan.md, §Mediciones) |
+
+El proyecto y las cuentas de prueba (`t058-…@example.com`) se quedan en staging: no hay borrado
+de cuentas.
+
 ## 5. Pruebas
 
 ```bash
