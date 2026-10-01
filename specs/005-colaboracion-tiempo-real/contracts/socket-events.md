@@ -5,6 +5,8 @@
   el token y reintenta una vez.
 - Todos los payloads del cliente se validan con zod (`packages/shared/src/realtime.ts`); un
   payload inválido se descarta y se registra.
+- Nombres: los eventos con `.` (`detail.created`, `diagram.published`…) son eventos de dominio
+  retransmitidos; los que llevan `:` (`room:join`, `project:closed`…) son propios del socket.
 
 ## Cliente → servidor
 

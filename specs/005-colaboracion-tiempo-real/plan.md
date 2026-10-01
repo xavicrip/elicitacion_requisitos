@@ -128,8 +128,9 @@ feature `realtime` en `web`, que se engancha al workspace mediante `useWorkspace
    detalle es nuevo, los calcula con la misma regla que `detailPermissions` (se mueve a
    `packages/shared` para compartirla) a partir del usuario y del estado del proyecto.
 8. **Cierre del proyecto y revocación**: `project:closed` invalida `projectKeys.detail`; la web
-   ya deriva el modo de solo lectura de `project.status` (004, `projectOpen`). `access:revoked`
-   también cuando se cierra la sesión (`sid` del token).
+   ya deriva el modo de solo lectura de `project.status` (004, `projectOpen`). Cerrar sesión no
+   se propaga por el socket: el access token dura 15 min y, al caducar sin renovarse, el socket
+   se desconecta.
 9. **Espacio de trabajo**: `RealtimeWorkspace` envuelve `DetailsWorkspacePage` (004) como esta
    envuelve `WorkspacePage` (003). Presencia con `overlays.presence` del store de la 003 y la
    selección con `useWorkspaceEvents`; los cursores, en coordenadas de imagen, como `Html` de
