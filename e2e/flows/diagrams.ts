@@ -9,6 +9,7 @@ export type CanvasState = {
   versionId: string;
   mode: 'view' | 'edit';
   selectedActivityKey: string | null;
+  hoveredActivityKey: string | null;
   imageStatus: 'loading' | 'ready' | 'error';
   camera: { zoom: number; center: { x: number; y: number } };
 };
@@ -102,4 +103,45 @@ export async function dragOnImage(
   await page.mouse.move((start.x + end.x) / 2, (start.y + end.y) / 2, { steps: 4 });
   await page.mouse.move(end.x, end.y, { steps: 4 });
   await page.mouse.up();
+}
+
+/** Sube una fixture, marca sus actividades por la API y publica la versión. */
+export async function publishFixture(
+  page: Page,
+  accessToken: string,
+  projectId: string,
+  file: string,
+  name = 'Diagrama grande',
+) {
+  const headers = { authorization: `Bearer ${accessToken}` };
+  const version = await uploadDiagram(page, accessToken, projectId, file, name);
+  for (const activity of fixtureActivities(file.replace(/\.png$/, '.json'))) {
+    const created = await page.request.post(`/api/diagram-versions/${version.id}/activities`, {
+      headers,
+      data: activity,
+    });
+    expect(created.status()).toBe(201);
+  }
+  const published = await page.request.post(`/api/diagram-versions/${version.id}/publish`, {
+    headers,
+  });
+  expect(published.status()).toBe(200);
+  return version;
+}
+
+/** Sube una versión nueva (borrador) de un diagrama por la API. */
+export async function uploadVersion(
+  page: Page,
+  accessToken: string,
+  diagramId: string,
+  file = 'compra-simple.png',
+) {
+  const response = await page.request.post(`/api/diagrams/${diagramId}/versions`, {
+    headers: { authorization: `Bearer ${accessToken}` },
+    multipart: {
+      file: { name: file, mimeType: 'image/png', buffer: readFileSync(fixturePath(file)) },
+    },
+  });
+  expect(response.status()).toBe(201);
+  return (await response.json()) as { id: string };
 }

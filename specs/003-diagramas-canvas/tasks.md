@@ -153,7 +153,7 @@ selección, teclado y móvil en solo lectura
 ### Tests for User Story 4 ⚠️
 
 - [X] T050 [P] [US4] Pruebas de `ActivityHotspots` (selección de la zona más pequeña bajo el cursor), `Minimap` (un clic centra la cámara) y `A11yActivityList` (`Tab` + `Enter` selecciona y centra; `aria-live` anuncia la selección; `Esc` deselecciona) en `apps/web/tests/workspace.test.tsx` — `test(web)`
-- [ ] T051 [P] [US4] E2E en `e2e/flows/workspace-navigation.spec.ts` sobre `grande-4000x3000.png` publicado, con `__canvasState`: rueda → zoom limitado al 10 %–800 %; `0` ajusta; clic en el minimapa centra; teclado (`Tab`, `Enter`, `+`, `-`, flechas); a 390 px se navega y selecciona pero no hay modo `edit` — `test(e2e)`
+- [X] T051 [P] [US4] E2E en `e2e/flows/workspace-navigation.spec.ts` sobre `grande-4000x3000.png` publicado, con `__canvasState`: rueda → zoom limitado al 10 %–800 %; `0` ajusta; clic en el minimapa centra; teclado (`Tab`, `Enter`, `+`, `-`, flechas); a 390 px se navega y selecciona pero no hay modo `edit` — `test(e2e)`
 
 ### Implementation for User Story 4
 
