@@ -3,11 +3,11 @@ import { useState, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
 import { LoginPage } from '../features/auth/LoginPage';
 import { DiagramListPage } from '../features/diagrams/DiagramListPage';
-import { DetailsWorkspacePage } from '../features/details/DetailsWorkspacePage';
 import { OrphansPage } from '../features/details/OrphansPage';
 import { AcceptInvitationPage } from '../features/invitations/AcceptInvitationPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
+import { RealtimeWorkspace } from '../features/realtime/RealtimeWorkspace';
 import { ProjectSettingsPage } from '../features/projects/ProjectSettingsPage';
 import { ProjectsPage } from '../features/projects/ProjectsPage';
 import { flagsQuery } from '../lib/flags';
@@ -38,7 +38,7 @@ export const routes: RouteObject[] = [
       {
         path: 'proyectos/:projectId/diagramas/:diagramId',
         loader: requireSession,
-        element: <DetailsWorkspacePage />,
+        element: <RealtimeWorkspace />,
       },
       {
         path: 'proyectos/:projectId/requisitos-huerfanos',
