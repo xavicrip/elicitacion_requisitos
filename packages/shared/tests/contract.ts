@@ -9,12 +9,16 @@ type SchemaObject = {
   minimum?: number;
   maximum?: number;
   exclusiveMinimum?: number;
+  maxItems?: number;
+  items?: SchemaObject;
+  required?: string[];
   properties?: Record<string, SchemaObject>;
 };
 
 const CONTRACTS = {
   '002': '002-auth-proyectos/contracts/auth-projects.openapi.yaml',
   '003': '003-diagramas-canvas/contracts/diagrams.openapi.yaml',
+  '004': '004-detalles-requisitos/contracts/details.openapi.yaml',
 } as const;
 
 const cache = new Map<string, Record<string, SchemaObject>>();
