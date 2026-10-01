@@ -40,7 +40,7 @@ type PresenceEntry = {
 | Situación | Acción |
 |-----------|--------|
 | `disconnect` | Mostrar "Sin conexión: reintentando"; deshabilitar guardar; conservar borradores |
-| `connect` tras una desconexión | `room:join` + invalidar las consultas `['diagram', versionId]` |
+| `connect` tras una desconexión | `room:join` + invalidar `detailKeys.all`, `diagramKeys.version(versionId)`, `diagramKeys.list(projectId)` y `projectKeys.detail(projectId)` (plan, ajuste 6) |
 | `access:revoked` | Mensaje "Ya no tienes acceso a este proyecto" y redirigir a "Mis proyectos" |
 | `project:closed` | Pasar a solo lectura sin recargar |
 | Evento con `rev` ≤ el de la caché | Ignorar (idempotencia) |
