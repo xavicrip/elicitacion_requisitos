@@ -24,16 +24,16 @@ async function appWithFlags(featureFlags: string): Promise<FastifyInstance> {
 }
 
 describe('registro del flag', () => {
-  it('diagrams está desactivado por defecto, es de la 003 y sustituye a diagram-editor', () => {
-    expect(FLAGS.diagrams).toMatchObject({ default: false, owner: '003-diagramas-canvas' });
+  it('diagrams está activado por defecto desde T059, es de la 003 y sustituye a diagram-editor', () => {
+    expect(FLAGS.diagrams).toMatchObject({ default: true, owner: '003-diagramas-canvas' });
     expect(FLAGS).not.toHaveProperty('diagram-editor');
   });
 });
 
-describe('flag diagrams desactivado (valor por defecto)', () => {
+describe('flag diagrams desactivado (FEATURE_FLAGS=diagrams=false)', () => {
   let app: FastifyInstance;
   beforeAll(async () => {
-    app = await appWithFlags('accounts=true');
+    app = await appWithFlags('diagrams=false');
   });
   afterAll(() => closeTestApp(app));
 
@@ -48,10 +48,10 @@ describe('flag diagrams desactivado (valor por defecto)', () => {
   });
 });
 
-describe('flag diagrams activado', () => {
+describe('flag diagrams activado (valor por defecto)', () => {
   let app: FastifyInstance;
   beforeAll(async () => {
-    app = await appWithFlags('accounts=true,diagrams=true');
+    app = await appWithFlags('');
   });
   afterAll(() => closeTestApp(app));
 

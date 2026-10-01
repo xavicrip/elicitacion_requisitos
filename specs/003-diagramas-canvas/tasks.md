@@ -171,7 +171,7 @@ selección, teclado y móvil en solo lectura
 - [X] T056 Medir en local, con Playwright y `cien-actividades.png`, los FPS durante zoom y desplazamiento (≥ 50, SC-002) y el tiempo hasta un diagrama navegable con la red limitada a 10 Mbps (< 3 s, SC-003), y el procesamiento de 10 MB (< 5 s); anotarlo en `plan.md` — `perf(web)`
 - [X] T057 Configurar Railway **antes de fusionar** (con el selector de entorno comprobado): `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID` y `S3_SECRET_ACCESS_KEY` de `api` como referencias al bucket del entorno (`reqcanvas` en producción, `reqcanvas-staging` en staging); `FEATURE_FLAGS` con `diagrams=true` solo en staging; registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [X] T058 Recorrer quickstart.md en staging (§1–§4) con dos navegadores, comprobar que el borde de Railway acepta una subida de 10 MB (plan, ajuste 9) y repetir las mediciones de T056; registrar el resultado en `quickstart.md` — `docs(repo)`
-- [ ] T059 Activar `diagrams` por defecto (`default: true`) cuando las cuatro historias y T058 estén en verde; retirar el flag en un commit posterior y separado (constitución IV) — `feat(shared)`
+- [X] T059 Activar `diagrams` por defecto (`default: true`) cuando las cuatro historias y T058 estén en verde; retirar el flag en un commit posterior y separado (constitución IV) — `feat(shared)`
 
 ---
 

@@ -32,8 +32,8 @@ export const FLAGS = defineFlags({
   },
   diagrams: {
     description:
-      'Diagramas de actividades y espacio de trabajo (subida, canvas, zonas y versiones); oculto hasta completar la feature',
-    default: false,
+      'Diagramas de actividades y espacio de trabajo (subida, canvas, zonas y versiones). Activado al completar la 003; se retirará en un commit aparte',
+    default: true,
     owner: '003-diagramas-canvas',
   },
 });
