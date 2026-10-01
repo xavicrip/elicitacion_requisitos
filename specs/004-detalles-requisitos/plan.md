@@ -18,7 +18,7 @@ notas desplegables, alimentados por un endpoint de **cobertura** agregado.
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x sobre Node.js 24 LTS
-**Primary Dependencies**: `api`: Fastify 5, Mongoose 8, zod. `web`: react-hook-form + zod, TanStack Query (actualizaciones optimistas), drei `Html` para las notas, `d3-scale-chromatic` (escala secuencial del mapa de calor), `jsdiff` (comparación ante un conflicto)
+**Primary Dependencies**: `api`: Fastify 5, Mongoose 9, zod 4. `web`: react-hook-form + zod, TanStack Query (actualizaciones optimistas), drei `Html` para las notas, `d3-scale-chromatic` (escala secuencial del mapa de calor), `jsdiff` (comparación ante un conflicto)
 **Storage**: MongoDB (`details`, `detail_votes`, `detail_comments`, `detail_history`); `audit_logs` (002)
 **Testing**: Vitest (contrato, integración, matriz de autorización ampliada, reglas de estado); Playwright (alta, edición con conflicto, votos, moderación, indicadores)
 **Target Platform**: Web (igual que 003)
@@ -83,7 +83,7 @@ apps/web/src/features/details/
 ├── ModerationMenu.tsx                       # validar / duplicado / descartar
 ├── OrphansPage.tsx                          # detalles de actividades eliminadas (Admin)
 └── overlays/{CoverageBadges.tsx,Heatmap.tsx,HeatmapLegend.tsx,StickyNotes.tsx}
-e2e/{details-create,details-edit,votes-comments,moderation,coverage}.spec.ts
+e2e/flows/{details-create,details-edit,votes-comments,moderation,coverage}.spec.ts
 ```
 
 **Structure Decision**: módulo `details` en `api`; en `web`, la feature se enchufa al

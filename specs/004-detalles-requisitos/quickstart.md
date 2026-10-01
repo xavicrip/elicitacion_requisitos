@@ -1,8 +1,8 @@
 # Quickstart: Detalles de requisitos por actividad
 
-Requiere 001–003 y un proyecto *Abierto* con el diagrama "Proceso de compra" publicado
-(10 actividades), con Ana (Admin) y Luis y Marta (Participantes). Hay datos de ejemplo con
-`pnpm --filter api seed:demo`.
+Requiere 001–003 y un proyecto *Abierto* con el diagrama "Proceso de compra"
+(`compra-simple.png`, 6 actividades) publicado, con Ana (Admin) y Luis y Marta
+(Participantes). Los helpers de `e2e/flows/details.ts` crean estos datos por la API.
 
 ## 1. Registrar (US1)
 
@@ -21,7 +21,7 @@ Requiere 001–003 y un proyecto *Abierto* con el diagrama "Proceso de compra" p
 
 ## 3. Indicadores (US3)
 
-1. Con detalles en 3 de las 10 actividades: contadores en 3 zonas y 7 marcas "sin detalles".
+1. Con detalles en 3 de las 6 actividades: contadores en 3 zonas y 3 marcas "sin detalles".
 2. Activar *Mapa de calor* → colores con leyenda; desplegar las notas de "Validar pago".
 
 ## 4. Votos y comentarios (US4)
@@ -41,6 +41,7 @@ Requiere 001–003 y un proyecto *Abierto* con el diagrama "Proceso de compra" p
 ## 6. Pruebas
 
 ```bash
-pnpm --filter api test -- details votes comments coverage authorization.matrix
-pnpm e2e -- details-create details-edit votes-comments moderation coverage
+pnpm test:services:up
+pnpm --filter @reqcanvas/api exec vitest run details votes-comments coverage moderation authorization.matrix
+pnpm dev:up && pnpm e2e --project flows
 ```

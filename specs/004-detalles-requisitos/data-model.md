@@ -64,6 +64,7 @@ validated → duplicate | discarded (y vuelta a pending)
 | Campo | Tipo | Reglas |
 |-------|------|--------|
 | `detailId` | ObjectId | Índice `{detailId, rev}` |
+| `projectId` | ObjectId | Índice `{projectId}`, para la cascada del proyecto |
 | `rev` | number | `rev` del detalle antes del cambio |
 | `snapshot` | `{given, when, then, type, priority, authorRole, tags, status, duplicateOf?, discardReason?}` | |
 | `editedBy` | ObjectId | |
@@ -71,6 +72,8 @@ validated → duplicate | discarded (y vuelta a pending)
 | `change` | `edit \| status \| reassign` | |
 
 ## Vista calculada: Coverage (por versión de diagrama)
+
+Solo se agregan las `activityKey` de la versión consultada: los detalles huérfanos no cuentan.
 
 ```ts
 type ActivityCoverage = {

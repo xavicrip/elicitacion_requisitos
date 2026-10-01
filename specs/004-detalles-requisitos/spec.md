@@ -155,6 +155,8 @@ ese estado y el enlace al original.
 - **FR-007**: El sistema DEBE detectar ediciones concurrentes del mismo detalle y evitar que se
   pierdan cambios en silencio.
 - **FR-008**: Los miembros DEBEN poder votar una vez cada detalle ajeno y retirar su voto.
+  Solo se votan detalles *pendientes* o *validados*; los *duplicados* y *descartados* se pueden
+  comentar pero no votar.
 - **FR-009**: Los miembros DEBEN poder comentar los detalles y editar o eliminar sus propios
   comentarios.
 - **FR-010**: El Administrador DEBE poder cambiar el estado de un detalle a *pendiente*,
@@ -165,7 +167,7 @@ ese estado y el enlace al original.
 - **FR-012**: El panel DEBE permitir filtrar por tipo, prioridad, estado y etiqueta, y ordenar
   por votos o por fecha.
 - **FR-013**: En un proyecto *cerrado* no se pueden crear, editar ni votar detalles ni
-  comentarios.
+  comentarios. Tampoco se modera ni se reasigna: un proyecto cerrado es de solo lectura.
 
 ### Key Entities
 
