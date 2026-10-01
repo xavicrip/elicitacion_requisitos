@@ -1,6 +1,6 @@
 import type { Writable } from 'node:stream';
 import type { FastifyInstance } from 'fastify';
-import { buildApp, type AuthConfig, type DeletionConfig } from '../../src/app';
+import { buildApp, type AuthConfig, type DeletionConfig, type RealtimeConfig } from '../../src/app';
 import { runMigrations } from '../../src/db/migrations';
 import {
   MONGO_TEST_URL,
@@ -23,6 +23,8 @@ type TestAppOptions = {
   withAuth?: boolean | Partial<AuthConfig>;
   /** Reintentos del job de borrado (por defecto, rápidos para las pruebas). */
   deletion?: DeletionConfig;
+  /** Tiempos de la colaboración en tiempo real (feature 005), cortos en las pruebas. */
+  realtime?: RealtimeConfig;
   logStream?: Writable;
 };
 
@@ -57,6 +59,7 @@ export async function buildTestApp(
       commit: 'test',
       featureFlags: options.featureFlags,
       auth,
+      realtime: options.realtime,
       deletion: {
         attempts: 3,
         backoffMs: 10,
