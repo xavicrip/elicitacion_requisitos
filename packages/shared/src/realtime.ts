@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import type { DetailEventName, DetailEvents } from './events';
+import { CommentSchema, DetailSchema, DetailStatusSchema } from './details';
+import { DETAIL_EVENTS, type DomainEvents } from './events';
 
 /**
  * Contrato de Socket.IO de la colaboración en tiempo real
@@ -70,11 +71,55 @@ export const SOCKET_SERVER_EVENTS = [
 export type JoinAck =
   { ok: true; presence: PresenceEntry[] } | { ok: false; code: 'not_found' | 'invalid' };
 
+/** Eventos de dominio que se retransmiten a la sala del proyecto (plan, ajuste 4). */
+export const RELAYED_EVENTS = [...DETAIL_EVENTS, 'diagram.published'] as const;
+export type RelayedEventName = (typeof RELAYED_EVENTS)[number];
+
 /** Un evento de dominio tal como llega por el socket: con un `eventId` para la idempotencia. */
 export type Relayed<T> = T & { eventId: string };
 
+// Esquemas de los eventos retransmitidos (pruebas de contrato, constitución III). Estrictos:
+// un campo calculado por usuario (`permissions`, `votedByMe`) no puede colarse.
+const Envelope = { eventId: z.uuid(), actorId: Id, at: z.iso.datetime(), projectId: Id };
+const DetailBase = { ...Envelope, diagramId: Id };
+const PublicDetailSchema = DetailSchema.omit({ permissions: true, votedByMe: true }).strict();
+const PublicCommentSchema = CommentSchema.omit({ permissions: true }).strict();
+const Place = z.object({ diagramId: Id, activityKey: Id }).strict();
+
+export const RELAYED_EVENT_SCHEMAS = {
+  'detail.created': z.object({ ...DetailBase, detail: PublicDetailSchema }).strict(),
+  'detail.updated': z
+    .object({ ...DetailBase, detail: PublicDetailSchema, rev: z.number().int().min(0) })
+    .strict(),
+  'detail.deleted': z.object({ ...DetailBase, detailId: Id, activityKey: Id }).strict(),
+  'detail.status_changed': z
+    .object({
+      ...DetailBase,
+      detailId: Id,
+      activityKey: Id,
+      status: DetailStatusSchema,
+      duplicateOf: Id.optional(),
+      discardReason: z.string().optional(),
+    })
+    .strict(),
+  'detail.reassigned': z.object({ ...DetailBase, detailId: Id, from: Place, to: Place }).strict(),
+  'vote.changed': z
+    .object({
+      ...DetailBase,
+      detailId: Id,
+      voteCount: z.number().int().min(0),
+      userId: Id,
+      voted: z.boolean(),
+    })
+    .strict(),
+  'comment.created': z.object({ ...DetailBase, comment: PublicCommentSchema }).strict(),
+  'comment.updated': z.object({ ...DetailBase, comment: PublicCommentSchema }).strict(),
+  'comment.deleted': z.object({ ...DetailBase, commentId: Id, detailId: Id }).strict(),
+  'diagram.published': z.object({ ...Envelope, diagramId: Id, versionId: Id }).strict(),
+} satisfies Record<RelayedEventName, z.ZodType>;
+
 export type ServerToClientEvents = {
-  [N in DetailEventName]: (payload: Relayed<DetailEvents[N]>) => void;
+  [N in RelayedEventName]: (payload: Relayed<DomainEvents[N]>) => void;
 } & {
   'presence:update': (payload: PresenceUpdate) => void;
   'cursor:moved': (payload: CursorMoved) => void;

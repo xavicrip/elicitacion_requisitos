@@ -10,6 +10,7 @@ import type { Redis } from 'ioredis';
 import { Types } from 'mongoose';
 import { Server, type Socket } from 'socket.io';
 import { usersModel } from '../modules/users/model.js';
+import { registerBridge } from './bridge.js';
 import { registerRooms } from './rooms.js';
 
 export type RealtimeConfig = {
@@ -128,6 +129,7 @@ export const realtimePlugin = fp<RealtimeConfig>(
     });
 
     app.decorate('io', io);
+    registerBridge(app);
     // Antes de cerrar el servidor HTTP: Fastify lo cierra después.
     app.addHook('preClose', async () => {
       io.local.disconnectSockets(true);
@@ -138,5 +140,5 @@ export const realtimePlugin = fp<RealtimeConfig>(
       sub.disconnect();
     });
   },
-  { name: 'realtime', dependencies: ['redis', 'auth', 'mongo'] },
+  { name: 'realtime', dependencies: ['redis', 'auth', 'mongo', 'domain-events'] },
 );
