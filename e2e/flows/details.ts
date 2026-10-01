@@ -1,5 +1,12 @@
 import type { APIRequestContext, Page } from '@playwright/test';
-import { fixtureActivities, openProject, publishFixture } from './diagrams';
+import {
+  canvasState,
+  fixtureActivities,
+  imageReady,
+  openProject,
+  publishFixture,
+  toScreen,
+} from './diagrams';
 import { expect } from './fixtures';
 import { newUser, registerUser, type TestUser } from './helpers';
 
@@ -113,4 +120,22 @@ export async function createDetail(
   );
   expect(response.status(), await response.text()).toBe(201);
   return (await response.json()) as { id: string; rev: number };
+}
+
+const IMAGE = { width: 900, height: 1200 };
+
+/** Abre el diagrama, hace clic en la zona de una actividad y devuelve el panel de requisitos. */
+export async function selectActivity(page: Page, diagram: PublishedDiagram, label: string) {
+  await page.goto(`/proyectos/${diagram.projectId}/diagramas/${diagram.diagramId}`);
+  await imageReady(page);
+  const { bbox, key } = diagram.activities.get(label)!;
+  const point = await toScreen(page, {
+    x: (bbox.x + bbox.w / 2) * IMAGE.width,
+    y: (bbox.y + bbox.h / 2) * IMAGE.height,
+  });
+  await page.mouse.click(point.x, point.y);
+  await expect.poll(async () => (await canvasState(page))?.selectedActivityKey).toBe(key);
+  const panel = page.getByRole('complementary', { name: 'Requisitos' });
+  await expect(panel.getByRole('heading', { name: `Requisitos de «${label}»` })).toBeVisible();
+  return panel;
 }

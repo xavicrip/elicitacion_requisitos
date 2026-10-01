@@ -1,29 +1,8 @@
-import type { Page } from '@playwright/test';
-import { canvasState, imageReady, login, toScreen } from './diagrams';
-import { projectWithPublishedDiagram, registerTeam, type PublishedDiagram } from './details';
+import { login } from './diagrams';
+import { projectWithPublishedDiagram, registerTeam, selectActivity } from './details';
 import { expect, test } from './fixtures';
 
 // US1: registrar un detalle en una actividad (quickstart §1). Solo contra el stack local.
-
-const IMAGE = { width: 900, height: 1200 };
-
-/** Abre el diagrama y selecciona una actividad haciendo clic en su zona. */
-async function selectActivity(page: Page, diagram: PublishedDiagram, label: string) {
-  await page.goto(`/proyectos/${diagram.projectId}/diagramas/${diagram.diagramId}`);
-  await imageReady(page);
-  const { bbox } = diagram.activities.get(label)!;
-  const point = await toScreen(page, {
-    x: (bbox.x + bbox.w / 2) * IMAGE.width,
-    y: (bbox.y + bbox.h / 2) * IMAGE.height,
-  });
-  await page.mouse.click(point.x, point.y);
-  await expect
-    .poll(async () => (await canvasState(page))?.selectedActivityKey)
-    .toBe(diagram.activities.get(label)!.key);
-  const panel = page.getByRole('complementary', { name: 'Requisitos' });
-  await expect(panel.getByRole('heading', { name: `Requisitos de «${label}»` })).toBeVisible();
-  return panel;
-}
 
 test('un Participante registra un detalle en "Validar pago" y lo ve al recargar', async ({
   page,
