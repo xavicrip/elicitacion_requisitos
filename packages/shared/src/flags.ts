@@ -24,6 +24,12 @@ export const FLAGS = defineFlags({
     default: false,
     owner: '002-auth-proyectos',
   },
+  realtime: {
+    description:
+      'Colaboración en tiempo real (Socket.IO): cambios al instante, presencia, cursores y reconexión; oculto hasta completar la feature',
+    default: false,
+    owner: '005-colaboracion-tiempo-real',
+  },
 });
 
 /**

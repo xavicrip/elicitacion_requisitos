@@ -30,9 +30,13 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag           | Por defecto | Feature              | Qué oculta                                                                                |
-| -------------- | ----------- | -------------------- | ----------------------------------------------------------------------------------------- |
-| `invite-email` | `false`     | `002-auth-proyectos` | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace) |
+| Flag           | Por defecto | Feature                        | Qué oculta                                                                                                                                                               |
+| -------------- | ----------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `realtime`     | `false`     | `005-colaboracion-tiempo-real` | Colaboración en tiempo real. Desactivado, `api` no monta el servidor Socket.IO (`/socket.io/`) y `web` no abre el socket: los cambios se ven al recargar, como en la 004 |
+| `invite-email` | `false`     | `002-auth-proyectos`           | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)                                                                                |
+
+En local y en CI, Compose activa `realtime` (`infra/docker-compose.yml`); en Railway, solo en
+`staging` hasta completar la feature.
 
 ## Flags retirados
 
