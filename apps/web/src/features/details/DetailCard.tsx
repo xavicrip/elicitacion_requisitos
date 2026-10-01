@@ -4,8 +4,10 @@ import { lazy, Suspense, useId, useState } from 'react';
 import { FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
 import { detailKeys, detailsApi } from './api';
+import { Comments } from './Comments';
 import { DetailForm } from './DetailForm';
 import { DETAIL_STATUS_LABEL, DETAIL_TYPE_LABEL, PRIORITY_LABEL } from './labels';
+import { VoteButton } from './VoteButton';
 
 // `diff` solo se descarga al abrir el historial.
 const HistoryDrawer = lazy(() => import('./HistoryDrawer'));
@@ -24,16 +26,20 @@ export function DetailCard({
   detail,
   projectId,
   facets,
+  projectOpen,
 }: {
   detail: Detail;
   projectId: string;
   facets?: Facets;
+  /** Con el proyecto abierto se puede comentar (FR-013). */
+  projectOpen: boolean;
 }) {
   const queryClient = useQueryClient();
   const confirmId = useId();
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [error, setError] = useState('');
 
   const remove = useMutation({
@@ -90,9 +96,9 @@ export function DetailCard({
       <p className="text-gray-600">
         {detail.author.name}
         {detail.authorRole && ` · ${detail.authorRole}`} ·{' '}
-        <time dateTime={detail.createdAt}>{dateFormat.format(new Date(detail.createdAt))}</time> ·{' '}
-        {detail.voteCount} voto(s)
+        <time dateTime={detail.createdAt}>{dateFormat.format(new Date(detail.createdAt))}</time>
       </p>
+      <VoteButton detail={detail} />
       <div className="flex flex-wrap gap-2">
         {detail.permissions.canEdit && (
           <button
@@ -119,7 +125,16 @@ export function DetailCard({
         >
           Historial
         </button>
+        <button
+          type="button"
+          aria-expanded={showComments}
+          onClick={() => setShowComments(!showComments)}
+          className="rounded border px-2 py-1"
+        >
+          Comentarios ({detail.commentCount})
+        </button>
       </div>
+      {showComments && <Comments detailId={detail.id} canComment={projectOpen} />}
       <FormError>{error}</FormError>
       {confirming && (
         <div

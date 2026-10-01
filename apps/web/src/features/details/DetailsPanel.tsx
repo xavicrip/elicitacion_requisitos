@@ -69,6 +69,7 @@ export function DetailsPanel({
                 detail={detail}
                 projectId={project.id}
                 facets={facets.data}
+                projectOpen={project.status === 'open'}
               />
             ))}
           </div>
