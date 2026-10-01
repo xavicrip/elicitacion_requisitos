@@ -7,6 +7,7 @@ import { detailKeys, detailsApi } from './api';
 import { Comments } from './Comments';
 import { DetailForm } from './DetailForm';
 import { DETAIL_STATUS_LABEL, DETAIL_TYPE_LABEL, PRIORITY_LABEL } from './labels';
+import { ModerationMenu } from './ModerationMenu';
 import { VoteButton } from './VoteButton';
 
 // `diff` solo se descarga al abrir el historial.
@@ -27,12 +28,15 @@ export function DetailCard({
   projectId,
   facets,
   projectOpen,
+  siblings = [],
 }: {
   detail: Detail;
   projectId: string;
   facets?: Facets;
   /** Con el proyecto abierto se puede comentar (FR-013). */
   projectOpen: boolean;
+  /** Los demás detalles de la actividad: candidatos a original de un duplicado. */
+  siblings?: Detail[];
 }) {
   const queryClient = useQueryClient();
   const confirmId = useId();
@@ -70,7 +74,10 @@ export function DetailCard({
   }
 
   return (
-    <article className="space-y-2 rounded border p-3 text-sm">
+    <article
+      id={`detail-${detail.id}`}
+      className={`space-y-2 rounded border p-3 text-sm ${detail.status === 'duplicate' ? 'opacity-60' : ''}`}
+    >
       <dl className="space-y-1">
         <div>
           <dt className="inline font-semibold">Dado </dt>
@@ -93,6 +100,17 @@ export function DetailCard({
           <span key={tag}>#{tag}</span>
         ))}
       </p>
+      {detail.status === 'duplicate' && detail.duplicateOf && (
+        <p>
+          Duplicado de otro requisito:{' '}
+          <a href={`#detail-${detail.duplicateOf}`} className="underline">
+            Ver el original
+          </a>
+        </p>
+      )}
+      {detail.status === 'discarded' && detail.discardReason && (
+        <p className="rounded bg-gray-100 px-2 py-1">Motivo del descarte: {detail.discardReason}</p>
+      )}
       <p className="text-gray-600">
         {detail.author.name}
         {detail.authorRole && ` · ${detail.authorRole}`} ·{' '}
@@ -134,6 +152,7 @@ export function DetailCard({
           Comentarios ({detail.commentCount})
         </button>
       </div>
+      {detail.permissions.canModerate && <ModerationMenu detail={detail} siblings={siblings} />}
       {showComments && <Comments detailId={detail.id} canComment={projectOpen} />}
       <FormError>{error}</FormError>
       {confirming && (

@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-rou
 import { LoginPage } from '../features/auth/LoginPage';
 import { DiagramListPage } from '../features/diagrams/DiagramListPage';
 import { DetailsWorkspacePage } from '../features/details/DetailsWorkspacePage';
+import { OrphansPage } from '../features/details/OrphansPage';
 import { AcceptInvitationPage } from '../features/invitations/AcceptInvitationPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
@@ -26,6 +27,14 @@ const accounts = (element: ReactNode) => (
 const diagrams = (element: ReactNode) =>
   accounts(
     <FlagGate flag="diagrams" fallback={<NotFoundPage />}>
+      {element}
+    </FlagGate>,
+  );
+
+/** Rutas de la feature 004: además, detrás del flag `details` (plan de la 004, ajuste 2). */
+const details = (element: ReactNode) =>
+  diagrams(
+    <FlagGate flag="details" fallback={<NotFoundPage />}>
       {element}
     </FlagGate>,
   );
@@ -53,6 +62,11 @@ export const routes: RouteObject[] = [
         path: 'proyectos/:projectId/diagramas/:diagramId',
         loader: requireSession,
         element: diagrams(<DetailsWorkspacePage />),
+      },
+      {
+        path: 'proyectos/:projectId/requisitos-huerfanos',
+        loader: requireSession,
+        element: details(<OrphansPage />),
       },
       { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
       { path: '*', element: <NotFoundPage /> },
