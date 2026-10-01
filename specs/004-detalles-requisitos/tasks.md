@@ -181,7 +181,7 @@ con motivo; el panel se filtra y ordena; los detalles huérfanos se reasignan
 - [X] T048 [P] Medir SC-003 (panel de una actividad con 200 detalles en < 1 s) y la cobertura de 100 actividades con 5 000 detalles (< 200 ms p95) con `e2e/perf` y una prueba de rendimiento de `api`; anotarlo en `plan.md` — `perf(api)`
 - [X] T049 [P] ADR `docs/adr/0006-detalles-de-requisitos.md` (ancla por la `activityKey` de una versión publicada, vigente o archivada, y los huérfanos como estado temporal que resuelve el Administrador, en lugar de borrar: así se lee el Principio I; concurrencia con `rev`, contadores de votos con índice único, eventos de dominio en proceso) — `docs(adr)`
 - [X] T050 [P] Actualizar el README (sección de detalles de requisitos: pantallas, flag `details`) y revisar que `quickstart.md` siga al día con lo construido — `docs(repo)`
-- [ ] T051 Configurar Railway **antes de fusionar**: `FEATURE_FLAGS=accounts=true,diagrams=true,details=true` en `api` de staging (producción sin cambios) y registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
+- [X] T051 Configurar Railway **antes de fusionar**: `FEATURE_FLAGS=accounts=true,diagrams=true,details=true` en `api` de staging (producción sin cambios) y registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [ ] T052 Recorrer quickstart.md en staging (§1–§5) con un Administrador y dos Participantes y repetir las mediciones de T034 y T048; registrar el resultado en `quickstart.md` — `docs(repo)`
 - [ ] T053 Activar `details` por defecto (`default: true`) cuando las cinco historias y T052 estén en verde; retirar el flag en un commit posterior y separado (constitución IV) — `feat(shared)`
 

@@ -131,3 +131,9 @@ entorno: el mismo que los respaldos de migraciones (ADR 0003), con las imágenes
 `E2E_HOOKS` no se define nunca en Railway. Sin las `S3_*`, `api` no arranca y Railway mantiene la
 versión anterior; una caída del bucket solo se refleja en `/health/deep` (check `storage`), no en
 el healthcheck de despliegue.
+
+## Variables de la feature 004 (2026-10-01)
+
+La 004 no necesita variables nuevas. Antes de integrarla (T051), `FEATURE_FLAGS` de `api` en
+staging pasa a `accounts=true,diagrams=true,details=true`; producción sigue sin definirla
+(`details` desactivado hasta completar la feature).
