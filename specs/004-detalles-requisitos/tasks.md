@@ -141,7 +141,7 @@ comentarios propios
 - [X] T035 [P] [US4] Pruebas de contrato de `PUT/DELETE /details/:id/vote`, `GET/POST /details/:id/comments` y `PATCH/DELETE /comments/:id` en `apps/api/tests/contract/votes-comments.contract.test.ts` — `test(api)`
 - [X] T036 [P] [US4] Pruebas de integración en `apps/api/tests/integration/votes-comments.test.ts`: votar es idempotente y `voteCount` es exacto también con votos simultáneos (índice único, research R4); retirar el voto; votar el propio detalle → `403`; votar un detalle *duplicado* o *descartado* → `409`, aunque sí se puede comentar (FR-008); comentar (1–1 000 caracteres, texto literal) con `commentCount`; editar el comentario propio (`editedAt`); eliminarlo su autor o un Administrador, otro miembro → `403`; proyecto cerrado → `409` para votar y comentar; eventos, auditoría y rate limit por usuario — `test(api)`
 - [X] T037 [P] [US4] Pruebas en `apps/web/tests/votes-comments.test.tsx`: botón de voto con actualización optimista, `aria-pressed` y vuelta atrás si la API falla; deshabilitado en los detalles propios; lista de comentarios con autor y fecha, editar y eliminar los propios — `test(web)`
-- [ ] T038 [P] [US4] E2E en `e2e/flows/votes-comments.spec.ts`: Marta vota el detalle de Luis (1) y retira el voto (0); Luis no puede votar el suyo; Marta comenta "¿Aplica también a PayPal?" y aparece con su nombre — `test(e2e)`
+- [X] T038 [P] [US4] E2E en `e2e/flows/votes-comments.spec.ts`: Marta vota el detalle de Luis (1) y retira el voto (0); Luis no puede votar el suyo; Marta comenta "¿Aplica también a PayPal?" y aparece con su nombre — `test(e2e)`
 
 ### Implementation for User Story 4
 
