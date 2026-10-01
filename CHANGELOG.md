@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.5.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.4.0...v0.5.0) (2026-10-01)
+
+
+### Funcionalidades
+
+* **api:** add requirement coverage per activity for the canvas ([ae6308a](https://github.com/xavicrip/elicitacion_requisitos/commit/ae6308adc218c1307e0e03048b0aca0ab7107c56))
+* **api:** add the detail, vote, comment and history models ([b648daf](https://github.com/xavicrip/elicitacion_requisitos/commit/b648dafdf0e9feb0fdf11f3da2ccfeab2c202206))
+* **api:** add the in-process domain events for requirement details ([f955f01](https://github.com/xavicrip/elicitacion_requisitos/commit/f955f019854276371d9fe292abbe1a631c5a0aef))
+* **api:** add the requirement details indexes migration ([d1a8d80](https://github.com/xavicrip/elicitacion_requisitos/commit/d1a8d80e9e25975f65916de572d86c0ee6e819e0))
+* **api:** cascade requirement details and keep them as orphans ([9545ea9](https://github.com/xavicrip/elicitacion_requisitos/commit/9545ea906b98f7c1670fc010d5b2c3e0305ed330))
+* **api:** edit and delete requirement details with history ([31c27b3](https://github.com/xavicrip/elicitacion_requisitos/commit/31c27b3d9ede629f655bd53aeac05be656bf0311))
+* **api:** moderate requirement details and reassign orphans ([dc79d34](https://github.com/xavicrip/elicitacion_requisitos/commit/dc79d34bc07bf931d152ad0eba8e4d5e0599dfd7))
+* **api:** register and list requirement details per activity ([7c5bf97](https://github.com/xavicrip/elicitacion_requisitos/commit/7c5bf97f856eaabb9eece5dbbb06c69b73801d2f))
+* **api:** share If-Match parsing and add a per-user write rate limit ([7592628](https://github.com/xavicrip/elicitacion_requisitos/commit/75926289edcf849ead81471b2b6611a0c736e9f5))
+* **api:** vote and comment on requirement details ([f2d9992](https://github.com/xavicrip/elicitacion_requisitos/commit/f2d99927286b4c875c67b275dd8db20acbdb08ff))
+* **shared:** add the details feature flag ([26c60c0](https://github.com/xavicrip/elicitacion_requisitos/commit/26c60c009b7d85619aa2f404fea9a1dda38b74b9))
+* **shared:** add the requirement detail schemas and domain events ([ce157b8](https://github.com/xavicrip/elicitacion_requisitos/commit/ce157b8df35e2e02461a3015fa22ebf71a38ac8f))
+* **shared:** turn the details flag on by default ([2f260cd](https://github.com/xavicrip/elicitacion_requisitos/commit/2f260cd759b5c75ac705870c3ef293e913513117))
+* **web:** edit and delete requirement details with history and conflicts ([085c93c](https://github.com/xavicrip/elicitacion_requisitos/commit/085c93c9e8d96bf44418b79058f3a0437c19c281))
+* **web:** moderate requirement details and reassign orphans ([524d46a](https://github.com/xavicrip/elicitacion_requisitos/commit/524d46aadd056c5012e303c9b5092059a6d17d16))
+* **web:** show and register requirement details beside the diagram ([cf5fd48](https://github.com/xavicrip/elicitacion_requisitos/commit/cf5fd48cd3f81fa6eb49761ae0f19b82de72bf22))
+* **web:** show requirement coverage on the diagram ([9ed95ba](https://github.com/xavicrip/elicitacion_requisitos/commit/9ed95ba547814cdf56c45aa5019419cdcd019c68))
+* **web:** vote and comment on requirement details ([90945e3](https://github.com/xavicrip/elicitacion_requisitos/commit/90945e3e7c72325c0cd4d5ac03e731632f4b4688))
+
+
+### Correcciones
+
+* **web:** keep the vote button disabled in a closed project ([795c1c7](https://github.com/xavicrip/elicitacion_requisitos/commit/795c1c706492f510dfffdff41b7647d87f3c38bc))
+
+
+### Rendimiento
+
+* **api:** measure the details panel and the coverage endpoint ([83bb878](https://github.com/xavicrip/elicitacion_requisitos/commit/83bb878dedb82ce3c0ec071a3d0a24787e5f5a05))
+* **web:** measure the canvas with the 004 indicators ([d9be2c0](https://github.com/xavicrip/elicitacion_requisitos/commit/d9be2c05259c93c583bc954823a858206fdd4f65))
+
 ## [0.4.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.3.0...v0.4.0) (2026-10-01)
 
 
