@@ -3,7 +3,18 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Component, Suspense, useEffect, useRef, type ComponentRef, type ReactNode } from 'react';
 import { MOUSE, SRGBColorSpace } from 'three';
 import { EditorLayer } from '../editor/EditorLayer';
-import { fitZoom, MAX_ZOOM_FACTOR, MIN_ZOOM_FACTOR, type Size } from './camera/zoom';
+import type { VersionWithActivities } from '@reqcanvas/shared';
+import { useQuery } from '@tanstack/react-query';
+import { diagramKeys } from '../api';
+import { ActivityHotspots, type HotspotExtensions } from './ActivityHotspots';
+import {
+  applyCameraCommand,
+  fitZoom,
+  MAX_ZOOM_FACTOR,
+  MIN_ZOOM_FACTOR,
+  type Camera,
+  type Size,
+} from './camera/zoom';
 import { useWorkspaceStore } from './store';
 
 /**
@@ -35,9 +46,31 @@ function CameraRig({ image, editing }: { image: Size; editing: boolean }) {
   const { camera, size, invalidate } = useThree();
   const controls = useRef<ComponentRef<typeof MapControls>>(null);
   const setCamera = useWorkspaceStore((state) => state.setCamera);
+  const setViewport = useWorkspaceStore((state) => state.setViewport);
+  const cameraCommand = useWorkspaceStore((state) => state.cameraCommand);
   const fitted = useRef(false);
 
+  /** Lleva la cámara y el objetivo de MapControls a `next` (coordenadas de imagen). */
+  const moveTo = (next: Camera) => {
+    camera.zoom = next.zoom;
+    camera.position.set(next.center.x, -next.center.y, 100);
+    camera.updateProjectionMatrix();
+    controls.current?.target.set(next.center.x, -next.center.y, 0);
+    controls.current?.update();
+    setCamera(next);
+    invalidate();
+  };
+
+  // Órdenes del teclado, el minimapa y la lista accesible.
   useEffect(() => {
+    if (!cameraCommand) return;
+    const { camera: current, viewport } = useWorkspaceStore.getState();
+    moveTo(applyCameraCommand(current, cameraCommand.command, viewport, image));
+    // Solo al llegar una orden nueva (moveTo usa la cámara y los controles, que no cambian).
+  }, [cameraCommand]);
+
+  useEffect(() => {
+    setViewport({ width: size.width, height: size.height });
     const fit = fitZoom(size, image);
     if (controls.current) {
       controls.current.minZoom = fit * MIN_ZOOM_FACTOR;
@@ -45,14 +78,9 @@ function CameraRig({ image, editing }: { image: Size; editing: boolean }) {
     }
     if (fitted.current) return;
     fitted.current = true;
-    camera.zoom = fit;
-    camera.position.set(image.width / 2, -image.height / 2, 100);
-    camera.updateProjectionMatrix();
-    controls.current?.target.set(image.width / 2, -image.height / 2, 0);
-    controls.current?.update();
-    setCamera({ zoom: fit, center: { x: image.width / 2, y: image.height / 2 } });
-    invalidate();
-  }, [camera, size, image, invalidate, setCamera]);
+    moveTo({ zoom: fit, center: { x: image.width / 2, y: image.height / 2 } });
+    // El ajuste inicial se hace una vez; al cambiar el tamaño solo se recalculan los límites.
+  }, [size, image, setViewport]);
 
   return (
     <MapControls
@@ -97,13 +125,19 @@ export default function DiagramCanvas({
   image,
   versionId,
   editing,
+  hotspots,
 }: {
   imageUrl: string;
   image: Size;
   versionId: string;
   editing: boolean;
+  hotspots?: HotspotExtensions;
 }) {
   const setImageStatus = useWorkspaceStore((state) => state.setImageStatus);
+  const { data: version } = useQuery<VersionWithActivities>({
+    queryKey: diagramKeys.version(versionId),
+    enabled: false,
+  });
   return (
     <Canvas
       orthographic
@@ -118,7 +152,11 @@ export default function DiagramCanvas({
           <DiagramImage url={imageUrl} image={image} />
         </Suspense>
       </TextureErrorBoundary>
-      {editing && <EditorLayer versionId={versionId} image={image} />}
+      {editing ? (
+        <EditorLayer versionId={versionId} image={image} />
+      ) : (
+        <ActivityHotspots activities={version?.activities ?? []} image={image} {...hotspots} />
+      )}
       <CameraRig image={image} editing={editing} />
     </Canvas>
   );

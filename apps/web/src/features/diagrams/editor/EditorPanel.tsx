@@ -2,7 +2,8 @@ import type { VersionWithActivities } from '@reqcanvas/shared';
 import { useQuery } from '@tanstack/react-query';
 import { diagramKeys } from '../api';
 import { useWorkspaceStore } from '../workspace/store';
-import { ActivityForm, TYPE_LABEL } from './ActivityForm';
+import { TYPE_LABEL } from '../labels';
+import { ActivityForm } from './ActivityForm';
 
 /** Panel lateral del modo edit: actividades marcadas y formulario de la seleccionada. */
 export function EditorPanel({ versionId }: { versionId: string }) {

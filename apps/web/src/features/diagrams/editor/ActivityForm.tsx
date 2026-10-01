@@ -8,15 +8,9 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { FormError } from '../../../components/form';
 import { ApiError } from '../../../lib/api-client';
 import { diagramKeys } from '../api';
+import { TYPE_LABEL } from '../labels';
 import { activitiesApi, activityCache } from './api';
 import { useAutosave } from './useAutosave';
-
-export const TYPE_LABEL: Record<ActivityType, string> = {
-  action: 'Acción',
-  decision: 'Decisión',
-  start: 'Inicio',
-  end: 'Fin',
-};
 
 const LabelSchema = ActivityInputSchema.shape.label;
 

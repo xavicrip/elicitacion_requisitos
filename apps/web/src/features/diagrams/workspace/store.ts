@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getConfig } from '../../../lib/config';
-import type { Camera } from './camera/zoom';
+import type { Camera, CameraCommand, Size } from './camera/zoom';
 
 export type WorkspaceMode = 'view' | 'edit';
 export type ImageStatus = 'loading' | 'ready' | 'error';
@@ -17,6 +17,10 @@ export type WorkspaceState = {
   imageStatus: ImageStatus;
   /** Capas opcionales, p. ej. 'heatmap' (004), 'presence' (005), 'proposals' (006). */
   overlays: Record<string, boolean>;
+  /** Tamaño del canvas en px de pantalla (minimapa y órdenes de cámara). */
+  viewport: Size;
+  /** Última orden pendiente para la cámara; `id` distingue dos órdenes iguales seguidas. */
+  cameraCommand: { id: number; command: CameraCommand } | null;
 };
 
 type WorkspaceActions = {
@@ -26,6 +30,8 @@ type WorkspaceActions = {
   setCamera(camera: Camera): void;
   setImageStatus(status: ImageStatus): void;
   setOverlay(name: string, enabled: boolean): void;
+  setViewport(viewport: Size): void;
+  requestCamera(command: CameraCommand): void;
   reset(): void;
 };
 
@@ -37,6 +43,8 @@ const initial: WorkspaceState = {
   camera: { zoom: 1, center: { x: 0, y: 0 } },
   imageStatus: 'loading',
   overlays: {},
+  viewport: { width: 0, height: 0 },
+  cameraCommand: null,
 };
 
 export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()((set) => ({
@@ -55,6 +63,9 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()((se
   setImageStatus: (imageStatus) => set({ imageStatus }),
   setOverlay: (name, enabled) =>
     set((state) => ({ overlays: { ...state.overlays, [name]: enabled } })),
+  setViewport: (viewport) => set({ viewport }),
+  requestCamera: (command) =>
+    set((state) => ({ cameraCommand: { id: (state.cameraCommand?.id ?? 0) + 1, command } })),
   reset: () => set(initial),
 }));
 
