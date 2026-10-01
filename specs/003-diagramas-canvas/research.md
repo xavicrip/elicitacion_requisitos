@@ -4,20 +4,25 @@
 
 ## R1. Almacenamiento de imágenes
 
-- **Decision**: bucket **compatible con S3** usando `@aws-sdk/client-s3` con `forcePathStyle`
-  configurable. En Railway se usa un **Railway Bucket**; en local y en CI, **MinIO** (servicio
-  en `docker-compose.yml` y en el job de CI). El bucket es privado; `web` recibe **presigned
-  GET URLs** de 1 h desde la API.
-  *Revisado el 2026-09-30 (plan, ajustes 1–3)*: las imágenes las sirve `api` por el proxy de
-  `web` (mismo origen: Railway Buckets no documenta CORS y WebGL lo exige para las texturas),
-  y en local y en CI se usa **RustFS** en lugar de MinIO.
-- **Rationale**: el cliente S3 funciona igual con Railway, R2 y MinIO; las URLs firmadas evitan
-  pasar los bytes de la imagen por la API en cada visualización.
-- **Alternatives considered**: Railway Volume montado en `api` (acopla el estado a una
-  instancia e impide escalar horizontalmente, contra el Principio II); GridFS (sobrecarga
-  MongoDB con binarios).
+- **Decision**: bucket **compatible con S3** con `@aws-sdk/client-s3` y `forcePathStyle`
+  configurable. En Railway, un **Railway Bucket** por entorno (`reqcanvas-staging`,
+  `reqcanvas`), el mismo de los respaldos de migraciones (ADR 0003), con las imágenes bajo
+  `projects/{projectId}/diagrams/{versionId}/`. En local y en CI, **RustFS** (servicio `s3` de
+  `infra/docker-compose.yml`, de `infra/docker-compose.test.yml` y del job de CI). El bucket es
+  privado y las imágenes las sirve `api` por el proxy de `web`, con caché `immutable` y `ETag`
+  (ADR 0005).
+  *Revisado el 2026-09-30 (plan, ajustes 1–3)*: la decisión inicial eran **presigned GET URLs**
+  de 1 h y **MinIO** en local. Se descartaron las URLs firmadas porque Railway Buckets no
+  documenta CORS y WebGL lo exige para usar la imagen como textura; MinIO, por RustFS (Apache 2.0,
+  ya usado por los respaldos).
+- **Rationale**: el cliente S3 funciona igual con Railway, R2 y RustFS; servir desde `api`
+  mantiene el mismo origen y comprueba la membresía en cada imagen, y la caché del navegador
+  evita repetir la descarga (medido: navegable en 2,1 s con 10 Mbps, plan §Mediciones).
+- **Alternatives considered**: presigned URLs (ver arriba); Railway Volume montado en `api`
+  (acopla el estado a una instancia e impide escalar horizontalmente, contra el Principio II);
+  GridFS (sobrecarga MongoDB con binarios).
 - **Nota**: si la cuenta de Railway no dispone de Buckets, se usa Cloudflare R2 sin cambios de
-  código (solo `S3_ENDPOINT`). Se documenta en un ADR.
+  código (solo las variables `S3_*`).
 
 ## R2. Validación y procesamiento de la imagen
 
@@ -96,6 +101,14 @@
 
 ## R9. Variables de entorno nuevas
 
-`S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`,
-`S3_FORCE_PATH_STYLE`. En Railway se referencian desde el servicio Bucket; en GitHub
-Actions no hacen falta (el despliegue solo invoca `railway up`).
+De `api` (`specs/001-plataforma-base/contracts/env-vars.md`, ADR 0002):
+
+| Variable | Railway | Local y CI (RustFS) |
+|----------|---------|---------------------|
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Referencias al bucket del entorno: `${{reqcanvas-staging.ENDPOINT}}`… en staging, `${{reqcanvas.ENDPOINT}}`… en producción | `http://s3:9000` (Compose) o `S3_TEST_URL`, bucket `reqcanvas`, `us-east-1`, `rustfsadmin` |
+| `S3_FORCE_PATH_STYLE` | Sin definir (`false`) | `true` |
+| `S3_CREATE_BUCKET` | Sin definir (`false`) | `true` (RustFS no crea el bucket) |
+
+De `web`: `E2E_HOOKS=true` solo en Compose y en el CI (expone `window.__canvasState`); nunca
+en Railway. En GitHub Actions no hacen falta las `S3_*`: el despliegue solo invoca `railway up`.
+Sin las `S3_*` obligatorias, `api` no arranca.

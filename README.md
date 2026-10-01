@@ -17,6 +17,7 @@ diagrama, y el administrador los analiza con técnicas de minería de datos y de
 | `analytics` | Python 3.12 + FastAPI                      | 8000               |
 | `mongodb`   | MongoDB 7                                  | (solo red interna) |
 | `redis`     | Redis 7                                    | (solo red interna) |
+| `s3`        | RustFS (bucket S3; en Railway, un Bucket)  | (solo red interna) |
 
 ```text
 apps/web          Frontend
@@ -41,7 +42,7 @@ git clone https://github.com/xavicrip/elicitacion_requisitos.git reqcanvas
 cd reqcanvas
 pnpm install                       # dependencias de Node + hooks de git (Husky)
 (cd apps/analytics && uv sync)     # dependencias de Python
-pnpm dev:up                        # construye y levanta los 5 servicios con Docker Compose
+pnpm dev:up                        # construye y levanta los 6 servicios con Docker Compose
 ```
 
 `pnpm dev:up` aplica las migraciones de MongoDB antes de arrancar la API (igual que el
@@ -84,6 +85,28 @@ gestionar miembros e invitar con un enlace (`/invitacion/<token>`). `web` reenv�
 
 Referencia completa: [`env-vars.md`](specs/001-plataforma-base/contracts/env-vars.md).
 
+### Diagramas y espacio de trabajo (feature 003)
+
+Detrás del flag `diagrams` (activado en Compose). Desde un proyecto, _Diagramas_ lista sus
+diagramas con miniatura; el Administrador sube un PNG, JPG o SVG de hasta 10 MB, marca sus
+actividades arrastrando sobre la imagen (nombre, tipo y transiciones, con guardado automático) y
+publica la versión. Todos los miembros navegan el diagrama publicado en un canvas three.js: zoom
+con la rueda o `+`/`-`, `0` para ajustar, minimapa, selección por clic o con el teclado (`Tab` +
+`Enter`). En pantallas de menos de 768 px y en proyectos cerrados, solo lectura. Ver el
+[quickstart de la 003](specs/003-diagramas-canvas/quickstart.md) y el
+[ADR 0005](docs/adr/0005-imagenes-y-canvas.md).
+
+Las imágenes se guardan en un bucket S3: en local, RustFS (servicio `s3` de Compose, que crea el
+bucket al arrancar); en Railway, el Bucket de cada entorno. `api` las sirve por el proxy de `web`
+con caché del navegador.
+
+| Servicio | Variable                                                               | Obligatoria  | Uso                                                 |
+| -------- | ---------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
+| `api`    | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Sí           | Bucket de las imágenes (en Railway, referencias)    |
+| `api`    | `S3_REGION`                                                            | No (`auto`)  | Región S3                                           |
+| `api`    | `S3_FORCE_PATH_STYLE`, `S3_CREATE_BUCKET`                              | No (`false`) | `true` solo con RustFS (local y CI)                 |
+| `web`    | `E2E_HOOKS`                                                            | No           | `true` solo en Compose y CI: expone `__canvasState` |
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash
@@ -93,18 +116,20 @@ docker compose -f infra/docker-compose.yml logs api analytics | grep prueba-456
 
 ## Desarrollo
 
-| Comando                                                                       | Qué hace                                                                    |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `pnpm lint`                                                                   | ESLint + Ruff (Python)                                                      |
-| `pnpm format:check` / `pnpm format`                                           | Prettier                                                                    |
-| `pnpm typecheck`                                                              | TypeScript (todos los paquetes y `e2e/`) + mypy                             |
-| `pnpm test:services:up` / `test:services:down`                                | MongoDB, Redis y S3 (RustFS) para las pruebas de integración                |
-| `pnpm test`                                                                   | Vitest (shared, api, web) + pytest (analytics)                              |
-| `pnpm e2e`                                                                    | Pruebas de humo contra `BASE_URL` / `API_URL` (por defecto, el stack local) |
-| `pnpm --filter @reqcanvas/api migrate:up` / `migrate:down` / `migrate:status` | Migraciones (lee `MONGO_URL` y `MONGO_DB`)                                  |
-| `pnpm --filter @reqcanvas/api migrate:create <nombre>`                        | Nueva migración a partir de `migrations/sample-migration.js`                |
+| Comando                                                                       | Qué hace                                                                  |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `pnpm lint`                                                                   | ESLint + Ruff (Python)                                                    |
+| `pnpm format:check` / `pnpm format`                                           | Prettier                                                                  |
+| `pnpm typecheck`                                                              | TypeScript (todos los paquetes y `e2e/`) + mypy                           |
+| `pnpm test:services:up` / `test:services:down`                                | MongoDB, Redis y S3 (RustFS) para las pruebas de integración              |
+| `pnpm test`                                                                   | Vitest (shared, api, web) + pytest (analytics)                            |
+| `pnpm e2e`                                                                    | Pruebas de humo contra `BASE_URL` / `API_URL` y, en local, los flujos E2E |
+| `pnpm e2e:perf`                                                               | Mediciones de rendimiento del canvas (local, abre Chrome)                 |
+| `pnpm --filter @reqcanvas/api migrate:up` / `migrate:down` / `migrate:status` | Migraciones (lee `MONGO_URL` y `MONGO_DB`)                                |
+| `pnpm --filter @reqcanvas/api migrate:create <nombre>`                        | Nueva migración a partir de `migrations/sample-migration.js`              |
 
-Las pruebas de integración necesitan MongoDB, Redis y un S3 (para los respaldos de migraciones).
+Las pruebas de integración necesitan MongoDB, Redis y un S3 (respaldos de migraciones e imágenes
+de diagramas).
 El stack de `pnpm dev:up` no los publica en el host; levántalos con:
 
 ```bash

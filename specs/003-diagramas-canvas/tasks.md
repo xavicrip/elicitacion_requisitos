@@ -167,7 +167,7 @@ selección, teclado y móvil en solo lectura
 ## Phase 7: Polish & Cross-Cutting Concerns
 
 - [X] T054 [P] ADR `docs/adr/0005-imagenes-y-canvas.md` (imágenes servidas por `api` en lugar de URLs prefirmadas, bucket compartido con prefijos, pipeline de `sharp`, three.js con renderizado bajo demanda, estado expuesto para los E2E) — `docs(adr)`
-- [ ] T055 [P] Actualizar `specs/003-diagramas-canvas/quickstart.md` (incluidos los comandos de prueba con `@reqcanvas/api`), `research.md` (R1 y R9: RustFS, variables reales) y el README (pantallas, variables `S3_*`, RustFS local) — `docs(repo)`
+- [X] T055 [P] Actualizar `specs/003-diagramas-canvas/quickstart.md` (incluidos los comandos de prueba con `@reqcanvas/api`), `research.md` (R1 y R9: RustFS, variables reales) y el README (pantallas, variables `S3_*`, RustFS local) — `docs(repo)`
 - [X] T056 Medir en local, con Playwright y `cien-actividades.png`, los FPS durante zoom y desplazamiento (≥ 50, SC-002) y el tiempo hasta un diagrama navegable con la red limitada a 10 Mbps (< 3 s, SC-003), y el procesamiento de 10 MB (< 5 s); anotarlo en `plan.md` — `perf(web)`
 - [X] T057 Configurar Railway **antes de fusionar** (con el selector de entorno comprobado): `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID` y `S3_SECRET_ACCESS_KEY` de `api` como referencias al bucket del entorno (`reqcanvas` en producción, `reqcanvas-staging` en staging); `FEATURE_FLAGS` con `diagrams=true` solo en staging; registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [ ] T058 Recorrer quickstart.md en staging (§1–§4) con dos navegadores, comprobar que el borde de Railway acepta una subida de 10 MB (plan, ajuste 9) y repetir las mediciones de T056; registrar el resultado en `quickstart.md` — `docs(repo)`
