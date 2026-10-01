@@ -1,10 +1,23 @@
 import fastifyRateLimit from '@fastify/rate-limit';
+import type { FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { clientIp } from '../lib/client-ip.js';
 import { HttpError } from '../lib/errors.js';
 
 /** Límite de las rutas `/auth/*`: 20 peticiones por minuto e IP (research R4). */
 export const AUTH_RATE_LIMIT = { max: 20, timeWindow: '1 minute' } as const;
+
+/**
+ * Escrituras de los miembros (detalles, votos y comentarios de la 004): 60 por minuto y usuario,
+ * no por IP. Se evalúa en `preHandler`, después de `requireAuth` y de los guards de la ruta, así
+ * que ya se conoce al usuario.
+ */
+export const USER_WRITE_RATE_LIMIT = {
+  max: 60,
+  timeWindow: '1 minute',
+  hook: 'preHandler',
+  keyGenerator: (request: FastifyRequest) => `user:${request.user.id}`,
+} as const;
 
 type RateLimitOptions = {
   /** Prefijo de las claves en Redis (las pruebas usan uno propio). */

@@ -2,12 +2,8 @@ import { ActivityInputSchema, ActivityPatchSchema, ActivitySchema } from '@reqca
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import {
-  activitiesService,
-  activityEtag,
-  parseIfMatch,
-  RevConflict,
-} from './activities.service.js';
+import { activitiesService, activityEtag, RevConflict } from './activities.service.js';
+import { parseIfMatch } from '../../lib/if-match.js';
 import { toActivityDto } from './dto.js';
 import type { Activity } from './models/activity.js';
 import type { DiagramVersion } from './models/version.js';
@@ -52,7 +48,7 @@ export async function activityRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const rev = parseIfMatch(request.headers['if-match']);
+      const rev = parseIfMatch(request.headers['if-match'], 'la actividad');
       try {
         const activity = await activities.update(request.resource as Activity, rev, request.body, {
           actorId: request.user.id,
