@@ -26,6 +26,7 @@ import { authPlugin } from './plugins/auth.js';
 import { authorizationPlugin } from './plugins/authorization.js';
 import { featureGatePlugin } from './plugins/flags.js';
 import { domainEventsPlugin } from './lib/domain-events.js';
+import { realtimePlugin, type RealtimeConfig } from './realtime/server.js';
 import { mongoPlugin } from './plugins/mongo.js';
 import { genReqId, observability, REDACT_PATHS } from './plugins/observability.js';
 import { rateLimitPlugin } from './plugins/rate-limit.js';
@@ -49,7 +50,11 @@ export type ServicesConfig = {
   deletion?: DeletionConfig;
   /** Bucket S3 de las imágenes de diagramas (feature 003). */
   storage?: StorageConfig;
+  /** Colaboración en tiempo real (feature 005), solo con el flag `realtime`. */
+  realtime?: RealtimeConfig;
 };
+
+export type { RealtimeConfig };
 
 export type StorageConfig = {
   endpoint: string;
@@ -166,6 +171,15 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(coverageRoutes);
         await app.register(voteRoutes);
         await app.register(commentRoutes);
+
+        // Colaboración en tiempo real (feature 005): Socket.IO atiende /socket.io/ fuera del
+        // router, así que el flag decide si se monta (plan de la 005, ajuste 2).
+        if (flags.realtime) {
+          await app.register(realtimePlugin, {
+            adapterKey: `${redisNameSpace}socket.io`,
+            ...services.realtime,
+          });
+        }
       }
     }
   }

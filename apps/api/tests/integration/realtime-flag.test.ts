@@ -34,3 +34,12 @@ describe('flag realtime desactivado (valor por defecto)', () => {
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({ realtime: false });
   });
 });
+
+describe('flag realtime activado', () => {
+  it('se monta el servidor: el handshake llega a la autenticación', async () => {
+    ({ app } = await buildTestApp('realtimeon', { withAuth: true, featureFlags: 'realtime=true' }));
+    const url = await app.listen({ port: 0, host: '127.0.0.1' });
+    expect(await tryHandshake(url)).toBe('unauthorized');
+    expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({ realtime: true });
+  });
+});
