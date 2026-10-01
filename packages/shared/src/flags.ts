@@ -18,12 +18,6 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
  * Ver docs/feature-flags.md.
  */
 export const FLAGS = defineFlags({
-  accounts: {
-    description:
-      'Cuentas, proyectos e invitaciones (registro, login y "Mis proyectos"). Activado al completar la 002; se retirará en un commit aparte',
-    default: true,
-    owner: '002-auth-proyectos',
-  },
   'invite-email': {
     description:
       'Enviar las invitaciones por email; requiere un servicio de correo (hasta entonces se copia el enlace)',

@@ -95,7 +95,7 @@ export function useDetailsTestSession() {
 /** Monta el espacio de trabajo de un diagrama publicado con la API simulada. */
 export function renderWorkspace(
   handlers: Record<string, Handler | Handler[]> = {},
-  flags: Record<string, boolean> = { accounts: true },
+  flags: Record<string, boolean> = {},
 ) {
   const api = mockApi({
     'GET /api/config': () => json(200, { flags }),

@@ -9,20 +9,23 @@ declare module 'fastify' {
   }
 }
 
+/** Rutas que oculta cada flag, por su nombre. */
+export type FlagGates = Partial<Record<string, RegExp>>;
+
 /**
  * Rutas de cada flag: con el flag desactivado responden 404, como si no existieran
- * (constitución IV: funcionalidad incompleta integrada detrás de un flag).
+ * (constitución IV: funcionalidad incompleta integrada detrás de un flag). Ahora no hay
+ * ninguna: cada feature añade aquí las suyas mientras su flag exista.
  */
-const GATED_PREFIXES: Partial<Record<keyof ActiveFlags, RegExp>> = {
-  accounts: /^\/(auth|me|projects|invitations)(\/|\?|$)/,
-};
+const GATED_PREFIXES: FlagGates = {};
 
-export const featureGatePlugin = fp<{ flags: ActiveFlags }>(
-  async (app, { flags }) => {
+export const featureGatePlugin = fp<{ flags: ActiveFlags; gates?: FlagGates }>(
+  async (app, { flags, gates = GATED_PREFIXES }) => {
     app.decorate('flags', flags);
+    const active: Record<string, boolean> = flags;
     app.addHook('onRequest', async (request) => {
-      for (const [flag, pattern] of Object.entries(GATED_PREFIXES)) {
-        if (!flags[flag as keyof ActiveFlags] && pattern.test(request.url)) {
+      for (const [flag, pattern] of Object.entries(gates)) {
+        if (pattern && !active[flag] && pattern.test(request.url)) {
           throw new HttpError(404, 'NOT_FOUND', 'Recurso no encontrado');
         }
       }

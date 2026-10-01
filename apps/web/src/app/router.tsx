@@ -10,18 +10,11 @@ import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
 import { ProjectSettingsPage } from '../features/projects/ProjectSettingsPage';
 import { ProjectsPage } from '../features/projects/ProjectsPage';
-import { FlagGate, flagsQuery } from '../lib/flags';
+import { flagsQuery } from '../lib/flags';
 import '../lib/zod';
 import { HomePage } from './HomePage';
 import { Layout } from './Layout';
 import { NotFoundPage } from './NotFoundPage';
-
-/** Rutas de la feature 002: con el flag `accounts` desactivado, no existen (constitución IV). */
-const accounts = (element: ReactNode) => (
-  <FlagGate flag="accounts" fallback={<NotFoundPage />}>
-    {element}
-  </FlagGate>
-);
 
 /** Rutas de la app (React Router 7, modo librería; research R10). */
 export const routes: RouteObject[] = [
@@ -29,30 +22,30 @@ export const routes: RouteObject[] = [
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'entrar', element: accounts(<LoginPage />) },
-      { path: 'registro', element: accounts(<RegisterPage />) },
-      { path: 'proyectos', loader: requireSession, element: accounts(<ProjectsPage />) },
+      { path: 'entrar', element: <LoginPage /> },
+      { path: 'registro', element: <RegisterPage /> },
+      { path: 'proyectos', loader: requireSession, element: <ProjectsPage /> },
       {
         path: 'proyectos/:projectId',
         loader: requireSession,
-        element: accounts(<ProjectSettingsPage />),
+        element: <ProjectSettingsPage />,
       },
       {
         path: 'proyectos/:projectId/diagramas',
         loader: requireSession,
-        element: accounts(<DiagramListPage />),
+        element: <DiagramListPage />,
       },
       {
         path: 'proyectos/:projectId/diagramas/:diagramId',
         loader: requireSession,
-        element: accounts(<DetailsWorkspacePage />),
+        element: <DetailsWorkspacePage />,
       },
       {
         path: 'proyectos/:projectId/requisitos-huerfanos',
         loader: requireSession,
-        element: accounts(<OrphansPage />),
+        element: <OrphansPage />,
       },
-      { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
+      { path: 'invitacion/:token', element: <AcceptInvitationPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

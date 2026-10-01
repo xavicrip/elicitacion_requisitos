@@ -19,12 +19,12 @@ const session = { accessToken: 'token-1', expiresIn: 900, user };
 let handlers: Record<string, Handler>;
 let requests: Array<{ url: string; method: string; body?: unknown }>;
 
-/** API simulada: responde según "MÉTODO /ruta"; por defecto `accounts` activado y sin sesión. */
+/** API simulada: responde según "MÉTODO /ruta"; por defecto, sin sesión. */
 beforeEach(() => {
   useAuthStore.getState().clear();
   requests = [];
   handlers = {
-    'GET /api/config': () => json(200, { flags: { accounts: true } }),
+    'GET /api/config': () => json(200, { flags: {} }),
     'POST /api/auth/refresh': () => json(401, { code: 'SESSION_EXPIRED', message: 'Caducada' }),
     'GET /api/projects': () => json(200, []),
   };
@@ -178,25 +178,5 @@ describe('sesión y rutas protegidas', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/entrar'));
     expect(requests.some((r) => r.method === 'POST' && r.url === '/api/auth/logout')).toBe(true);
     expect(useAuthStore.getState().accessToken).toBeNull();
-  });
-});
-
-describe('flag accounts desactivado', () => {
-  it.each(['/entrar', '/registro', '/proyectos'])(
-    '%s muestra "Página no encontrada"',
-    async (path) => {
-      handlers['GET /api/config'] = () => json(200, { flags: { accounts: false } });
-      renderAt(path);
-      expect(
-        await screen.findByRole('heading', { name: 'Página no encontrada' }),
-      ).toBeInTheDocument();
-    },
-  );
-
-  it('la cabecera no muestra enlaces de acceso', async () => {
-    handlers['GET /api/config'] = () => json(200, { flags: { accounts: false } });
-    renderAt('/');
-    await screen.findByRole('heading', { name: 'ReqCanvas', level: 1 });
-    expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
   });
 });

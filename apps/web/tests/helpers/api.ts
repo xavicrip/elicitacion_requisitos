@@ -17,11 +17,11 @@ export const json = (status: number, body?: unknown) =>
 
 /**
  * API simulada con `fetch`: responde según "MÉTODO /api/ruta". Un handler puede ser un array
- * para responder en orden a llamadas sucesivas. Por defecto, `accounts` activado.
+ * para responder en orden a llamadas sucesivas. Por defecto, sin flags.
  */
 export function mockApi(initial: Record<string, Handler | Handler[]> = {}) {
   const handlers: Record<string, Handler | Handler[]> = {
-    'GET /api/config': () => json(200, { flags: { accounts: true } }),
+    'GET /api/config': () => json(200, { flags: {} }),
     ...initial,
   };
   const requests: Recorded[] = [];

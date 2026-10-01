@@ -24,20 +24,21 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 2. Léelo en la API con `loadFlags(process.env.FEATURE_FLAGS)` (`apps/api/src/lib/flags.ts`).
    El frontend recibe los flags activos en `GET /config`.
 
+3. Para ocultar rutas de `api`, añade su patrón a `GATED_PREFIXES`
+   (`apps/api/src/plugins/flags.ts`): con el flag desactivado responden 404. En `web`, envuelve
+   la ruta o el componente en `<FlagGate flag="…">` (`apps/web/src/lib/flags.tsx`).
+
 ## Flags actuales
 
-| Flag       | Por defecto | Feature              | Qué oculta                                                                                                                                                         |
-| ---------- | ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `accounts` | `true`      | `002-auth-proyectos` | Registro, login, "Mis proyectos" e invitaciones. Desactivado, las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra |
-
-`accounts` está activado por defecto desde que se completó la 002 (T067, 2026-09-30). Para
-ocultarlo en un entorno: `FEATURE_FLAGS=accounts=false`. Se retirará, con sus comprobaciones,
-en un commit aparte.
+| Flag           | Por defecto | Feature              | Qué oculta                                                                                |
+| -------------- | ----------- | -------------------- | ----------------------------------------------------------------------------------------- |
+| `invite-email` | `false`     | `002-auth-proyectos` | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace) |
 
 ## Flags retirados
 
 | Flag       | Feature                   | Activado por defecto | Retirado   |
 | ---------- | ------------------------- | -------------------- | ---------- |
+| `accounts` | `002-auth-proyectos`      | 2026-09-30 (T067)    | 2026-10-01 |
 | `diagrams` | `003-diagramas-canvas`    | 2026-10-01 (T059)    | 2026-10-01 |
 | `details`  | `004-detalles-requisitos` | 2026-10-01 (T053)    | 2026-10-01 |
 
@@ -46,7 +47,7 @@ en un commit aparte.
 Variable `FEATURE_FLAGS` en Railway (o en `.env` en local):
 
 ```text
-FEATURE_FLAGS=diagrams=true,detection=false
+FEATURE_FLAGS=invite-email=true,detection=false
 ```
 
 Un nombre desconocido o un valor distinto de `true`/`false` genera un aviso en el log y no
