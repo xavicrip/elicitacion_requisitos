@@ -37,6 +37,9 @@ Requiere 001–003 y un proyecto *Abierto* con el diagrama "Proceso de compra"
 2. Ana *descarta* otro con el motivo "Fuera de alcance" → Luis ve el motivo.
 3. Filtrar el panel por *Validado*.
 4. Cerrar el proyecto → el formulario y los votos desaparecen; los detalles siguen visibles.
+5. Subir una versión 2 del diagrama, eliminar en ella "Validar pago" (avisa de cuántos
+   requisitos tiene) y publicarla → sus detalles aparecen en *Diagramas → Requisitos sin
+   actividad* y Ana los reasigna a otra actividad publicada.
 
 ## 6. Pruebas
 

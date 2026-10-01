@@ -107,6 +107,19 @@ con caché del navegador.
 | `api`    | `S3_FORCE_PATH_STYLE`, `S3_CREATE_BUCKET`                              | No (`false`) | `true` solo con RustFS (local y CI)                 |
 | `web`    | `E2E_HOOKS`                                                            | No           | `true` solo en Compose y CI: expone `__canvasState` |
 
+### Detalles de requisitos (feature 004)
+
+Detrás del flag `details` (activado en Compose). Al seleccionar una actividad del diagrama se
+abre el panel _Requisitos_: sus requisitos Dado / Cuando / Entonces, con tipo, prioridad MoSCoW,
+rol y etiquetas, filtrables y ordenados por votos o fecha, y el formulario de alta si el proyecto
+está abierto. Su autor los edita (con historial y aviso si otra persona los cambió a la vez);
+los miembros votan y comentan; el Administrador los valida, los marca como duplicados o los
+descarta con un motivo, y reasigna los que quedan sin actividad al publicar una versión nueva
+(_Requisitos sin actividad_, en la lista de diagramas). En el canvas, cada actividad muestra su
+número de requisitos o la marca «Sin detalles», sus notas y un mapa de calor. Ver el
+[quickstart de la 004](specs/004-detalles-requisitos/quickstart.md) y el
+[ADR 0006](docs/adr/0006-detalles-de-requisitos.md).
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash
