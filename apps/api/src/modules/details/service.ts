@@ -3,6 +3,8 @@ import type {
   DetailFields,
   DetailPatch,
   HistoryEntry,
+  ReassignInput,
+  StatusChange,
   DetailStatus,
   DetailType,
   Facets,
@@ -10,10 +12,10 @@ import type {
 } from '@reqcanvas/shared';
 import { normalizeTag } from '@reqcanvas/shared';
 import type { FastifyInstance } from 'fastify';
-import { Types } from 'mongoose';
+import { isValidObjectId, Types } from 'mongoose';
 import { HttpError } from '../../lib/errors.js';
 import { activitiesModel } from '../diagrams/models/activity.js';
-import type { Diagram } from '../diagrams/models/diagram.js';
+import { diagramsModel, type Diagram } from '../diagrams/models/diagram.js';
 import type { Member, Project } from '../projects/model.js';
 import { projectsModel } from '../projects/model.js';
 import { toDetailDto } from './dto.js';
@@ -36,6 +38,28 @@ export type ListQuery = {
 
 const activityNotFound = () =>
   new HttpError(404, 'NOT_FOUND', 'La actividad no está en la versión publicada del diagrama.');
+
+/** Transiciones de estado permitidas (data-model.md); solo el Administrador modera. */
+const TRANSITIONS: Record<DetailStatus, DetailStatus[]> = {
+  pending: ['validated', 'duplicate', 'discarded'],
+  validated: ['pending', 'duplicate', 'discarded'],
+  duplicate: ['pending'],
+  discarded: ['pending'],
+};
+
+const STATUS_NAME: Record<DetailStatus, string> = {
+  pending: 'pendiente',
+  validated: 'validado',
+  duplicate: 'duplicado',
+  discarded: 'descartado',
+};
+
+const invalidDuplicate = () =>
+  new HttpError(
+    422,
+    'INVALID_DUPLICATE',
+    'El original debe ser otro requisito de este proyecto que no sea a su vez un duplicado.',
+  );
 
 const forbidden = () => new HttpError(403, 'FORBIDDEN', 'No puedes modificar este requisito.');
 
@@ -75,6 +99,7 @@ export function detailsService(app: FastifyInstance) {
   const Comments = commentsModel(app.mongo);
   const History = historyModel(app.mongo);
   const Activities = activitiesModel(app.mongo);
+  const Diagrams = diagramsModel(app.mongo);
   const Projects = projectsModel(app.mongo);
 
   /** Detalles listos para un miembro concreto: autor, si ya votó y sus permisos. */
@@ -141,8 +166,138 @@ export function detailsService(app: FastifyInstance) {
       editedBy: viewer.membership.userId,
     });
 
+  /** Claves de la versión publicada de un diagrama (vacío si no tiene). */
+  async function publishedKeys(diagram: Pick<Diagram, 'publishedVersionId'>): Promise<string[]> {
+    if (!diagram.publishedVersionId) return [];
+    return Activities.distinct('key', { versionId: diagram.publishedVersionId });
+  }
+
+  /** Aplica un cambio guardando antes la versión anterior en el historial. */
+  async function changeWithHistory(
+    detail: Detail,
+    set: Record<string, unknown>,
+    change: 'status' | 'reassign',
+    viewer: Viewer,
+  ): Promise<{ before: Detail; after: DetailDto }> {
+    const before = (await Details.findOneAndUpdate(
+      { _id: detail._id },
+      { $set: set, $inc: { rev: 1 } },
+      { new: false, runValidators: true },
+    ).lean<Detail>())!;
+    await recordHistory(before, change, viewer);
+    const after = await presentOne((await Details.findById(detail._id).lean<Detail>())!, viewer);
+    await touchProject(detail.projectId);
+    return { before, after };
+  }
+
   return {
     present,
+
+    /**
+     * Moderación (FR-010): transiciones de data-model.md (`409` si no está permitida). Un
+     * duplicado señala a otro detalle del proyecto que no sea a su vez duplicado (`422`).
+     */
+    async moderate(detail: Detail, change: StatusChange, viewer: Viewer) {
+      if (!TRANSITIONS[detail.status].includes(change.status)) {
+        throw new HttpError(
+          409,
+          'INVALID_TRANSITION',
+          `Un requisito ${STATUS_NAME[detail.status]} no puede pasar a ${STATUS_NAME[change.status]}.`,
+        );
+      }
+      let duplicateOf: Types.ObjectId | null = null;
+      if (change.status === 'duplicate') {
+        if (
+          !isValidObjectId(change.duplicateOf) ||
+          change.duplicateOf === detail._id.toHexString()
+        ) {
+          throw invalidDuplicate();
+        }
+        const original = await Details.findOne(
+          { _id: change.duplicateOf, projectId: detail.projectId },
+          { status: 1 },
+        ).lean<Pick<Detail, '_id' | 'status'>>();
+        if (!original || original.status === 'duplicate') throw invalidDuplicate();
+        duplicateOf = original._id;
+      }
+      const { after } = await changeWithHistory(
+        detail,
+        {
+          status: change.status,
+          duplicateOf,
+          discardReason: change.status === 'discarded' ? change.discardReason : null,
+        },
+        'status',
+        viewer,
+      );
+      await app.detailEvents.emit('detail.status_changed', {
+        ...eventBase(detail, viewer),
+        detailId: after.id,
+        activityKey: after.activityKey,
+        status: after.status,
+        ...(after.duplicateOf ? { duplicateOf: after.duplicateOf } : {}),
+        ...(after.discardReason ? { discardReason: after.discardReason } : {}),
+      });
+      return after;
+    },
+
+    /**
+     * Detalles huérfanos (edge case de la spec): su `activityKey` ya no está en la versión
+     * publicada de su diagrama. Se calculan por consulta (research R1).
+     */
+    async orphans(projectId: Types.ObjectId, viewer: Viewer) {
+      const diagrams = await Diagrams.find({ projectId }, { publishedVersionId: 1 }).lean<
+        Array<Pick<Diagram, '_id' | 'publishedVersionId'>>
+      >();
+      if (diagrams.length === 0) return [];
+      const conditions = await Promise.all(
+        diagrams.map(async (diagram) => ({
+          diagramId: diagram._id,
+          activityKey: { $nin: await publishedKeys(diagram) },
+        })),
+      );
+      const details = await Details.find({ projectId, $or: conditions })
+        .sort({ createdAt: 1 })
+        .lean<Detail[]>();
+      return present(details, viewer);
+    },
+
+    /** Reasigna un huérfano a una actividad publicada de un diagrama del mismo proyecto. */
+    async reassign(detail: Detail, target: ReassignInput, viewer: Viewer) {
+      const own = await Diagrams.findById(detail.diagramId, { publishedVersionId: 1 }).lean<
+        Pick<Diagram, 'publishedVersionId'>
+      >();
+      if (own && (await publishedKeys(own)).includes(detail.activityKey)) {
+        throw new HttpError(
+          409,
+          'NOT_ORPHAN',
+          'Este requisito ya pertenece a una actividad publicada: no hace falta reasignarlo.',
+        );
+      }
+      const diagram = isValidObjectId(target.diagramId)
+        ? await Diagrams.findOne({
+            _id: target.diagramId,
+            projectId: detail.projectId,
+          }).lean<Diagram>()
+        : null;
+      if (!diagram || !(await publishedKeys(diagram)).includes(target.activityKey)) {
+        throw activityNotFound();
+      }
+      const { after } = await changeWithHistory(
+        detail,
+        { diagramId: diagram._id, activityKey: target.activityKey },
+        'reassign',
+        viewer,
+      );
+      await app.detailEvents.emit('detail.reassigned', {
+        ...eventBase(detail, viewer),
+        detailId: after.id,
+        from: { diagramId: detail.diagramId.toHexString(), activityKey: detail.activityKey },
+        to: { diagramId: after.diagramId, activityKey: after.activityKey },
+      });
+      return after;
+    },
+
     loadDetail: (id: string) => Details.findById(id).lean<Detail>(),
 
     /**
