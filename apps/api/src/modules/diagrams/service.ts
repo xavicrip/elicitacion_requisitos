@@ -238,6 +238,13 @@ export function diagramsService(app: FastifyInstance) {
         entity: { type: 'diagram_version', id: version._id.toHexString() },
         diff: { diagramId: version.diagramId.toHexString(), number: version.number },
       });
+      await app.domainEvents.emit('diagram.published', {
+        projectId: version.projectId.toHexString(),
+        diagramId: version.diagramId.toHexString(),
+        versionId: version._id.toHexString(),
+        actorId,
+        at: new Date().toISOString(),
+      });
       return toVersionDto(published);
     },
 

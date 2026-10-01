@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createDetailEvents } from '../../src/modules/details/events';
+import { createDomainEvents } from '../../src/lib/domain-events';
 
 const base = {
   projectId: 'p1',
@@ -30,9 +30,9 @@ const detail = {
 };
 const log = { warn: vi.fn() };
 
-describe('eventos de dominio de los detalles (research R10)', () => {
+describe('bus de eventos de dominio (research R10 de la 004; plan de la 005, ajuste 4)', () => {
   it('entrega cada evento a sus suscriptores y a los de todos los eventos', async () => {
-    const events = createDetailEvents(log);
+    const events = createDomainEvents(log);
     const created = vi.fn();
     const any = vi.fn();
     events.on('detail.created', created);
@@ -43,7 +43,7 @@ describe('eventos de dominio de los detalles (research R10)', () => {
   });
 
   it('los payloads nunca llevan datos calculados por usuario', async () => {
-    const events = createDetailEvents(log);
+    const events = createDomainEvents(log);
     const created = vi.fn();
     events.on('detail.created', created);
     await events.emit('detail.created', {
@@ -72,7 +72,7 @@ describe('eventos de dominio de los detalles (research R10)', () => {
   });
 
   it('un suscriptor que falla no interrumpe a los demás y queda en el log', async () => {
-    const events = createDetailEvents(log);
+    const events = createDomainEvents(log);
     const after = vi.fn();
     events.on('detail.deleted', () => {
       throw new Error('fallo del suscriptor');
@@ -87,7 +87,7 @@ describe('eventos de dominio de los detalles (research R10)', () => {
   });
 
   it('on devuelve una función para darse de baja', async () => {
-    const events = createDetailEvents(log);
+    const events = createDomainEvents(log);
     const listener = vi.fn();
     const off = events.on('vote.changed', listener);
     off();
@@ -99,5 +99,36 @@ describe('eventos de dominio de los detalles (research R10)', () => {
       voted: true,
     });
     expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('también entrega los eventos de diagramas, proyectos y miembros', async () => {
+    const events = createDomainEvents(log);
+    const any = vi.fn();
+    events.onAny(any);
+    const at = base.at;
+    await events.emit('diagram.published', {
+      projectId: 'p1',
+      diagramId: 'g1',
+      versionId: 'v2',
+      actorId: 'u1',
+      at,
+    });
+    await events.emit('project.status_changed', {
+      projectId: 'p1',
+      from: 'open',
+      to: 'closed',
+      actorId: 'u1',
+      at,
+    });
+    await events.emit('member.removed', { projectId: 'p1', userId: 'u2', actorId: 'u1', at });
+    await events.emit('member.left', { projectId: 'p1', userId: 'u2', actorId: 'u2', at });
+    await events.emit('project.deleted', { projectId: 'p1', actorId: 'u1', at });
+    expect(any.mock.calls.map(([name]) => name)).toEqual([
+      'diagram.published',
+      'project.status_changed',
+      'member.removed',
+      'member.left',
+      'project.deleted',
+    ]);
   });
 });

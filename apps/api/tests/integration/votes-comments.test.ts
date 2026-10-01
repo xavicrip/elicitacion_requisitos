@@ -19,7 +19,7 @@ const events: string[] = [];
 beforeAll(async () => {
   ({ app } = await buildTestApp('votescomments', { withAuth: true }));
   await app.ready();
-  app.detailEvents.onAny((name) => void events.push(name));
+  app.domainEvents.onAny((name) => void events.push(name));
   ana = await registerTestUser(app, 'Ana');
   luis = await registerTestUser(app, 'Luis');
   marta = await registerTestUser(app, 'Marta');

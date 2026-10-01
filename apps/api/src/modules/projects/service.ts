@@ -128,6 +128,11 @@ export function projectsService(app: FastifyInstance) {
         diff: { name: project.name },
       });
       await app.enqueueProjectDeletion(project._id.toHexString());
+      await app.domainEvents.emit('project.deleted', {
+        projectId: project._id.toHexString(),
+        actorId,
+        at: new Date().toISOString(),
+      });
     },
 
     /** Ciclo borrador → abierto → cerrado → abierto (FR-006), con auditoría (FR-013). */
@@ -160,6 +165,13 @@ export function projectsService(app: FastifyInstance) {
         projectId: project._id,
         entity: { type: 'project', id: project._id.toHexString() },
         diff: { status: { from, to } },
+      });
+      await app.domainEvents.emit('project.status_changed', {
+        projectId: project._id.toHexString(),
+        from,
+        to,
+        actorId,
+        at: new Date().toISOString(),
       });
       return toProjectDto(updated, membership);
     },

@@ -120,6 +120,12 @@ export function membersService(app: FastifyInstance) {
         entity: { type: 'member', id: targetId },
         diff: { role: target.role },
       });
+      await app.domainEvents.emit(self ? 'member.left' : 'member.removed', {
+        projectId: project._id.toHexString(),
+        userId: targetId,
+        actorId,
+        at: new Date().toISOString(),
+      });
     },
   };
 }
