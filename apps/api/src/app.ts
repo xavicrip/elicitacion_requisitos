@@ -11,6 +11,7 @@ import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
 import { detailEventsPlugin } from './modules/details/events.js';
+import { detailRoutes } from './modules/details/routes.js';
 import { registerDiagramsCascade } from './modules/diagrams/cascade.js';
 import { activityDependentsPlugin } from './modules/diagrams/dependents.js';
 import { imageRoutes } from './modules/diagrams/image.routes.js';
@@ -157,6 +158,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         // flag `details` esté desactivado, para no dejar datos huérfanos al borrar un proyecto.
         await app.register(detailEventsPlugin);
         registerDetailsCascade(app);
+        await app.register(detailRoutes);
       }
     }
   }
