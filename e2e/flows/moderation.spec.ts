@@ -17,10 +17,15 @@ test('duplicado, descarte con motivo, filtro por estado y proyecto cerrado', asy
     when: 'paga con tarjeta',
     then: 'el sistema confirma el pago',
   });
-  await createDetail(request, marta, diagram.diagramId, key, {
+  const cobro = await createDetail(request, marta, diagram.diagramId, key, {
     when: 'paga con tarjeta',
     then: 'el sistema confirma el cobro',
   });
+  // Luis vota antes de que se cierre el proyecto: después tampoco podrá retirar el voto.
+  const voted = await request.put(`/api/details/${cobro.id}/vote`, {
+    headers: { authorization: `Bearer ${luis.accessToken}` },
+  });
+  expect(voted.status()).toBe(200);
   await createDetail(request, luis, diagram.diagramId, key, {
     when: 'paga en efectivo',
     then: 'el repartidor cobra al entregar',
@@ -69,7 +74,9 @@ test('duplicado, descarte con motivo, filtro por estado y proyecto cerrado', asy
   const closedPanel = await selectActivity(luisPage, diagram, 'Validar pago');
   await expect(closedPanel.getByRole('article').first()).toBeVisible();
   await expect(closedPanel.getByRole('button', { name: 'Guardar requisito' })).toHaveCount(0);
-  for (const vote of await closedPanel.getByRole('button', { name: 'Votar' }).all()) {
+  const votes = closedPanel.getByRole('button', { name: 'Votar' });
+  await expect(votes.and(closedPanel.locator('[aria-pressed="true"]'))).toHaveCount(1);
+  for (const vote of await votes.all()) {
     await expect(vote).toBeDisabled();
   }
 });

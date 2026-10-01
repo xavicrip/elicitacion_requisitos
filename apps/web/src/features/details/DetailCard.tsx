@@ -116,7 +116,7 @@ export function DetailCard({
         {detail.authorRole && ` · ${detail.authorRole}`} ·{' '}
         <time dateTime={detail.createdAt}>{dateFormat.format(new Date(detail.createdAt))}</time>
       </p>
-      <VoteButton detail={detail} />
+      <VoteButton detail={detail} projectOpen={projectOpen} />
       <div className="flex flex-wrap gap-2">
         {detail.permissions.canEdit && (
           <button

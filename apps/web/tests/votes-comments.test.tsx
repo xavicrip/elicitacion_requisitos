@@ -85,6 +85,24 @@ describe('votar (US4, FR-008)', () => {
     const panel = await selectActivity();
     expect(await within(panel).findByRole('button', { name: 'Votar' })).toBeDisabled();
   });
+
+  it('con el proyecto cerrado no se retira un voto ya dado (FR-013)', async () => {
+    renderWorkspace({
+      'GET /api/projects/p1': () => json(200, project({ status: 'closed' })),
+      [DETAILS_URL]: () =>
+        json(200, [
+          detail({
+            votedByMe: true,
+            voteCount: 3,
+            permissions: { canEdit: false, canDelete: false, canVote: false, canModerate: false },
+          }),
+        ]),
+    });
+    const panel = await selectActivity();
+    const button = await within(panel).findByRole('button', { name: 'Votar' });
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button).toBeDisabled();
+  });
 });
 
 describe('comentar (US4, FR-009)', () => {
