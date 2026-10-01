@@ -7,16 +7,18 @@ type Flags = Record<string, boolean>;
  * Flags activos del entorno, de `GET /api/config` (docs/feature-flags.md). Si no se pueden
  * leer, todos cuentan como desactivados: una funcionalidad oculta nunca se muestra por error.
  */
+export const flagsQuery = {
+  queryKey: ['flags'],
+  queryFn: async (): Promise<Flags> => {
+    const response = await fetch('/api/config', { credentials: 'same-origin' });
+    if (!response.ok) return {};
+    return ((await response.json()) as { flags?: Flags }).flags ?? {};
+  },
+  staleTime: Infinity,
+};
+
 export function useFlags(): { flags: Flags; isLoading: boolean } {
-  const { data, isLoading } = useQuery({
-    queryKey: ['flags'],
-    queryFn: async (): Promise<Flags> => {
-      const response = await fetch('/api/config', { credentials: 'same-origin' });
-      if (!response.ok) return {};
-      return ((await response.json()) as { flags?: Flags }).flags ?? {};
-    },
-    staleTime: Infinity,
-  });
+  const { data, isLoading } = useQuery(flagsQuery);
   return { flags: data ?? {}, isLoading };
 }
 

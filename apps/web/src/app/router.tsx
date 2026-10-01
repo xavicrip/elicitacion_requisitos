@@ -9,7 +9,7 @@ import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
 import { ProjectSettingsPage } from '../features/projects/ProjectSettingsPage';
 import { ProjectsPage } from '../features/projects/ProjectsPage';
-import { FlagGate } from '../lib/flags';
+import { FlagGate, flagsQuery } from '../lib/flags';
 import '../lib/zod';
 import { HomePage } from './HomePage';
 import { Layout } from './Layout';
@@ -62,9 +62,15 @@ export const routes: RouteObject[] = [
 
 /** Proveedores comunes: datos del servidor con TanStack Query. */
 export function AppProviders({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(
-    () => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } }),
-  );
+  const [queryClient] = useState(() => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
+    });
+    // Los flags se piden al arrancar, en paralelo con el refresco de la sesión de los loaders, en
+    // lugar de esperar a que se pinte la primera ruta (una petición menos en serie).
+    void client.prefetchQuery(flagsQuery);
+    return client;
+  });
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
 

@@ -111,7 +111,8 @@ test('diagrama navegable con la red a 10 Mbps en menos de 3 s (SC-003)', async (
   await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
   await cdp.send('Network.emulateNetworkConditions', {
     offline: false,
-    latency: 20,
+    // PERF_LATENCY_MS simula la latencia de un entorno remoto (staging: ~170 ms por petición).
+    latency: Number(process.env.PERF_LATENCY_MS ?? 20),
     downloadThroughput: (10 * 1024 * 1024) / 8,
     uploadThroughput: (10 * 1024 * 1024) / 8,
   });
