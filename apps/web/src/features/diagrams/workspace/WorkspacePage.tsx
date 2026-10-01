@@ -179,17 +179,16 @@ function Workspace({
   }
   return (
     <div className="relative h-[70vh] overflow-hidden rounded border">
-      {imageUrl && (
-        <Suspense fallback={null}>
-          <DiagramCanvas
-            imageUrl={imageUrl}
-            image={image}
-            versionId={versionId}
-            editing={editing}
-            hotspots={hotspots}
-          />
-        </Suspense>
-      )}
+      {/* El canvas se monta sin esperar a la imagen: el contexto WebGL se crea mientras llega. */}
+      <Suspense fallback={null}>
+        <DiagramCanvas
+          imageUrl={imageUrl}
+          image={image}
+          versionId={versionId}
+          editing={editing}
+          hotspots={hotspots}
+        />
+      </Suspense>
       {!editing && <A11yActivityList activities={activities} image={image} />}
       <Minimap thumbUrl={thumbUrl} image={image} />
       {imageStatus === 'loading' && (

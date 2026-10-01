@@ -127,7 +127,8 @@ export default function DiagramCanvas({
   editing,
   hotspots,
 }: {
-  imageUrl: string;
+  /** `blob:` de la imagen display; mientras llega, el canvas ya está creado. */
+  imageUrl: string | undefined;
   image: Size;
   versionId: string;
   editing: boolean;
@@ -149,7 +150,7 @@ export default function DiagramCanvas({
       <color attach="background" args={['#f3f4f6']} />
       <TextureErrorBoundary onError={() => setImageStatus('error')}>
         <Suspense fallback={null}>
-          <DiagramImage url={imageUrl} image={image} />
+          {imageUrl && <DiagramImage url={imageUrl} image={image} />}
         </Suspense>
       </TextureErrorBoundary>
       {editing ? (
