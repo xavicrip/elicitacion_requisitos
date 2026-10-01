@@ -164,7 +164,7 @@ let users: { admin: TestUser; participant: TestUser; other: TestUser; outsider: 
 beforeAll(async () => {
   ({ app } = await buildTestApp('matrix', {
     withAuth: true,
-    featureFlags: `${DIAGRAM_FLAGS},details=true`,
+    featureFlags: DIAGRAM_FLAGS,
   }));
   await app.ready();
   users = {

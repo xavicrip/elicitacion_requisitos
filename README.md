@@ -109,9 +109,8 @@ con caché del navegador.
 
 ### Detalles de requisitos (feature 004)
 
-Detrás del flag `details` (activado en Compose). Al seleccionar una actividad del diagrama se
-abre el panel _Requisitos_: sus requisitos Dado / Cuando / Entonces, con tipo, prioridad MoSCoW,
-rol y etiquetas, filtrables y ordenados por votos o fecha, y el formulario de alta si el proyecto
+Al seleccionar una actividad del diagrama se abre el panel _Requisitos_: sus requisitos Dado /
+Cuando / Entonces, con tipo, prioridad MoSCoW, rol y etiquetas, filtrables y ordenados por votos o fecha, y el formulario de alta si el proyecto
 está abierto. Su autor los edita (con historial y aviso si otra persona los cambió a la vez);
 los miembros votan y comentan; el Administrador los valida, los marca como duplicados o los
 descarta con un motivo, y reasigna los que quedan sin actividad al publicar una versión nueva

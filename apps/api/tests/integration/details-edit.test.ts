@@ -8,7 +8,7 @@ import { historyModel } from '../../src/modules/details/models/history';
 import { votesModel } from '../../src/modules/details/models/vote';
 import { projectsModel } from '../../src/modules/projects/model';
 import { buildTestApp, closeTestApp } from '../helpers/app';
-import { createDetail, DETAIL_FLAGS, detailsUrl, publishedDiagram } from '../helpers/details';
+import { createDetail, detailsUrl, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -21,7 +21,7 @@ let marta: TestUser;
 const events: string[] = [];
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('detailsedit', { withAuth: true, featureFlags: DETAIL_FLAGS }));
+  ({ app } = await buildTestApp('detailsedit', { withAuth: true }));
   await app.ready();
   app.detailEvents.onAny((name) => void events.push(name));
   ana = await registerTestUser(app, 'Ana');

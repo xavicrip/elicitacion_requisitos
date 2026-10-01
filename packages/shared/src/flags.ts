@@ -36,12 +36,6 @@ export const FLAGS = defineFlags({
     default: true,
     owner: '003-diagramas-canvas',
   },
-  details: {
-    description:
-      'Detalles de requisitos por actividad (Dado/Cuando/Entonces, votos, comentarios, moderación e indicadores). Activado al completar la 004; se retirará en un commit aparte',
-    default: true,
-    owner: '004-detalles-requisitos',
-  },
 });
 
 /**

@@ -8,7 +8,7 @@ import { votesModel } from '../../src/modules/details/models/vote';
 import { projectsModel } from '../../src/modules/projects/model';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { uploadDiagram } from '../helpers/diagrams';
-import { createDetail, DETAIL_FLAGS, detailsUrl, publishedDiagram } from '../helpers/details';
+import { createDetail, detailsUrl, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -23,7 +23,6 @@ const events: string[] = [];
 beforeAll(async () => {
   ({ app } = await buildTestApp('detailscreate', {
     withAuth: true,
-    featureFlags: DETAIL_FLAGS,
     logStream: new Writable({ write: (_c, _e, done) => done() }),
   }));
   await app.ready();

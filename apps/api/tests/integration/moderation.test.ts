@@ -5,7 +5,7 @@ import { auditLogsModel } from '../../src/modules/audit/model';
 import { projectsModel } from '../../src/modules/projects/model';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { uploadVersion } from '../helpers/diagrams';
-import { createDetail, DETAIL_FLAGS, detailsUrl, publishedDiagram } from '../helpers/details';
+import { createDetail, detailsUrl, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -17,7 +17,7 @@ let luis: TestUser;
 const events: string[] = [];
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('moderation', { withAuth: true, featureFlags: DETAIL_FLAGS }));
+  ({ app } = await buildTestApp('moderation', { withAuth: true }));
   await app.ready();
   app.detailEvents.onAny((name) => void events.push(name));
   ana = await registerTestUser(app, 'Ana');
