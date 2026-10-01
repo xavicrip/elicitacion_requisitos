@@ -15,12 +15,14 @@ export const PrioritySchema = z.enum(['must', 'should', 'could', 'wont']);
 export const DetailStatusSchema = z.enum(['pending', 'validated', 'duplicate', 'discarded']);
 
 /** Un componente del escenario: obligatorio, de 5 a 1 000 caracteres, texto plano. */
-const scenarioPart = (name: string) =>
-  z
-    .string({ error: `Escribe el ${name}.` })
+const scenarioPart = (name: string) => {
+  const capitalized = name[0]!.toUpperCase() + name.slice(1);
+  return z
+    .string({ error: `Escribe ${name}.` })
     .trim()
-    .min(5, { error: `El ${name} necesita al menos 5 caracteres.` })
-    .max(1000, { error: `El ${name} admite como máximo 1 000 caracteres.` });
+    .min(5, { error: `Escribe ${name}: al menos 5 caracteres.` })
+    .max(1000, { error: `${capitalized} admite como máximo 1 000 caracteres.` });
+};
 
 /** Etiqueta normalizada: minúsculas y espacios simples (para agrupar y sugerir). */
 export function normalizeTag(tag: string): string {
@@ -50,9 +52,9 @@ const AuthorRoleSchema = z
   .transform((role) => role || null);
 
 const detailFields = {
-  given: scenarioPart('contexto (Dado)'),
-  when: scenarioPart('acción (Cuando)'),
-  then: scenarioPart('resultado (Entonces)'),
+  given: scenarioPart('el contexto (Dado)'),
+  when: scenarioPart('la acción (Cuando)'),
+  then: scenarioPart('el resultado (Entonces)'),
   type: DetailTypeSchema,
   priority: PrioritySchema.nullable(),
   authorRole: AuthorRoleSchema,

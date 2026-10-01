@@ -1,4 +1,4 @@
-import type { Activity, VersionStatus } from '@reqcanvas/shared';
+import type { Activity, Project, VersionStatus, VersionWithActivities } from '@reqcanvas/shared';
 import { useQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
@@ -32,12 +32,30 @@ const STATUS_LABEL: Record<VersionStatus, string> = {
  * Espacio de trabajo de un diagrama (contracts/canvas-ui.md). El Administrador trabaja sobre el
  * borrador si lo hay; los Participantes, sobre la versión publicada.
  */
-export type WorkspacePageProps = HotspotExtensions & {
-  /** Panel lateral en modo vista para la actividad seleccionada (la 004 monta los requisitos). */
-  sidePanel?: (selectedKey: string | null) => ReactNode;
+/** Lo que un panel lateral necesita saber de la página. */
+export type SidePanelContext = {
+  project: Project;
+  diagramId: string;
+  version: VersionWithActivities;
 };
 
-export function WorkspacePage({ sidePanel, ...hotspots }: WorkspacePageProps = {}) {
+export type WorkspacePageProps = HotspotExtensions & {
+  /** Panel lateral en modo vista para la actividad seleccionada (la 004 monta los requisitos). */
+  sidePanel?: (selectedKey: string | null, context: SidePanelContext) => ReactNode;
+  /**
+   * El Administrador abre el borrador (modo edit). Con `onPreferPublishedChange`, puede cambiar a
+   * la versión publicada, p. ej. para ver sus requisitos (plan de la 004, ajuste 8).
+   */
+  preferPublished?: boolean;
+  onPreferPublishedChange?: (preferPublished: boolean) => void;
+};
+
+export function WorkspacePage({
+  sidePanel,
+  preferPublished = false,
+  onPreferPublishedChange,
+  ...hotspots
+}: WorkspacePageProps = {}) {
   const { projectId = '', diagramId = '' } = useParams();
   const project = useQuery({
     queryKey: projectKeys.detail(projectId),
@@ -48,7 +66,12 @@ export function WorkspacePage({ sidePanel, ...hotspots }: WorkspacePageProps = {
     queryFn: () => diagramsApi.list(projectId),
   });
   const summary = diagrams.data?.find((diagram) => diagram.id === diagramId);
-  const versionId = summary ? (summary.draftVersionId ?? summary.publishedVersionId) : undefined;
+  const hasBoth = Boolean(summary?.draftVersionId && summary.publishedVersionId);
+  const versionId = summary
+    ? preferPublished && summary.publishedVersionId
+      ? summary.publishedVersionId
+      : (summary.draftVersionId ?? summary.publishedVersionId)
+    : undefined;
   const version = useQuery({
     queryKey: diagramKeys.version(versionId ?? ''),
     queryFn: () => diagramsApi.version(versionId!),
@@ -97,6 +120,15 @@ export function WorkspacePage({ sidePanel, ...hotspots }: WorkspacePageProps = {
               Versión {version.data.number} · {STATUS_LABEL[version.data.status]}
             </p>
           </div>
+          {isAdmin && hasBoth && onPreferPublishedChange && (
+            <button
+              type="button"
+              onClick={() => onPreferPublishedChange(!preferPublished)}
+              className="rounded border px-4 py-2"
+            >
+              {preferPublished ? 'Editar el borrador' : 'Ver la versión publicada'}
+            </button>
+          )}
           {writable && version.data.status === 'draft' && (
             <PublishButton projectId={projectId} version={version.data} />
           )}
@@ -115,7 +147,8 @@ export function WorkspacePage({ sidePanel, ...hotspots }: WorkspacePageProps = {
             hotspots={hotspots}
           />
           {editing && <EditorPanel versionId={version.data.id} />}
-          {!editing && sidePanel?.(selectedKey)}
+          {!editing &&
+            sidePanel?.(selectedKey, { project: project.data, diagramId, version: version.data })}
           {!editing && !sidePanel && (
             <SelectedActivity activities={version.data.activities} selectedKey={selectedKey} />
           )}

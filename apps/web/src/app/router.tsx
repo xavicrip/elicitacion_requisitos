@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
 import { LoginPage } from '../features/auth/LoginPage';
 import { DiagramListPage } from '../features/diagrams/DiagramListPage';
-import { WorkspacePage } from '../features/diagrams/workspace/WorkspacePage';
+import { DetailsWorkspacePage } from '../features/details/DetailsWorkspacePage';
 import { AcceptInvitationPage } from '../features/invitations/AcceptInvitationPage';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { requireSession } from '../features/auth/session';
@@ -52,7 +52,7 @@ export const routes: RouteObject[] = [
       {
         path: 'proyectos/:projectId/diagramas/:diagramId',
         loader: requireSession,
-        element: diagrams(<WorkspacePage />),
+        element: diagrams(<DetailsWorkspacePage />),
       },
       { path: 'invitacion/:token', element: accounts(<AcceptInvitationPage />) },
       { path: '*', element: <NotFoundPage /> },
