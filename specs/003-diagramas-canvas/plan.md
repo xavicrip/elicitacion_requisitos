@@ -143,6 +143,25 @@ El plan se escribió antes de implementar la 001 y la 002. Revisado contra `main
 11. **Última actividad**: publicar una versión o editar actividades actualiza
     `projects.lastActivityAt` ("Mis proyectos", FR-012 de la 002).
 
+## Mediciones (T056, 2026-09-30)
+
+En local (Docker Compose, Apple M1, Chrome de Playwright con ventana), con
+`pnpm e2e:perf` (`e2e/perf/workspace.perf.spec.ts`):
+
+| Medida | Objetivo | Resultado |
+|--------|----------|-----------|
+| FPS con `cien-actividades.png` (100 zonas) al hacer zoom | ≥ 50 (SC-002) | 60 FPS, p95 de 17 ms por frame |
+| FPS al desplazar con el ratón | ≥ 50 (SC-002) | 60 FPS, p95 de 18 ms |
+| Diagrama navegable con la red a 10 Mbps, sin caché | < 3 s (SC-003) | 2,1 s (566 KiB transferidos) |
+| Subir y procesar un PNG de 9,9 MB | < 5 s | 1,3 s |
+
+- Chromium headless renderiza WebGL por software (SwiftShader): ahí el desplazamiento baja a
+  ~45 FPS porque mide la CPU, no una GPU. Por eso el proyecto `perf` abre ventana y el CI no lo
+  ejecuta.
+- Optimización tras la primera medición (42 FPS al desplazar): las zonas se memoizan y el
+  resaltado no se actualiza mientras se arrastra la vista.
+- T058 repite las tres medidas contra staging.
+
 ## Complexity Tracking
 
 Sin violaciones.

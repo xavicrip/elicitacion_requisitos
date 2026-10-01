@@ -22,6 +22,7 @@
     "test:services:up": "docker compose -f infra/docker-compose.test.yml up -d --wait",
     "test:services:down": "docker compose -f infra/docker-compose.test.yml down",
     "e2e": "playwright test -c e2e/playwright.config.ts",
+    "e2e:perf": "playwright test -c e2e/playwright.config.ts --project perf",
     "typecheck:e2e": "tsc -p e2e",
     "test:repo": "vitest run -c tests/repo/vitest.config.ts && sh tests/repo/wait-for-health.test.sh && sh tests/repo/rollback.test.sh && sh tests/repo/deploy-service.test.sh && sh tests/repo/web-proxy.test.sh && sh tests/repo/first-new-migration.test.sh"
   },
