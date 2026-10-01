@@ -114,14 +114,14 @@ desplegables, alimentados por el endpoint de cobertura
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T028 [P] [US3] Prueba de contrato de `GET /diagram-versions/:id/coverage` en `apps/api/tests/contract/coverage.contract.test.ts` — `test(api)`
-- [ ] T029 [P] [US3] Pruebas de integración en `apps/api/tests/integration/coverage.test.ts`: `total` excluye `discarded` y `duplicate`; `byStatus` por estado; `effectiveVotes` suma los votos de sus duplicados; `top` con ≤ 3 resúmenes "Cuando … → Entonces …" de ≤ 80 caracteres ordenados por votos (research R8); solo cuentan las `activityKey` de la versión consultada, no los huérfanos; actividades sin detalles con `total: 0`; un Participante solo consulta versiones publicadas (un borrador → `404`); no miembro → `404` — `test(api)`
+- [X] T028 [P] [US3] Prueba de contrato de `GET /diagram-versions/:id/coverage` en `apps/api/tests/contract/coverage.contract.test.ts` — `test(api)`
+- [X] T029 [P] [US3] Pruebas de integración en `apps/api/tests/integration/coverage.test.ts`: `total` excluye `discarded` y `duplicate`; `byStatus` por estado; `effectiveVotes` suma los votos de sus duplicados; `top` con ≤ 3 resúmenes "Cuando … → Entonces …" de ≤ 80 caracteres ordenados por votos (research R8); solo cuentan las `activityKey` de la versión consultada, no los huérfanos; actividades sin detalles con `total: 0`; un Participante solo consulta versiones publicadas (un borrador → `404`); no miembro → `404` — `test(api)`
 - [ ] T030 [P] [US3] Pruebas puras y de componentes en `apps/web/tests/coverage.test.tsx`: escala por cuantiles del mapa de calor y cortes de la leyenda; `colorFor` solo con la capa `heatmap` activa; contador y marca "sin detalles" con texto e icono (no solo color, WCAG 1.4.1); notas con ≤ 3 resúmenes, plegables; la cobertura se vuelve a pedir tras crear, editar, moderar o eliminar un detalle — `test(web)`
 - [ ] T031 [P] [US3] E2E en `e2e/flows/coverage.spec.ts` sobre `compra-simple.png` (6 actividades) con detalles en 3: 3 contadores y 3 marcas "sin detalles"; activar *Mapa de calor* muestra la leyenda; desplegar las notas de "Validar pago" — `test(e2e)`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Implementar la agregación de cobertura (research R7) y `apps/api/src/modules/details/coverage.routes.ts` con `requireResourceProject` y la visibilidad de versiones de la 003 — `feat(api)`
+- [X] T032 [US3] Implementar la agregación de cobertura (research R7) y `apps/api/src/modules/details/coverage.routes.ts` con `requireResourceProject` y la visibilidad de versiones de la 003 — `feat(api)`
 - [ ] T033 [US3] Implementar `apps/web/src/features/details/overlays/{CoverageBadges.tsx,Heatmap.ts,HeatmapLegend.tsx,StickyNotes.tsx}` con `renderBadge`, `colorFor` y `overlays.heatmap` de la 003, y el botón *Mapa de calor* en `DetailsWorkspacePage.tsx` — `feat(web)`
 - [ ] T034 [US3] Ampliar `e2e/perf/workspace.perf.spec.ts` con los indicadores y el mapa de calor activos sobre `cien-actividades.png` y comprobar ≥ 50 FPS (plan, ajuste 9); si no se cumple, dibujar los contadores como sprites en lugar de `Html` — `perf(web)`
 
