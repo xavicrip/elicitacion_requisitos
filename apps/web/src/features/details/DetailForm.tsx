@@ -147,6 +147,9 @@ export function DetailForm({
   const [error, setError] = useState('');
   const [conflict, setConflict] = useState<{ mine: DetailInput; current: Detail } | null>(null);
   const editing = Boolean(detail);
+  // El `rev` con que se abrió: si llega un cambio de otra persona por el socket (005), guardar
+  // con él da 409 y la comparación, en lugar de pisar ese cambio en silencio.
+  const [openedRev] = useState(detail?.rev);
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: detail ? fromDetail(detail) : EMPTY,
@@ -163,7 +166,7 @@ export function DetailForm({
   const save = useMutation({
     mutationFn: ({ input, rev }: { input: DetailInput; rev?: number }) =>
       detail
-        ? detailsApi.update(detail.id, rev ?? detail.rev, input)
+        ? detailsApi.update(detail.id, rev ?? openedRev ?? detail.rev, input)
         : detailsApi.create(diagramId, activityKey, input),
     onSuccess: async () => {
       setError('');
