@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { io } from 'socket.io-client';
 
 const API_URL = process.env.API_URL ?? 'http://localhost:3000';
 const EXPECTED_VERSION = process.env.EXPECTED_VERSION;
@@ -20,6 +21,27 @@ test('el proxy de web llega a api (/api/health, feature 002)', async ({ request 
   const response = await request.get('/api/health');
   expect(response.status(), await response.text()).toBe(200);
   expect(await response.json()).toMatchObject({ service: 'api' });
+});
+
+test('el WebSocket de Socket.IO atraviesa web hasta api (/socket.io, feature 005)', async ({
+  request,
+  baseURL,
+}) => {
+  const { flags } = (await (await request.get('/api/config')).json()) as {
+    flags: Record<string, boolean>;
+  };
+  test.skip(!flags.realtime, 'flag realtime desactivado en este entorno');
+  // Sin token, la respuesta `unauthorized` solo puede venir del middleware de api.
+  const socket = io(baseURL!, { transports: ['websocket'], reconnection: false, timeout: 5000 });
+  try {
+    const result = await new Promise<string>((resolve) => {
+      socket.on('connect', () => resolve('connected'));
+      socket.on('connect_error', (error) => resolve(error.message));
+    });
+    expect(result).toBe('unauthorized');
+  } finally {
+    socket.close();
+  }
 });
 
 test('api /health/deep responde 200 con mongo, redis y analytics arriba', async ({ request }) => {

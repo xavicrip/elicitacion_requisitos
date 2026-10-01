@@ -46,6 +46,14 @@
 		}
 	}
 
+	# WebSocket de Socket.IO (feature 005, plan ajuste 3): con `handle` y no `handle_path`,
+	# porque Socket.IO espera el prefijo. reverse_proxy pasa el upgrade sin más configuración.
+	handle /socket.io/* {
+		reverse_proxy {$API_INTERNAL_URL} {
+			header_up X-Real-IP {client_real_ip}
+		}
+	}
+
 	handle {
 		root * /srv
 		# La configuración cambia por entorno: nunca en caché.
