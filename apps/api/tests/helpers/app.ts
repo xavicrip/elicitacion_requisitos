@@ -14,7 +14,7 @@ import {
 export const TEST_JWT_SECRET = 'secreto-de-prueba-de-al-menos-32-bytes!!';
 
 type TestAppOptions = {
-  /** `FEATURE_FLAGS`; por defecto `accounts=true`. `''` deja los valores por defecto. */
+  /** `FEATURE_FLAGS`; sin definir, los valores por defecto. */
   featureFlags?: string;
   /**
    * Monta la autenticación completa como en producción (plugins y rutas de la 002). Sin ella,
@@ -55,8 +55,7 @@ export async function buildTestApp(
       analyticsUrl: 'http://127.0.0.1:9',
       version: 'test',
       commit: 'test',
-      // Las pruebas de la 002 necesitan el flag `accounts`; '' deja los valores por defecto.
-      featureFlags: options.featureFlags ?? 'accounts=true',
+      featureFlags: options.featureFlags,
       auth,
       deletion: {
         attempts: 3,

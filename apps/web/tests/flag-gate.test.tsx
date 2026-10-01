@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FlagGate } from '../src/lib/flags';
 
-// Con `accounts` desactivado, web no muestra registro ni login (constitución IV, análisis C1).
+// Constitución IV: con un flag desactivado, web no muestra lo que oculta. `ejemplo` no es un flag
+// real: FlagGate acepta cualquier nombre.
 
 function renderGate(flags: Record<string, boolean> | 'error') {
   vi.stubGlobal(
@@ -21,8 +22,8 @@ function renderGate(flags: Record<string, boolean> | 'error') {
     <QueryClientProvider
       client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
     >
-      <FlagGate flag="accounts" fallback={<p>No disponible</p>}>
-        <p>Iniciar sesión</p>
+      <FlagGate flag="ejemplo" fallback={<p>No disponible</p>}>
+        <p>Contenido</p>
       </FlagGate>
     </QueryClientProvider>,
   );
@@ -33,15 +34,15 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('FlagGate con los flags de /api/config', () => {
   it('muestra el contenido si el flag está activado', async () => {
-    renderGate({ accounts: true });
-    expect(await screen.findByText('Iniciar sesión')).toBeInTheDocument();
+    renderGate({ ejemplo: true });
+    expect(await screen.findByText('Contenido')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith('/api/config', expect.anything());
   });
 
   it('muestra la alternativa si el flag está desactivado', async () => {
-    renderGate({ accounts: false });
+    renderGate({ ejemplo: false });
     expect(await screen.findByText('No disponible')).toBeInTheDocument();
-    expect(screen.queryByText('Iniciar sesión')).not.toBeInTheDocument();
+    expect(screen.queryByText('Contenido')).not.toBeInTheDocument();
   });
 
   it('si no puede leer los flags, trata el flag como desactivado', async () => {
@@ -56,12 +57,12 @@ describe('FlagGate con los flags de /api/config', () => {
     );
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <FlagGate flag="accounts" fallback={<p>No disponible</p>}>
-          <p>Iniciar sesión</p>
+        <FlagGate flag="ejemplo" fallback={<p>No disponible</p>}>
+          <p>Contenido</p>
         </FlagGate>
       </QueryClientProvider>,
     );
-    expect(screen.queryByText('Iniciar sesión')).not.toBeInTheDocument();
+    expect(screen.queryByText('Contenido')).not.toBeInTheDocument();
     expect(screen.queryByText('No disponible')).not.toBeInTheDocument();
   });
 });

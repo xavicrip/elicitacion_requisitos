@@ -7,7 +7,7 @@ import { useAuthStore } from '../src/lib/auth-store';
 import { json, mockApi } from './helpers/api';
 import { mockUploads } from './helpers/xhr';
 
-const FLAGS = { flags: { accounts: true } };
+const FLAGS = { flags: {} };
 const project = (overrides: Record<string, unknown> = {}) => ({
   id: 'p1',
   name: 'Tienda en línea',
