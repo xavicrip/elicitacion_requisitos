@@ -123,7 +123,7 @@ desplegables, alimentados por el endpoint de cobertura
 
 - [X] T032 [US3] Implementar la agregación de cobertura (research R7) y `apps/api/src/modules/details/coverage.routes.ts` con `requireResourceProject` y la visibilidad de versiones de la 003 — `feat(api)`
 - [X] T033 [US3] Implementar `apps/web/src/features/details/overlays/{CoverageBadges.tsx,Heatmap.ts,HeatmapLegend.tsx,StickyNotes.tsx}` con `renderBadge`, `colorFor` y `overlays.heatmap` de la 003, y el botón *Mapa de calor* en `DetailsWorkspacePage.tsx` — `feat(web)`
-- [ ] T034 [US3] Ampliar `e2e/perf/workspace.perf.spec.ts` con los indicadores y el mapa de calor activos sobre `cien-actividades.png` y comprobar ≥ 50 FPS (plan, ajuste 9); si no se cumple, dibujar los contadores como sprites en lugar de `Html` — `perf(web)`
+- [X] T034 [US3] Ampliar `e2e/perf/workspace.perf.spec.ts` con los indicadores y el mapa de calor activos sobre `cien-actividades.png` y comprobar ≥ 50 FPS (plan, ajuste 9); si no se cumple, dibujar los contadores como sprites en lugar de `Html` — `perf(web)`
 
 **Checkpoint**: US1–US3 funcionan; quickstart §3 en verde
 

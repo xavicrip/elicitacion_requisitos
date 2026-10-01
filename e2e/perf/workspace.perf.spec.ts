@@ -4,7 +4,7 @@ import { imageReady, login, openProject, publishFixture, toScreen } from '../flo
 import { expect, test } from '../flows/fixtures';
 import { registerUser } from '../flows/helpers';
 
-// T056: mediciones de rendimiento de la 003 (SC-002, SC-003 y el procesamiento de 10 MB).
+// T056 (003) y T034 (004): mediciones de rendimiento (SC-002, SC-003, 10 MB e indicadores).
 // Solo contra el stack local: `pnpm e2e --project perf`. Los resultados se anotan en plan.md.
 
 type Sharp = (
@@ -47,6 +47,27 @@ async function measureFrames(page: Page, interact: () => Promise<void>): Promise
   };
 }
 
+/** Zoom y desplazamiento continuos sobre el centro del diagrama de 100 zonas. */
+async function measureNavigation(page: Page) {
+  const middle = await toScreen(page, { x: 1500, y: 1000 });
+  await page.mouse.move(middle.x, middle.y);
+  const zoom = await measureFrames(page, async () => {
+    for (let i = 0; i < 90; i++) {
+      await page.mouse.wheel(0, i < 45 ? -120 : 120);
+      await page.waitForTimeout(16);
+    }
+  });
+  const pan = await measureFrames(page, async () => {
+    await page.mouse.down();
+    for (let i = 0; i < 120; i++) {
+      await page.mouse.move(middle.x + 200 * Math.sin(i / 10), middle.y + 100 * Math.cos(i / 10));
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  });
+  return { zoom, pan };
+}
+
 test('FPS durante zoom y desplazamiento con 100 zonas (SC-002: ≥ 50)', async ({
   page,
   request,
@@ -64,25 +85,58 @@ test('FPS durante zoom y desplazamiento con 100 zonas (SC-002: ≥ 50)', async (
   await page.goto(`/proyectos/${projectId}/diagramas/${version.diagramId}`);
   await imageReady(page);
 
-  const middle = await toScreen(page, { x: 1500, y: 1000 });
-  await page.mouse.move(middle.x, middle.y);
-  const zoom = await measureFrames(page, async () => {
-    for (let i = 0; i < 90; i++) {
-      await page.mouse.wheel(0, i < 45 ? -120 : 120);
-      await page.waitForTimeout(16);
-    }
-  });
-
-  const pan = await measureFrames(page, async () => {
-    await page.mouse.down();
-    for (let i = 0; i < 120; i++) {
-      await page.mouse.move(middle.x + 200 * Math.sin(i / 10), middle.y + 100 * Math.cos(i / 10));
-      await page.waitForTimeout(16);
-    }
-    await page.mouse.up();
-  });
-
+  const { zoom, pan } = await measureNavigation(page);
   console.log(`[perf] zoom: ${JSON.stringify(zoom)} · desplazamiento: ${JSON.stringify(pan)}`);
+  expect(zoom.fps).toBeGreaterThanOrEqual(50);
+  expect(pan.fps).toBeGreaterThanOrEqual(50);
+});
+
+test('FPS con los indicadores y el mapa de calor de la 004 (plan de la 004, ajuste 9)', async ({
+  page,
+  request,
+}) => {
+  const user = await registerUser(request);
+  await login(page, user);
+  const projectId = await openProject(page, user.accessToken);
+  const version = await publishFixture(
+    page,
+    user.accessToken,
+    projectId,
+    'cien-actividades.png',
+    'Cien actividades',
+  );
+  const headers = { authorization: `Bearer ${user.accessToken}` };
+  const activities = (
+    (await (await page.request.get(`/api/diagram-versions/${version.id}`, { headers })).json()) as {
+      activities: Array<{ key: string }>;
+    }
+  ).activities;
+  // Detalles en la mitad de las zonas (por debajo del límite de 60 escrituras por minuto):
+  // 50 contadores y 50 marcas «Sin detalles», todos como DOM sobre el canvas.
+  for (const { key } of activities.slice(0, 50)) {
+    const created = await page.request.post(
+      `/api/diagrams/${version.diagramId}/activities/${key}/details`,
+      {
+        headers,
+        data: {
+          given: 'el cliente tiene productos',
+          when: 'paga con tarjeta',
+          then: 'el sistema confirma el pago',
+          type: 'functional',
+        },
+      },
+    );
+    expect(created.status()).toBe(201);
+  }
+  await page.goto(`/proyectos/${projectId}/diagramas/${version.diagramId}`);
+  await imageReady(page);
+  await expect(page.getByRole('main').getByText('Sin detalles')).toHaveCount(50);
+  await page.getByRole('button', { name: 'Mapa de calor' }).click();
+
+  const { zoom, pan } = await measureNavigation(page);
+  console.log(
+    `[perf] con indicadores · zoom: ${JSON.stringify(zoom)} · desplazamiento: ${JSON.stringify(pan)}`,
+  );
   expect(zoom.fps).toBeGreaterThanOrEqual(50);
   expect(pan.fps).toBeGreaterThanOrEqual(50);
 });
