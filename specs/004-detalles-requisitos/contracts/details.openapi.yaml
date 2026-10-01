@@ -40,8 +40,8 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Detail' }
         '400': { description: Validación (indica los campos) }
-        '422': { description: La actividad no existe en la versión publicada }
-        '423': { description: Proyecto cerrado }
+        '404': { description: 'El diagrama no tiene versión publicada o la actividad no está en ella' }
+        '409': { description: 'Proyecto no abierto (PROJECT_NOT_OPEN): un proyecto cerrado es de solo lectura' }
   /details/{detailId}:
     parameters: [{ $ref: '#/components/parameters/DetailId' }]
     patch:
@@ -59,11 +59,13 @@ paths:
               schema: { $ref: '#/components/schemas/Detail' }
         '403': { description: Sin permiso según autor/estado }
         '409':
-          description: Conflicto de edición; devuelve la versión actual
+          description: >-
+            Conflicto de edición: el cuerpo es el detalle actual. Con el proyecto no abierto, el
+            cuerpo es el error PROJECT_NOT_OPEN (se distinguen por `code`)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Detail' }
-        '423': { description: Proyecto cerrado }
+        '428': { description: Falta If-Match }
     delete:
       summary: Eliminar (autor si pending; Admin siempre); elimina votos y comentarios
       responses:
@@ -88,6 +90,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Detail' }
+        '403': { description: Solo el Administrador }
+        '409': { description: 'Transición no permitida o proyecto no abierto (PROJECT_NOT_OPEN)' }
         '422': { description: Falta duplicateOf/discardReason o el destino no es válido }
   /details/{detailId}/reassign:
     parameters: [{ $ref: '#/components/parameters/DetailId' }]
@@ -108,6 +112,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Detail' }
+        '404': { description: La actividad destino no está en la versión publicada }
+        '409': { description: 'Proyecto no abierto (PROJECT_NOT_OPEN): un proyecto cerrado es de solo lectura' }
   /details/{detailId}/history:
     parameters: [{ $ref: '#/components/parameters/DetailId' }]
     get:
@@ -132,6 +138,7 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/VoteState' }
         '403': { description: Detalle propio }
+        '409': { description: 'Solo se votan detalles pendientes o validados; o proyecto no abierto (PROJECT_NOT_OPEN)' }
     delete:
       summary: Retirar voto (idempotente)
       responses:
@@ -156,6 +163,7 @@ paths:
               required: [text]
               properties: { text: { type: string, minLength: 1, maxLength: 1000 } }
       responses:
+        '409': { description: 'Proyecto no abierto (PROJECT_NOT_OPEN): un proyecto cerrado es de solo lectura' }
         '201':
           content:
             application/json:

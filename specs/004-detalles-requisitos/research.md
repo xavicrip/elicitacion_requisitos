@@ -48,7 +48,8 @@
 | `duplicate` | Solo lectura | Moderar (volver a `pending`) |
 | `discarded` | Solo lectura (ve el motivo) | Moderar |
 
-Con el proyecto `closed`, nadie escribe (se responde `423 Locked`).
+Con el proyecto `closed`, nadie escribe, tampoco el Administrador al moderar o reasignar: se
+responde `409 PROJECT_NOT_OPEN`, como en la 002 (plan, ajuste 3).
 
 ## R6. Duplicados en los indicadores
 
@@ -71,7 +72,8 @@ Con el proyecto `closed`, nadie escribe (se responde `423 Locked`).
   sobre una escala por cuantiles del número de detalles, con opacidad 0,45 para no tapar el
   texto del diagrama; leyenda HTML con los cortes. "Sin detalles" = badge gris con icono y texto
   (no solo color, por accesibilidad). Las notas son `Html` de drei, ancladas al borde derecho de
-  la zona, colapsables y con un máximo de 3 resúmenes (truncados a 80 caracteres).
+  la zona, colapsables y con un máximo de 3 resúmenes. Cada resumen es "Cuando {when} →
+  Entonces {then}", truncado a 80 caracteres con "…".
 - **Rationale**: FR-011 y SC-004; se usa texto y forma además del color (WCAG 1.4.1).
 
 ## R9. Sugerencias de rol y etiquetas
