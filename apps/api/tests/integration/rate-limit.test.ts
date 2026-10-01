@@ -1,6 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AUTH_RATE_LIMIT, rateLimitPlugin } from '../../src/plugins/rate-limit';
+import {
+  AUTH_RATE_LIMIT,
+  rateLimitPlugin,
+  USER_WRITE_RATE_LIMIT,
+} from '../../src/plugins/rate-limit';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 
 let app: FastifyInstance;
@@ -11,6 +15,17 @@ beforeAll(async () => {
   await app.register(rateLimitPlugin, { nameSpace: `rl-test-${Date.now()}:` });
   app.post('/auth/prueba', { config: { rateLimit: AUTH_RATE_LIMIT } }, async () => ({ ok: true }));
   app.get('/libre', async () => ({ ok: true }));
+  // Escrituras de la 004: el usuario lo identifica antes un preHandler (como requireAuth).
+  app.post(
+    '/escritura',
+    {
+      config: { rateLimit: USER_WRITE_RATE_LIMIT },
+      preHandler: async (request) => {
+        (request as { user: unknown }).user = { id: request.headers['x-usuario'] };
+      },
+    },
+    async () => ({ ok: true }),
+  );
   await app.ready();
 });
 
@@ -59,5 +74,30 @@ describe('rate limit de /auth/* (research R4)', () => {
   it('guarda los contadores en Redis (compartidos entre réplicas de api)', async () => {
     const keys = await app.redis.keys('rl-test-*');
     expect(keys.length).toBeGreaterThan(0);
+  });
+});
+
+describe('rate limit por usuario de las escrituras (plan de la 004, ajuste 7)', () => {
+  const write = (user: string, ip = '10.1.0.1') =>
+    app.inject({
+      method: 'POST',
+      url: '/escritura',
+      remoteAddress: ip,
+      headers: { 'x-usuario': user },
+    });
+
+  it('permite 60 escrituras por minuto y usuario y responde 429 a la 61.ª', async () => {
+    for (let i = 0; i < 60; i++) expect((await write('ana')).statusCode).toBe(200);
+    const blocked = await write('ana');
+    expect(blocked.statusCode).toBe(429);
+    expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0);
+  });
+
+  it('cuenta por usuario, no por IP: otro usuario desde la misma IP sigue escribiendo', async () => {
+    expect((await write('luis', '10.1.0.1')).statusCode).toBe(200);
+  });
+
+  it('cambiar de IP no salta el límite del usuario', async () => {
+    expect((await write('ana', '10.1.0.99')).statusCode).toBe(429);
   });
 });

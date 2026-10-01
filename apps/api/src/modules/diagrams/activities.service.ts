@@ -2,30 +2,15 @@ import type { ActivityInput, ActivityPatch, Activity as ActivityDto } from '@req
 import type { FastifyInstance } from 'fastify';
 import { Types } from 'mongoose';
 import { HttpError } from '../../lib/errors.js';
+import { revEtag } from '../../lib/if-match.js';
 import { auditService } from '../audit/service.js';
 import { projectsModel } from '../projects/model.js';
 import { toActivityDto } from './dto.js';
 import { activitiesModel, type Activity } from './models/activity.js';
 import { versionsModel, type DiagramVersion } from './models/version.js';
 
-/** `ETag` de una actividad: su `rev` (concurrencia optimista, research R6). */
-export const activityEtag = (rev: number) => `"${rev}"`;
-
-/** Lee el `rev` de `If-Match` (`"3"`, `W/"3"` o `3`); 428 si falta o no es válido. */
-export function parseIfMatch(header: string | undefined): number {
-  const rev = header
-    ?.trim()
-    .replace(/^W\//, '')
-    .replace(/^"(.*)"$/, '$1');
-  if (!rev || !/^\d+$/.test(rev)) {
-    throw new HttpError(
-      428,
-      'PRECONDITION_REQUIRED',
-      'Falta la versión de la actividad (If-Match). Recarga la página e inténtalo de nuevo.',
-    );
-  }
-  return Number(rev);
-}
+/** `ETag` de una actividad: su `rev` (concurrencia optimista, research R6 de la 003). */
+export const activityEtag = revEtag;
 
 /** Otro administrador guardó antes: la respuesta es la actividad actual (contrato, 409). */
 export class RevConflict extends Error {
