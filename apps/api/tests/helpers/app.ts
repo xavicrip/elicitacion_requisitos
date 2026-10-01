@@ -25,6 +25,8 @@ type TestAppOptions = {
   deletion?: DeletionConfig;
   /** Tiempos de la colaboración en tiempo real (feature 005), cortos en las pruebas. */
   realtime?: RealtimeConfig;
+  /** Reutiliza la base de datos de otra app: dos instancias de `api` (réplicas, feature 005). */
+  dbName?: string;
   logStream?: Writable;
 };
 
@@ -33,7 +35,7 @@ export async function buildTestApp(
   prefix: string,
   options: TestAppOptions = {},
 ): Promise<{ app: FastifyInstance; dbName: string }> {
-  const dbName = uniqueDbName(prefix);
+  const dbName = options.dbName ?? uniqueDbName(prefix);
   await runMigrations('up', { url: MONGO_TEST_URL, dbName });
   const auth: AuthConfig | undefined = options.withAuth
     ? {
