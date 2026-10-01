@@ -137,3 +137,10 @@ el healthcheck de despliegue.
 La 004 no necesita variables nuevas. Antes de integrarla (T051), `FEATURE_FLAGS` de `api` en
 staging pasa a `accounts=true,diagrams=true,details=true`; producción sigue sin definirla
 (`details` desactivado hasta completar la feature).
+
+## Flags retirados (2026-10-01)
+
+`accounts`, `diagrams` y `details` se retiraron tras la v0.5.0 (`docs/feature-flags.md`): sus
+funcionalidades ya no dependen de `FEATURE_FLAGS`. La variable de `api` en staging se elimina
+después de desplegar el retiro; mientras siga definida, `api` solo avisa en el log de los flags
+desconocidos. Producción nunca la definió.
