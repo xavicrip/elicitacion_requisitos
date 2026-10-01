@@ -79,13 +79,72 @@ apps/web/src/features/realtime/
 ├── ConnectionBanner.tsx                        # "Sin conexión: reintentando"
 └── drafts.ts                                   # borradores en localStorage
 apps/api/railway.json                           # numReplicas configurable
-tests/load/realtime.artillery.yml
-e2e/{realtime-sync,presence,reconnect}.spec.ts
+e2e/flows/{realtime-sync,presence,reconnect}.spec.ts
+e2e/perf/realtime.perf.spec.ts                  # 50 clientes con socket.io-client
 ```
 
 **Structure Decision**: carpeta `realtime/` en `api` (transversal, no un módulo de dominio);
 feature `realtime` en `web`, que se engancha al workspace mediante `useWorkspaceEvents` y
 `overlays.presence` (contrato de la 003).
+
+## Ajustes tras implementar la 002, la 003 y la 004 (2026-10-01)
+
+1. **Versiones reales**: `socket.io` 4 y `@socket.io/redis-adapter` sobre el `ioredis` del
+   plugin de la 002 (`apps/api/src/plugins/redis.ts`; el adaptador usa dos conexiones propias
+   con `duplicate()`), zod 4 para los payloads y el JWT de `@fastify/jwt` (`{ sub, sid }`, 15 min)
+   para el *handshake*, verificado con `app.jwt.verify`.
+2. **Flag `realtime`** (`default: false`, owner `005-colaboracion-tiempo-real`). Socket.IO
+   atiende `/socket.io/` fuera del router de Fastify, así que `GATED_PREFIXES` no sirve: con el
+   flag desactivado no se monta el servidor, y `web` no abre el socket (`useFlags`). Se activa
+   por defecto al cerrar la feature y se retira después, como `accounts`, `diagrams` y `details`.
+3. **Proxy**: el `Caddyfile` de `web` no tiene `/socket.io`. Se añade `handle /socket.io/*` con
+   `reverse_proxy {$API_INTERNAL_URL}` y la misma `X-Real-IP` (`handle`, no `handle_path`:
+   Socket.IO espera el prefijo; Caddy pasa el *upgrade* a WebSocket sin más configuración), y
+   `'/socket.io': { ws: true }` en el proxy de Vite. En staging se comprueba que el borde de
+   Railway mantiene el WebSocket abierto (el *ping* de Socket.IO es cada 25 s).
+4. **Eventos de dominio**: la 004 solo tiene `app.detailEvents` (`apps/api/src/modules/details/
+   events.ts`, en proceso y sin datos por usuario) y `bridge.ts` se suscribe con `onAny`.
+   Faltan los eventos de fuera de los detalles: `diagram.published` (publicar en
+   `diagrams/service.ts`), `project.status_changed` (`changeStatus` en `projects/service.ts`),
+   `member.removed` y `member.left` (`members.ts`) y `project.deleted`. El bus se generaliza a
+   `app.domainEvents` con los tipos de `packages/shared/src/events.ts` ampliados; la auditoría
+   de los detalles sigue igual (los cambios de proyecto y miembros ya se auditan en la 002).
+5. **Varias réplicas**: `api` tiene hoy una réplica. El evento se emite en la réplica que hizo
+   la escritura y `io.to(sala).emit` lo reparte por Redis a los sockets de todas: no hace falta
+   publicar los eventos en Redis por separado (la consecuencia que dejó abierta el ADR 0006).
+   La prueba de dos réplicas son dos instancias de `buildTestApp` escuchando en puertos
+   distintos con el mismo Redis, en Vitest, en lugar de escalar Compose. En staging se valida
+   con 2 réplicas (`numReplicas` lo configura el propietario en Railway).
+6. **Claves reales de TanStack Query**: no existe `['diagram', versionId]`. Al reconectar se
+   invalidan `detailKeys.all`, `diagramKeys.version(versionId)`, `diagramKeys.list(projectId)`
+   y `projectKeys.detail(projectId)`. Los eventos de detalles **se aplican con su payload**
+   (`setQueryData` en `detailKeys.activity(diagramId, key)` y en el `voteCount`) en lugar de
+   invalidar y volver a pedir: con ~185 ms de ida y vuelta a staging (T052), entrega más
+   petición rozaría los 500 ms de SC-001. La cobertura sí se invalida, en segundo plano.
+   Idempotencia: `detail.updated` con `rev` ≤ el de la caché se ignora; `vote.changed` trae el
+   `voteCount` absoluto.
+7. **Permisos en la caché**: los eventos no traen `permissions` ni `votedByMe` (004, R10). Al
+   aplicar `detail.created`/`detail.updated`, el cliente conserva los de la caché o, si el
+   detalle es nuevo, los calcula con la misma regla que `detailPermissions` (se mueve a
+   `packages/shared` para compartirla) a partir del usuario y del estado del proyecto.
+8. **Cierre del proyecto y revocación**: `project:closed` invalida `projectKeys.detail`; la web
+   ya deriva el modo de solo lectura de `project.status` (004, `projectOpen`). `access:revoked`
+   también cuando se cierra la sesión (`sid` del token).
+9. **Espacio de trabajo**: `RealtimeWorkspace` envuelve `DetailsWorkspacePage` (004) como esta
+   envuelve `WorkspacePage` (003). Presencia con `overlays.presence` del store de la 003 y la
+   selección con `useWorkspaceEvents`; los cursores, en coordenadas de imagen, como `Html` de
+   drei. Con 50 cursores hay que mantener ≥ 50 FPS con `cien-actividades.png`
+   (`pnpm e2e:perf`).
+10. **Rate limit por socket en memoria** (cursores 20/s, selección 10/s): cada socket vive en
+    una réplica, así que no hace falta Redis; distinto del límite HTTP de 60 escrituras por
+    minuto y usuario de la 004, que no cambia.
+11. **Borradores**: el formulario de la 004 (`DetailForm`) guarda en `localStorage` por diagrama
+    y `activityKey`, con `try/catch`, y lo borra al guardar.
+12. **Pruebas**: servidor real con `app.listen({ port: 0 })` y `socket.io-client`; E2E en
+    `e2e/flows/` con dos contextos y los helpers de la 004 (`registerTeam`,
+    `projectWithPublishedDiagram`); la carga de 50 usuarios con un script de `socket.io-client`
+    en `e2e/perf` en lugar de Artillery (sin dependencia nueva; Principio VII), y medición en
+    staging como en T052.
 
 ## Complexity Tracking
 
