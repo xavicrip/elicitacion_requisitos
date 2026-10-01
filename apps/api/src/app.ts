@@ -10,6 +10,7 @@ import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
+import { coverageRoutes } from './modules/details/coverage.routes.js';
 import { detailEventsPlugin } from './modules/details/events.js';
 import { detailRoutes } from './modules/details/routes.js';
 import { registerDiagramsCascade } from './modules/diagrams/cascade.js';
@@ -159,6 +160,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(detailEventsPlugin);
         registerDetailsCascade(app);
         await app.register(detailRoutes);
+        await app.register(coverageRoutes);
       }
     }
   }
