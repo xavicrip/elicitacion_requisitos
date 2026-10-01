@@ -1,6 +1,8 @@
 import type {
   Detail as DetailDto,
   DetailFields,
+  DetailPatch,
+  HistoryEntry,
   DetailStatus,
   DetailType,
   Facets,
@@ -16,7 +18,9 @@ import type { Member, Project } from '../projects/model.js';
 import { projectsModel } from '../projects/model.js';
 import { usersModel } from '../users/model.js';
 import { toDetailDto } from './dto.js';
+import { commentsModel } from './models/comment.js';
 import { detailsModel, type Detail } from './models/detail.js';
+import { historyModel, type DetailHistory, type HistoryChange } from './models/history.js';
 import { votesModel } from './models/vote.js';
 import { detailPermissions } from './permissions.js';
 
@@ -33,24 +37,63 @@ export type ListQuery = {
 const activityNotFound = () =>
   new HttpError(404, 'NOT_FOUND', 'La actividad no está en la versión publicada del diagrama.');
 
+const forbidden = () => new HttpError(403, 'FORBIDDEN', 'No puedes modificar este requisito.');
+
+/** Otra persona guardó antes: la respuesta es el detalle actual (contrato, 409). */
+export class DetailConflict extends Error {
+  constructor(readonly current: DetailDto) {
+    super('rev desactualizado');
+  }
+}
+
+/** Campos editables que se copian al historial antes de cada cambio (research R3). */
+const SNAPSHOT_FIELDS = [
+  'given',
+  'when',
+  'then',
+  'type',
+  'priority',
+  'authorRole',
+  'tags',
+  'status',
+  'duplicateOf',
+  'discardReason',
+] as const;
+
+function snapshotOf(detail: Detail): Record<string, unknown> {
+  return Object.fromEntries(
+    SNAPSHOT_FIELDS.map((field) => {
+      const value = detail[field];
+      return [field, value instanceof Types.ObjectId ? value.toHexString() : (value ?? null)];
+    }),
+  );
+}
+
 /** Nombre de usuario que se muestra si la cuenta ya no existe. */
 const UNKNOWN_USER = 'Usuario eliminado';
 
 export function detailsService(app: FastifyInstance) {
   const Details = detailsModel(app.mongo);
   const Votes = votesModel(app.mongo);
+  const Comments = commentsModel(app.mongo);
+  const History = historyModel(app.mongo);
   const Activities = activitiesModel(app.mongo);
   const Projects = projectsModel(app.mongo);
   const Users = usersModel(app.mongo);
 
+  /** Nombres de usuario por id (también de miembros retirados: la cuenta sigue existiendo). */
+  async function userNames(ids: Types.ObjectId[]): Promise<Map<string, string>> {
+    const unique = [...new Set(ids.map((id) => id.toHexString()))];
+    const users = await Users.find({ _id: { $in: unique } }, { name: 1 }).lean<
+      Array<{ _id: Types.ObjectId; name: string }>
+    >();
+    return new Map(users.map((user) => [user._id.toHexString(), user.name]));
+  }
+
   /** Detalles listos para un miembro concreto: autor, si ya votó y sus permisos. */
   async function present(details: Detail[], viewer: Viewer): Promise<DetailDto[]> {
     if (details.length === 0) return [];
-    const authorIds = [...new Set(details.map((d) => d.authorId.toHexString()))];
-    const users = await Users.find({ _id: { $in: authorIds } }, { name: 1 }).lean<
-      Array<{ _id: Types.ObjectId; name: string }>
-    >();
-    const names = new Map(users.map((user) => [user._id.toHexString(), user.name]));
+    const names = await userNames(details.map((d) => d.authorId));
     const voted = new Set(
       (
         await Votes.find(
@@ -86,8 +129,99 @@ export function detailsService(app: FastifyInstance) {
   const touchProject = (projectId: Types.ObjectId) =>
     Projects.updateOne({ _id: projectId }, { $set: { lastActivityAt: new Date() } });
 
+  const eventBase = (detail: Detail, viewer: Viewer) => ({
+    projectId: detail.projectId.toHexString(),
+    diagramId: detail.diagramId.toHexString(),
+    actorId: viewer.membership.userId.toHexString(),
+    at: new Date().toISOString(),
+  });
+
+  async function presentOne(detail: Detail, viewer: Viewer): Promise<DetailDto> {
+    const [presented] = await present([detail], viewer);
+    return presented!;
+  }
+
+  /** Guarda en el historial la versión anterior de un detalle (FR-006). */
+  const recordHistory = (before: Detail, change: HistoryChange, viewer: Viewer) =>
+    History.create({
+      detailId: before._id,
+      projectId: before.projectId,
+      rev: before.rev,
+      snapshot: snapshotOf(before),
+      change,
+      editedBy: viewer.membership.userId,
+    });
+
   return {
     present,
+    loadDetail: (id: string) => Details.findById(id).lean<Detail>(),
+
+    /**
+     * Edita solo si `rev` coincide con el guardado (FR-007); si no, `DetailConflict` con el
+     * detalle actual. Antes del cambio, la versión anterior va al historial (FR-006).
+     */
+    async update(current: Detail, rev: number, patch: DetailPatch, viewer: Viewer) {
+      if (!detailPermissions(current, viewer.membership, viewer.project).canEdit) throw forbidden();
+      const before = await Details.findOneAndUpdate(
+        { _id: current._id, rev },
+        { $set: patch, $inc: { rev: 1 } },
+        { new: false, runValidators: true },
+      ).lean<Detail>();
+      if (!before) {
+        const latest = await Details.findById(current._id).lean<Detail>();
+        if (!latest) throw new HttpError(404, 'NOT_FOUND', 'Recurso no encontrado');
+        throw new DetailConflict(await presentOne(latest, viewer));
+      }
+      await recordHistory(before, 'edit', viewer);
+      const updated = await presentOne(
+        (await Details.findById(current._id).lean<Detail>())!,
+        viewer,
+      );
+      await touchProject(current.projectId);
+      await app.detailEvents.emit('detail.updated', {
+        ...eventBase(current, viewer),
+        detail: updated,
+        rev: updated.rev,
+      });
+      return updated;
+    },
+
+    /** Elimina el detalle con sus votos, comentarios e historial (edge case de la spec). */
+    async remove(detail: Detail, viewer: Viewer) {
+      if (!detailPermissions(detail, viewer.membership, viewer.project).canDelete) {
+        throw forbidden();
+      }
+      await Promise.all([
+        Votes.deleteMany({ detailId: detail._id }),
+        Comments.deleteMany({ detailId: detail._id }),
+        History.deleteMany({ detailId: detail._id }),
+      ]);
+      await Details.deleteOne({ _id: detail._id });
+      await touchProject(detail.projectId);
+      await app.detailEvents.emit('detail.deleted', {
+        ...eventBase(detail, viewer),
+        detailId: detail._id.toHexString(),
+        activityKey: detail.activityKey,
+      });
+    },
+
+    /** Versiones anteriores, de la más reciente a la más antigua. */
+    async history(detail: Detail): Promise<HistoryEntry[]> {
+      const entries = await History.find({ detailId: detail._id })
+        .sort({ rev: -1, editedAt: -1 })
+        .lean<DetailHistory[]>();
+      const names = await userNames(entries.map((entry) => entry.editedBy));
+      return entries.map((entry) => ({
+        rev: entry.rev,
+        change: entry.change,
+        editedBy: {
+          id: entry.editedBy.toHexString(),
+          name: names.get(entry.editedBy.toHexString()) ?? UNKNOWN_USER,
+        },
+        editedAt: entry.editedAt.toISOString(),
+        snapshot: entry.snapshot,
+      }));
+    },
 
     /**
      * Detalles de una actividad (FR-001, FR-012): por votos efectivos y luego por fecha, o solo
@@ -133,16 +267,13 @@ export function detailsService(app: FastifyInstance) {
         activityKey,
         authorId: viewer.membership.userId,
       });
-      const [detail] = await present([created.toObject()], viewer);
+      const detail = await presentOne(created.toObject(), viewer);
       await touchProject(diagram.projectId);
       await app.detailEvents.emit('detail.created', {
-        projectId: diagram.projectId.toHexString(),
-        diagramId: diagram._id.toHexString(),
-        actorId: viewer.membership.userId.toHexString(),
-        at: new Date().toISOString(),
-        detail: detail!,
+        ...eventBase(created.toObject(), viewer),
+        detail,
       });
-      return detail!;
+      return detail;
     },
 
     /** Roles y etiquetas usados en el proyecto, por frecuencia (FR-003, research R9). */

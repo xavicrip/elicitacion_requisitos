@@ -1,5 +1,7 @@
 import {
   DetailInputSchema,
+  DetailPatchSchema,
+  HistoryEntrySchema,
   PrioritySchema,
   DetailSchema,
   DetailStatusSchema,
@@ -9,14 +11,16 @@ import {
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { revEtag } from '../../lib/if-match.js';
+import { parseIfMatch, revEtag } from '../../lib/if-match.js';
 import { USER_WRITE_RATE_LIMIT } from '../../plugins/rate-limit.js';
 import type { Diagram } from '../diagrams/models/diagram.js';
 import { diagramsService } from '../diagrams/service.js';
-import { detailsService } from './service.js';
+import type { Detail } from './models/detail.js';
+import { DetailConflict, detailsService } from './service.js';
 
 const ActivityParams = z.object({ id: z.string(), key: z.string() });
 const ProjectParams = z.object({ projectId: z.string() });
+const IdParams = z.object({ id: z.string() });
 const ListQuerySchema = z.object({
   status: DetailStatusSchema.optional(),
   type: DetailTypeSchema.optional(),
@@ -72,6 +76,63 @@ export async function detailRoutes(app: FastifyInstance) {
       );
       return reply.code(201).header('etag', revEtag(detail.rev)).send(detail);
     },
+  );
+
+  const writable = [
+    app.requireAuth,
+    app.requireResourceProject(details.loadDetail),
+    app.requireProjectStatus('open'),
+  ];
+
+  routes.patch(
+    '/details/:id',
+    {
+      preHandler: writable,
+      config: { rateLimit: USER_WRITE_RATE_LIMIT },
+      // 409: el detalle actual (conflicto de edición) o el error PROJECT_NOT_OPEN.
+      schema: {
+        params: IdParams,
+        body: DetailPatchSchema,
+        response: { 200: DetailSchema, 409: z.unknown() },
+      },
+    },
+    async (request, reply) => {
+      const rev = parseIfMatch(request.headers['if-match'], 'el requisito');
+      try {
+        const detail = await details.update(
+          request.resource as Detail,
+          rev,
+          request.body,
+          viewer(request),
+        );
+        return reply.header('etag', revEtag(detail.rev)).send(detail);
+      } catch (error) {
+        if (!(error instanceof DetailConflict)) throw error;
+        return reply.code(409).header('etag', revEtag(error.current.rev)).send(error.current);
+      }
+    },
+  );
+
+  routes.delete(
+    '/details/:id',
+    {
+      preHandler: writable,
+      config: { rateLimit: USER_WRITE_RATE_LIMIT },
+      schema: { params: IdParams },
+    },
+    async (request, reply) => {
+      await details.remove(request.resource as Detail, viewer(request));
+      return reply.code(204).send();
+    },
+  );
+
+  routes.get(
+    '/details/:id/history',
+    {
+      preHandler: [app.requireAuth, app.requireResourceProject(details.loadDetail)],
+      schema: { params: IdParams, response: { 200: z.array(HistoryEntrySchema) } },
+    },
+    async (request) => details.history(request.resource as Detail),
   );
 
   routes.get(
