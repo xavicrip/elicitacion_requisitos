@@ -1,9 +1,11 @@
 import type {
   ActivityCoverage,
+  Comment,
   Detail,
   DetailInput,
   Facets,
   HistoryEntry,
+  VoteState,
 } from '@reqcanvas/shared';
 import { apiFetch } from '../../lib/api-client';
 
@@ -30,6 +32,14 @@ export const detailsApi = {
   remove: (id: string) => apiFetch<void>(`/details/${id}`, { method: 'DELETE' }),
   history: (id: string) => apiFetch<HistoryEntry[]>(`/details/${id}/history`),
   facets: (projectId: string) => apiFetch<Facets>(`/projects/${projectId}/details/facets`),
+  vote: (id: string, voted: boolean) =>
+    apiFetch<VoteState>(`/details/${id}/vote`, { method: voted ? 'PUT' : 'DELETE' }),
+  comments: (id: string) => apiFetch<Comment[]>(`/details/${id}/comments`),
+  comment: (id: string, text: string) =>
+    apiFetch<Comment>(`/details/${id}/comments`, { method: 'POST', body: { text } }),
+  editComment: (id: string, text: string) =>
+    apiFetch<Comment>(`/comments/${id}`, { method: 'PATCH', body: { text } }),
+  removeComment: (id: string) => apiFetch<void>(`/comments/${id}`, { method: 'DELETE' }),
   coverage: (versionId: string) =>
     apiFetch<ActivityCoverage[]>(`/diagram-versions/${versionId}/coverage`),
 };
@@ -47,4 +57,5 @@ export const detailKeys = {
     ['details', diagramId, activityKey] as const,
   facets: (projectId: string) => ['details-facets', projectId] as const,
   history: (id: string) => ['details-history', id] as const,
+  comments: (id: string) => ['details', 'comments', id] as const,
 };
