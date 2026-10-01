@@ -140,6 +140,20 @@ workspace de la 003 mediante los puntos de extensión de `contracts/canvas-ui.md
 12. **Última actividad y auditoría**: crear, editar, moderar o comentar actualiza
     `projects.lastActivityAt`; los eventos de dominio se consumen en la auditoría (R10).
 
+## Mediciones (T034 y T048, 2026-10-01)
+
+En local (Docker Compose, Apple M1, Chrome de Playwright con ventana), con `pnpm e2e:perf`:
+
+| Medida | Objetivo | Resultado |
+|--------|----------|-----------|
+| FPS con `cien-actividades.png`, 50 contadores, 50 marcas «Sin detalles» y el mapa de calor | ≥ 50 (SC-002 de la 003) | 60 FPS al hacer zoom y al desplazar (p95 de 18 ms) |
+| Panel de una actividad con 200 detalles, desde el clic hasta verlos | < 1 s (SC-003) | 0,16 s |
+| Cobertura de 100 actividades con 5 000 detalles, a través del proxy | < 200 ms p95 | 75 ms p95 |
+
+- Con 60 FPS no hace falta dibujar los contadores como sprites (ajuste 9): siguen siendo DOM.
+- Los 5 000 detalles se insertan directamente en el MongoDB de Compose: por la API serían
+  demasiado lentos por el límite de 60 escrituras por minuto y usuario.
+
 ## Complexity Tracking
 
 Sin violaciones.

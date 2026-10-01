@@ -1,4 +1,6 @@
+import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
 import { imageReady, login, openProject, publishFixture, toScreen } from '../flows/diagrams';
 import { expect, test } from '../flows/fixtures';
@@ -213,4 +215,113 @@ test('una imagen de 10 MB se procesa en menos de 5 s', async ({ page, request })
     `[perf] ${(buffer.length / 1024 / 1024).toFixed(2)} MB subidos y procesados en ${seconds.toFixed(2)} s`,
   );
   expect(seconds).toBeLessThan(5);
+});
+
+/**
+ * Inserta detalles directamente en el MongoDB del stack de Compose: por la API serían demasiado
+ * lentos (60 escrituras por minuto y usuario). Solo para estas mediciones locales.
+ */
+function seedDetails(docs: {
+  projectId: string;
+  diagramId: string;
+  authorId: string;
+  keys: string[];
+}) {
+  const script = `
+    const project = ObjectId('${docs.projectId}');
+    const diagram = ObjectId('${docs.diagramId}');
+    const author = ObjectId('${docs.authorId}');
+    const keys = ${JSON.stringify(docs.keys)};
+    const now = new Date();
+    db.details.insertMany(keys.map((key, i) => ({
+      projectId: project, diagramId: diagram, activityKey: key,
+      given: 'el cliente tiene productos en el carrito número ' + i,
+      when: 'paga con tarjeta', then: 'el sistema confirma el pago ' + i,
+      type: 'functional', priority: null, authorRole: null, tags: [], status: 'pending',
+      duplicateOf: null, discardReason: null, voteCount: i % 7, commentCount: 0,
+      authorId: author, rev: 0, createdAt: now, updatedAt: now,
+    })));
+  `;
+  // Por la entrada estándar: el script (5 000 claves) excede el límite de argumentos.
+  execFileSync(
+    'docker',
+    [
+      'compose',
+      '-f',
+      'infra/docker-compose.yml',
+      'exec',
+      '-T',
+      'mongodb',
+      'mongosh',
+      '--quiet',
+      'reqcanvas',
+    ],
+    { cwd: fileURLToPath(new URL('../../', import.meta.url)), input: script, stdio: 'pipe' },
+  );
+}
+
+const percentile = (values: number[], p: number) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.min(sorted.length - 1, Math.ceil(p * sorted.length) - 1)]!;
+};
+
+test('panel de una actividad con 200 detalles (< 1 s, SC-003 de la 004) y cobertura de 5 000 (< 200 ms p95)', async ({
+  page,
+  request,
+}) => {
+  const user = await registerUser(request);
+  await login(page, user);
+  const projectId = await openProject(page, user.accessToken);
+  const version = await publishFixture(
+    page,
+    user.accessToken,
+    projectId,
+    'cien-actividades.png',
+    'Cien actividades',
+  );
+  const headers = { authorization: `Bearer ${user.accessToken}` };
+  const { activities } = (await (
+    await page.request.get(`/api/diagram-versions/${version.id}`, { headers })
+  ).json()) as {
+    activities: Array<{ key: string; bbox: { x: number; y: number; w: number; h: number } }>;
+  };
+  const me = (await (await page.request.get('/api/me', { headers })).json()) as { id: string };
+  // 200 en la primera actividad y 4 800 repartidos entre las otras 99: 5 000 en total.
+  const keys = [
+    ...Array.from({ length: 200 }, () => activities[0]!.key),
+    ...Array.from({ length: 4800 }, (_, i) => activities[1 + (i % 99)]!.key),
+  ];
+  seedDetails({ projectId, diagramId: version.diagramId, authorId: me.id, keys });
+
+  // Cobertura: 20 peticiones a través del proxy de web.
+  const durations: number[] = [];
+  for (let i = 0; i < 20; i++) {
+    const started = performance.now();
+    const response = await page.request.get(`/api/diagram-versions/${version.id}/coverage`, {
+      headers,
+    });
+    expect(response.status()).toBe(200);
+    durations.push(performance.now() - started);
+  }
+  const p95 = Math.round(percentile(durations, 0.95));
+
+  // Panel: desde el clic en la zona hasta ver los 200 detalles.
+  await page.goto(`/proyectos/${projectId}/diagramas/${version.diagramId}`);
+  await imageReady(page);
+  const { bbox } = activities[0]!;
+  const point = await toScreen(page, {
+    x: (bbox.x + bbox.w / 2) * 3000,
+    y: (bbox.y + bbox.h / 2) * 2000,
+  });
+  const started = Date.now();
+  await page.mouse.click(point.x, point.y);
+  const panel = page.getByRole('complementary', { name: 'Requisitos' });
+  await expect(panel.getByRole('article')).toHaveCount(200, { timeout: 10_000 });
+  const panelSeconds = (Date.now() - started) / 1000;
+
+  console.log(
+    `[perf] cobertura de 5 000 detalles: p95 ${p95} ms · panel con 200 detalles: ${panelSeconds.toFixed(2)} s`,
+  );
+  expect(p95).toBeLessThan(200);
+  expect(panelSeconds).toBeLessThan(1);
 });
