@@ -10,5 +10,6 @@ paths = [
   '''apps/api/tests/''',
   '''apps/analytics/tests/''',
   '''apps/web/tests/''',
+  '''packages/shared/tests/''',
   '''\.env\.example$''',
 ]
