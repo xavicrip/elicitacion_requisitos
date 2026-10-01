@@ -161,6 +161,10 @@ describe('ActivityForm (FR-004, FR-005)', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Eliminar actividad' }));
     const dialog = await screen.findByRole('alertdialog');
     expect(dialog).toHaveTextContent('3');
+    // Plan de la 004, ajuste 4: los requisitos no se borran; quedan para reasignarlos.
+    expect(dialog).toHaveTextContent(
+      'quedarán sin actividad al publicar esta versión y podrás reasignarlos',
+    );
     await userEvent.click(within(dialog).getByRole('button', { name: 'Eliminar de todos modos' }));
 
     await waitFor(() => expect(onDeleted).toHaveBeenCalled());

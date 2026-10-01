@@ -23,7 +23,8 @@ const STATUS_TEXT = {
 
 /**
  * Formulario de la actividad seleccionada (FR-004, FR-005): nombre, tipo y transiciones, con
- * guardado automático, y eliminación con confirmación si tiene requisitos asociados.
+ * guardado automático, y eliminación con confirmación si tiene requisitos asociados (que se
+ * conservan para reasignarlos).
  */
 export function ActivityForm({
   versionId,
@@ -173,8 +174,8 @@ export function ActivityForm({
           className="space-y-3 rounded border border-red-300 bg-red-50 p-4"
         >
           <p>
-            Esta actividad tiene {dependents} requisito(s) asociado(s). Si la eliminas, también se
-            eliminarán.
+            Esta actividad tiene {dependents} requisito(s) asociado(s). Si la eliminas, quedarán sin
+            actividad al publicar esta versión y podrás reasignarlos.
           </p>
           <div className="flex gap-3">
             <button
