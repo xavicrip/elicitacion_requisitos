@@ -26,19 +26,16 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag       | Por defecto | Feature                   | Qué oculta                                                                                                                                                               |
-| ---------- | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `accounts` | `true`      | `002-auth-proyectos`      | Registro, login, "Mis proyectos" e invitaciones. Desactivado, las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra       |
-| `details`  | `false`     | `004-detalles-requisitos` | Detalles de requisitos: las rutas de detalles, votos, comentarios, cobertura y huérfanos de `api` responden 404 y `web` no muestra el panel ni los indicadores           |
-| `diagrams` | `true`      | `003-diagramas-canvas`    | Diagramas y espacio de trabajo. Desactivado, `/projects/:id/diagrams`, `/diagrams`, `/diagram-versions` y `/activities` de `api` responden 404 y `web` oculta la sección |
+| Flag       | Por defecto | Feature                   | Qué oculta                                                                                                                                                                  |
+| ---------- | ----------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accounts` | `true`      | `002-auth-proyectos`      | Registro, login, "Mis proyectos" e invitaciones. Desactivado, las rutas `/auth`, `/me`, `/projects` e `/invitations` de `api` responden 404 y `web` no las muestra          |
+| `details`  | `true`      | `004-detalles-requisitos` | Detalles de requisitos. Desactivado, las rutas de detalles, votos, comentarios, cobertura y huérfanos de `api` responden 404 y `web` no muestra el panel ni los indicadores |
+| `diagrams` | `true`      | `003-diagramas-canvas`    | Diagramas y espacio de trabajo. Desactivado, `/projects/:id/diagrams`, `/diagrams`, `/diagram-versions` y `/activities` de `api` responden 404 y `web` oculta la sección    |
 
-`accounts` está activado por defecto desde que se completó la 002 (T067, 2026-09-30) y
-`diagrams`, desde que se completó la 003 (T059, 2026-10-01). Para ocultar uno en un entorno:
-`FEATURE_FLAGS=accounts=false` o `FEATURE_FLAGS=diagrams=false`. Se retirarán, con sus
-comprobaciones, en commits aparte.
-
-En local y en CI, Compose activa `details` (`infra/docker-compose.yml`); en Railway, solo en
-`staging` hasta completar la feature.
+`accounts` está activado por defecto desde que se completó la 002 (T067, 2026-09-30);
+`diagrams`, desde que se completó la 003 (T059, 2026-10-01), y `details`, desde que se completó
+la 004 (T053, 2026-10-01). Para ocultar uno en un entorno: `FEATURE_FLAGS=details=false`, por
+ejemplo. Se retirarán, con sus comprobaciones, en commits aparte.
 
 ## Activarlo por entorno
 

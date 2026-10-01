@@ -183,7 +183,7 @@ con motivo; el panel se filtra y ordena; los detalles huérfanos se reasignan
 - [X] T050 [P] Actualizar el README (sección de detalles de requisitos: pantallas, flag `details`) y revisar que `quickstart.md` siga al día con lo construido — `docs(repo)`
 - [X] T051 Configurar Railway **antes de fusionar**: `FEATURE_FLAGS=accounts=true,diagrams=true,details=true` en `api` de staging (producción sin cambios) y registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
 - [X] T052 Recorrer quickstart.md en staging (§1–§5) con un Administrador y dos Participantes y repetir las mediciones de T034 y T048; registrar el resultado en `quickstart.md` — `docs(repo)`
-- [ ] T053 Activar `details` por defecto (`default: true`) cuando las cinco historias y T052 estén en verde; retirar el flag en un commit posterior y separado (constitución IV) — `feat(shared)`
+- [X] T053 Activar `details` por defecto (`default: true`) cuando las cinco historias y T052 estén en verde; retirar el flag en un commit posterior y separado (constitución IV) — `feat(shared)`
 
 ---
 
