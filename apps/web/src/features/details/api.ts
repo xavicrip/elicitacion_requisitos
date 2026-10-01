@@ -1,4 +1,4 @@
-import type { Detail, DetailInput, Facets } from '@reqcanvas/shared';
+import type { Detail, DetailInput, Facets, HistoryEntry } from '@reqcanvas/shared';
 import { apiFetch } from '../../lib/api-client';
 
 export type DetailsQuery = { sort: 'votes' | 'recent' };
@@ -14,6 +14,15 @@ export const detailsApi = {
       method: 'POST',
       body: input,
     }),
+  /** `rev` es el que se editó: la API responde 409 con el detalle actual si cambió. */
+  update: (id: string, rev: number, input: DetailInput) =>
+    apiFetch<Detail>(`/details/${id}`, {
+      method: 'PATCH',
+      body: input,
+      headers: { 'if-match': `"${rev}"` },
+    }),
+  remove: (id: string) => apiFetch<void>(`/details/${id}`, { method: 'DELETE' }),
+  history: (id: string) => apiFetch<HistoryEntry[]>(`/details/${id}/history`),
   facets: (projectId: string) => apiFetch<Facets>(`/projects/${projectId}/details/facets`),
 };
 
@@ -24,4 +33,5 @@ export const detailKeys = {
   activity: (diagramId: string, activityKey: string) =>
     ['details', diagramId, activityKey] as const,
   facets: (projectId: string) => ['details-facets', projectId] as const,
+  history: (id: string) => ['details-history', id] as const,
 };

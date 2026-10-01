@@ -44,7 +44,12 @@ export function DetailsPanel({
           )}
           <div className="space-y-2">
             {details.data?.map((detail) => (
-              <DetailCard key={detail.id} detail={detail} />
+              <DetailCard
+                key={detail.id}
+                detail={detail}
+                projectId={project.id}
+                facets={facets.data}
+              />
             ))}
           </div>
           {version.status !== 'published' ? (

@@ -3,15 +3,21 @@ import {
   DetailInputSchema,
   DetailTypeSchema,
   PrioritySchema,
+  type Detail,
+  type DetailInput,
   type Facets,
 } from '@reqcanvas/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useId, useState } from 'react';
+import { lazy, Suspense, useId, useState } from 'react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { applyApiError, FormError } from '../../components/form';
+import { ApiError } from '../../lib/api-client';
 import { detailKeys, detailsApi } from './api';
 import { DETAIL_TYPE_LABEL, PRIORITY_LABEL } from './labels';
+
+// `diff` solo se descarga si hay un conflicto.
+const ConflictDialog = lazy(() => import('./ConflictDialog'));
 
 const MAX_LENGTH = 1000;
 /** A partir de aquí se muestra el contador de caracteres. */
@@ -43,6 +49,35 @@ const splitTags = (text: string) =>
     .split(',')
     .map((tag) => tag.trim())
     .filter(Boolean);
+
+const toInput = (values: FormValues): DetailInput => ({
+  given: values.given,
+  when: values.when,
+  then: values.then,
+  type: values.type,
+  priority: values.priority || null,
+  authorRole: values.authorRole.trim() || null,
+  tags: splitTags(values.tags),
+});
+
+const fromDetail = (detail: Detail): FormValues => ({
+  given: detail.given,
+  when: detail.when,
+  then: detail.then,
+  type: detail.type,
+  priority: detail.priority ?? '',
+  authorRole: detail.authorRole ?? '',
+  tags: detail.tags.join(', '),
+});
+
+/** Un 409 de PATCH trae el detalle actual; el de un proyecto no abierto trae `code`. */
+const conflictOf = (error: unknown): Detail | null =>
+  error instanceof ApiError &&
+  error.status === 409 &&
+  error.body &&
+  !(error.body as { code?: string }).code
+    ? (error.body as Detail)
+    : null;
 
 function ScenarioField({
   label,
@@ -83,17 +118,25 @@ function ScenarioField({
   );
 }
 
-/** Alta de un detalle Dado/Cuando/Entonces con tipo, prioridad, rol y etiquetas (FR-002, FR-003). */
+/**
+ * Alta o edición de un detalle Dado/Cuando/Entonces con tipo, prioridad, rol y etiquetas
+ * (FR-002, FR-003). En edición, un 409 abre la comparación con la versión actual (FR-007).
+ */
 export function DetailForm({
   projectId,
   diagramId,
   activityKey,
   facets,
+  detail,
+  onDone,
 }: {
   projectId: string;
   diagramId: string;
   activityKey: string;
   facets: Facets | undefined;
+  /** Detalle que se edita; sin él, el formulario da de alta uno nuevo. */
+  detail?: Detail;
+  onDone?: () => void;
 }) {
   const queryClient = useQueryClient();
   const typeId = useId();
@@ -102,30 +145,38 @@ export function DetailForm({
   const rolesListId = useId();
   const tagsId = useId();
   const [error, setError] = useState('');
-  const form = useForm<FormValues>({ resolver: zodResolver(FormSchema), defaultValues: EMPTY });
+  const [conflict, setConflict] = useState<{ mine: DetailInput; current: Detail } | null>(null);
+  const editing = Boolean(detail);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: detail ? fromDetail(detail) : EMPTY,
+  });
   const values = form.watch();
   const errors = form.formState.errors;
 
-  const create = useMutation({
-    mutationFn: (input: FormValues) =>
-      detailsApi.create(diagramId, activityKey, {
-        given: input.given,
-        when: input.when,
-        then: input.then,
-        type: input.type,
-        priority: input.priority || null,
-        authorRole: input.authorRole.trim() || null,
-        tags: splitTags(input.tags),
-      }),
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: detailKeys.activity(diagramId, activityKey) }),
+      queryClient.invalidateQueries({ queryKey: detailKeys.facets(projectId) }),
+    ]);
+
+  const save = useMutation({
+    mutationFn: ({ input, rev }: { input: DetailInput; rev?: number }) =>
+      detail
+        ? detailsApi.update(detail.id, rev ?? detail.rev, input)
+        : detailsApi.create(diagramId, activityKey, input),
     onSuccess: async () => {
       setError('');
-      form.reset(EMPTY);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: detailKeys.activity(diagramId, activityKey) }),
-        queryClient.invalidateQueries({ queryKey: detailKeys.facets(projectId) }),
-      ]);
+      setConflict(null);
+      if (!editing) form.reset(EMPTY);
+      await refresh();
+      onDone?.();
     },
-    onError: (err) => setError(applyApiError(err, form.setError)),
+    onError: (err, { input }) => {
+      const current = conflictOf(err);
+      if (current) setConflict({ mine: input, current });
+      else setError(applyApiError(err, form.setError));
+    },
   });
 
   const addTag = (tag: string) => {
@@ -136,11 +187,11 @@ export function DetailForm({
   return (
     <form
       noValidate
-      onSubmit={form.handleSubmit((input) => create.mutate(input))}
-      className="space-y-3 border-t pt-3 text-sm"
-      aria-label="Nuevo requisito"
+      onSubmit={form.handleSubmit((values) => save.mutate({ input: toInput(values) }))}
+      className={editing ? 'space-y-3 text-sm' : 'space-y-3 border-t pt-3 text-sm'}
+      aria-label={editing ? 'Editar requisito' : 'Nuevo requisito'}
     >
-      <h3 className="font-semibold">Nuevo requisito</h3>
+      <h3 className="font-semibold">{editing ? 'Editar requisito' : 'Nuevo requisito'}</h3>
       <ScenarioField
         label="Dado (contexto)"
         value={values.given}
@@ -233,13 +284,35 @@ export function DetailForm({
         )}
       </div>
       <FormError>{error}</FormError>
-      <button
-        type="submit"
-        disabled={create.isPending}
-        className="rounded bg-blue-700 px-4 py-2 font-medium text-white disabled:opacity-50"
-      >
-        Guardar requisito
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={save.isPending}
+          className="rounded bg-blue-700 px-4 py-2 font-medium text-white disabled:opacity-50"
+        >
+          {editing ? 'Guardar cambios' : 'Guardar requisito'}
+        </button>
+        {editing && (
+          <button type="button" onClick={onDone} className="rounded border px-4 py-2">
+            Cancelar
+          </button>
+        )}
+      </div>
+      {conflict && (
+        <Suspense fallback={null}>
+          <ConflictDialog
+            mine={conflict.mine}
+            current={conflict.current}
+            saving={save.isPending}
+            onKeepMine={() => save.mutate({ input: conflict.mine, rev: conflict.current.rev })}
+            onUseCurrent={async () => {
+              setConflict(null);
+              await refresh();
+              onDone?.();
+            }}
+          />
+        </Suspense>
+      )}
     </form>
   );
 }
