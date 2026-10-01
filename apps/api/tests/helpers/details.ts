@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { uploadDiagram } from './diagrams';
 
-/** Flags de las pruebas de la 004. */
+/** Escenario Dado/Cuando/Entonces válido. */
 export const scenario = {
   given: 'el cliente tiene productos en el carrito',
   when: 'paga con tarjeta',

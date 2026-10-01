@@ -26,7 +26,7 @@ beforeAll(async () => {
     logStream: new Writable({ write: (_c, _e, done) => done() }),
   }));
   await app.ready();
-  app.detailEvents.onAny((name) => void events.push(name));
+  app.domainEvents.onAny((name) => void events.push(name));
   ana = await registerTestUser(app, 'Ana');
   luis = await registerTestUser(app, 'Luis');
   marta = await registerTestUser(app, 'Marta');

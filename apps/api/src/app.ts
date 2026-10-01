@@ -12,7 +12,7 @@ import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
 import { commentRoutes } from './modules/details/comments.routes.js';
 import { coverageRoutes } from './modules/details/coverage.routes.js';
-import { detailEventsPlugin } from './modules/details/events.js';
+import { detailAuditPlugin } from './modules/details/events.js';
 import { detailRoutes } from './modules/details/routes.js';
 import { voteRoutes } from './modules/details/votes.routes.js';
 import { registerDiagramsCascade } from './modules/diagrams/cascade.js';
@@ -25,6 +25,7 @@ import { projectRoutes } from './modules/projects/routes.js';
 import { authPlugin } from './plugins/auth.js';
 import { authorizationPlugin } from './plugins/authorization.js';
 import { featureGatePlugin } from './plugins/flags.js';
+import { domainEventsPlugin } from './lib/domain-events.js';
 import { mongoPlugin } from './plugins/mongo.js';
 import { genReqId, observability, REDACT_PATHS } from './plugins/observability.js';
 import { rateLimitPlugin } from './plugins/rate-limit.js';
@@ -126,6 +127,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       timeoutMs: checkTimeoutMs,
     });
     await app.register(redisPlugin, { url: services.redisUrl, timeoutMs: checkTimeoutMs });
+    await app.register(domainEventsPlugin);
     if (services.storage) await app.register(storagePlugin, services.storage);
     await app.register(healthRoutes, {
       analyticsUrl: services.analyticsUrl,
@@ -157,9 +159,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(activityRoutes);
         registerDiagramsCascade(app);
 
-        // Detalles de requisitos (feature 004): la cascada y el conteo se registran aunque el
-        // flag `details` esté desactivado, para no dejar datos huérfanos al borrar un proyecto.
-        await app.register(detailEventsPlugin);
+        // Detalles de requisitos (feature 004).
+        await app.register(detailAuditPlugin);
         registerDetailsCascade(app);
         await app.register(detailRoutes);
         await app.register(coverageRoutes);

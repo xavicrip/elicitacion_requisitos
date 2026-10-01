@@ -65,7 +65,7 @@ export function interactionsService(app: FastifyInstance) {
       : await Details.findById(detail._id);
     const voteCount = updated?.voteCount ?? 0;
     if (delta) {
-      await app.detailEvents.emit('vote.changed', {
+      await app.domainEvents.emit('vote.changed', {
         ...eventBase(detail, viewer),
         detailId: detail._id.toHexString(),
         voteCount,
@@ -132,7 +132,7 @@ export function interactionsService(app: FastifyInstance) {
       await Details.updateOne({ _id: detail._id }, { $inc: { commentCount: 1 } });
       const [comment] = await presentComments([created.toObject()], viewer);
       await touchProject(detail.projectId);
-      await app.detailEvents.emit('comment.created', {
+      await app.domainEvents.emit('comment.created', {
         ...eventBase(detail, viewer),
         comment: comment!,
       });
@@ -150,7 +150,7 @@ export function interactionsService(app: FastifyInstance) {
         { new: true, runValidators: true },
       ).lean<DetailComment>();
       const [presented] = await presentComments([updated!], viewer);
-      await app.detailEvents.emit('comment.updated', {
+      await app.domainEvents.emit('comment.updated', {
         ...eventBase(await detailOf(comment), viewer),
         comment: presented!,
       });
@@ -165,7 +165,7 @@ export function interactionsService(app: FastifyInstance) {
       const { deletedCount } = await Comments.deleteOne({ _id: comment._id });
       if (!deletedCount) return;
       await Details.updateOne({ _id: comment.detailId }, { $inc: { commentCount: -1 } });
-      await app.detailEvents.emit('comment.deleted', {
+      await app.domainEvents.emit('comment.deleted', {
         ...eventBase(await detailOf(comment), viewer),
         commentId: comment._id.toHexString(),
         detailId: comment.detailId.toHexString(),

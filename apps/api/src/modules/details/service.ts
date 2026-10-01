@@ -230,7 +230,7 @@ export function detailsService(app: FastifyInstance) {
         'status',
         viewer,
       );
-      await app.detailEvents.emit('detail.status_changed', {
+      await app.domainEvents.emit('detail.status_changed', {
         ...eventBase(detail, viewer),
         detailId: after.id,
         activityKey: after.activityKey,
@@ -289,7 +289,7 @@ export function detailsService(app: FastifyInstance) {
         'reassign',
         viewer,
       );
-      await app.detailEvents.emit('detail.reassigned', {
+      await app.domainEvents.emit('detail.reassigned', {
         ...eventBase(detail, viewer),
         detailId: after.id,
         from: { diagramId: detail.diagramId.toHexString(), activityKey: detail.activityKey },
@@ -322,7 +322,7 @@ export function detailsService(app: FastifyInstance) {
         viewer,
       );
       await touchProject(current.projectId);
-      await app.detailEvents.emit('detail.updated', {
+      await app.domainEvents.emit('detail.updated', {
         ...eventBase(current, viewer),
         detail: updated,
         rev: updated.rev,
@@ -342,7 +342,7 @@ export function detailsService(app: FastifyInstance) {
       ]);
       await Details.deleteOne({ _id: detail._id });
       await touchProject(detail.projectId);
-      await app.detailEvents.emit('detail.deleted', {
+      await app.domainEvents.emit('detail.deleted', {
         ...eventBase(detail, viewer),
         detailId: detail._id.toHexString(),
         activityKey: detail.activityKey,
@@ -413,7 +413,7 @@ export function detailsService(app: FastifyInstance) {
       });
       const detail = await presentOne(created.toObject(), viewer);
       await touchProject(diagram.projectId);
-      await app.detailEvents.emit('detail.created', {
+      await app.domainEvents.emit('detail.created', {
         ...eventBase(created.toObject(), viewer),
         detail,
       });
