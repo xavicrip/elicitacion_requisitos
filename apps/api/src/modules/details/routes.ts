@@ -1,5 +1,7 @@
 import {
   DetailInputSchema,
+  ReassignInputSchema,
+  StatusChangeSchema,
   DetailPatchSchema,
   HistoryEntrySchema,
   PrioritySchema,
@@ -133,6 +135,39 @@ export async function detailRoutes(app: FastifyInstance) {
       schema: { params: IdParams, response: { 200: z.array(HistoryEntrySchema) } },
     },
     async (request) => details.history(request.resource as Detail),
+  );
+
+  const moderation = [
+    app.requireAuth,
+    app.requireResourceProject(details.loadDetail, 'admin'),
+    app.requireProjectStatus('open'),
+  ];
+
+  routes.post(
+    '/details/:id/status',
+    {
+      preHandler: moderation,
+      schema: { params: IdParams, body: StatusChangeSchema, response: { 200: DetailSchema } },
+    },
+    async (request) => details.moderate(request.resource as Detail, request.body, viewer(request)),
+  );
+
+  routes.post(
+    '/details/:id/reassign',
+    {
+      preHandler: moderation,
+      schema: { params: IdParams, body: ReassignInputSchema, response: { 200: DetailSchema } },
+    },
+    async (request) => details.reassign(request.resource as Detail, request.body, viewer(request)),
+  );
+
+  routes.get(
+    '/projects/:projectId/details/orphans',
+    {
+      preHandler: [app.requireAuth, app.requireProjectRole('admin')],
+      schema: { params: ProjectParams, response: { 200: z.array(DetailSchema) } },
+    },
+    async (request) => details.orphans(request.project!._id, viewer(request)),
   );
 
   routes.get(
