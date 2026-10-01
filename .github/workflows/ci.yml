@@ -173,8 +173,8 @@ jobs:
         run: docker compose -f infra/docker-compose.yml up -d --build --wait --wait-timeout 300
         env:
           APP_VERSION: ci
-          # Los E2E de `flows` prueban la funcionalidad detrás de los flags (features 002 y 003).
-          FEATURE_FLAGS: accounts=true,diagrams=true
+          # Los E2E de `flows` prueban la funcionalidad detrás de los flags (features 002, 003 y 004).
+          FEATURE_FLAGS: accounts=true,diagrams=true,details=true
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
         env:
