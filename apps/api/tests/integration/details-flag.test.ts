@@ -35,16 +35,16 @@ async function appWithFlags(featureFlags: string): Promise<FastifyInstance> {
 }
 
 describe('registro del flag', () => {
-  it('details está desactivado por defecto, es de la 004 y sustituye a coverage-overlay', () => {
-    expect(FLAGS.details).toMatchObject({ default: false, owner: '004-detalles-requisitos' });
+  it('details está activado por defecto desde T053, es de la 004 y sustituye a coverage-overlay', () => {
+    expect(FLAGS.details).toMatchObject({ default: true, owner: '004-detalles-requisitos' });
     expect(FLAGS).not.toHaveProperty('coverage-overlay');
   });
 });
 
-describe('flag details desactivado (valor por defecto)', () => {
+describe('flag details desactivado (FEATURE_FLAGS=details=false)', () => {
   let app: FastifyInstance;
   beforeAll(async () => {
-    app = await appWithFlags('');
+    app = await appWithFlags('details=false');
   });
   afterAll(() => closeTestApp(app));
 
@@ -59,10 +59,10 @@ describe('flag details desactivado (valor por defecto)', () => {
   });
 });
 
-describe('flag details activado', () => {
+describe('flag details activado (valor por defecto)', () => {
   let app: FastifyInstance;
   beforeAll(async () => {
-    app = await appWithFlags('details=true');
+    app = await appWithFlags('');
   });
   afterAll(() => closeTestApp(app));
 

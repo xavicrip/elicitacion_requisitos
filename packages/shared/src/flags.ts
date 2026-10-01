@@ -38,8 +38,8 @@ export const FLAGS = defineFlags({
   },
   details: {
     description:
-      'Detalles de requisitos por actividad (Dado/Cuando/Entonces, votos, comentarios, moderación e indicadores); oculto hasta completar la feature',
-    default: false,
+      'Detalles de requisitos por actividad (Dado/Cuando/Entonces, votos, comentarios, moderación e indicadores). Activado al completar la 004; se retirará en un commit aparte',
+    default: true,
     owner: '004-detalles-requisitos',
   },
 });
