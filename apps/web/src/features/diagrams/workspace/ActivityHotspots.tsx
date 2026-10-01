@@ -1,7 +1,7 @@
 import type { Activity } from '@reqcanvas/shared';
 import { Html } from '@react-three/drei';
 import { useThree, type ThreeEvent } from '@react-three/fiber';
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { hitTest, toPixels } from '../editor/geometry';
 import type { Point, Size } from './camera/zoom';
 import { useWorkspaceStore } from './store';
@@ -10,6 +10,41 @@ import { ZoneShape } from './ZoneShape';
 const DEFAULT_COLOR = '#2563eb';
 /** Un arrastre (desplazar la vista) no es un clic. */
 const CLICK_TOLERANCE_PX = 4;
+
+/** Una zona; memoizada para que resaltar otra no vuelva a renderizar las demás. */
+const Hotspot = memo(function Hotspot({
+  activity,
+  image,
+  selected,
+  hovered,
+  color,
+  badge,
+}: {
+  activity: Activity;
+  image: Size;
+  selected: boolean;
+  hovered: boolean;
+  color: string;
+  badge: ReactNode;
+}) {
+  const { x, y, width } = toPixels(activity.bbox, image);
+  return (
+    <group>
+      <ZoneShape
+        bbox={activity.bbox}
+        image={image}
+        color={color}
+        opacity={selected ? 0.3 : hovered ? 0.2 : 0.06}
+        borderOpacity={selected || hovered ? 1 : 0.35}
+      />
+      {badge && (
+        <Html position={[x + width, -y, 2]} style={{ pointerEvents: 'none' }}>
+          {badge}
+        </Html>
+      )}
+    </group>
+  );
+});
 
 /** Actividad bajo un punto de la imagen: la zona más pequeña que lo contiene (research R5). */
 export function hotspotAt(activities: Activity[], point: Point, image: Size): string | null {
@@ -52,6 +87,8 @@ export function ActivityHotspots({
       <mesh
         position={[image.width / 2, -image.height / 2, 0.5]}
         onPointerMove={(event) => {
+          // Con un botón pulsado se está desplazando la vista: no se resalta (rendimiento).
+          if (event.buttons !== 0) return;
           const key = hotspotAt(activities, toImage(event), image);
           if (key !== useWorkspaceStore.getState().hoveredActivityKey) hover(key);
           gl.domElement.style.cursor = key ? 'pointer' : '';
@@ -69,28 +106,17 @@ export function ActivityHotspots({
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {activities.map((activity) => {
-        const active = activity.key === selectedKey || activity.key === hoveredKey;
-        const color = colorFor?.(activity) ?? DEFAULT_COLOR;
-        const badge = renderBadge?.(activity);
-        const { x, y, width } = toPixels(activity.bbox, image);
-        return (
-          <group key={activity.key}>
-            <ZoneShape
-              bbox={activity.bbox}
-              image={image}
-              color={color}
-              opacity={activity.key === selectedKey ? 0.3 : active ? 0.2 : 0.06}
-              borderOpacity={active ? 1 : 0.35}
-            />
-            {badge && (
-              <Html position={[x + width, -y, 2]} style={{ pointerEvents: 'none' }}>
-                {badge}
-              </Html>
-            )}
-          </group>
-        );
-      })}
+      {activities.map((activity) => (
+        <Hotspot
+          key={activity.key}
+          activity={activity}
+          image={image}
+          selected={activity.key === selectedKey}
+          hovered={activity.key === hoveredKey}
+          color={colorFor?.(activity) ?? DEFAULT_COLOR}
+          badge={renderBadge?.(activity)}
+        />
+      ))}
 
       {labelled.map((activity) => {
         const { x, y } = toPixels(activity.bbox, image);
