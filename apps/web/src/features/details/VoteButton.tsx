@@ -6,9 +6,10 @@ import { detailKeys, detailsApi } from './api';
 
 /**
  * Voto (+1) con actualización optimista (FR-008): el contador cambia al pulsar y vuelve atrás si
- * la API lo rechaza. Los detalles propios no se votan; un voto ya dado siempre se puede retirar.
+ * la API lo rechaza. Los detalles propios no se votan; un voto ya dado se puede retirar mientras
+ * el proyecto esté abierto (FR-013).
  */
-export function VoteButton({ detail }: { detail: Detail }) {
+export function VoteButton({ detail, projectOpen }: { detail: Detail; projectOpen: boolean }) {
   const queryClient = useQueryClient();
   const [state, setState] = useState({ voteCount: detail.voteCount, votedByMe: detail.votedByMe });
   const [error, setError] = useState('');
@@ -17,6 +18,8 @@ export function VoteButton({ detail }: { detail: Detail }) {
   useEffect(() => {
     setState({ voteCount: detail.voteCount, votedByMe: detail.votedByMe });
   }, [detail.voteCount, detail.votedByMe]);
+
+  const canToggle = detail.permissions.canVote || (projectOpen && state.votedByMe);
 
   const toggle = async () => {
     const before = state;
@@ -41,12 +44,8 @@ export function VoteButton({ detail }: { detail: Detail }) {
       <button
         type="button"
         aria-pressed={state.votedByMe}
-        disabled={pending || (!detail.permissions.canVote && !state.votedByMe)}
-        title={
-          detail.permissions.canVote || state.votedByMe
-            ? undefined
-            : 'No puedes votar este requisito'
-        }
+        disabled={pending || !canToggle}
+        title={canToggle ? undefined : 'No puedes votar este requisito'}
         onClick={() => void toggle()}
         className="rounded border px-2 py-1 aria-pressed:bg-blue-100 disabled:opacity-50"
       >
