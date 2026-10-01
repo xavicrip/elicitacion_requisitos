@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import type { SidePanelContext } from '../diagrams/workspace/WorkspacePage';
 import { detailKeys, detailsApi, type DetailsQuery } from './api';
 import { DetailCard } from './DetailCard';
 import { DetailForm } from './DetailForm';
 import type { HeatmapScale } from './overlays/Heatmap';
+import { DetailFilters } from './DetailFilters';
 import { HeatmapLegend } from './overlays/HeatmapLegend';
-
-const DEFAULT_QUERY: DetailsQuery = { sort: 'votes' };
 
 /**
  * Panel lateral de requisitos de la actividad seleccionada (FR-001): sus detalles, ordenados
@@ -24,15 +24,17 @@ export function DetailsPanel({
   heatmap?: { on: boolean; toggle: () => void; legend?: HeatmapScale['legend'] };
 }) {
   const activity = version.activities.find((candidate) => candidate.key === activityKey);
+  const [query, setQuery] = useState<DetailsQuery>({ sort: 'votes' });
   const details = useQuery({
-    queryKey: detailKeys.list(diagramId, activityKey ?? '', DEFAULT_QUERY),
-    queryFn: () => detailsApi.list(diagramId, activityKey!, DEFAULT_QUERY),
+    queryKey: detailKeys.list(diagramId, activityKey ?? '', query),
+    queryFn: () => detailsApi.list(diagramId, activityKey!, query),
     enabled: Boolean(activity),
   });
+  // También alimentan el filtro por etiqueta.
   const facets = useQuery({
     queryKey: detailKeys.facets(project.id),
     queryFn: () => detailsApi.facets(project.id),
-    enabled: Boolean(activity) && project.status === 'open',
+    enabled: Boolean(activity),
     staleTime: 60_000,
   });
 
@@ -58,6 +60,7 @@ export function DetailsPanel({
       ) : (
         <>
           <h2 className="font-semibold">Requisitos de «{activity.label}»</h2>
+          <DetailFilters query={query} onChange={setQuery} tags={facets.data?.tags ?? []} />
           {details.isLoading && <p className="text-sm">Cargando…</p>}
           {details.data?.length === 0 && (
             <p className="text-sm text-gray-600">Esta actividad aún no tiene requisitos.</p>
@@ -70,6 +73,7 @@ export function DetailsPanel({
                 projectId={project.id}
                 facets={facets.data}
                 projectOpen={project.status === 'open'}
+                siblings={details.data}
               />
             ))}
           </div>

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
+import { FlagGate } from '../../lib/flags';
 import { projectKeys, projectsApi } from '../projects/api';
 import { ProjectNotFound } from '../projects/ProjectNotFound';
 import { diagramKeys, diagramsApi, useImageUrl } from './api';
@@ -40,7 +41,19 @@ export function DiagramListPage() {
           </p>
           <h1 className="text-2xl font-semibold">Diagramas</h1>
         </div>
-        {isAdmin && project.data.status !== 'closed' && <UploadDialog projectId={projectId} />}
+        <div className="flex flex-wrap items-center gap-3">
+          {isAdmin && (
+            <FlagGate flag="details">
+              <Link
+                to={`/proyectos/${projectId}/requisitos-huerfanos`}
+                className="text-sm underline"
+              >
+                Requisitos sin actividad
+              </Link>
+            </FlagGate>
+          )}
+          {isAdmin && project.data.status !== 'closed' && <UploadDialog projectId={projectId} />}
+        </div>
       </header>
       {diagrams.data.length === 0 ? (
         <p>Todavía no hay diagramas.</p>

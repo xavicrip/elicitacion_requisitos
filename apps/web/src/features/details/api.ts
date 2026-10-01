@@ -3,19 +3,36 @@ import type {
   Comment,
   Detail,
   DetailInput,
+  DetailStatus,
+  DetailType,
+  Priority,
+  ReassignInput,
+  StatusChange,
   Facets,
   HistoryEntry,
   VoteState,
 } from '@reqcanvas/shared';
 import { apiFetch } from '../../lib/api-client';
 
-export type DetailsQuery = { sort: 'votes' | 'recent' };
+/** Orden y filtros del panel (FR-012); los filtros vacíos no se envían. */
+export type DetailsQuery = {
+  sort: 'votes' | 'recent';
+  status?: DetailStatus;
+  type?: DetailType;
+  priority?: Priority;
+  tag?: string;
+};
+
+const queryString = (query: DetailsQuery) =>
+  new URLSearchParams(
+    Object.entries(query).filter((entry): entry is [string, string] => Boolean(entry[1])),
+  ).toString();
 
 /** Detalles de requisitos (contracts/details.openapi.yaml). */
 export const detailsApi = {
   list: (diagramId: string, activityKey: string, query: DetailsQuery = { sort: 'votes' }) =>
     apiFetch<Detail[]>(
-      `/diagrams/${diagramId}/activities/${activityKey}/details?${new URLSearchParams(query)}`,
+      `/diagrams/${diagramId}/activities/${activityKey}/details?${queryString(query)}`,
     ),
   create: (diagramId: string, activityKey: string, input: DetailInput) =>
     apiFetch<Detail>(`/diagrams/${diagramId}/activities/${activityKey}/details`, {
@@ -40,6 +57,11 @@ export const detailsApi = {
   editComment: (id: string, text: string) =>
     apiFetch<Comment>(`/comments/${id}`, { method: 'PATCH', body: { text } }),
   removeComment: (id: string) => apiFetch<void>(`/comments/${id}`, { method: 'DELETE' }),
+  moderate: (id: string, change: StatusChange) =>
+    apiFetch<Detail>(`/details/${id}/status`, { method: 'POST', body: change }),
+  orphans: (projectId: string) => apiFetch<Detail[]>(`/projects/${projectId}/details/orphans`),
+  reassign: (id: string, target: ReassignInput) =>
+    apiFetch<Detail>(`/details/${id}/reassign`, { method: 'POST', body: target }),
   coverage: (versionId: string) =>
     apiFetch<ActivityCoverage[]>(`/diagram-versions/${versionId}/coverage`),
 };
@@ -58,4 +80,5 @@ export const detailKeys = {
   facets: (projectId: string) => ['details-facets', projectId] as const,
   history: (id: string) => ['details-history', id] as const,
   comments: (id: string) => ['details', 'comments', id] as const,
+  orphans: (projectId: string) => ['details', 'orphans', projectId] as const,
 };
