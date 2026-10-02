@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.6.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.5.0...v0.6.0) (2026-10-02)
+
+
+### Funcionalidades
+
+* **api:** add the Socket.IO server with JWT auth and rooms ([cb06e3c](https://github.com/xavicrip/elicitacion_requisitos/commit/cb06e3ca701592a1470f092394d589fbde3a9b49))
+* **api:** generalize the domain event bus and emit project events ([87f7323](https://github.com/xavicrip/elicitacion_requisitos/commit/87f7323480c469c568ea49a2e7646fa5e456d2e0))
+* **api:** log socket lifecycle, ping latency and dropped events per replica ([bee255f](https://github.com/xavicrip/elicitacion_requisitos/commit/bee255f63c8998f38282d5ee75df85931b3f3fd0))
+* **api:** relay domain events to the project room ([9d3d741](https://github.com/xavicrip/elicitacion_requisitos/commit/9d3d7410110af9e606b7b3c2039ee38e6c75b4d5))
+* **api:** relay live cursors to the diagram room ([bdb9e67](https://github.com/xavicrip/elicitacion_requisitos/commit/bdb9e67a00b5fceeb5a3f79fb64e293fc2dce879))
+* **api:** revoke realtime access when members leave or projects change ([ee657a0](https://github.com/xavicrip/elicitacion_requisitos/commit/ee657a04c0a7ca63582453b0f26add55ee035cfd))
+* **api:** track presence per diagram in Redis ([bc8490b](https://github.com/xavicrip/elicitacion_requisitos/commit/bc8490b894be4de9081140d04e5845474f5ff492))
+* **shared:** add the realtime feature flag ([4c3a60f](https://github.com/xavicrip/elicitacion_requisitos/commit/4c3a60fa8149586dd8d31c6be84180073927afbe))
+* **shared:** add the realtime socket contract ([13bcfad](https://github.com/xavicrip/elicitacion_requisitos/commit/13bcfad75fab849a603ed09db5fcc4b85538ab7d))
+* **shared:** enable realtime by default (T047) ([8b9f997](https://github.com/xavicrip/elicitacion_requisitos/commit/8b9f997dc3464bfc1e32d1a579518e579ed3d5a6))
+* **web:** add the realtime socket client ([aaf7b6b](https://github.com/xavicrip/elicitacion_requisitos/commit/aaf7b6bd2a102ae643dcd48a873aade7724955ac))
+* **web:** apply realtime events to the workspace cache ([60a8119](https://github.com/xavicrip/elicitacion_requisitos/commit/60a8119544e2fd5431d2a4ae36dd3cd9a7c933c8))
+* **web:** proxy the Socket.IO WebSocket to api ([dd5b090](https://github.com/xavicrip/elicitacion_requisitos/commit/dd5b090792fcfbc04b239abc0c8bedf7697d629d))
+* **web:** reconnect without losing work and react to revocation ([484a3e0](https://github.com/xavicrip/elicitacion_requisitos/commit/484a3e04917d13df8dba292288961083d2b3dc54))
+* **web:** show live cursors in image coordinates ([b6ea5dc](https://github.com/xavicrip/elicitacion_requisitos/commit/b6ea5dca70e4048f91558295b77b50f7c5339384))
+* **web:** show who is connected and what they have selected ([c65b0e4](https://github.com/xavicrip/elicitacion_requisitos/commit/c65b0e4170d07e993a41f1c55f5cffb9dfa17c6d))
+
+
+### Rendimiento
+
+* **e2e:** measure realtime latency and cursor FPS with 50 clients ([54efb4a](https://github.com/xavicrip/elicitacion_requisitos/commit/54efb4a4b965ea9b58dad0c058a4b8969bebf77b))
+
+
+### Refactorizaciones
+
+* **shared:** retire the accounts feature flag ([aa54c85](https://github.com/xavicrip/elicitacion_requisitos/commit/aa54c85d6f3818a3dcc17be5cd84524c4f3cb0d5))
+* **shared:** retire the details feature flag ([73698a7](https://github.com/xavicrip/elicitacion_requisitos/commit/73698a7abb51e9911347c5a2fba21f8437a0325a))
+* **shared:** retire the diagrams feature flag ([8749164](https://github.com/xavicrip/elicitacion_requisitos/commit/87491644e3cc7c6fc718a98f1fd4b84204b8b45b))
+* **shared:** share the detail permission rule with web ([dd1d40d](https://github.com/xavicrip/elicitacion_requisitos/commit/dd1d40d288694acd6a1d8cb156e869b388fce3cf))
+
 ## [0.5.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.4.0...v0.5.0) (2026-10-01)
 
 
