@@ -4,8 +4,10 @@ import {
   type Comment,
   type Detail,
   type DomainEvents,
+  type AccessRevoked,
   type JoinAck,
   type PresenceEntry,
+  type ProjectRoom,
   type ProjectStatus,
   type PublicDetail,
   type RelayedEventName,
@@ -13,8 +15,10 @@ import {
 } from '@reqcanvas/shared';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { detailKeys, type DetailsQuery } from '../details/api';
 import { diagramKeys } from '../diagrams/api';
+import { projectKeys } from '../projects/api';
 import type { RealtimeSocket } from './socket';
 
 /** Quién mira y qué: para calcular permisos y saber qué invalidar. */
@@ -228,27 +232,105 @@ export function applyRealtimeEvent<N extends RelayedEventName>(
   void client.invalidateQueries({ queryKey: detailKeys.coverage(ctx.versionId) });
 }
 
-/** Sala de la versión mostrada: se une, y al cambiar de versión sale de la anterior (U3). */
-export function useRealtimeRoom(socket: RealtimeSocket | null, versionId: string | null) {
+/**
+ * Sala de la versión mostrada: se une, y al cambiar de versión sale de la anterior (U3). Tras
+ * una desconexión vuelve a unirse al reconectar y avisa con `onReconnect` (US4).
+ */
+export function useRealtimeRoom(
+  socket: RealtimeSocket | null,
+  versionId: string | null,
+  onReconnect?: () => void,
+) {
   const [status, setStatus] = useState<'idle' | 'joining' | 'joined' | 'denied'>('idle');
   const [presence, setPresence] = useState<PresenceEntry[]>([]);
+  const reconnectRef = useRef(onReconnect);
+  reconnectRef.current = onReconnect;
 
   useEffect(() => {
     if (!socket || !versionId) {
       setStatus('idle');
       return;
     }
-    setStatus('joining');
-    socket.emit('room:join', { versionId }, (ack: JoinAck) => {
-      setPresence(ack.ok ? ack.presence : []);
-      setStatus(ack.ok ? 'joined' : 'denied');
-    });
+    const join = () => {
+      setStatus('joining');
+      socket.emit('room:join', { versionId }, (ack: JoinAck) => {
+        setPresence(ack.ok ? ack.presence : []);
+        setStatus(ack.ok ? 'joined' : 'denied');
+      });
+    };
+    let lost = false;
+    const onDisconnect = () => {
+      lost = true;
+      setStatus('joining');
+    };
+    const onConnect = () => {
+      if (!lost) return;
+      lost = false;
+      join();
+      reconnectRef.current?.();
+    };
+    const listener = socket as unknown as Listener;
+    listener.on('disconnect', onDisconnect);
+    listener.on('connect', onConnect);
+    join();
     return () => {
+      listener.off('disconnect', onDisconnect);
+      listener.off('connect', onConnect);
       socket.emit('room:leave', { versionId });
     };
   }, [socket, versionId]);
 
   return { status, presence };
+}
+
+type Listener = { on(name: string, h: unknown): unknown; off(name: string, h: unknown): unknown };
+
+/** Aviso al llegar a "Mis proyectos" tras perder el acceso (FR-008). */
+export const REVOKED_NOTICE = 'Ya no tienes acceso a este proyecto.';
+
+/**
+ * Ciclo de vida del espacio de trabajo en tiempo real (US4): la sala, resincronizar al
+ * reconectar (SC-003: lo ocurrido mientras tanto se vuelve a pedir), salir al perder el acceso
+ * y pasar a solo lectura al cerrarse el proyecto.
+ */
+export function useRealtimeLifecycle(
+  socket: RealtimeSocket | null,
+  { projectId, versionId }: { projectId: string; versionId: string | null },
+) {
+  const client = useQueryClient();
+  const navigate = useNavigate();
+
+  const room = useRealtimeRoom(socket, versionId, () => {
+    void client.invalidateQueries({ queryKey: detailKeys.all });
+    void client.invalidateQueries({ queryKey: diagramKeys.list(projectId) });
+    void client.invalidateQueries({ queryKey: projectKeys.detail(projectId) });
+    if (versionId) void client.invalidateQueries({ queryKey: diagramKeys.version(versionId) });
+  });
+
+  useEffect(() => {
+    if (!socket) return;
+    const listener = socket as unknown as Listener;
+    const onRevoked = (event: AccessRevoked) => {
+      if (event.projectId !== projectId) return;
+      navigate('/proyectos', { state: { notice: REVOKED_NOTICE } });
+    };
+    // La web deriva la solo lectura del estado del proyecto (004, `projectOpen`).
+    const onStatus = (event: ProjectRoom) => {
+      if (event.projectId === projectId) {
+        void client.invalidateQueries({ queryKey: projectKeys.detail(projectId) });
+      }
+    };
+    listener.on('access:revoked', onRevoked);
+    listener.on('project:closed', onStatus);
+    listener.on('project:reopened', onStatus);
+    return () => {
+      listener.off('access:revoked', onRevoked);
+      listener.off('project:closed', onStatus);
+      listener.off('project:reopened', onStatus);
+    };
+  }, [socket, projectId, client, navigate]);
+
+  return room;
 }
 
 /** Aplica los eventos del socket mientras el componente está montado. */

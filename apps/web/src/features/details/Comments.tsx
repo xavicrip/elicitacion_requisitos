@@ -4,6 +4,7 @@ import { useId, useState } from 'react';
 import { FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
 import { detailKeys, detailsApi } from './api';
+import { useCanWrite } from '../realtime/connection';
 
 const dateFormat = new Intl.DateTimeFormat('es', {
   day: 'numeric',
@@ -108,6 +109,7 @@ export function Comments({ detailId, canComment }: { detailId: string; canCommen
   });
   // También cambia commentCount del detalle.
   const refresh = () => queryClient.invalidateQueries({ queryKey: detailKeys.all });
+  const canWrite = useCanWrite();
   const publish = useMutation({
     mutationFn: () => detailsApi.comment(detailId, text),
     onSuccess: async () => {
@@ -147,7 +149,7 @@ export function Comments({ detailId, canComment }: { detailId: string; canCommen
           <FormError>{error}</FormError>
           <button
             type="submit"
-            disabled={publish.isPending || !text.trim()}
+            disabled={publish.isPending || !text.trim() || !canWrite}
             className="rounded bg-blue-700 px-3 py-1 text-white disabled:opacity-50"
           >
             Publicar

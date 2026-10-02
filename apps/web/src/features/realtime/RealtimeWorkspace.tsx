@@ -5,10 +5,11 @@ import { useAuthStore } from '../../lib/auth-store';
 import { DetailsWorkspacePage } from '../details/DetailsWorkspacePage';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { projectKeys, projectsApi } from '../projects/api';
+import { ConnectionBanner } from './ConnectionBanner';
 import { PresenceBar } from './PresenceBar';
 import { useRealtimeSocket } from './socket';
 import { presenceBadge, usePresence } from './usePresence';
-import { useRealtimeRoom, useRealtimeSync } from './useRealtimeSync';
+import { useRealtimeLifecycle, useRealtimeSync } from './useRealtimeSync';
 
 /**
  * Espacio de trabajo con colaboración en tiempo real (feature 005, plan ajuste 9): envuelve el
@@ -24,7 +25,7 @@ export function RealtimeWorkspace() {
     queryKey: projectKeys.detail(projectId),
     queryFn: () => projectsApi.get(projectId),
   });
-  const room = useRealtimeRoom(socket, versionId || null);
+  const room = useRealtimeLifecycle(socket, { projectId, versionId: versionId || null });
   const joined = room.status === 'joined';
   const presence = usePresence(socket, versionId || null, room.presence, joined);
   const badge = useMemo(
@@ -48,6 +49,7 @@ export function RealtimeWorkspace() {
     <>
       {/* Estado para los E2E (`waitConnected`); no se muestra. */}
       <span hidden data-realtime-status={room.status} />
+      <ConnectionBanner />
       {joined && user && <PresenceBar entries={presence} userId={user.id} />}
       <DetailsWorkspacePage extraBadge={badge} />
     </>
