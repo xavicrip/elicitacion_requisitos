@@ -95,13 +95,13 @@ seleccionada cada una
 ### Tests for User Story 2 ⚠️
 
 - [X] T024 [P] [US2] Pruebas de integración en `apps/api/tests/integration/presence.test.ts`: `room:join` devuelve el estado y emite `presence:update` completo a `diagram:{versionId}`; dos pestañas del mismo usuario cuentan como una (`sockets: 2`) y desaparece al cerrar la última; `presence:heartbeat` actualiza `lastSeen` y el barrido elimina a quien no da señal en 10 s (tiempos inyectados), con un solo barrido a la vez entre instancias (`SET NX`); `presence:select` se reparte y se limita a 10/s; el color es `presenceColor(userId)`; como mucho 50 entradas; la clave expira si nadie la actualiza; con dos instancias, la presencia es la misma en ambas; `presence:select` y `presence:heartbeat` de un socket que no está en la sala se ignoran. Amplía `socket-events.contract.test.ts` con `presence:update` y los payloads inválidos de `presence:*` — `test(api)`
-- [ ] T025 [P] [US2] Pruebas en `apps/web/tests/presence.test.tsx`: `PresenceBar` lista a los demás con nombre y color (sin duplicados y sin el usuario actual); seleccionar una actividad envía `presence:select` (con `useWorkspaceEvents` de la 003); la actividad seleccionada por otra persona muestra su color, combinado con los indicadores de cobertura de la 004 sin taparlos; latido cada 5 s mientras la pestaña está abierta — `test(web)`
-- [ ] T026 [P] [US2] E2E en `e2e/flows/presence.spec.ts`: tres cuentas ven a las otras dos; Luis selecciona "Emitir factura" y los demás ven su color en esa actividad; Luis abre otra pestaña y sigue apareciendo una vez; al cerrar ambas, desaparece en ≤ 10 s — `test(e2e)`
+- [X] T025 [P] [US2] Pruebas en `apps/web/tests/presence.test.tsx`: `PresenceBar` lista a los demás con nombre y color (sin duplicados y sin el usuario actual); seleccionar una actividad envía `presence:select` (con `useWorkspaceEvents` de la 003); la actividad seleccionada por otra persona muestra su color, combinado con los indicadores de cobertura de la 004 sin taparlos; latido cada 5 s mientras la pestaña está abierta — `test(web)`
+- [X] T026 [P] [US2] E2E en `e2e/flows/presence.spec.ts`: tres cuentas ven a las otras dos; Luis selecciona "Emitir factura" y los demás ven su color en esa actividad; Luis abre otra pestaña y sigue apareciendo una vez; al cerrar ambas, desaparece en ≤ 10 s — `test(e2e)`
 
 ### Implementation for User Story 2
 
 - [X] T027 [US2] Implementar `apps/api/src/realtime/presence.ts` (hash `presence:{versionId}`, latido, barrido con bloqueo, selección) y conectarlo en `rooms.ts` y en la desconexión — `feat(api)`
-- [ ] T028 [US2] Implementar `apps/web/src/features/realtime/{usePresence.ts,PresenceBar.tsx}` y el indicador de selección con `overlays.presence` del store de la 003; `DetailsWorkspacePage` acepta indicadores adicionales para componerlos con los suyos — `feat(web)`
+- [X] T028 [US2] Implementar `apps/web/src/features/realtime/{usePresence.ts,PresenceBar.tsx}` y el indicador de selección con `overlays.presence` del store de la 003; `DetailsWorkspacePage` acepta indicadores adicionales para componerlos con los suyos — `feat(web)`
 
 **Checkpoint**: US2 funcional; quickstart §2 en verde
 

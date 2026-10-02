@@ -5,6 +5,7 @@ import {
   type Detail,
   type DomainEvents,
   type JoinAck,
+  type PresenceEntry,
   type ProjectStatus,
   type PublicDetail,
   type RelayedEventName,
@@ -230,6 +231,7 @@ export function applyRealtimeEvent<N extends RelayedEventName>(
 /** Sala de la versión mostrada: se une, y al cambiar de versión sale de la anterior (U3). */
 export function useRealtimeRoom(socket: RealtimeSocket | null, versionId: string | null) {
   const [status, setStatus] = useState<'idle' | 'joining' | 'joined' | 'denied'>('idle');
+  const [presence, setPresence] = useState<PresenceEntry[]>([]);
 
   useEffect(() => {
     if (!socket || !versionId) {
@@ -237,15 +239,16 @@ export function useRealtimeRoom(socket: RealtimeSocket | null, versionId: string
       return;
     }
     setStatus('joining');
-    socket.emit('room:join', { versionId }, (ack: JoinAck) =>
-      setStatus(ack.ok ? 'joined' : 'denied'),
-    );
+    socket.emit('room:join', { versionId }, (ack: JoinAck) => {
+      setPresence(ack.ok ? ack.presence : []);
+      setStatus(ack.ok ? 'joined' : 'denied');
+    });
     return () => {
       socket.emit('room:leave', { versionId });
     };
   }, [socket, versionId]);
 
-  return { status };
+  return { status, presence };
 }
 
 /** Aplica los eventos del socket mientras el componente está montado. */

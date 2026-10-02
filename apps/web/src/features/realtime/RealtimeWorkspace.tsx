@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { useParams } from 'react-router';
 import { useAuthStore } from '../../lib/auth-store';
 import { DetailsWorkspacePage } from '../details/DetailsWorkspacePage';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { projectKeys, projectsApi } from '../projects/api';
+import { PresenceBar } from './PresenceBar';
 import { useRealtimeSocket } from './socket';
+import { presenceBadge, usePresence } from './usePresence';
 import { useRealtimeRoom, useRealtimeSync } from './useRealtimeSync';
 
 /**
@@ -22,6 +25,12 @@ export function RealtimeWorkspace() {
     queryFn: () => projectsApi.get(projectId),
   });
   const room = useRealtimeRoom(socket, versionId || null);
+  const joined = room.status === 'joined';
+  const presence = usePresence(socket, versionId || null, room.presence, joined);
+  const badge = useMemo(
+    () => (joined && user ? presenceBadge(presence, user.id) : undefined),
+    [joined, presence, user],
+  );
   useRealtimeSync(
     socket,
     project.data && user && versionId
@@ -39,7 +48,8 @@ export function RealtimeWorkspace() {
     <>
       {/* Estado para los E2E (`waitConnected`); no se muestra. */}
       <span hidden data-realtime-status={room.status} />
-      <DetailsWorkspacePage />
+      {joined && user && <PresenceBar entries={presence} userId={user.id} />}
+      <DetailsWorkspacePage extraBadge={badge} />
     </>
   );
 }
