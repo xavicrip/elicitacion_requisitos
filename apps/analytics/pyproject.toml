@@ -53,7 +53,7 @@ ignore_missing_imports = true
 module = [
     "spacy", "spacy.*", "sentence_transformers", "sklearn", "sklearn.*", "umap", "umap.*",
     "networkx", "networkx.*", "mlxtend", "mlxtend.*", "pysentimiento", "pysentimiento.*",
-    "torch", "torch.*", "transformers", "transformers.*",
+    "torch", "torch.*", "transformers", "transformers.*", "pandas", "pandas.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
@@ -107,6 +107,9 @@ omit = [
     "*/analytics/mining/techniques.py",
     "*/analytics/mining/quality.py",
     "*/analytics/mining/duplicates.py",
+    "*/analytics/mining/sentiment.py",
+    "*/analytics/mining/association.py",
+    "*/analytics/mining/hotcold.py",
 ]
 
 [tool.coverage.report]
