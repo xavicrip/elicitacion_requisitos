@@ -285,10 +285,17 @@ describe('timeout y retención', () => {
     for (let i = 0; i < 12; i++) {
       runs.push(await settled((await create(target.projectId))._id.toHexString()));
     }
-    const left = await analysisRunsModel(app.mongo)
-      .find({ projectId: target.projectId })
-      .lean<AnalysisRunDoc[]>();
-    expect(left).toHaveLength(10);
+    // La limpieza corre justo después de cerrar el run: se espera a que termine.
+    let left: AnalysisRunDoc[] = [];
+    await vi.waitFor(
+      async () => {
+        left = await analysisRunsModel(app.mongo)
+          .find({ projectId: target.projectId })
+          .lean<AnalysisRunDoc[]>();
+        expect(left).toHaveLength(10);
+      },
+      { timeout: 5000, interval: 50 },
+    );
     expect(left.map((run) => run._id.toHexString())).not.toContain(runs[0]!._id.toHexString());
     expect(await app.storage.getStream(runs[0]!.resultsKey)).toBeNull();
     expect(await app.storage.getStream(runs[11]!.resultsKey)).not.toBeNull();
