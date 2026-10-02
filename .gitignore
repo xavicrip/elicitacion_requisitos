@@ -35,3 +35,6 @@ Thumbs.db
 .vscode/
 .coverage
 .coverage.*
+
+# Conjunto de validación de la detección: se genera al vuelo (tests/fixtures/generate.py)
+apps/analytics/tests/fixtures/diagrams/*.png

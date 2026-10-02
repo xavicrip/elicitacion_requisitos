@@ -1,0 +1,221 @@
+{
+  "id": "027",
+  "subset": "photo",
+  "style": "plantuml",
+  "width": 1100,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.17418,
+        "y": 0.10211,
+        "w": 0.0353,
+        "h": 0.03315
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Enviar cotización",
+      "bbox": {
+        "x": 0.07479,
+        "y": 0.2016,
+        "w": 0.23774,
+        "h": 0.0634
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Analizar requisitos",
+      "bbox": {
+        "x": 0.07729,
+        "y": 0.31545,
+        "w": 0.23709,
+        "h": 0.06358
+      }
+    },
+    {
+      "id": "a4",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.16329,
+        "y": 0.42768,
+        "w": 0.07001,
+        "h": 0.0657
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Conciliar cuentas",
+      "bbox": {
+        "x": 0.08224,
+        "y": 0.54134,
+        "w": 0.23579,
+        "h": 0.06395
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Crear usuario",
+      "bbox": {
+        "x": 0.0847,
+        "y": 0.65337,
+        "w": 0.23515,
+        "h": 0.06412
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Desplegar versión",
+      "bbox": {
+        "x": 0.08714,
+        "y": 0.76482,
+        "w": 0.23451,
+        "h": 0.0643
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Capacitar usuarios",
+      "bbox": {
+        "x": 0.08957,
+        "y": 0.87567,
+        "w": 0.23388,
+        "h": 0.06447
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Actualizar inventario",
+      "bbox": {
+        "x": 0.70643,
+        "y": 0.08606,
+        "w": 0.23167,
+        "h": 0.06243
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Diseñar solución",
+      "bbox": {
+        "x": 0.70722,
+        "y": 0.19913,
+        "w": 0.23105,
+        "h": 0.06261
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Clasificar reclamo",
+      "bbox": {
+        "x": 0.708,
+        "y": 0.3116,
+        "w": 0.23043,
+        "h": 0.06279
+      }
+    },
+    {
+      "id": "a13",
+      "type": "action",
+      "label": "Validar pago",
+      "bbox": {
+        "x": 0.70878,
+        "y": 0.42348,
+        "w": 0.22982,
+        "h": 0.06297
+      }
+    },
+    {
+      "id": "a14",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.80503,
+        "y": 0.54756,
+        "w": 0.0389,
+        "h": 0.03746
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Confirmar recepción",
+      "bbox": {
+        "x": 0.37906,
+        "y": 0.48246,
+        "w": 0.21519,
+        "h": 0.06331
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a6"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    },
+    {
+      "from": "a13",
+      "to": "a14"
+    }
+  ]
+}

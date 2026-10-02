@@ -1,0 +1,191 @@
+{
+  "id": "026",
+  "subset": "photo",
+  "style": "drawio",
+  "width": 1100,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.1925,
+        "y": 0.10149,
+        "w": 0.03404,
+        "h": 0.03229
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Aprobar crédito",
+      "bbox": {
+        "x": 0.09191,
+        "y": 0.19537,
+        "w": 0.23377,
+        "h": 0.06393
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Coordinar logística",
+      "bbox": {
+        "x": 0.09153,
+        "y": 0.30651,
+        "w": 0.23456,
+        "h": 0.06288
+      }
+    },
+    {
+      "id": "a4",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.17515,
+        "y": 0.41717,
+        "w": 0.06879,
+        "h": 0.06459
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Solicitar documentos",
+      "bbox": {
+        "x": 0.09078,
+        "y": 0.53085,
+        "w": 0.23614,
+        "h": 0.06198
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Firmar contrato",
+      "bbox": {
+        "x": 0.0904,
+        "y": 0.64276,
+        "w": 0.23694,
+        "h": 0.06391
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Restablecer contraseña",
+      "bbox": {
+        "x": 0.09002,
+        "y": 0.75543,
+        "w": 0.23775,
+        "h": 0.06586
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Inspeccionar calidad",
+      "bbox": {
+        "x": 0.08964,
+        "y": 0.86886,
+        "w": 0.23856,
+        "h": 0.06784
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Emitir factura",
+      "bbox": {
+        "x": 0.70509,
+        "y": 0.09977,
+        "w": 0.21819,
+        "h": 0.06259
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Archivar expediente",
+      "bbox": {
+        "x": 0.70672,
+        "y": 0.20641,
+        "w": 0.21888,
+        "h": 0.06163
+      }
+    },
+    {
+      "id": "a12",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.79992,
+        "y": 0.32617,
+        "w": 0.03764,
+        "h": 0.0361
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Generar orden de compra",
+      "bbox": {
+        "x": 0.38878,
+        "y": 0.47531,
+        "w": 0.21098,
+        "h": 0.06053
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a6"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    }
+  ]
+}

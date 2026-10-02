@@ -1,0 +1,161 @@
+{
+  "id": "028",
+  "subset": "photo",
+  "style": "staruml",
+  "width": 992,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.20516,
+        "y": 0.10412,
+        "w": 0.03913,
+        "h": 0.03314
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Agendar entrega",
+      "bbox": {
+        "x": 0.09324,
+        "y": 0.20256,
+        "w": 0.26464,
+        "h": 0.06297
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Programar reunión",
+      "bbox": {
+        "x": 0.09527,
+        "y": 0.31647,
+        "w": 0.26403,
+        "h": 0.06192
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Crear usuario",
+      "bbox": {
+        "x": 0.09729,
+        "y": 0.42858,
+        "w": 0.26342,
+        "h": 0.06293
+      }
+    },
+    {
+      "id": "a5",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.19274,
+        "y": 0.53932,
+        "w": 0.07753,
+        "h": 0.06527
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Validar pago",
+      "bbox": {
+        "x": 0.10129,
+        "y": 0.65107,
+        "w": 0.26221,
+        "h": 0.06518
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Cerrar ticket",
+      "bbox": {
+        "x": 0.10329,
+        "y": 0.76159,
+        "w": 0.26161,
+        "h": 0.06628
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Evaluar proveedor",
+      "bbox": {
+        "x": 0.10527,
+        "y": 0.87162,
+        "w": 0.26101,
+        "h": 0.06738
+      }
+    },
+    {
+      "id": "a10",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.89193,
+        "y": 0.10891,
+        "w": 0.0419,
+        "h": 0.0371
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Planificar sprint",
+      "bbox": {
+        "x": 0.4314,
+        "y": 0.5917,
+        "w": 0.23473,
+        "h": 0.06331
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a7"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    }
+  ]
+}
