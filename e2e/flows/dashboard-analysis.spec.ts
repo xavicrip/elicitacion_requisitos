@@ -33,6 +33,8 @@ test('ejecutar el análisis de texto y explorar sus resultados', async ({
     timeout: 300_000,
   });
   await expect(analysis.getByText(/Último análisis: .* · 80 detalles/)).toBeVisible();
+  // Con el worker real, todas las etapas terminan (modelos incluidos en su imagen).
+  await expect(analysis.getByText(/No se pudo calcular/)).toHaveCount(0);
 
   // Palabras clave de "Validar pago": términos de pagos.
   const keywords = analysis.getByRole('tabpanel');
