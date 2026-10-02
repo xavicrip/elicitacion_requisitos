@@ -115,10 +115,12 @@ jobs:
           echo "MIGRATION_ACTION=$value"
           railway variables --service api --environment "$ENVIRONMENT" --skip-deploys \
             --set "MIGRATION_ACTION=$value" >/dev/null
-      - name: Desplegar api, analytics y web
+      - name: Desplegar api, analytics, analytics-worker y web
         run: |
           pids=""
-          for service in analytics api web; do
+          # analytics-worker (006) usa la imagen de analytics con otro comando; su salud la
+          # comprueba api /health/deep (check detection-worker) con el flag detection activo.
+          for service in analytics analytics-worker api web; do
             scripts/railway/deploy-service.sh "$service" "$ENVIRONMENT" \
               "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.commit }}" &
             pids="$pids $!"
