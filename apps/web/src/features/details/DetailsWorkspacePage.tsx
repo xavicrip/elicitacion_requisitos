@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import type { HotspotExtensions } from '../diagrams/workspace/ActivityHotspots';
-import { WorkspacePage } from '../diagrams/workspace/WorkspacePage';
+import { WorkspacePage, type WorkspacePageProps } from '../diagrams/workspace/WorkspacePage';
 import { detailKeys, detailsApi } from './api';
 import { DetailsPanel } from './DetailsPanel';
 import { coverageHotspots, heatmapScale } from './overlays/Heatmap';
@@ -14,9 +14,12 @@ import { coverageHotspots, heatmapScale } from './overlays/Heatmap';
  */
 export function DetailsWorkspacePage({
   extraBadge,
+  overlay,
 }: {
   /** Indicadores de otras features junto a los de cobertura, p. ej. la presencia (005). */
   extraBadge?: HotspotExtensions['renderBadge'];
+  /** Capa sobre el canvas, p. ej. los cursores (005). */
+  overlay?: WorkspacePageProps['overlay'];
 } = {}) {
   const [preferPublished, setPreferPublished] = useState(false);
   const [openNotes, setOpenNotes] = useState<Set<string>>(new Set());
@@ -52,6 +55,7 @@ export function DetailsWorkspacePage({
     <WorkspacePage
       preferPublished={preferPublished}
       onPreferPublishedChange={setPreferPublished}
+      overlay={overlay}
       {...hotspots}
       renderBadge={
         hotspots.renderBadge || extraBadge

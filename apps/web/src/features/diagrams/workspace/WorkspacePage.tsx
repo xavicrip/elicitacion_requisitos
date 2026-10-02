@@ -14,6 +14,7 @@ import { PublishButton } from '../PublishButton';
 import { TYPE_LABEL } from '../labels';
 import { A11yActivityList } from './A11yActivityList';
 import type { HotspotExtensions } from './ActivityHotspots';
+import type { Size } from './camera/zoom';
 import { Minimap } from './Minimap';
 import { useWorkspaceStore } from './store';
 import { useWorkspaceKeyboard } from './useWorkspaceKeyboard';
@@ -48,12 +49,15 @@ export type WorkspacePageProps = HotspotExtensions & {
    */
   preferPublished?: boolean;
   onPreferPublishedChange?: (preferPublished: boolean) => void;
+  /** Capa HTML sobre el canvas, p. ej. los cursores de la 005. */
+  overlay?: (context: { image: Size; versionId: string }) => ReactNode;
 };
 
 export function WorkspacePage({
   sidePanel,
   preferPublished = false,
   onPreferPublishedChange,
+  overlay,
   ...hotspots
 }: WorkspacePageProps = {}) {
   const { projectId = '', diagramId = '' } = useParams();
@@ -145,6 +149,7 @@ export function WorkspacePage({
             activities={version.data.activities}
             editing={editing}
             hotspots={hotspots}
+            overlay={overlay}
           />
           {editing && <EditorPanel versionId={version.data.id} />}
           {!editing &&
@@ -190,6 +195,7 @@ function Workspace({
   activities,
   editing,
   hotspots,
+  overlay,
 }: {
   displayUrl: string;
   thumbUrl: string;
@@ -198,6 +204,7 @@ function Workspace({
   activities: Activity[];
   editing: boolean;
   hotspots: HotspotExtensions;
+  overlay: WorkspacePageProps['overlay'];
 }) {
   const imageUrl = useImageUrl(displayUrl);
   const imageStatus = useWorkspaceStore((state) => state.imageStatus);
@@ -223,6 +230,7 @@ function Workspace({
         />
       </Suspense>
       {!editing && <A11yActivityList activities={activities} image={image} />}
+      {overlay?.({ image, versionId })}
       <Minimap thumbUrl={thumbUrl} image={image} />
       {imageStatus === 'loading' && (
         <p className="absolute inset-0 flex items-center justify-center">Cargando imagen…</p>

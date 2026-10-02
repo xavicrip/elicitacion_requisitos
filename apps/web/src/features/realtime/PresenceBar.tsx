@@ -4,7 +4,7 @@ import type { PresenceEntry } from '@reqcanvas/shared';
 export function PresenceBar({ entries, userId }: { entries: PresenceEntry[]; userId: string }) {
   const others = entries.filter((entry) => entry.userId !== userId);
   return (
-    <section aria-label="Presencia" className="mb-2 flex items-center gap-2 text-sm">
+    <section aria-label="Presencia" className="flex items-center gap-2 text-sm">
       <span className="text-gray-600">Conectados:</span>
       {others.length === 0 ? (
         <span className="text-gray-500">Nadie más conectado</span>
