@@ -68,10 +68,21 @@ def test_detect_devuelve_el_contrato_con_zonas_normalizadas_y_progreso() -> None
     )
     assert [activity.type for activity in result.activities] == ["action"] * 5
     assert [activity.tempId for activity in result.activities] == ["a1", "a2", "a3", "a4", "a5"]
+    assert [(t.source, t.target) for t in result.transitions] == [
+        ("a1", "a2"),
+        ("a2", "a3"),
+        ("a3", "a4"),
+        ("a4", "a5"),
+    ]
+    assert (
+        detect(cv2.imread(str(DIAGRAMS / "004.png")), DetectionOptions(arrows=False)).transitions
+        == []
+    )
     assert all(activity.label for activity in result.activities)
     assert all(activity.confidence >= 0.8 for activity in result.activities)
     assert result.stats.ocrMeanConfidence is not None and not result.stats.llmUsed
     assert [stage for stage, _ in stages][:2] == ["shapes", "ocr"]
+    assert stages[-1][0] == "arrows"
     assert [pct for _, pct in stages] == sorted(pct for _, pct in stages)
 
 

@@ -7,12 +7,14 @@ from dataclasses import dataclass
 
 import httpx
 
+from analytics.detection.arrows import detect_arrows
 from analytics.detection.errors import DetectionError
 from analytics.detection.ocr import read_label
 from analytics.detection.preprocess import Image8, UnreadableImageError, decode, downscale
 from analytics.detection.schemas import (
     BBox,
     DetectedActivity,
+    DetectedTransition,
     DetectionJobInput,
     DetectionResult,
     DetectionStats,
@@ -88,9 +90,23 @@ def detect(
         )
         notify("ocr", 35 + round(50 * (index + 1) / max(1, len(shapes))))
 
+    transitions: list[DetectedTransition] = []
+    if options.arrows and len(shapes) > 1:
+        notify("arrows", 88)
+        transitions = [
+            DetectedTransition.model_validate(
+                {
+                    "from": f"a{arrow.source + 1}",
+                    "to": f"a{arrow.target + 1}",
+                    "confidence": arrow.confidence,
+                }
+            )
+            for arrow in detect_arrows(work, shapes)
+        ]
+
     return DetectionResult(
         activities=activities,
-        transitions=[],
+        transitions=transitions,
         stats=DetectionStats(
             durationMs=round((time.perf_counter() - started) * 1000),
             llmUsed=False,

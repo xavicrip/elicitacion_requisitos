@@ -70,6 +70,7 @@ class Score:
     labels_ok: int = 0
     transitions: int = 0
     transitions_found: int = 0
+    transitions_proposed: int = 0
     proposals: int = 0
     seconds: float = 0.0
     misses: list[str] = field(default_factory=list)
@@ -82,6 +83,7 @@ class Score:
             "labels_ok",
             "transitions",
             "transitions_found",
+            "transitions_proposed",
             "proposals",
         ):
             setattr(self, name, getattr(self, name) + getattr(other, name))
@@ -95,6 +97,12 @@ class Score:
     @property
     def label_accuracy(self) -> float:
         return self.labels_ok / self.labels if self.labels else 1.0
+
+    @property
+    def transition_precision(self) -> float:
+        if not self.transitions_proposed:
+            return 1.0
+        return self.transitions_found / self.transitions_proposed
 
     @property
     def transition_recall(self) -> float:
@@ -131,6 +139,7 @@ def score(truth: dict[str, Any], result: DetectionResult, seconds: float) -> Sco
                     f"{truth['id']} {activity['id']} «{activity['label']}» → «{best['label']}»"
                 )
     proposed = {(t.source, t.target) for t in result.transitions}
+    out.transitions_proposed = len(proposed)
     for transition in truth["transitions"]:
         out.transitions += 1
         source, target = matched.get(transition["from"]), matched.get(transition["to"])
@@ -175,7 +184,8 @@ def main() -> None:
         print(
             f"{name:10} zonas {item.zone_recall:5.1%} ({item.zones_found}/{item.zones}) · "
             f"etiquetas {item.label_accuracy:5.1%} ({item.labels_ok}/{item.labels}) · "
-            f"transiciones {item.transition_recall:5.1%} · propuestas {item.proposals}{timing}"
+            f"transiciones {item.transition_recall:5.1%} (precisión "
+            f"{item.transition_precision:5.1%}) · propuestas {item.proposals}{timing}"
         )
         if args.misses and not name.startswith("#"):
             for miss in item.misses:
