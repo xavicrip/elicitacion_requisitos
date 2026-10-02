@@ -82,7 +82,7 @@ export function registerRooms(
       const projectId = await authorize(versionId);
       if (!projectId) return reply({ ok: false, code: 'not_found' });
       await socket.join([projectRoom(projectId), diagramRoom(versionId)]);
-      socket.data.joined.set(versionId, projectId);
+      socket.data.joined[versionId] = projectId;
       reply({ ok: true, presence: await presence.join(versionId, socket) });
     }),
   );
@@ -93,13 +93,13 @@ export function registerRooms(
       const parsed = VersionRoomSchema.safeParse(input);
       if (!parsed.success) return logInvalid(app, socket, 'room:leave');
       const { versionId } = parsed.data;
-      const projectId = socket.data.joined.get(versionId);
+      const projectId = socket.data.joined[versionId];
       if (!projectId) return;
-      socket.data.joined.delete(versionId);
+      delete socket.data.joined[versionId];
       await socket.leave(diagramRoom(versionId));
       await presence.leave(versionId, socket);
       // Sigue en la sala del proyecto si ve otro diagrama del mismo proyecto.
-      if (![...socket.data.joined.values()].includes(projectId)) {
+      if (!Object.values(socket.data.joined).includes(projectId)) {
         await socket.leave(projectRoom(projectId));
       }
     }),
@@ -111,7 +111,7 @@ export function registerRooms(
     safely(app, 'presence:heartbeat', async (input: unknown) => {
       const parsed = VersionRoomSchema.safeParse(input);
       if (!parsed.success) return logInvalid(app, socket, 'presence:heartbeat');
-      if (socket.data.joined.has(parsed.data.versionId)) {
+      if (socket.rooms.has(diagramRoom(parsed.data.versionId))) {
         await presence.heartbeat(parsed.data.versionId, socket);
       }
     }),
@@ -123,7 +123,7 @@ export function registerRooms(
       const parsed = PresenceSelectSchema.safeParse(input);
       if (!parsed.success) return logInvalid(app, socket, 'presence:select');
       const { versionId, activityKey } = parsed.data;
-      if (!socket.data.joined.has(versionId) || !allowSelect()) return;
+      if (!socket.rooms.has(diagramRoom(versionId)) || !allowSelect()) return;
       await presence.select(versionId, socket, activityKey);
     }),
   );
@@ -131,7 +131,9 @@ export function registerRooms(
   socket.on(
     'disconnect',
     safely(app, 'disconnect', async () => {
-      for (const versionId of socket.data.joined.keys()) await presence.leave(versionId, socket);
+      for (const versionId of Object.keys(socket.data.joined)) {
+        await presence.leave(versionId, socket);
+      }
     }),
   );
 }
