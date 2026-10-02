@@ -1,0 +1,24 @@
+{
+  "v": 1,
+  "runId": "670000000000000000000002",
+  "projectId": "66f000000000000000000001",
+  "kind": "insights",
+  "inputUrl": "http://s3:9000/reqcanvas/projects/66f000000000000000000001/analysis/670000000000000000000001/input.json.gz?X-Amz-Signature=abc",
+  "resultsUrl": "http://s3:9000/reqcanvas/projects/66f000000000000000000001/analysis/670000000000000000000002/results.json.gz?X-Amz-Signature=ghi",
+  "previousResultsUrl": "http://s3:9000/reqcanvas/projects/66f000000000000000000001/analysis/670000000000000000000001/results.json.gz?X-Amz-Signature=jkl",
+  "stages": [
+    "insights"
+  ],
+  "settings": {
+    "extraAmbiguousTerms": [
+      "ágil"
+    ],
+    "extraStopwords": [
+      "tienda"
+    ],
+    "insightsEnabled": true,
+    "rejectedInsights": [
+      "La mayoría de requisitos son funcionales"
+    ]
+  }
+}

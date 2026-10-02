@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "status": "failed",
+  "partial": false,
+  "detailCount": 0,
+  "stages": {},
+  "error": {
+    "code": "INPUT_DOWNLOAD_FAILED"
+  }
+}

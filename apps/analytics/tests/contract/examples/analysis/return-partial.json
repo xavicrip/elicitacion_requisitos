@@ -1,0 +1,49 @@
+{
+  "v": 1,
+  "status": "done",
+  "partial": true,
+  "detailCount": 80,
+  "stages": {
+    "keywords": {
+      "status": "done",
+      "durationMs": 100
+    },
+    "cooccurrence": {
+      "status": "done",
+      "durationMs": 101
+    },
+    "topics": {
+      "status": "done",
+      "durationMs": 102
+    },
+    "clusters": {
+      "status": "done",
+      "durationMs": 103
+    },
+    "duplicates": {
+      "status": "done",
+      "durationMs": 104
+    },
+    "sentiment": {
+      "status": "failed",
+      "durationMs": 40,
+      "error": "MODEL_ERROR"
+    },
+    "quality": {
+      "status": "done",
+      "durationMs": 106
+    },
+    "association": {
+      "status": "done",
+      "durationMs": 107
+    },
+    "hotcold": {
+      "status": "done",
+      "durationMs": 108
+    },
+    "insights": {
+      "status": "skipped",
+      "reason": "NO_API_KEY"
+    }
+  }
+}

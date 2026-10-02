@@ -1,0 +1,66 @@
+{
+  "v": 1,
+  "projectId": "66f000000000000000000001",
+  "filters": {
+    "diagramIds": null,
+    "from": null,
+    "to": null,
+    "types": null,
+    "statuses": [
+      "pending",
+      "validated"
+    ]
+  },
+  "activities": [
+    {
+      "key": "act-04",
+      "diagramId": "66f100000000000000000001",
+      "label": "Validar pago"
+    }
+  ],
+  "details": [
+    {
+      "id": "66f200000000000000000001",
+      "diagramId": "66f100000000000000000001",
+      "activityKey": "act-04",
+      "given": "el cliente eligió pagar con tarjeta de crédito",
+      "when": "confirma el pago del pedido",
+      "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+      "type": "non_functional",
+      "priority": "must",
+      "authorRole": "Cajero",
+      "tags": [
+        "pagos"
+      ],
+      "status": "pending",
+      "voteCount": 3,
+      "commentCount": 1,
+      "createdAt": "2026-10-01T15:00:00.000Z"
+    },
+    {
+      "id": "66f200000000000000000002",
+      "diagramId": "66f100000000000000000001",
+      "activityKey": "act-04",
+      "given": "el comprador eligió pagar con tarjeta de crédito",
+      "when": "aprueba el pago del pedido",
+      "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+      "type": "non_functional",
+      "priority": null,
+      "authorRole": null,
+      "tags": [],
+      "status": "validated",
+      "voteCount": 0,
+      "commentCount": 0,
+      "createdAt": "2026-10-01T15:00:00.000Z"
+    }
+  ],
+  "duplicateDecisions": [
+    {
+      "pair": [
+        "66f200000000000000000001",
+        "66f200000000000000000003"
+      ],
+      "decision": "rejected"
+    }
+  ]
+}
