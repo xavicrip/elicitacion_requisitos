@@ -129,13 +129,13 @@ actividades
 ### Tests for User Story 3 ⚠️
 
 - [X] T038 [P] [US3] Pruebas unitarias en `apps/analytics/tests/unit/test_arrows.py`: en `004.png` se proponen las 4 transiciones en orden; la dirección sale de la punta; segmentos colineales se unen; una línea sin punta no se propone; la confianza baja con puntas borrosas; el recall y la precisión de transiciones se informan en `evaluate_detection.py` (sin gate) — `test(analytics)`
-- [ ] T039 [P] [US3] Pruebas de integración en `apps/api/tests/integration/transition-proposals.test.ts`: aceptar exige que las dos propuestas estén aceptadas (`422` si no, como el contrato) y añade la `key` destino al `next` de la actividad origen; descartar no la añade; volver a detectar las pasa a `superseded`; cuentan en `PENDING_PROPOSALS`; contrato ampliado en `detection.contract.test.ts` — `test(api)`
+- [X] T039 [P] [US3] Pruebas de integración en `apps/api/tests/integration/transition-proposals.test.ts`: aceptar exige que las dos propuestas estén aceptadas (`422` si no, como el contrato) y añade la `key` destino al `next` de la actividad origen; descartar no la añade; volver a detectar las pasa a `superseded`; cuentan en `PENDING_PROPOSALS`; contrato ampliado en `detection.contract.test.ts` — `test(api)`
 - [ ] T040 [P] [US3] Pruebas de web en `apps/web/tests/transition-proposals.test.tsx`: las transiciones propuestas se dibujan discontinuas en la capa; aceptar y descartar desde el panel; aceptar queda deshabilitado mientras alguna de sus actividades siga pendiente — `test(web)`
 
 ### Implementation for User Story 3
 
 - [X] T041 [US3] Implementar `apps/analytics/src/analytics/detection/arrows.py` (research R6) e incorporarlo al pipeline (etapa `arrows`) — `feat(analytics)`
-- [ ] T042 [US3] Implementar en `apps/api/src/modules/detection/` aceptar y descartar transiciones (por el servicio de actividades de la 003) — `feat(api)`
+- [X] T042 [US3] Implementar en `apps/api/src/modules/detection/` aceptar y descartar transiciones (por el servicio de actividades de la 003) — `feat(api)`
 - [ ] T043 [US3] Implementar las transiciones propuestas en `ProposalsLayer.tsx` y `ProposalReviewPanel.tsx` — `feat(web)`
 
 **Checkpoint**: todas las historias funcionales; quickstart §1–§3 en verde

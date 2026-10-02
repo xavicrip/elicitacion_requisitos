@@ -44,8 +44,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  activities: { type: array, items: { $ref: '#/components/schemas/ActivityProposal' } }
-                  transitions: { type: array, items: { $ref: '#/components/schemas/TransitionProposal' } }
+                  activities:
+                    { type: array, items: { $ref: '#/components/schemas/ActivityProposal' } }
+                  transitions:
+                    { type: array, items: { $ref: '#/components/schemas/TransitionProposal' } }
   /diagram-versions/{versionId}/proposals/accept-high:
     parameters: [{ name: versionId, in: path, required: true, schema: { type: string } }]
     post:
@@ -71,7 +73,13 @@ paths:
                 type: { type: string, enum: [action, decision, start, end] }
                 bbox:
                   type: object
-                  properties: { x: { type: number }, y: { type: number }, w: { type: number }, h: { type: number } }
+                  properties:
+                    {
+                      x: { type: number },
+                      y: { type: number },
+                      w: { type: number },
+                      h: { type: number },
+                    }
       responses:
         '200':
           description: Actividad creada (esquema Activity de la 003)
@@ -120,7 +128,8 @@ components:
         id: { type: string }
         bbox:
           type: object
-          properties: { x: { type: number }, y: { type: number }, w: { type: number }, h: { type: number } }
+          properties:
+            { x: { type: number }, y: { type: number }, w: { type: number }, h: { type: number } }
         type: { type: string, enum: [action, decision, start, end] }
         label: { type: string }
         confidence: { type: number }
@@ -129,10 +138,23 @@ components:
         status: { type: string, enum: [pending, accepted, discarded, superseded] }
     TransitionProposal:
       type: object
-      required: [id, fromProposalId, toProposalId, confidence, status]
+      required: [id, fromProposalId, toProposalId, confidence, status, from, to]
       properties:
         id: { type: string }
         fromProposalId: { type: string }
         toProposalId: { type: string }
         confidence: { type: number }
+        status: { type: string, enum: [pending, accepted, discarded, superseded] }
+        from: { $ref: '#/components/schemas/TransitionEnd' }
+        to: { $ref: '#/components/schemas/TransitionEnd' }
+    TransitionEnd:
+      description: Extremo de la flecha (para dibujarla y nombrarla aunque ya esté aceptado)
+      type: object
+      required: [label, bbox, status]
+      properties:
+        label: { type: string }
+        bbox:
+          type: object
+          properties:
+            { x: { type: number }, y: { type: number }, w: { type: number }, h: { type: number } }
         status: { type: string, enum: [pending, accepted, discarded, superseded] }
