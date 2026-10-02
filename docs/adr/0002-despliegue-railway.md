@@ -191,3 +191,11 @@ Railway pone `PORT`. `api` en staging pasa a `FEATURE_FLAGS=detection=true`; pro
 sin definirla (`detection` desactivado). Con el flag activo, `api /health/deep` incluye el check
 `detection-worker`, que comprueba el latido del worker en Redis: los smoke tests del despliegue
 cubren así un worker caído.
+
+Estado (2026-10-02): `analytics-worker` creado como servicio vacío (sin repositorio) en
+staging y producción, con la configuración de `railway.worker.json` y las variables
+`REDIS_URL`, `DETECTION_CONCURRENCY=1`, `DETECTION_TIMEOUT_S=180` y `LOG_LEVEL=INFO`, sin
+`ANTHROPIC_API_KEY`. `railway add` solo creó la instancia del entorno enlazado (producción) y
+`railway environment edit` no admite `isCreated`: la de staging se creó con la mutación
+`environmentPatchCommit` de la API de Railway y el mismo parche. Falta `FEATURE_FLAGS` en `api`
+de staging.
