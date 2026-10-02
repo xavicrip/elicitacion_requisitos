@@ -25,16 +25,21 @@ const ROUTES: Array<['GET' | 'POST', string]> = [
 ];
 
 describe('registro', () => {
-  it('detection y detection-llm están desactivados por defecto y son de la 006', () => {
-    for (const name of ['detection', 'detection-llm'] as const) {
-      expect(FLAGS[name]).toMatchObject({ default: false, owner: '006-deteccion-asistida' });
-    }
+  it('detection está activado por defecto (T052); detection-llm sigue desactivado (coste)', () => {
+    expect(FLAGS.detection).toMatchObject({ default: true, owner: '006-deteccion-asistida' });
+    expect(FLAGS['detection-llm']).toMatchObject({
+      default: false,
+      owner: '006-deteccion-asistida',
+    });
   });
 });
 
-describe('detection desactivado (valor por defecto)', () => {
+describe('detection desactivado (FEATURE_FLAGS=detection=false)', () => {
   it('las rutas de la detección responden 404 como si no existieran', async () => {
-    ({ app } = await buildTestApp('detectionoff', { withAuth: true }));
+    ({ app } = await buildTestApp('detectionoff', {
+      withAuth: true,
+      featureFlags: 'detection=false',
+    }));
     const user = await registerTestUser(app, 'Ana');
     for (const [method, url] of ROUTES) {
       const response = await app.inject({ method, url, headers: authHeaders(user), payload: {} });
@@ -44,7 +49,7 @@ describe('detection desactivado (valor por defecto)', () => {
   });
 
   it('GET /config lo informa al frontend', async () => {
-    ({ app } = await buildTestApp('detectionconfig'));
+    ({ app } = await buildTestApp('detectionconfig', { featureFlags: 'detection=false' }));
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({
       detection: false,
       'detection-llm': false,
@@ -67,9 +72,9 @@ describe('patrón de rutas', () => {
   });
 });
 
-describe('detection activado', () => {
+describe('detection activado (valor por defecto)', () => {
   it('GET /config lo informa', async () => {
-    ({ app } = await buildTestApp('detectionon', { featureFlags: 'detection=true' }));
+    ({ app } = await buildTestApp('detectionon'));
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({ detection: true });
   });
 });
