@@ -120,6 +120,21 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng
       - run: uv run --directory apps/analytics python tests/eval/evaluate_detection.py --subset digital --timing
 
+  # Minería de texto (feature 007, plan ajuste 16): pruebas y gates con los modelos reales del
+  # grupo `mining` (temas, duplicados, ambigüedad). Los modelos se guardan en la caché de Actions.
+  analysis-eval:
+    runs-on: ubuntu-latest
+    env:
+      HF_HOME: ${{ github.workspace }}/.cache/huggingface
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - uses: actions/cache@v4
+        with:
+          path: .cache/huggingface
+          key: hf-${{ hashFiles('apps/analytics/uv.lock') }}
+      - run: uv run --directory apps/analytics --group mining pytest tests/mining -q
+
   migrations:
     runs-on: ubuntu-latest
     services:
