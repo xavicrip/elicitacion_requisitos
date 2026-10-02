@@ -12,7 +12,7 @@
         "type": "object",
         "required": ["status"],
         "properties": {
-          "status": { "enum": ["completed", "failed", "skipped"] },
+          "status": { "enum": ["done", "failed", "skipped"] },
           "durationMs": { "type": "integer" },
           "reason": { "type": "string" },
           "error": { "type": "string" }
@@ -137,6 +137,10 @@
           "reason": { "type": "string" }
         }
       }
+    },
+    "insightsFewerThanExpected": {
+      "type": "boolean",
+      "description": "Quedaron menos de 3 insights tras verificar las evidencias y reintentar una vez (plan, ajuste 14)"
     },
     "insights": {
       "type": "array",

@@ -31,10 +31,10 @@
 ## R4. Embeddings, temas y grupos
 
 - **Decision**: `paraphrase-multilingual-MiniLM-L12-v2` (384 dimensiones, rápido en CPU,
-  multilingüe). Caché de embeddings en `analysis_embeddings` indexada por `sha256(texto)` para
-  no recalcular los detalles sin cambios.
+  multilingüe). Sin caché persistente: el worker no accede a MongoDB (plan, ajuste 1); se mide en
+  T056 si hace falta una.
   - **Temas**: BERTopic con los embeddings precalculados, UMAP (5D) + HDBSCAN
-    (`min_cluster_size = max(5, n/50)`) y el vectorizador c-TF-IDF con los lemas de R2; salida:
+    de scikit-learn (`min_cluster_size = max(5, n/50)`) y el vectorizador c-TF-IDF con los lemas de R2; salida:
     tema, términos, número de detalles y actividades. Con menos de 20 detalles no se ejecuta
     (US2-5).
   - **Grupos semánticos**: HDBSCAN sobre los embeddings reducidos (UMAP 5D), `min_cluster_size=3`;
@@ -89,14 +89,16 @@
 
 ## R10. Insights con LLM
 
-- **Decision**: **Claude Sonnet 5** (`claude-sonnet-5`, SDK `anthropic`) con *structured outputs*
+- **Decision**: **Claude** (`INSIGHTS_LLM_MODEL`, por defecto `claude-opus-5-5`, SDK `anthropic` con
+  `beta.messages.parse`, `fallbacks: "default"` y 60 s de límite) con *structured outputs*
   (esquema JSON): entrada = resumen compacto de los resultados (KPIs, top temas, calidad,
   reglas, calientes y frías, con **IDs de evidencia**) y hasta 200 detalles representativos
   (los más votados y los centroides de cada tema), **sin autor**. Salida: 3–10 insights
   `{ title, statement, recommendation, evidence: [{kind, id}] }`. **Verificación**: se
   descartan los insights con evidencias que no existen en los resultados o con cifras que no
   cuadran con los datos (comparación automática de porcentajes con un margen de ±2 puntos).
-  El feedback "no útil" se guarda y se añade a las instrucciones de ejecuciones futuras del
+  Si quedan menos de 3, se reintenta una vez con los descartados; si siguen faltando, se
+  devuelven los que haya con `insightsFewerThanExpected`. El feedback "no útil" se guarda y se añade a las instrucciones de ejecuciones futuras del
   proyecto como "evitar insights como…".
 - **Rationale**: FR-012 y SC-006 (100 % con evidencia); Principio VII.
 - **Fallo del proveedor**: la etapa `insights` queda `failed` y el resto de resultados siguen
@@ -104,20 +106,23 @@
 
 ## R11. Ejecución, programación y obsolescencia
 
-- **Decision**: `POST /projects/:id/analysis-runs` crea el run (`queued`) y encola en `analysis`
+- **Decision**: `POST /projects/:id/analysis-runs` crea el run (`pending`) y encola en `analysis`
   (índice único parcial: 1 activo por proyecto → 409). BullMQ *job scheduler* nocturno
   (`0 3 * * *` en la zona horaria del proyecto; por defecto America/Guayaquil) para los
   proyectos abiertos con cambios desde el último run. **Obsolescencia**: el run guarda
   `dataFingerprint = {count, maxUpdatedAt}`; el dashboard compara con el estado actual y
   muestra "Análisis desactualizado: N detalles nuevos".
 - **Fallos parciales**: cada técnica se ejecuta dentro de un `try` con su propio estado
-  en `results.stages[técnica]`.
+  en `results.stages[técnica]`; el run termina `done` con `partial: true`.
+- **Progreso**: la web consulta `GET /analysis-runs/:id` cada 3 s mientras el run está `pending`
+  o `running` (el dashboard no está en ninguna sala de Socket.IO; plan, ajuste 8).
 
 ## R12. Visualización
 
 - **Decision**: **ECharts** (barras, líneas, dispersión 2D de grupos, grafo con fuerzas para la
   coocurrencia, `echarts-wordcloud`, heatmap), con la paleta de la guía *dataviz* del proyecto y
-  soporte de tema claro y oscuro. El mapa de cobertura reutiliza el canvas three.js de la 003
+  soporte de tema claro y oscuro, tabla accesible por gráfico y el texto de los detalles escapado
+  en los tooltips (plan, ajuste 15). El mapa de cobertura reutiliza el canvas three.js de la 003
   con el overlay `heatmap` de la 004.
 - **Alternatives considered**: Recharts (sin grafo de red ni nube de palabras nativos).
 
