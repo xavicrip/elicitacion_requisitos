@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { lazy, Suspense, useState, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
 import { LoginPage } from '../features/auth/LoginPage';
 import { DiagramListPage } from '../features/diagrams/DiagramListPage';
@@ -15,6 +15,9 @@ import '../lib/zod';
 import { HomePage } from './HomePage';
 import { Layout } from './Layout';
 import { NotFoundPage } from './NotFoundPage';
+
+// El dashboard (feature 007) trae ECharts: se carga solo al entrar en su ruta.
+const DashboardPage = lazy(() => import('../features/dashboard/DashboardPage'));
 
 /** Rutas de la app (React Router 7, modo librería; research R10). */
 export const routes: RouteObject[] = [
@@ -44,6 +47,15 @@ export const routes: RouteObject[] = [
         path: 'proyectos/:projectId/requisitos-huerfanos',
         loader: requireSession,
         element: <OrphansPage />,
+      },
+      {
+        path: 'proyectos/:projectId/dashboard',
+        loader: requireSession,
+        element: (
+          <Suspense fallback={<p>Cargando…</p>}>
+            <DashboardPage />
+          </Suspense>
+        ),
       },
       { path: 'invitacion/:token', element: <AcceptInvitationPage /> },
       { path: '*', element: <NotFoundPage /> },
