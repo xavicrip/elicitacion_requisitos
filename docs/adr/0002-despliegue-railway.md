@@ -197,5 +197,4 @@ staging y producción, con la configuración de `railway.worker.json` y las vari
 `REDIS_URL`, `DETECTION_CONCURRENCY=1`, `DETECTION_TIMEOUT_S=180` y `LOG_LEVEL=INFO`, sin
 `ANTHROPIC_API_KEY`. `railway add` solo creó la instancia del entorno enlazado (producción) y
 `railway environment edit` no admite `isCreated`: la de staging se creó con la mutación
-`environmentPatchCommit` de la API de Railway y el mismo parche. Falta `FEATURE_FLAGS` en `api`
-de staging.
+`environmentPatchCommit` de la API de Railway y el mismo parche. `api` en staging tiene `FEATURE_FLAGS=detection=true`; producción sigue sin definirla.
