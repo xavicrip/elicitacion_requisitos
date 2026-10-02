@@ -160,3 +160,9 @@ réplicas queda validado por las pruebas de integración con dos instancias de l
 mismo Redis. Al pasar a un plan con réplicas, se aplica ese mismo comando (y se añade
 `environments.staging.deploy.multiRegionConfig` a `apps/api/railway.json`, que es la fuente de
 verdad) y se repite la comprobación de T046 con los logs de conexión.
+
+## Flag `realtime` retirado (2026-10-02)
+
+`realtime` se activó por defecto en la v0.6.0 y se retiró después (`docs/feature-flags.md`). La
+variable `FEATURE_FLAGS` de `api` en staging se elimina después de desplegar el retiro; mientras
+siga definida, `api` solo avisa en el log del flag desconocido. Producción nunca la definió.
