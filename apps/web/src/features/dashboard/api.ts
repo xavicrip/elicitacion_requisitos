@@ -1,5 +1,5 @@
-import type { DashboardFilters, DescriptiveDashboard } from '@reqcanvas/shared';
-import { apiFetch } from '../../lib/api-client';
+import type { AnalysisRun, DashboardFilters, DescriptiveDashboard } from '@reqcanvas/shared';
+import { ApiError, apiFetch } from '../../lib/api-client';
 
 /** Filtros por defecto del dashboard (FR-003): detalles pendientes y validados. */
 export const DEFAULT_FILTERS: DashboardFilters = {
@@ -32,9 +32,26 @@ export const dashboardApi = {
     apiFetch<DescriptiveDashboard>(
       `/projects/${projectId}/dashboard/descriptive${filtersQuery(filters)}`,
     ),
+  /** Último análisis terminado, con resultados; `null` si aún no hay ninguno. */
+  latest: async (projectId: string): Promise<AnalysisRun | null> => {
+    try {
+      return await apiFetch<AnalysisRun>(`/projects/${projectId}/analysis-runs/latest`);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null;
+      throw error;
+    }
+  },
+  run: (runId: string) => apiFetch<AnalysisRun>(`/analysis-runs/${runId}`),
+  start: (projectId: string, filters: DashboardFilters) =>
+    apiFetch<AnalysisRun>(`/projects/${projectId}/analysis-runs`, {
+      method: 'POST',
+      body: { filters },
+    }),
 };
 
 export const dashboardKeys = {
   descriptive: (projectId: string, filters: DashboardFilters) =>
     ['projects', projectId, 'dashboard', 'descriptive', filters] as const,
+  latest: (projectId: string) => ['projects', projectId, 'analysis', 'latest'] as const,
+  run: (runId: string) => ['analysis-runs', runId] as const,
 };

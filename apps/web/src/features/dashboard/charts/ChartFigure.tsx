@@ -1,4 +1,5 @@
 import type { EChartsCoreOption } from 'echarts/core';
+import type { ChartClick } from './EChart';
 import { lazy, Suspense, useId, type ReactNode } from 'react';
 
 const EChart = lazy(() => import('./EChart'));
@@ -16,6 +17,7 @@ export function ChartFigure({
   option,
   table,
   height = 240,
+  onClick,
   children,
 }: {
   title: string;
@@ -23,6 +25,7 @@ export function ChartFigure({
   option: EChartsCoreOption;
   table: TableData;
   height?: number;
+  onClick?: (params: ChartClick) => void;
   children?: ReactNode;
 }) {
   const titleId = useId();
@@ -34,7 +37,7 @@ export function ChartFigure({
       <p className="text-sm text-gray-600">{description}</p>
       <div aria-hidden="true">
         <Suspense fallback={<div style={{ height }} />}>
-          <EChart option={option} height={height} />
+          <EChart option={option} height={height} onClick={onClick} />
         </Suspense>
       </div>
       {children}

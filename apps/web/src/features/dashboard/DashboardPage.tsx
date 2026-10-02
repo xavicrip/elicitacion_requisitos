@@ -8,6 +8,7 @@ import { ApiError } from '../../lib/api-client';
 import { useFlags } from '../../lib/flags';
 import { projectKeys, projectsApi } from '../projects/api';
 import { ProjectNotFound } from '../projects/ProjectNotFound';
+import { AnalysisSection } from './analysis/AnalysisSection';
 import { dashboardApi, dashboardKeys, DEFAULT_FILTERS } from './api';
 import { CoverageMap } from './descriptive/CoverageMap';
 import { Distributions } from './descriptive/Distributions';
@@ -75,6 +76,7 @@ export default function DashboardPage() {
           <Distributions data={descriptive.data} />
         </>
       )}
+      <AnalysisSection projectId={projectId} filters={filters} />
     </section>
   );
 }
