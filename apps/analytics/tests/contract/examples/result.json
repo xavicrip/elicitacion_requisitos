@@ -1,0 +1,34 @@
+{
+  "v": 1,
+  "activities": [
+    {
+      "tempId": "a1",
+      "bbox": { "x": 0.12, "y": 0.3, "w": 0.15, "h": 0.06 },
+      "type": "action",
+      "label": "Validar pago",
+      "confidence": 0.91,
+      "flags": ["llm_corrected"]
+    },
+    {
+      "tempId": "a2",
+      "bbox": { "x": 0.12, "y": 0.42, "w": 0.15, "h": 0.06 },
+      "type": "action",
+      "label": "Emitir factura",
+      "confidence": 0.62,
+      "flags": []
+    },
+    {
+      "tempId": "a3",
+      "bbox": { "x": 0.18, "y": 0.1, "w": 0.02, "h": 0.03 },
+      "type": "start",
+      "label": "",
+      "confidence": 0.88,
+      "flags": []
+    }
+  ],
+  "transitions": [
+    { "from": "a3", "to": "a1", "confidence": 0.8 },
+    { "from": "a1", "to": "a2", "confidence": 0.74 }
+  ],
+  "stats": { "durationMs": 18450, "llmUsed": true, "ocrMeanConfidence": 0.83 }
+}

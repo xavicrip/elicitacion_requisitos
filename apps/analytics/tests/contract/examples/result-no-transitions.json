@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "activities": [
+    {
+      "tempId": "a1",
+      "bbox": { "x": 0.4, "y": 0.4, "w": 0.2, "h": 0.1 },
+      "type": "decision",
+      "label": "",
+      "confidence": 0.35,
+      "flags": ["empty_label"]
+    }
+  ],
+  "transitions": [],
+  "stats": { "durationMs": 2310, "llmUsed": false, "ocrMeanConfidence": null }
+}

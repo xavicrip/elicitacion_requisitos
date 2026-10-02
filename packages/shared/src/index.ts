@@ -6,3 +6,4 @@ export * from './projects';
 export * from './details';
 export * from './events';
 export * from './realtime';
+export * from './detection';
