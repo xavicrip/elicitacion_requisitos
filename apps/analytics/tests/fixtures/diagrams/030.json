@@ -1,0 +1,206 @@
+{
+  "id": "030",
+  "subset": "photo",
+  "style": "plantuml",
+  "width": 1100,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.19087,
+        "y": 0.13296,
+        "w": 0.03323,
+        "h": 0.03211
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Medir satisfacción",
+      "bbox": {
+        "x": 0.09567,
+        "y": 0.22573,
+        "w": 0.22534,
+        "h": 0.0636
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Desplegar versión",
+      "bbox": {
+        "x": 0.0969,
+        "y": 0.33388,
+        "w": 0.22445,
+        "h": 0.06279
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Enviar cotización",
+      "bbox": {
+        "x": 0.09812,
+        "y": 0.44119,
+        "w": 0.22358,
+        "h": 0.06199
+      }
+    },
+    {
+      "id": "a5",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.1779,
+        "y": 0.54735,
+        "w": 0.06542,
+        "h": 0.06188
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Analizar requisitos",
+      "bbox": {
+        "x": 0.10052,
+        "y": 0.65331,
+        "w": 0.22185,
+        "h": 0.06042
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Emitir factura",
+      "bbox": {
+        "x": 0.10172,
+        "y": 0.75814,
+        "w": 0.221,
+        "h": 0.05965
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Registrar pedido",
+      "bbox": {
+        "x": 0.1029,
+        "y": 0.86216,
+        "w": 0.22015,
+        "h": 0.05889
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Archivar expediente",
+      "bbox": {
+        "x": 0.70557,
+        "y": 0.10296,
+        "w": 0.23051,
+        "h": 0.06504
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Conciliar cuentas",
+      "bbox": {
+        "x": 0.7044,
+        "y": 0.21294,
+        "w": 0.22959,
+        "h": 0.0642
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Validar pago",
+      "bbox": {
+        "x": 0.70324,
+        "y": 0.32205,
+        "w": 0.22868,
+        "h": 0.06338
+      }
+    },
+    {
+      "id": "a13",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.79623,
+        "y": 0.44341,
+        "w": 0.03893,
+        "h": 0.03648
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Responder consulta",
+      "bbox": {
+        "x": 0.38205,
+        "y": 0.5964,
+        "w": 0.20657,
+        "h": 0.0608
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a7"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": "005",
+  "subset": "digital",
+  "style": "plantuml",
+  "width": 400,
+  "height": 1020,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.4525,
+        "y": 0.11471,
+        "w": 0.095,
+        "h": 0.03725
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Elaborar informe",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.22745,
+        "w": 0.65,
+        "h": 0.07059
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Consultar historial",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.35686,
+        "w": 0.65,
+        "h": 0.07059
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Negociar condiciones",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.48627,
+        "w": 0.65,
+        "h": 0.07059
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Autorizar gasto",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.61569,
+        "w": 0.65,
+        "h": 0.07059
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Registrar pedido",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.7451,
+        "w": 0.65,
+        "h": 0.07059
+      }
+    },
+    {
+      "id": "a7",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.445,
+        "y": 0.88824,
+        "w": 0.11,
+        "h": 0.04314
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    }
+  ]
+}

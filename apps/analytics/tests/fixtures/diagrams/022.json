@@ -1,0 +1,281 @@
+{
+  "id": "022",
+  "subset": "scanned",
+  "style": "drawio",
+  "width": 1692,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.10599,
+        "y": 0.10227,
+        "w": 0.02254,
+        "h": 0.03271
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Analizar requisitos",
+      "bbox": {
+        "x": 0.04063,
+        "y": 0.20056,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Registrar pedido",
+      "bbox": {
+        "x": 0.04091,
+        "y": 0.31376,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Escalar incidente",
+      "bbox": {
+        "x": 0.04119,
+        "y": 0.42697,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a5",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.09584,
+        "y": 0.53874,
+        "w": 0.04508,
+        "h": 0.06541
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Despachar pedido",
+      "bbox": {
+        "x": 0.04175,
+        "y": 0.65338,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Confirmar dirección",
+      "bbox": {
+        "x": 0.04203,
+        "y": 0.76659,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Verificar identidad",
+      "bbox": {
+        "x": 0.04231,
+        "y": 0.8798,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Archivar expediente",
+      "bbox": {
+        "x": 0.45406,
+        "y": 0.0852,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Medir satisfacción",
+      "bbox": {
+        "x": 0.45434,
+        "y": 0.19841,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Asignar transportista",
+      "bbox": {
+        "x": 0.45462,
+        "y": 0.31161,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a13",
+      "type": "action",
+      "label": "Conciliar cuentas",
+      "bbox": {
+        "x": 0.4549,
+        "y": 0.42482,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a14",
+      "type": "action",
+      "label": "Restablecer contraseña",
+      "bbox": {
+        "x": 0.45518,
+        "y": 0.53803,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a15",
+      "type": "action",
+      "label": "Revisar presupuesto",
+      "bbox": {
+        "x": 0.45546,
+        "y": 0.65124,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a16",
+      "type": "action",
+      "label": "Firmar contrato",
+      "bbox": {
+        "x": 0.45574,
+        "y": 0.76444,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a17",
+      "type": "action",
+      "label": "Preparar paquete",
+      "bbox": {
+        "x": 0.45602,
+        "y": 0.87765,
+        "w": 0.15382,
+        "h": 0.06255
+      }
+    },
+    {
+      "id": "a18",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.93163,
+        "y": 0.09539,
+        "w": 0.0261,
+        "h": 0.03787
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Crear usuario",
+      "bbox": {
+        "x": 0.23664,
+        "y": 0.59583,
+        "w": 0.142,
+        "h": 0.06249
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a7"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    },
+    {
+      "from": "a13",
+      "to": "a14"
+    },
+    {
+      "from": "a14",
+      "to": "a15"
+    },
+    {
+      "from": "a15",
+      "to": "a16"
+    },
+    {
+      "from": "a16",
+      "to": "a17"
+    },
+    {
+      "from": "a17",
+      "to": "a18"
+    }
+  ]
+}

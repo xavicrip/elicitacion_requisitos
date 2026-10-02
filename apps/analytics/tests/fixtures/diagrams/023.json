@@ -1,0 +1,191 @@
+{
+  "id": "023",
+  "subset": "scanned",
+  "style": "staruml",
+  "width": 1100,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.1646,
+        "y": 0.1003,
+        "w": 0.03455,
+        "h": 0.03259
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Evaluar proveedor",
+      "bbox": {
+        "x": 0.06367,
+        "y": 0.19891,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Imprimir comprobante",
+      "bbox": {
+        "x": 0.06366,
+        "y": 0.31212,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Archivar expediente",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.42532,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a5",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.14726,
+        "y": 0.53683,
+        "w": 0.0691,
+        "h": 0.06519
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Agendar entrega",
+      "bbox": {
+        "x": 0.0636,
+        "y": 0.65174,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Validar información",
+      "bbox": {
+        "x": 0.06359,
+        "y": 0.76495,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Aprobar crédito",
+      "bbox": {
+        "x": 0.06357,
+        "y": 0.87816,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Aprobar diseño",
+      "bbox": {
+        "x": 0.70006,
+        "y": 0.08579,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Crear usuario",
+      "bbox": {
+        "x": 0.70004,
+        "y": 0.199,
+        "w": 0.23637,
+        "h": 0.06178
+      }
+    },
+    {
+      "id": "a12",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.7982,
+        "y": 0.32423,
+        "w": 0.04001,
+        "h": 0.03774
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Escalar incidente",
+      "bbox": {
+        "x": 0.36361,
+        "y": 0.59518,
+        "w": 0.21819,
+        "h": 0.06178
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a7"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    }
+  ]
+}

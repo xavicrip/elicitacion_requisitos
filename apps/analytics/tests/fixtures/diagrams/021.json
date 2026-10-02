@@ -1,0 +1,255 @@
+{
+  "id": "021",
+  "subset": "scanned",
+  "style": "plantuml",
+  "width": 1410,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.13887,
+        "y": 0.08533,
+        "w": 0.02785,
+        "h": 0.03368
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Despachar pedido",
+      "bbox": {
+        "x": 0.05661,
+        "y": 0.18068,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Emitir factura",
+      "bbox": {
+        "x": 0.05344,
+        "y": 0.29382,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Publicar resultados",
+      "bbox": {
+        "x": 0.05027,
+        "y": 0.40696,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Restablecer contraseña",
+      "bbox": {
+        "x": 0.04709,
+        "y": 0.52011,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Negociar condiciones",
+      "bbox": {
+        "x": 0.04392,
+        "y": 0.63325,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a7",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.1059,
+        "y": 0.74735,
+        "w": 0.0557,
+        "h": 0.06735
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Aprobar diseño",
+      "bbox": {
+        "x": 0.03757,
+        "y": 0.85953,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Evaluar proveedor",
+      "bbox": {
+        "x": 0.55596,
+        "y": 0.08789,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a11",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.61794,
+        "y": 0.202,
+        "w": 0.0557,
+        "h": 0.06735
+      }
+    },
+    {
+      "id": "a13",
+      "type": "action",
+      "label": "Notificar al cliente",
+      "bbox": {
+        "x": 0.54961,
+        "y": 0.31418,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a14",
+      "type": "action",
+      "label": "Confirmar dirección",
+      "bbox": {
+        "x": 0.54643,
+        "y": 0.42732,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a15",
+      "type": "action",
+      "label": "Evaluar riesgo",
+      "bbox": {
+        "x": 0.54326,
+        "y": 0.54046,
+        "w": 0.18602,
+        "h": 0.06927
+      }
+    },
+    {
+      "id": "a16",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.61697,
+        "y": 0.66874,
+        "w": 0.03225,
+        "h": 0.03899
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Clasificar reclamo",
+      "bbox": {
+        "x": 0.27306,
+        "y": 0.81256,
+        "w": 0.17185,
+        "h": 0.06869
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Validar pago",
+      "bbox": {
+        "x": 0.7851,
+        "y": 0.2672,
+        "w": 0.17185,
+        "h": 0.06869
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a9"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a13"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    },
+    {
+      "from": "a13",
+      "to": "a14"
+    },
+    {
+      "from": "a14",
+      "to": "a15"
+    },
+    {
+      "from": "a15",
+      "to": "a16"
+    }
+  ]
+}

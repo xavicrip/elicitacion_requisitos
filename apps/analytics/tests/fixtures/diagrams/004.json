@@ -1,0 +1,82 @@
+{
+  "id": "004",
+  "subset": "digital",
+  "style": "drawio",
+  "width": 400,
+  "height": 770,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "action",
+      "label": "Registrar devolución",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.12987,
+        "w": 0.65,
+        "h": 0.09351
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Negociar condiciones",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.3013,
+        "w": 0.65,
+        "h": 0.09351
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Verificar identidad",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.47273,
+        "w": 0.65,
+        "h": 0.09351
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Revisar solicitud",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.64416,
+        "w": 0.65,
+        "h": 0.09351
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Aprobar crédito",
+      "bbox": {
+        "x": 0.175,
+        "y": 0.81558,
+        "w": 0.65,
+        "h": 0.09351
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "id": "025",
+  "subset": "scanned",
+  "style": "plantuml",
+  "width": 1100,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.1775,
+        "y": 0.09017,
+        "w": 0.03566,
+        "h": 0.03364
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Analizar requisitos",
+      "bbox": {
+        "x": 0.0722,
+        "y": 0.18562,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Ejecutar pruebas",
+      "bbox": {
+        "x": 0.06826,
+        "y": 0.29876,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a4",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.14785,
+        "y": 0.41278,
+        "w": 0.07132,
+        "h": 0.06729
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Planificar sprint",
+      "bbox": {
+        "x": 0.06038,
+        "y": 0.52505,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Cerrar ticket",
+      "bbox": {
+        "x": 0.05644,
+        "y": 0.6382,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Emitir factura",
+      "bbox": {
+        "x": 0.0525,
+        "y": 0.75135,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Confirmar dirección",
+      "bbox": {
+        "x": 0.04856,
+        "y": 0.86449,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Confirmar recepción",
+      "bbox": {
+        "x": 0.71216,
+        "y": 0.09218,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Aprobar diseño",
+      "bbox": {
+        "x": 0.70822,
+        "y": 0.20533,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Aprobar crédito",
+      "bbox": {
+        "x": 0.70428,
+        "y": 0.31848,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a13",
+      "type": "action",
+      "label": "Enviar cotización",
+      "bbox": {
+        "x": 0.70034,
+        "y": 0.43162,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a14",
+      "type": "action",
+      "label": "Conciliar cuentas",
+      "bbox": {
+        "x": 0.6964,
+        "y": 0.54477,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a15",
+      "type": "action",
+      "label": "Corregir defectos",
+      "bbox": {
+        "x": 0.69246,
+        "y": 0.65791,
+        "w": 0.23839,
+        "h": 0.06904
+      }
+    },
+    {
+      "id": "a16",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.78707,
+        "y": 0.7861,
+        "w": 0.04129,
+        "h": 0.03895
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Registrar asistencia",
+      "bbox": {
+        "x": 0.36219,
+        "y": 0.47777,
+        "w": 0.22021,
+        "h": 0.06848
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a6"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    },
+    {
+      "from": "a13",
+      "to": "a14"
+    },
+    {
+      "from": "a14",
+      "to": "a15"
+    },
+    {
+      "from": "a15",
+      "to": "a16"
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+{
+  "id": "029",
+  "subset": "photo",
+  "style": "drawio",
+  "width": 1410,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.15809,
+        "y": 0.12271,
+        "w": 0.02639,
+        "h": 0.02951
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Coordinar logística",
+      "bbox": {
+        "x": 0.07954,
+        "y": 0.20956,
+        "w": 0.17539,
+        "h": 0.05825
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Analizar requisitos",
+      "bbox": {
+        "x": 0.07481,
+        "y": 0.31195,
+        "w": 0.17628,
+        "h": 0.05811
+      }
+    },
+    {
+      "id": "a4",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.13161,
+        "y": 0.41437,
+        "w": 0.0536,
+        "h": 0.06021
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Archivar expediente",
+      "bbox": {
+        "x": 0.06521,
+        "y": 0.51995,
+        "w": 0.17807,
+        "h": 0.0578
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Validar información",
+      "bbox": {
+        "x": 0.06033,
+        "y": 0.62556,
+        "w": 0.17898,
+        "h": 0.05811
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Desplegar versión",
+      "bbox": {
+        "x": 0.05541,
+        "y": 0.73153,
+        "w": 0.1799,
+        "h": 0.0595
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Bloquear acceso",
+      "bbox": {
+        "x": 0.05043,
+        "y": 0.83861,
+        "w": 0.18083,
+        "h": 0.06091
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Pagar proveedor",
+      "bbox": {
+        "x": 0.55415,
+        "y": 0.09821,
+        "w": 0.17997,
+        "h": 0.05956
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Emitir factura",
+      "bbox": {
+        "x": 0.55182,
+        "y": 0.20149,
+        "w": 0.1809,
+        "h": 0.05942
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Aprobar crédito",
+      "bbox": {
+        "x": 0.54948,
+        "y": 0.30586,
+        "w": 0.18184,
+        "h": 0.05927
+      }
+    },
+    {
+      "id": "a13",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.61118,
+        "y": 0.41027,
+        "w": 0.05423,
+        "h": 0.06139
+      }
+    },
+    {
+      "id": "a15",
+      "type": "action",
+      "label": "Medir satisfacción",
+      "bbox": {
+        "x": 0.54471,
+        "y": 0.51792,
+        "w": 0.18375,
+        "h": 0.05895
+      }
+    },
+    {
+      "id": "a16",
+      "type": "action",
+      "label": "Planificar sprint",
+      "bbox": {
+        "x": 0.54229,
+        "y": 0.62562,
+        "w": 0.18472,
+        "h": 0.05927
+      }
+    },
+    {
+      "id": "a17",
+      "type": "action",
+      "label": "Generar orden de compra",
+      "bbox": {
+        "x": 0.53984,
+        "y": 0.7337,
+        "w": 0.1857,
+        "h": 0.06072
+      }
+    },
+    {
+      "id": "a18",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.61446,
+        "y": 0.85532,
+        "w": 0.03207,
+        "h": 0.03717
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Despachar pedido",
+      "bbox": {
+        "x": 0.29078,
+        "y": 0.4662,
+        "w": 0.16644,
+        "h": 0.05833
+      }
+    },
+    {
+      "id": "a14",
+      "type": "action",
+      "label": "Actualizar inventario",
+      "bbox": {
+        "x": 0.77799,
+        "y": 0.46309,
+        "w": 0.17168,
+        "h": 0.05951
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a6"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    },
+    {
+      "from": "a13",
+      "to": "a15"
+    },
+    {
+      "from": "a13",
+      "to": "a14"
+    },
+    {
+      "from": "a14",
+      "to": "a15"
+    },
+    {
+      "from": "a15",
+      "to": "a16"
+    },
+    {
+      "from": "a16",
+      "to": "a17"
+    },
+    {
+      "from": "a17",
+      "to": "a18"
+    }
+  ]
+}

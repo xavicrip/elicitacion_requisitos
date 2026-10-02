@@ -1,0 +1,330 @@
+{
+  "id": "015",
+  "subset": "digital",
+  "style": "drawio",
+  "width": 1800,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.10056,
+        "y": 0.10034,
+        "w": 0.02111,
+        "h": 0.03259
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Validar pago",
+      "bbox": {
+        "x": 0.03889,
+        "y": 0.19897,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Inspeccionar calidad",
+      "bbox": {
+        "x": 0.03889,
+        "y": 0.31218,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a4",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.09,
+        "y": 0.42367,
+        "w": 0.04222,
+        "h": 0.06518
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Coordinar logística",
+      "bbox": {
+        "x": 0.03889,
+        "y": 0.53859,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Archivar expediente",
+      "bbox": {
+        "x": 0.03889,
+        "y": 0.6518,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a8",
+      "type": "decision",
+      "label": "",
+      "bbox": {
+        "x": 0.09,
+        "y": 0.76329,
+        "w": 0.04222,
+        "h": 0.06518
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Emitir factura",
+      "bbox": {
+        "x": 0.03889,
+        "y": 0.87822,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a11",
+      "type": "action",
+      "label": "Analizar requisitos",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.08576,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a12",
+      "type": "action",
+      "label": "Autorizar gasto",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.19897,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a13",
+      "type": "action",
+      "label": "Recibir mercadería",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.31218,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a14",
+      "type": "action",
+      "label": "Diseñar solución",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.42539,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a15",
+      "type": "action",
+      "label": "Negociar condiciones",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.53859,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a16",
+      "type": "action",
+      "label": "Crear usuario",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.6518,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a17",
+      "type": "action",
+      "label": "Confirmar recepción",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.76501,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a18",
+      "type": "action",
+      "label": "Actualizar inventario",
+      "bbox": {
+        "x": 0.42778,
+        "y": 0.87822,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a19",
+      "type": "action",
+      "label": "Planificar sprint",
+      "bbox": {
+        "x": 0.81667,
+        "y": 0.08576,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a20",
+      "type": "action",
+      "label": "Clasificar reclamo",
+      "bbox": {
+        "x": 0.81667,
+        "y": 0.19897,
+        "w": 0.14444,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a21",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.87667,
+        "y": 0.32419,
+        "w": 0.02444,
+        "h": 0.03774
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Revisar presupuesto",
+      "bbox": {
+        "x": 0.22222,
+        "y": 0.48199,
+        "w": 0.13333,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Bloquear acceso",
+      "bbox": {
+        "x": 0.22222,
+        "y": 0.82161,
+        "w": 0.13333,
+        "h": 0.06175
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a6"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a10"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    },
+    {
+      "from": "a11",
+      "to": "a12"
+    },
+    {
+      "from": "a12",
+      "to": "a13"
+    },
+    {
+      "from": "a13",
+      "to": "a14"
+    },
+    {
+      "from": "a14",
+      "to": "a15"
+    },
+    {
+      "from": "a15",
+      "to": "a16"
+    },
+    {
+      "from": "a16",
+      "to": "a17"
+    },
+    {
+      "from": "a17",
+      "to": "a18"
+    },
+    {
+      "from": "a18",
+      "to": "a19"
+    },
+    {
+      "from": "a19",
+      "to": "a20"
+    },
+    {
+      "from": "a20",
+      "to": "a21"
+    }
+  ]
+}

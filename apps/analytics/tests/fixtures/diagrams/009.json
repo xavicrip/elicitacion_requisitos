@@ -1,0 +1,172 @@
+{
+  "id": "009",
+  "subset": "digital",
+  "style": "drawio",
+  "width": 1100,
+  "height": 1166,
+  "activities": [
+    {
+      "id": "a1",
+      "type": "start",
+      "label": "",
+      "bbox": {
+        "x": 0.16455,
+        "y": 0.10034,
+        "w": 0.03455,
+        "h": 0.03259
+      }
+    },
+    {
+      "id": "a2",
+      "type": "action",
+      "label": "Cerrar ticket",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.19897,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a3",
+      "type": "action",
+      "label": "Clasificar reclamo",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.31218,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a4",
+      "type": "action",
+      "label": "Escalar incidente",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.42539,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a5",
+      "type": "action",
+      "label": "Aprobar crédito",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.53859,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a6",
+      "type": "action",
+      "label": "Generar orden de compra",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.6518,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a7",
+      "type": "action",
+      "label": "Validar pago",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.76501,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a8",
+      "type": "action",
+      "label": "Notificar al cliente",
+      "bbox": {
+        "x": 0.06364,
+        "y": 0.87822,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a9",
+      "type": "action",
+      "label": "Bloquear acceso",
+      "bbox": {
+        "x": 0.7,
+        "y": 0.08576,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a10",
+      "type": "action",
+      "label": "Registrar pedido",
+      "bbox": {
+        "x": 0.7,
+        "y": 0.19897,
+        "w": 0.23636,
+        "h": 0.06175
+      }
+    },
+    {
+      "id": "a11",
+      "type": "end",
+      "label": "",
+      "bbox": {
+        "x": 0.79818,
+        "y": 0.32419,
+        "w": 0.04,
+        "h": 0.03774
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "from": "a4",
+      "to": "a5"
+    },
+    {
+      "from": "a5",
+      "to": "a6"
+    },
+    {
+      "from": "a6",
+      "to": "a7"
+    },
+    {
+      "from": "a7",
+      "to": "a8"
+    },
+    {
+      "from": "a8",
+      "to": "a9"
+    },
+    {
+      "from": "a9",
+      "to": "a10"
+    },
+    {
+      "from": "a10",
+      "to": "a11"
+    }
+  ]
+}
