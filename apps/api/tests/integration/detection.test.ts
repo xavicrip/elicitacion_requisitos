@@ -208,7 +208,10 @@ describe('ciclo del job', () => {
       stage: 'ocr',
       pct: 55,
     });
-    expect(events.at(-1)?.payload).toMatchObject({ jobId, proposed: 3 });
+    await vi.waitFor(() => expect(events.at(-1)?.payload).toMatchObject({ jobId, proposed: 3 }), {
+      timeout: 2000,
+      interval: 20,
+    });
   });
 
   it('el worker recibe la URL firmada de la imagen display y las opciones', async () => {
@@ -271,7 +274,11 @@ describe('ciclo del job', () => {
         message: 'No se pudo leer la imagen del diagrama. Vuelve a intentarlo.',
       },
     });
-    expect(events.at(-1)).toMatchObject({ name: 'detection.failed' });
+    // El evento se emite justo después de guardar el estado: se espera a que llegue.
+    await vi.waitFor(() => expect(events.at(-1)).toMatchObject({ name: 'detection.failed' }), {
+      timeout: 2000,
+      interval: 20,
+    });
 
     behaviours.set(versionId, async () => {
       throw new Error('stack interno en /app/x.py línea 3');
