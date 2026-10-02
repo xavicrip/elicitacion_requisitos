@@ -22,7 +22,8 @@
 }
 ```
 
-- `image.url`: presigned GET con validez de 10 min.
+- `image.url`: presigned GET con validez de 10 min de la imagen **display** de la versión (la
+  misma que ve el canvas; las `bbox` del resultado son normalizadas).
 
 ## Progreso (`job.updateProgress`)
 
@@ -57,6 +58,12 @@
 - `bbox` normalizado a la imagen de entrada. `tempId` es único dentro del resultado.
 - `api` añade `possible_duplicate` al comparar con las actividades existentes (el worker no
   las conoce).
+
+## Salud del worker
+
+El worker escribe `detection:worker:{id}` en Redis cada 10 s (TTL 30 s); `api /health/deep`
+informa `detection-worker` según haya alguna clave viva. Además expone `GET /health` en `PORT`
+para el healthcheck de Railway.
 
 ## Errores
 

@@ -4,8 +4,10 @@
 
 ## R1. Cola de trabajos entre Node y Python
 
-- **Decision**: **BullMQ** en ambos lados: `api` usa `Queue` y `QueueEvents` (Node) y
-  `analytics-worker` usa el paquete oficial `bullmq` de Python (`Worker`). Cola `detection`,
+- **Decision**: **BullMQ** en ambos lados: `api` usa `Queue` y `QueueEvents` (Node) en
+  `apps/api/src/jobs/detection.ts`, con el patrón de `project-deletion.ts` (conexión `ioredis`
+  propia y `queuePrefix` para aislar las pruebas), y `analytics-worker` usa el paquete oficial
+  `bullmq` de Python (`Worker`, ≥ 3.3, que fija `redis==7.4.1`). Cola `detection`,
   `attempts: 2`, backoff exponencial, `removeOnComplete: 1000`. Progreso con
   `job.updateProgress({stage, pct})`.
 - **Rationale**: el Redis ya existe (001) y BullMQ se usa también en la 002; una sola
@@ -54,11 +56,13 @@
 
 ## R5. Refinamiento con modelo multimodal (opcional)
 
-- **Decision**: si el flag `detection-llm` está activo y existe `ANTHROPIC_API_KEY`, se envía a
-  **Claude Sonnet 5** (`claude-sonnet-5`, SDK `anthropic` de Python) la imagen del diagrama
-  junto con las zonas detectadas (JSON con bbox, tipo y texto OCR), y se pide con *structured
-  outputs* (esquema JSON) una corrección de `label` y `type` por zona y posibles zonas
-  omitidas. Las correcciones sustituyen las del OCR solo si el modelo devuelve la misma zona
+- **Decision**: si el flag `detection-llm` está activo y existe `ANTHROPIC_API_KEY`, se envía
+  al modelo de `DETECTION_LLM_MODEL` (por defecto `claude-opus-5-5`; `claude-sonnet-5-5` como
+  alternativa más barata, a decidir al medir), con el SDK `anthropic` de Python, la imagen del
+  diagrama junto con las zonas detectadas (JSON con bbox, tipo y texto OCR), y se pide con
+  salida estructurada (`output_config.format` con un esquema JSON) una corrección de `label` y
+  `type` por zona y posibles zonas omitidas, sin traducir el texto. Se comprueba `stop_reason`
+  (una negativa, `refusal`, se trata como fallo del refinamiento). Las correcciones sustituyen las del OCR solo si el modelo devuelve la misma zona
   (IoU ≥ 0,7); las zonas nuevas entran con confianza `medium`. Con timeout de 30 s, si falla se
   sigue con el resultado local.
 - **Rationale**: mejora los nombres (SC-002) en texto pequeño o con tildes sin depender del LLM
@@ -75,7 +79,9 @@
 
 ## R7. Revisión en el editor
 
-- **Decision**: `ProposalsLayer` dibuja las propuestas con borde discontinuo y color por
+- **Decision**: `ProposalsLayer` es una capa HTML sobre el canvas (prop `overlay` de
+  `WorkspacePage`, como los cursores de la 005) y el panel de revisión ocupa el hueco
+  `editorPanel` junto a `EditorPanel`. Dibuja las propuestas con borde discontinuo y color por
   confianza (verde, ámbar, gris) **más un icono y un texto** (no solo color). Las propuestas que
   se superponen (IoU ≥ 0,5) con actividades existentes se marcan como `possible_duplicate` y
   quedan excluidas de "Aceptar todas las de confianza alta". Aceptar → `POST
@@ -97,7 +103,11 @@
 - **Decision**: la imagen de `analytics` instala `tesseract-ocr`, `tesseract-ocr-spa` y
   `tesseract-ocr-eng` (apt) y `libgl` no es necesario (versión headless de OpenCV). Nuevo
   servicio Railway `analytics-worker` con la misma imagen y el *start command*
-  `python -m analytics.worker`, con su `railway.json` (healthcheck desactivado; reinicio
-  `ON_FAILURE`). `deploy.yml` añade `railway up --service analytics-worker`. Nuevas variables:
-  `ANTHROPIC_API_KEY` (opcional), `DETECTION_CONCURRENCY` (por defecto 2), `DETECTION_TIMEOUT_S`
-  (por defecto 180).
+  `python -m analytics.worker`, healthcheck `GET /health` (servidor HTTP mínimo del worker) y
+  reinicio `ON_FAILURE`. Su configuración vive en `apps/analytics/railway.worker.json` como
+  fuente de verdad y se aplica con `railway environment edit` (Railway no lee los
+  `railway.json`, ADR 0002). La cuenta admite una réplica por servicio y quizá solo 0,5 GB de
+  RAM: `DETECTION_CONCURRENCY` por defecto 1 y objetivo de memoria < 400 MB. `deploy.yml` añade
+  el servicio al bucle de despliegue. Nuevas variables: `ANTHROPIC_API_KEY` y
+  `DETECTION_LLM_MODEL` (opcionales), `DETECTION_CONCURRENCY` (1) y `DETECTION_TIMEOUT_S`
+  (180).

@@ -22,11 +22,11 @@ Nada se convierte en actividad sin aceptación explícita (Principio VII).
 **Primary Dependencies**: `analytics`: `bullmq` (worker Python oficial), `opencv-python-headless`, `numpy`, `pytesseract` + paquetes del sistema `tesseract-ocr`, `tesseract-ocr-spa`, `tesseract-ocr-eng`, `httpx`, `anthropic` (opcional, flag `detection-llm`). `api`: `bullmq` (Queue + QueueEvents). `web`: capa de propuestas en el editor
 **Storage**: MongoDB (`detection_jobs`, `activity_proposals`, `transition_proposals`, propiedad de `api`); Redis (colas BullMQ); lectura de imágenes del bucket vía presigned URL
 **Testing**: pytest con un **conjunto de validación etiquetado** (30 diagramas con *ground truth* JSON) y un script de precisión y exhaustividad con umbrales como gate de CI; Vitest (endpoints de la API y ciclo de vida del job con un worker falso); Playwright (flujo de revisión)
-**Target Platform**: `analytics` en Railway (contenedor con Tesseract, 2 GB de RAM)
+**Target Platform**: `analytics` y `analytics-worker` en Railway (contenedor con Tesseract; la cuenta admite una réplica por servicio y quizá solo 0,5 GB de RAM, ajuste 9)
 **Project Type**: Aplicación web + servicio de procesamiento
 **Performance Goals**: < 60 s para 50 actividades (SC-003); tiempo máximo del job 3 min (edge case)
 **Constraints**: el worker no escribe en MongoDB (devuelve el resultado a la API); la imagen solo llega por presigned URL; sin datos personales hacia el LLM (solo la imagen del diagrama)
-**Scale/Scope**: diagramas de hasta 8192 px y 100 actividades; ≤ 2 jobs concurrentes por réplica
+**Scale/Scope**: diagramas de hasta 8192 px y 100 actividades; `DETECTION_CONCURRENCY=1` por defecto y memoria del worker < 400 MB
 
 ## Constitution Check
 
@@ -66,7 +66,7 @@ specs/006-deteccion-asistida/
 ```text
 packages/shared/src/detection.ts                    # DetectionJobInput/Result (zod), ProposalStatus
 apps/analytics/src/analytics/
-├── worker.py                                       # Worker BullMQ ("detection"), progreso, timeouts
+├── worker.py                                       # Worker BullMQ ("detection"), progreso, timeouts, latido y GET /health
 └── detection/
     ├── pipeline.py                                 # Orquesta las etapas → DetectionResult
     ├── preprocess.py                               # escala de grises, binarización adaptativa
@@ -76,13 +76,16 @@ apps/analytics/src/analytics/
     ├── llm_refine.py                               # Refinamiento opcional con Claude (flag)
     └── schemas.py                                  # pydantic (espejo del contrato)
 apps/analytics/tests/
+├── fixtures/generate.py                            # Generador reproducible del conjunto de validación
 ├── fixtures/diagrams/{001..030}.{png,json}         # Conjunto de validación con ground truth
 ├── unit/test_{shapes,ocr,arrows,preprocess}.py
 ├── contract/test_detection_job.py
 └── eval/evaluate_detection.py                      # precisión/exhaustividad → gate de CI
+apps/api/src/jobs/detection.ts                      # Queue + QueueEvents → persistir resultado, eventos
+apps/api/src/lib/storage.ts                         # + presignGet
+apps/api/src/modules/diagrams/publish-guards.ts     # registerPublishGuard (condiciones de publicación)
 apps/api/src/modules/detection/
 ├── routes.ts                                       # iniciar, estado, propuestas, aceptar/descartar
-├── queue.ts                                        # Queue + QueueEvents → persistir resultado
 ├── service.ts                                      # aceptar → crear activity (source: detected)
 └── models/{job,activity-proposal,transition-proposal}.ts
 apps/api/migrations/20261022000000-detection-indexes.js
@@ -91,7 +94,8 @@ apps/web/src/features/detection/
 ├── ProposalsLayer.tsx                              # zonas punteadas con color por confianza
 └── ProposalReviewPanel.tsx                         # aceptar / editar / descartar / aceptar todas (alta)
 .github/workflows/ci.yml                            # + job detection-eval
-e2e/detection-review.spec.ts
+apps/analytics/railway.worker.json                  # Configuración de analytics-worker (fuente de verdad)
+e2e/flows/detection.spec.ts
 ```
 
 **Structure Decision**: el pipeline vive en `analytics` como paquete `detection/` con etapas
@@ -103,8 +107,7 @@ por separado.
 
 1. **BullMQ real**: `api` ya usa `bullmq` 6 (`apps/api/src/jobs/project-deletion.ts`: `Queue` y
    `Worker` con una conexión `ioredis` propia y `queuePrefix` para aislar las pruebas). La cola
-   `detection` sigue el mismo patrón (`apps/api/src/jobs/detection.ts` en lugar de
-   `modules/detection/queue.ts`), con `QueueEvents` para `progress`, `completed` y `failed`. El
+   `detection` sigue el mismo patrón (`apps/api/src/jobs/detection.ts`), con `QueueEvents` para `progress`, `completed` y `failed`. El
    worker de Python usa el paquete `bullmq` con el mismo prefijo (`bull`) y la misma URL de Redis;
    la prueba de contrato del job se ejecuta en ambos lados contra el mismo JSON de ejemplo.
 2. **`analytics` actual**: FastAPI con `pydantic-settings`, `redis` y `pymongo`, gestionado con

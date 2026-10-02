@@ -47,9 +47,13 @@ Regla: como máximo un job `pending|running` por versión (índice único parcia
 
 ## Cambios en entidades existentes
 
-- `activities.source = 'detected'` al aceptar (campo ya previsto en la 003).
-- **Publicación** (003): se añade la condición "0 `activity_proposals` o `transition_proposals`
-  en `pending` para la versión" → si no se cumple, `422` con el conteo.
+- `activities.source = 'detected'` al aceptar (campo ya previsto en la 003); la actividad se crea
+  con el servicio de actividades del editor, que genera su `key`.
+- **Transiciones**: la 003 guarda las flechas en `activity.next` (lista de `key`). Aceptar una
+  `transition_proposal` añade la `key` de la actividad destino al `next` de la actividad origen.
+- **Publicación** (003): la detección registra con `registerPublishGuard` la condición "0
+  `activity_proposals` o `transition_proposals` en `pending` para la versión" → si no se
+  cumple, `422 PENDING_PROPOSALS` con el conteo.
 
 ## Migración
 
