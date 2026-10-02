@@ -46,9 +46,9 @@ El frontend usa **ECharts**.
 | Principio | Cumplimiento | Estado |
 |-----------|--------------|--------|
 | I. Requisito anclado a la actividad | Todas las métricas se calculan por actividad; los insights enlazan a detalles y actividades concretos. | ✅ |
-| II. Servicios desacoplados | Contrato de la cola en `contracts/analysis-job.md`; esquema de resultados versionado (`schemaVersion`) validado en ambos lados. `analysis_runs` se declara **compartida** (la crea `api` y escribe `results` `analytics`); lecturas de `details`/`activities` declaradas en la 004. | ✅ (justificado abajo) |
+| II. Servicios desacoplados | Contrato de la cola en `contracts/analysis-job.md`; esquema de resultados versionado (`schemaVersion`) validado en ambos lados. El worker no accede a MongoDB: recibe el conjunto y devuelve los resultados por el bucket con URLs firmadas, y solo `api` escribe `analysis_runs` (ajuste 1). | ✅ |
 | III. Pruebas primero | Gates de métricas sobre el conjunto de validación (duplicados, ambigüedad, temas) y pruebas de contrato antes de implementar cada técnica. | ✅ |
-| IV. Commits atómicos y reversibles | Flags `analytics-text` e `insights`; cada técnica es un módulo y un commit independientes; el esquema de resultados es aditivo. | ✅ |
+| IV. Commits atómicos y reversibles | Flags `dashboard` e `insights` (ajuste 5); cada técnica es un módulo y un commit independientes; el esquema de resultados es aditivo. | ✅ |
 | V. Seguridad por defecto | Solo Admin; datos enviados al LLM anonimizados (sin autor); `ANTHROPIC_API_KEY` solo en Railway; el texto del LLM se renderiza como texto plano. | ✅ |
 | VI. Observabilidad | Estado y progreso por etapa; duración por técnica en logs; errores parciales (una técnica falla y el resto sigue). | ✅ |
 | VII. Humano en el bucle | Duplicados confirmados o rechazados por el Admin (sin tocar los detalles salvo confirmación, que usa la moderación de la 004); insights con evidencias y botón "no útil". | ✅ |
@@ -122,9 +122,81 @@ paquete `mining/` de `analytics`, con un módulo por técnica. La infraestructur
 (`worker.py`, servicio `analytics-worker` en Railway) la crea la primera de las features 006 o
 007 que se integre en `main`; la segunda solo registra su cola.
 
+## Ajustes tras implementar la 002–006 (2026-10-02)
+
+1. **El worker no accede a MongoDB (constitución II, como la 006)**. En lugar de leer `details`
+   y escribir `analysis_runs`, `api` exporta el conjunto analizado (detalles filtrados **sin
+   autor**, actividades con su nombre y decisiones de duplicados previas) a un JSON comprimido en
+   el bucket (`projects/{projectId}/analysis/{runId}/input.json.gz`) y encola el job con una URL
+   firmada de lectura y otra de escritura (`presignGet` ya existe; se añade `presignPut`, 15 min).
+   El worker sube los resultados a `…/{runId}/results.json.gz` y devuelve solo un resumen
+   (`status`, `stages`, `detailCount`). `api` valida el resultado con el esquema compartido y es
+   la única que escribe `analysis_runs`. Desaparecen la escritura compartida, la lectura
+   compartida de `details` y la caché `analysis_embeddings` en MongoDB (ver *Complexity
+   Tracking*). Los archivos quedan bajo el prefijo del proyecto, así que la cascada de borrado
+   de la 003 (`deletePrefix(projects/{id})`) también los elimina.
+2. **Cola BullMQ como la 006**: cola `analysis` en `apps/api/src/jobs/analysis.ts` (mismo patrón
+   que `jobs/detection.ts`: `Queue` + `QueueEvents`, prefijo `bull`, latido del worker en Redis
+   y check en `/health/deep`). Contrato del job (versión 1) en `packages/shared` (zod) y en
+   `analytics` (pydantic), con la prueba de contrato en ambos lados sobre los mismos ejemplos.
+   `attempts: 1` y un límite de `ANALYSIS_TIMEOUT_S=900` (15 min), como `DETECTION_TIMEOUT_S`.
+3. **Servicio aparte para la minería**: los modelos (spaCy, sentence-transformers, pysentimiento,
+   torch) añaden más de 1,5 GB que la detección no necesita. El `Dockerfile` de `analytics` gana
+   una etapa `mining` (torch **CPU** desde el índice de PyTorch, modelos descargados en el build)
+   y un servicio nuevo, `analysis-worker`, la ejecuta con `python -m analytics.mining.worker`;
+   `analytics` y `analytics-worker` siguen con la imagen ligera. Railway: mismas reglas que el
+   worker de la 006 (configuración en `apps/analytics/railway.mining.json`, servicio creado antes
+   de fusionar, `deploy.yml` lo añade al bucle). La cuenta admite 24 GB por servicio (medido en
+   la 006), así que los 4 GB previstos no son un límite. **Aviso local**: la imagen ocupa ~3 GB;
+   el disco del equipo de desarrollo tiene poco margen.
+4. **Dependencias**: `scikit-learn` ≥ 1.3 trae `HDBSCAN`, así que no se añade el paquete
+   `hdbscan`; BERTopic acepta ese modelo como `hdbscan_model`. Se mantienen `umap-learn`,
+   `bertopic`, `sentence-transformers`, `spacy` + `es_core_news_md`, `pysentimiento`, `mlxtend` y
+   `networkx`. Sin `pymongo` en el worker.
+5. **Flags (constitución IV)**: uno por feature más uno operativo, como en la 006: `dashboard`
+   (`default: false`; oculta las rutas `/projects/:id/dashboard`, `/projects/:id/analysis-runs`,
+   `/analysis-runs/...`, `/duplicate-pairs/...`, `/insights/...` con `GATED_PREFIXES` y la entrada
+   del menú con `useFlags`) e `insights` (`default: false`, coste del LLM). Sustituyen a
+   `analytics-text` e `insights` del plan original. `dashboard` se activa por defecto al cerrar
+   la feature y se retira después; `insights` queda como flag operativo.
+6. **Insights con Claude**: SDK `anthropic` (ya en `analytics` desde la 006) con
+   `beta.messages.parse` y salida estructurada (pydantic), modelo por defecto `claude-opus-5-5`
+   configurable con `INSIGHTS_LLM_MODEL`, `fallbacks: "default"` ante una negativa y 60 s de
+   límite; sin `ANTHROPIC_API_KEY` la etapa queda `skipped`. Se envían agregados y textos de
+   detalles, nunca nombres ni emails (el export del ajuste 1 ya no los contiene). La
+   verificación de evidencias y cifras de R10 se mantiene.
+7. **Datos de la 004**: un detalle pertenece a `diagramId` + `activityKey` (la `key` estable de la
+   actividad entre versiones), con `given`, `when`, `then`, `type` (`functional`,
+   `non_functional`, `business_rule`, `constraint`), `priority` MoSCoW o nula, `authorRole`,
+   `tags`, `status` (`pending`, `validated`, `duplicate`, `discarded`), `duplicateOf`, votos y
+   comentarios. La distribución *por rol* usa `authorRole`; la cobertura reutiliza
+   `coverageOf` (`modules/details/coverage.ts`) y el nombre de la actividad sale de la versión
+   publicada. Confirmar un duplicado llama al servicio de moderación de la 004 (el de
+   `POST /details/:id/status`), no inserta directamente.
+8. **Progreso sin socket**: las salas de la 005 son del espacio de trabajo de un diagrama
+   (`room:join` con `versionId`); el dashboard no se une a ninguna. Un análisis tarda minutos, así
+   que la web consulta `GET /analysis-runs/:id` cada 3 s mientras está `queued` o `running`; no
+   se añaden eventos de Socket.IO.
+9. **Análisis programado**: `upsertJobScheduler` de BullMQ en `api` (un scheduler por proyecto con
+   la programación activada), que solo encola si hubo cambios desde el último run
+   (`dataFingerprint`). Es P3 dentro de la feature: puede quedar fuera sin afectar a US1–US5.
+10. **Web**: página `/proyectos/:id/dashboard` (solo Administrador; enlace en la cabecera del
+    proyecto). Gráficos con ECharts siguiendo la guía *dataviz* (paleta validada en claro y
+    oscuro, texto alternativo y tabla accesible por gráfico). El mapa de cobertura reutiliza
+    el canvas de la 003 con el overlay de mapa de calor de la 004, en solo lectura.
+11. **Conjunto de validación**: generado y versionado como el de la 006
+    (`apps/analytics/tests/fixtures/generate_details.py`, 300 detalles con 3 temas, pares de
+    duplicados y términos ambiguos etiquetados), con un job `analysis-eval` en el CI que falla
+    si no se alcanzan SC-003, SC-004 y la pureza de temas. Se propone añadirlo a los checks
+    obligatorios de `main` (en la 006, `detection-eval` no lo es).
+12. **Migración**: `20261029000000-analysis-indexes.js` (posterior a la de la 006), sin el índice
+    TTL de `analysis_embeddings`.
+
 ## Complexity Tracking
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| `analysis_runs` escrita por dos servicios (`api` crea el documento y `analytics` escribe `results`/`status`) | Los resultados de 5 000 detalles (embeddings 2D, temas, pares) pueden superar varios MB, un tamaño inadecuado para el valor de retorno del job en Redis | Devolverlos por Redis (006, R2) llenaría la memoria de Redis; un endpoint HTTP de subida desde `analytics` a `api` añade acoplamiento síncrono y reintentos. La escritura se limita a los campos `status`, `progress`, `results` y `error` de documentos creados por `api`. |
-| Imagen de `analytics` de ~2,5 GB (modelos de spaCy, sentence-transformers y pysentimiento incluidos) | Los análisis deben funcionar sin descargas en tiempo de ejecución y con arranques predecibles | Descargar los modelos al arrancar ralentiza cada despliegue y falla si el hub externo no está disponible |
+| Imagen `mining` de ~3 GB (modelos de spaCy, sentence-transformers y pysentimiento incluidos) en un servicio aparte (`analysis-worker`) | Los análisis deben funcionar sin descargas en tiempo de ejecución y con arranques predecibles; separarla evita que la detección y `analytics` carguen esos modelos | Descargar los modelos al arrancar ralentiza cada despliegue y falla si el hub externo no está disponible; una sola imagen para los tres servicios triplicaría el peso de la detección |
+
+La escritura compartida de `analysis_runs` del plan original desaparece con el ajuste 1: los
+resultados viajan por el bucket y solo `api` escribe en MongoDB.
