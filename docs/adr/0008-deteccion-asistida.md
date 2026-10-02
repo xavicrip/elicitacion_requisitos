@@ -44,6 +44,32 @@ réplica por servicio y quizá solo 0,5 GB de RAM (ADR 0002).
 7. **Estados del job**: `pending`, `running`, `done` y `failed` (constitución VI), con el
    progreso por etapas publicado en tiempo real por Socket.IO (005) y consultable por REST.
 
+## Resultados (T046, 2026-10-02)
+
+Medidos en local con Docker Compose (detalle en `specs/006-deteccion-asistida/plan.md`,
+sección _Mediciones_):
+
+- **Gate de precisión** (20 diagramas digitales del conjunto de validación): zonas 100 % y
+  nombres 100 %, frente al mínimo de 85 % y 80 %. En los escaneos y fotos simulados, también
+  100 %. Las transiciones (sin gate): recall y precisión del 100 % en los tres subconjuntos.
+- **Tiempo**: 8,0 s de punta a punta para el diagrama de 50 actividades (objetivo < 60 s).
+- **Memoria del worker**: 100 MB en reposo y 168 MB de pico (objetivo < 400 MB), compatible con
+  los 0,5 GB del plan Free de Railway.
+
+El conjunto es sintético y limpio; con diagramas reales la precisión será menor, por eso la
+revisión humana sigue siendo obligatoria. Si en uso real no se alcanza SC-001, la evolución
+prevista es el detector entrenado de las alternativas.
+
+Decisiones de la implementación que no estaban en el plan:
+
+- **Formas sin texto**: el inicio, el fin y las decisiones sin nombre se aceptan como «Inicio»,
+  «Fin» y «Decisión» (la 003 exige un nombre); solo una acción sin nombre exige escribirlo.
+- **Dirección de las flechas**: la punta es el triángulo relleno que queda pegado a una forma;
+  con ruido de escaneo, otra mancha cerca del origen invertía la flecha.
+- **Refinamiento**: activa el _fallback_ del lado del servidor ante una negativa por política
+  (otro modelo en la misma llamada); el modelo por defecto es `claude-opus-5-5`, configurable con
+  `DETECTION_LLM_MODEL`.
+
 ## Alternativas descartadas
 
 - **Detector entrenado (YOLO o similar)**: mejor en fotos de pizarra, pero requiere etiquetar
