@@ -6,6 +6,7 @@ import { DetailsWorkspacePage } from '../details/DetailsWorkspacePage';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { projectKeys, projectsApi } from '../projects/api';
 import { ConnectionBanner } from './ConnectionBanner';
+import { CursorsLayer, CursorsToggle } from './CursorsLayer';
 import { PresenceBar } from './PresenceBar';
 import { useRealtimeSocket } from './socket';
 import { presenceBadge, usePresence } from './usePresence';
@@ -50,8 +51,28 @@ export function RealtimeWorkspace() {
       {/* Estado para los E2E (`waitConnected`); no se muestra. */}
       <span hidden data-realtime-status={room.status} />
       <ConnectionBanner />
-      {joined && user && <PresenceBar entries={presence} userId={user.id} />}
-      <DetailsWorkspacePage extraBadge={badge} />
+      {joined && user && (
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <PresenceBar entries={presence} userId={user.id} />
+          <CursorsToggle />
+        </div>
+      )}
+      <DetailsWorkspacePage
+        extraBadge={badge}
+        overlay={
+          socket
+            ? ({ image, versionId: shown }) => (
+                <CursorsLayer
+                  socket={socket}
+                  versionId={shown}
+                  joined={joined && shown === versionId}
+                  image={image}
+                  presence={presence}
+                />
+              )
+            : undefined
+        }
+      />
     </>
   );
 }

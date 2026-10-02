@@ -133,8 +133,10 @@ feature `realtime` en `web`, que se engancha al workspace mediante `useWorkspace
    se desconecta.
 9. **Espacio de trabajo**: `RealtimeWorkspace` envuelve `DetailsWorkspacePage` (004) como esta
    envuelve `WorkspacePage` (003). Presencia con `overlays.presence` del store de la 003 y la
-   selección con `useWorkspaceEvents`; los cursores, en coordenadas de imagen, como `Html` de
-   drei. Con 50 cursores hay que mantener ≥ 50 FPS con `cien-actividades.png`
+   selección con `useWorkspaceEvents`; los cursores, en coordenadas de imagen, en una capa HTML
+   sobre el canvas (prop `overlay` de `WorkspacePage`) colocada con `imageToScreen` y movida con
+   `requestAnimationFrame` sin renderizar React: el canvas usa `frameloop="demand"` y un `Html`
+   de drei obligaría a redibujar la escena en cada fotograma de interpolación. Con 50 cursores hay que mantener ≥ 50 FPS con `cien-actividades.png`
    (`pnpm e2e:perf`).
 10. **Rate limit por socket en memoria** (cursores 20/s, selección 10/s): cada socket vive en
     una réplica, así que no hace falta Redis; distinto del límite HTTP de 60 escrituras por
