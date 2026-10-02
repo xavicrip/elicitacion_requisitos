@@ -144,3 +144,12 @@ staging pasa a `accounts=true,diagrams=true,details=true`; producción sigue sin
 funcionalidades ya no dependen de `FEATURE_FLAGS`. La variable de `api` en staging se elimina
 después de desplegar el retiro; mientras siga definida, `api` solo avisa en el log de los flags
 desconocidos. Producción nunca la definió.
+
+## Variables y réplicas de la feature 005 (2026-10-01)
+
+Antes de integrar la 005 (T045), `api` en staging tiene `FEATURE_FLAGS=realtime=true` y 2
+réplicas en `us-west2` (`environments.staging.deploy.multiRegionConfig` de
+`apps/api/railway.json`: el panel de este plan no muestra el número de réplicas), para comprobar en un entorno real que el adaptador de Redis reparte los eventos entre
+réplicas sin sesiones persistentes (ADR 0007). Producción sigue sin definir `FEATURE_FLAGS`
+(`realtime` desactivado) y con una réplica. No hacen falta variables nuevas: Socket.IO usa el
+Redis existente y Railway pone `RAILWAY_REPLICA_ID`, que aparece en los logs de conexión.
