@@ -46,8 +46,9 @@ dominio tipados en proceso tras cada escritura confirmada.
    cliente va atrasado, se pierde un cursor en lugar de encolarse. La web los dibuja en una capa
    HTML sobre el canvas, interpolados con `requestAnimationFrame`, para no redibujar la escena
    de three.js (renderizada bajo demanda) en cada fotograma.
-8. **Detrás del flag `realtime`.** Sin él no se monta el servidor de Socket.IO y la web es la de
-   la 004.
+8. **Detrás del flag `realtime` mientras se construyó.** Sin él no se montaba el servidor de
+   Socket.IO y la web era la de la 004; se activó por defecto tras el recorrido en staging y se
+   retiró en la v0.6.0 (`docs/feature-flags.md`).
 
 ## Alternativas descartadas
 
