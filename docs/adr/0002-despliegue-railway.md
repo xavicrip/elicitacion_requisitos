@@ -198,3 +198,12 @@ staging y producción, con la configuración de `railway.worker.json` y las vari
 `ANTHROPIC_API_KEY`. `railway add` solo creó la instancia del entorno enlazado (producción) y
 `railway environment edit` no admite `isCreated`: la de staging se creó con la mutación
 `environmentPatchCommit` de la API de Railway y el mismo parche. `api` en staging tiene `FEATURE_FLAGS=detection=true`; producción sigue sin definirla.
+
+## Flag `detection` retirado (2026-10-02)
+
+`detection` se activó por defecto tras el recorrido en staging (T052) y se retiró después
+(`docs/feature-flags.md`): `api` monta siempre la cola de la detección y `/health/deep` incluye
+siempre el check `detection-worker`, así que `analytics-worker` debe estar desplegado en cada
+entorno. La variable `FEATURE_FLAGS=detection=true` de `api` en staging se elimina después de
+desplegar el retiro; mientras siga definida, `api` solo avisa en el log del flag desconocido.
+Producción nunca la definió. `detection-llm` sigue como flag operativo.
