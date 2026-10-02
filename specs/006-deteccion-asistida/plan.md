@@ -178,6 +178,23 @@ por separado.
     (servicio `analytics-worker` en `infra/docker-compose.yml`) y `compra-simple.png`, que ya
     tiene su *ground truth* (`e2e/fixtures/diagrams/compra-simple.json`).
 
+## Mediciones (T046, 2026-10-02)
+
+Local, Docker Compose en un Mac M-series (`pnpm e2e:perf -g "50 actividades"` y
+`uv run python tests/eval/evaluate_detection.py --timing`), sin refinamiento con Claude:
+
+| Medición | Objetivo | Resultado |
+| --- | --- | --- |
+| Detección de `020.png` (50 actividades) de punta a punta, por la API | < 60 s (SC-003) | 8,0 s (50 zonas, 54 flechas) |
+| Memoria del worker (`docker stats`) | < 400 MB (ajuste 9) | 100 MB en reposo, 168 MB de pico |
+| Gate de precisión, subconjunto digital (20 diagramas) | zonas ≥ 85 %, nombres ≥ 80 % | zonas 100 %, nombres 100 % |
+| Escaneos / fotos simulados (informativo) | — | zonas y nombres 100 % |
+| Transiciones, recall y precisión (informativo) | — | 100 % / 100 % en los tres subconjuntos |
+| Tiempo total del conjunto digital en el proceso local | — | 59,5 s para 20 diagramas (≈ 3 s cada uno) |
+
+El conjunto de validación es sintético y limpio: con diagramas reales la precisión será menor. La
+memoria y el tiempo en Railway (0,5 GB y 1 vCPU si el plan es Free) se comprueban en T051.
+
 ## Complexity Tracking
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
