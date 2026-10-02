@@ -31,6 +31,8 @@ export type Storage = {
    * descarga la imagen sin credenciales del bucket.
    */
   presignGet(key: string, ttlSeconds: number): Promise<string>;
+  /** URL firmada de escritura para un único objeto (feature 007: resultados del worker). */
+  presignPut(key: string, contentType: string, ttlSeconds: number): Promise<string>;
   /** Claves bajo el prefijo (paginando). */
   listKeys(prefix: string): Promise<string[]>;
   /** Borra todos los objetos del prefijo (paginando); devuelve cuántos borró. */
@@ -99,6 +101,14 @@ export function createStorage(config: StorageConfig): Storage {
       return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
         expiresIn: ttlSeconds,
       });
+    },
+
+    presignPut(key, contentType, ttlSeconds) {
+      return getSignedUrl(
+        client,
+        new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }),
+        { expiresIn: ttlSeconds },
+      );
     },
 
     async listKeys(prefix) {
