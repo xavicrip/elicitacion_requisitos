@@ -30,13 +30,17 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag            | Por defecto | Feature                  | Qué oculta                                                                                             |
-| --------------- | ----------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `detection-llm` | `false`     | `006-deteccion-asistida` | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste |
-| `invite-email`  | `false`     | `002-auth-proyectos`     | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)              |
+| Flag            | Por defecto | Feature                   | Qué oculta                                                                                                                                    |
+| --------------- | ----------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dashboard`     | `false`     | `007-dashboard-analitico` | El dashboard analítico: `/projects/:id/dashboard`, los análisis, las decisiones de duplicados y los ajustes; en `web`, la entrada _Dashboard_ |
+| `detection-llm` | `false`     | `006-deteccion-asistida`  | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste                                        |
+| `insights`      | `false`     | `007-dashboard-analitico` | Los resúmenes de hallazgos con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste                                             |
+| `invite-email`  | `false`     | `002-auth-proyectos`      | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)                                                     |
 
 `detection-llm` es un flag operativo por su coste: queda desactivado aunque la detección ya no
-dependa de ningún flag.
+dependa de ningún flag. En local y en CI, Compose activa `dashboard` (`infra/docker-compose.yml`);
+en Railway, solo en `staging` hasta completar la feature 007. `insights` es operativo, como
+`detection-llm`.
 
 ## Flags retirados
 
