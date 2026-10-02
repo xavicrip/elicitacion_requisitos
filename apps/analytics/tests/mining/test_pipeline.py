@@ -1,8 +1,11 @@
 """El orquestador con las técnicas reales sobre el conjunto de validación (feature 007, US2)."""
 
+import json
 import time
+from pathlib import Path
 from typing import Any
 
+import jsonschema
 import pytest
 
 import analytics.mining.techniques  # noqa: F401 - registra las técnicas
@@ -12,6 +15,10 @@ from analytics.mining.schemas import ProgressStage
 from .helpers import context, detail
 
 TEXT_STAGES = ["keywords", "cooccurrence", "topics", "clusters"]
+SCHEMA = (
+    Path(__file__).parents[4]
+    / "specs/007-dashboard-analitico/contracts/analysis-results.schema.json"
+)
 
 
 async def run(details: list[dict[str, Any]] | None = None) -> Any:
@@ -39,6 +46,11 @@ async def test_el_analisis_de_texto_completo_produce_resultados_validos() -> Non
     assert results.preprocess is not None and results.preprocess.unrecognizedRatio is not None
     # 300 detalles: muy por debajo de los 5 minutos de SC-002 para 2 000.
     assert seconds < 120
+    # Lo que el worker sube cumple el esquema compartido con `api` (un punto sin grupo lleva
+    # `groupId: null`, no se omite).
+    uploaded = json.loads(results.model_dump_json(by_alias=True, exclude_unset=True))
+    jsonschema.validate(uploaded, json.loads(SCHEMA.read_text(encoding="utf-8")))
+    assert all("groupId" in point for point in uploaded["clusters"]["points"])
 
 
 @pytest.mark.asyncio

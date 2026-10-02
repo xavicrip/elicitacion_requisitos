@@ -67,7 +67,7 @@
       "type": "object",
       "properties": {
         "groups": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "detailIds": { "type": "array", "items": { "type": "string" } }, "representativeId": { "type": "string" } } } },
-        "points": { "type": "array", "items": { "type": "object", "properties": { "detailId": { "type": "string" }, "x": { "type": "number" }, "y": { "type": "number" }, "groupId": { "type": ["string", "null"] } } } }
+        "points": { "type": "array", "items": { "type": "object", "required": ["detailId", "x", "y", "groupId"], "properties": { "detailId": { "type": "string" }, "x": { "type": "number" }, "y": { "type": "number" }, "groupId": { "type": ["string", "null"] } } } }
       }
     },
     "duplicates": {

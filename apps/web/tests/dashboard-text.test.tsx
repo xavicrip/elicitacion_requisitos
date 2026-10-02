@@ -336,7 +336,7 @@ describe('resultados', () => {
   it('grupos: al elegir uno se ven sus detalles con el acceso al diagrama', async () => {
     withResults();
     const panel = await open('Grupos');
-    expect(within(panel).getByText(/1 grupos reúnen 2 de los 2 detalles/)).toBeInTheDocument();
+    expect(within(panel).getByText(/1 grupos reúnen 2 de los 3 detalles/)).toBeInTheDocument();
     await userEvent.click(within(panel).getByRole('button', { name: 'Grupo 1 · 2 detalles' }));
     const details = within(panel).getByRole('region', { name: 'Detalles del grupo' });
     expect(within(details).getAllByRole('listitem')).toHaveLength(2);

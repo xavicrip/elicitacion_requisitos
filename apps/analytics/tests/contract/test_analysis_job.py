@@ -61,7 +61,7 @@ def test_los_resultados_cumplen_el_esquema_json() -> None:
     jsonschema.validate(example("results"), schema)
     # Lo que produce el worker (sin secciones vacías) también.
     results = AnalysisResults.model_validate(example("results"))
-    jsonschema.validate(results.model_dump(mode="json", by_alias=True, exclude_none=True), schema)
+    jsonschema.validate(results.model_dump(mode="json", by_alias=True, exclude_unset=True), schema)
 
 
 @pytest.mark.parametrize(
