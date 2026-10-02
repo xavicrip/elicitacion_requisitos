@@ -11,6 +11,7 @@ import {
   S3Client,
   S3ServiceException,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { StorageConfig } from '../app.js';
 
 export type StoredObject = {
@@ -25,6 +26,11 @@ export type Storage = {
   put(key: string, body: Buffer, contentType: string): Promise<{ etag: string }>;
   /** `null` si el objeto no existe. */
   getStream(key: string): Promise<StoredObject | null>;
+  /**
+   * URL firmada de lectura (GET) con validez de `ttlSeconds`: el worker de detección (006)
+   * descarga la imagen sin credenciales del bucket.
+   */
+  presignGet(key: string, ttlSeconds: number): Promise<string>;
   /** Claves bajo el prefijo (paginando). */
   listKeys(prefix: string): Promise<string[]>;
   /** Borra todos los objetos del prefijo (paginando); devuelve cuántos borró. */
@@ -87,6 +93,12 @@ export function createStorage(config: StorageConfig): Storage {
         if (error instanceof NoSuchKey || status(error) === 404) return null;
         throw error;
       }
+    },
+
+    presignGet(key, ttlSeconds) {
+      return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
+        expiresIn: ttlSeconds,
+      });
     },
 
     async listKeys(prefix) {
