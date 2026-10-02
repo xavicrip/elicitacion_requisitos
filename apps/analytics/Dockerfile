@@ -12,6 +12,10 @@ FROM python:3.12-slim-bookworm AS runtime
 ARG APP_VERSION=dev
 ARG GIT_SHA=unknown
 ENV PATH=/app/.venv/bin:$PATH PYTHONUNBUFFERED=1 APP_VERSION=$APP_VERSION GIT_SHA=$GIT_SHA
+# Tesseract para el OCR de la detección (feature 006, ADR 0008); OpenCV es headless (sin libGL).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 10001 app
 WORKDIR /app
 COPY --from=build --chown=app:app /app/.venv /app/.venv
