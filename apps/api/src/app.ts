@@ -177,6 +177,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         if (flags.realtime) {
           await app.register(realtimePlugin, {
             adapterKey: `${redisNameSpace}socket.io`,
+            keyPrefix: redisNameSpace,
             ...services.realtime,
           });
         }

@@ -1,11 +1,22 @@
-import { RELAYED_EVENT_SCHEMAS, type RelayedEventName } from '@reqcanvas/shared';
+import {
+  PresenceUpdateSchema,
+  RELAYED_EVENT_SCHEMAS,
+  type RelayedEventName,
+} from '@reqcanvas/shared';
 import type { FastifyInstance } from 'fastify';
 import { Types } from 'mongoose';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { createDetail, publishedDiagram } from '../helpers/details';
 import { uploadVersion } from '../helpers/diagrams';
-import { closeSockets, connect, nextEvent, type ClientSocket } from '../helpers/realtime';
+import {
+  closeSockets,
+  collect,
+  connect,
+  nextEvent,
+  pause,
+  type ClientSocket,
+} from '../helpers/realtime';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -135,6 +146,8 @@ describe('eventos de dominio retransmitidos (servidor → cliente)', () => {
       inject('POST', `/diagram-versions/${version.id}/publish`, ana),
     );
     expect(published).toMatchObject({ diagramId: diagram.diagramId, versionId: version.id });
+    // La versión anterior queda archivada: las pruebas siguientes usan la publicada.
+    diagram.versionId = version.id;
   });
 });
 
@@ -150,5 +163,28 @@ describe('eventos del cliente con un payload inválido', () => {
     expect(await socket.timeout(2000).emitWithAck('auth:refresh', { token: 3 } as never)).toEqual({
       ok: false,
     });
+  });
+});
+
+describe('presencia (US2)', () => {
+  it('presence:update valida contra su esquema', async () => {
+    const observer = await connect(url, ana.accessToken);
+    await observer.timeout(2000).emitWithAck('room:join', { versionId: diagram.versionId });
+    const update = nextEvent(observer, 'presence:update');
+    await listener();
+    const payload = await update;
+    expect(PresenceUpdateSchema.safeParse(payload).error?.issues ?? []).toEqual([]);
+  });
+
+  it('presence:select y presence:heartbeat con un payload inválido se descartan', async () => {
+    const observer = await connect(url, ana.accessToken);
+    await observer.timeout(2000).emitWithAck('room:join', { versionId: diagram.versionId });
+    const socket = await listener();
+    await pause(100);
+    const updates = collect(observer, 'presence:update');
+    socket.emit('presence:select', { versionId: diagram.versionId } as never);
+    socket.emit('presence:heartbeat', { versionId: 7 } as never);
+    await pause(300);
+    expect(updates).toEqual([]);
   });
 });

@@ -6,19 +6,23 @@ No hay colecciones nuevas en MongoDB. Estructuras en Redis y en el cliente:
 
 ## Sesión de presencia (Redis)
 
-- **Clave**: `presence:{versionId}` (hash). **Campo**: `userId`.
+- **Clave**: `presence:{versionId}` (hash). **Campo**: `{userId}:{socketId}`, uno por socket:
+  varias pestañas o réplicas no compiten por un contador; la presencia se agrupa por persona
+  al leerla (`presenceState`).
 - **Valor** (JSON):
 
 | Campo | Tipo | Reglas |
 |-------|------|--------|
+| `userId` | string | Persona del socket |
 | `name` | string | Nombre del usuario |
-| `color` | string | `#RRGGBB` de la paleta de 12 colores, estable por `userId` |
-| `sockets` | number | Nº de pestañas conectadas; al llegar a 0 se elimina el campo |
 | `selectedActivityKey` | string \| null | Actividad seleccionada |
-| `lastSeen` | number | epoch ms; se elimina si `now - lastSeen > 10 000` |
+| `selectedAt` | number | epoch ms de la selección; con varias pestañas manda la última |
+| `lastSeen` | number | epoch ms; no cuenta si `now - lastSeen > 10 000` y el barrido lo elimina |
 
-- **Barrido**: cada 5 s, bloqueo `presence:sweep:lock` (`SET NX PX 4000`).
-- La clave expira (`EXPIRE 3600`) si nadie la actualiza.
+- El color no se guarda: es `presenceColor(userId)`, estable sobre la paleta de 12 colores.
+- Al cerrar el socket o salir de la sala se borra su campo.
+- **Barrido**: cada 5 s, bloqueo `presence:sweep:lock` (`SET NX PX`), una réplica cada vez.
+- La clave expira (`PEXPIRE 3600000`) si nadie la actualiza.
 
 ## Canal del adaptador (Redis pub/sub)
 

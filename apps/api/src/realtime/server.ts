@@ -11,13 +11,16 @@ import { Types } from 'mongoose';
 import { Server, type Socket } from 'socket.io';
 import { usersModel } from '../modules/users/model.js';
 import { registerBridge } from './bridge.js';
+import { createPresence, type PresenceConfig } from './presence.js';
 import { registerRooms } from './rooms.js';
 
-export type RealtimeConfig = {
+export type RealtimeConfig = PresenceConfig & {
   /** Margen tras la caducidad del access token antes de desconectar (60 s por defecto). */
   tokenGraceMs?: number;
   /** Prefijo de los canales del adaptador Redis; las pruebas usan uno propio. */
   adapterKey?: string;
+  /** Prefijo de las claves de Redis (presencia); las pruebas usan uno propio. */
+  keyPrefix?: string;
 };
 
 export type SocketData = {
@@ -72,12 +75,27 @@ function duplicate(app: FastifyInstance, role: string): Redis {
 }
 
 /**
+ * Cierra una conexión del adaptador sin dejar comandos pendientes rechazados: si aún está
+ * conectando (la app se cierra nada más arrancar), espera a que esté lista, como mucho 1 s.
+ */
+async function closeClient(client: Redis) {
+  if (client.status === 'connecting' || client.status === 'connect') {
+    await Promise.race([
+      new Promise((resolve) => client.once('ready', resolve)),
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+    ]);
+  }
+  if (client.status === 'ready') await client.quit().catch(() => client.disconnect());
+  else client.disconnect();
+}
+
+/**
  * Socket.IO sobre el servidor HTTP de Fastify (plan de la 005, ajustes 1, 2 y 5): solo
  * WebSocket (Railway no garantiza sesiones persistentes), adaptador Redis para repartir las
  * emisiones entre réplicas y el JWT de la 002 en el handshake.
  */
 export const realtimePlugin = fp<RealtimeConfig>(
-  async (app, { tokenGraceMs = 60_000, adapterKey = 'socket.io' }) => {
+  async (app, { tokenGraceMs = 60_000, adapterKey = 'socket.io', keyPrefix = '', ...timings }) => {
     const pub = duplicate(app, 'pub');
     const sub = duplicate(app, 'sub');
     const io: RealtimeServer = new Server(app.server, {
@@ -86,6 +104,7 @@ export const realtimePlugin = fp<RealtimeConfig>(
       adapter: createAdapter(pub, sub, { key: adapterKey }),
     });
     const Users = usersModel(app.mongo);
+    const presence = createPresence(app, io, { prefix: keyPrefix, ...timings });
 
     io.use(async (socket, next) => {
       const payload = verifyToken(app, socket.handshake.auth?.token);
@@ -125,19 +144,20 @@ export const realtimePlugin = fp<RealtimeConfig>(
         if (typeof ack === 'function') ack({ ok });
       });
 
-      registerRooms(app, io, socket);
+      registerRooms(app, socket, presence);
     });
 
     app.decorate('io', io);
+    app.decorate('presence', presence);
     registerBridge(app);
     // Antes de cerrar el servidor HTTP: Fastify lo cierra después.
     app.addHook('preClose', async () => {
+      presence.stop();
       io.local.disconnectSockets(true);
       io.engine.close();
     });
     app.addHook('onClose', async () => {
-      pub.disconnect();
-      sub.disconnect();
+      await Promise.all([closeClient(pub), closeClient(sub)]);
     });
   },
   { name: 'realtime', dependencies: ['redis', 'auth', 'mongo', 'domain-events'] },
