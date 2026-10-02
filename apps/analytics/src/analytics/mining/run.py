@@ -39,6 +39,16 @@ class Context:
     shared: dict[str, Any] = field(default_factory=dict)
     #: Secciones extra de los resultados (p. ej. `preprocess`).
     extra: dict[str, Any] = field(default_factory=dict)
+    #: Secciones ya calculadas (o las del run original al regenerar insights).
+    sections: dict[str, Any] = field(default_factory=dict)
+
+
+class SkipStage(Exception):  # noqa: N818 - no es un error: la etapa no aplica
+    """Una técnica decide que su etapa no aplica (p. ej. sin clave del modelo)."""
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason
 
 
 @dataclass(frozen=True)
@@ -79,11 +89,11 @@ async def process(
 ) -> Outcome:
     available = TECHNIQUES if techniques is None else techniques
     context = Context(job=job, data=data, previous=previous)
-    sections: dict[str, Any] = {}
+    sections = context.sections
     stages: dict[Stage, StageResult] = {}
     if previous is not None:
         # Regenerar insights: se conservan las demás secciones del run original.
-        sections = previous.model_dump(mode="json", by_alias=True, exclude_unset=True)
+        sections.update(previous.model_dump(mode="json", by_alias=True, exclude_unset=True))
         stages = dict(previous.stages)
 
     for index, stage in enumerate(job.stages):
@@ -96,6 +106,10 @@ async def process(
         started = time.perf_counter()
         try:
             value = await asyncio.to_thread(available[stage], context)
+        except SkipStage as skip:
+            stages[stage] = StageResult(status="skipped", reason=skip.reason)
+            sections.pop(stage, None)
+            continue
         except Exception as error:  # noqa: BLE001 - una técnica fallida no detiene el análisis
             duration = round((time.perf_counter() - started) * 1000)
             logger.exception(
