@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CommentSchema, DetailSchema, DetailStatusSchema } from './details';
 import { DETAIL_EVENTS, type DomainEvents } from './events';
+import type { DetectionEventName, DetectionEvents } from './detection';
 
 /**
  * Contrato de Socket.IO de la colaboración en tiempo real
@@ -120,6 +121,9 @@ export const RELAYED_EVENT_SCHEMAS = {
 
 export type ServerToClientEvents = {
   [N in RelayedEventName]: (payload: Relayed<DomainEvents[N]>) => void;
+} & {
+  // Detección asistida (feature 006): a la sala de la versión, solo quien ve el borrador.
+  [N in DetectionEventName]: (payload: Relayed<DetectionEvents[N]>) => void;
 } & {
   'presence:update': (payload: PresenceUpdate) => void;
   'cursor:moved': (payload: CursorMoved) => void;

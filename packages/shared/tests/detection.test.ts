@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { contractSchema } from './contract';
 import {
+  ActivityProposalSchema,
+  ConfidenceLevelSchema,
   DETECTION_STAGES,
   DetectionJobInputSchema,
   DetectionJobSchema,
@@ -10,6 +13,7 @@ import {
   DetectionResultSchema,
   ProposalAcceptInputSchema,
   ProposalStatusSchema,
+  TransitionProposalSchema,
   confidenceLevel,
 } from '../src/detection';
 
@@ -148,5 +152,26 @@ describe('aceptar una propuesta', () => {
       ProposalAcceptInputSchema.safeParse({ label: 'Validar pago', type: 'action' }).success,
     ).toBe(true);
     expect(ProposalAcceptInputSchema.safeParse({ label: '  ' }).success).toBe(false);
+  });
+});
+
+describe('contrato OpenAPI de la 006', () => {
+  it('los campos obligatorios del contrato existen en los esquemas compartidos', () => {
+    for (const [name, schema] of [
+      ['DetectionJob', DetectionJobSchema],
+      ['ActivityProposal', ActivityProposalSchema],
+      ['TransitionProposal', TransitionProposalSchema],
+    ] as const) {
+      const required = contractSchema(name, '006').required ?? [];
+      expect(Object.keys(schema.shape), name).toEqual(expect.arrayContaining(required));
+    }
+  });
+
+  it('los enums coinciden con los del contrato', () => {
+    const job = contractSchema('DetectionJob', '006').properties!;
+    expect(job.status!.enum).toEqual(DetectionJobStatusSchema.options);
+    const proposal = contractSchema('ActivityProposal', '006').properties!;
+    expect(proposal.status!.enum).toEqual(ProposalStatusSchema.options);
+    expect(proposal.confidenceLevel!.enum).toEqual(ConfidenceLevelSchema.options);
   });
 });
