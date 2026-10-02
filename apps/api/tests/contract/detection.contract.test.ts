@@ -1,6 +1,7 @@
-import { DetectionJobSchema, ProposalsSchema } from '@reqcanvas/shared';
+import { ActivitySchema, DetectionJobSchema, ProposalsSchema } from '@reqcanvas/shared';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { EXAMPLE_RESULT, startFakeWorker } from '../helpers/detection-worker';
 import { uploadDiagram } from '../helpers/diagrams';
@@ -66,6 +67,16 @@ describe('/diagram-versions/{versionId}/detections', () => {
       headers: admin,
     });
     expect(response.statusCode, response.body).toBe(202);
+    const jobId = response.json().id;
+    await vi.waitFor(
+      async () => {
+        const latest = (
+          await app.inject({ url: `/diagram-versions/${versionId}/detections`, headers: admin })
+        ).json();
+        expect(latest).toMatchObject({ id: jobId, status: 'done' });
+      },
+      { timeout: 5000, interval: 50 },
+    );
   });
 });
 
@@ -95,5 +106,63 @@ describe('/diagram-versions/{versionId}/proposals', () => {
         ].sort(),
       );
     }
+  });
+});
+
+describe('revisión de propuestas', () => {
+  const pendingIds = async () =>
+    (await app.inject({ url: `/diagram-versions/${versionId}/proposals`, headers: admin })).json()
+      .activities as Array<{ id: string; label: string; confidenceLevel: string }>;
+
+  it('POST /proposals/{id}/accept 200 devuelve la actividad creada (Activity de la 003)', async () => {
+    const proposal = (await pendingIds()).find((p) => p.label === 'Emitir factura')!;
+    const response = await app.inject({
+      method: 'POST',
+      url: `/proposals/${proposal.id}/accept`,
+      headers: admin,
+      payload: { label: 'Emitir la factura', type: 'action' },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(ActivitySchema.strict().safeParse(response.json()).error?.issues ?? []).toEqual([]);
+  });
+
+  it('POST /proposals/{id}/accept 422 con una acción sin nombre', async () => {
+    const proposal = (await pendingIds()).find((p) => p.label === 'Validar pago')!;
+    const response = await app.inject({
+      method: 'POST',
+      url: `/proposals/${proposal.id}/accept`,
+      headers: admin,
+      payload: { label: '   ' },
+    });
+    // Un nombre en blanco no pasa la validación del cuerpo (las mismas reglas que la 003).
+    expect([400, 422]).toContain(response.statusCode);
+  });
+
+  it('POST /proposals/{id}/discard 204 sin cuerpo', async () => {
+    const proposal = (await pendingIds()).find((p) => p.label === 'Validar pago')!;
+    const response = await app.inject({
+      method: 'POST',
+      url: `/proposals/${proposal.id}/discard`,
+      headers: admin,
+    });
+    expect(response.statusCode).toBe(204);
+    expect(response.body).toBe('');
+  });
+
+  it('POST /diagram-versions/{id}/proposals/accept-high 200 devuelve { accepted }', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/diagram-versions/${versionId}/proposals/accept-high`,
+      headers: admin,
+    });
+    expect(response.statusCode).toBe(200);
+    expect(
+      z
+        .object({ accepted: z.number().int().min(0) })
+        .strict()
+        .parse(response.json()),
+    ).toEqual({
+      accepted: 1,
+    });
   });
 });

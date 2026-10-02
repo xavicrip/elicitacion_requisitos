@@ -5,7 +5,10 @@ import {
   type BBox,
   type DetectionJob,
   type DetectionProgress,
+  type Activity,
+  type ActivityType,
   type DetectionStartInput,
+  type ProposalAcceptInput,
   type ProposalFlag,
   type Proposals,
   type TransitionProposal,
@@ -13,8 +16,9 @@ import {
 import type { FastifyInstance } from 'fastify';
 import { Types } from 'mongoose';
 import { HttpError } from '../../lib/errors.js';
+import { activitiesService } from '../diagrams/activities.service.js';
 import { activitiesModel } from '../diagrams/models/activity.js';
-import type { DiagramVersion } from '../diagrams/models/version.js';
+import { versionsModel, type DiagramVersion } from '../diagrams/models/version.js';
 import { activityProposalsModel, type ActivityProposalDoc } from './models/activity-proposal.js';
 import { detectionJobsModel, type DetectionJobDoc } from './models/job.js';
 import {
@@ -90,6 +94,18 @@ export function toTransitionProposalDto(proposal: TransitionProposalDoc): Transi
   };
 }
 
+/** Nombre por defecto de las formas que casi nunca llevan texto (la 003 exige un nombre). */
+const DEFAULT_LABEL: Partial<Record<ActivityType, string>> = {
+  start: 'Inicio',
+  end: 'Fin',
+  decision: 'Decisión',
+};
+
+const alreadyReviewed = () =>
+  new HttpError(409, 'PROPOSAL_NOT_PENDING', 'Esta propuesta ya se revisó.');
+
+const sameBox = (a: BBox, b: BBox) => a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
+
 const isDuplicateKey = (error: unknown) => (error as { code?: number }).code === 11000;
 
 const notDraft = () =>
@@ -107,6 +123,92 @@ export function detectionService(app: FastifyInstance) {
   const ActivityProposals = activityProposalsModel(app.mongo);
   const TransitionProposals = transitionProposalsModel(app.mongo);
   const Activities = activitiesModel(app.mongo);
+  const Versions = versionsModel(app.mongo);
+  const activities = activitiesService(app);
+
+  async function reviewed(
+    proposal: ActivityProposalDoc | TransitionProposalDoc,
+    kind: 'activity' | 'transition',
+    status: 'accepted' | 'discarded',
+    actorId: string,
+    activityId?: string,
+  ) {
+    const job = await Jobs.findById(proposal.jobId).lean<DetectionJobDoc>();
+    if (!job) return;
+    await app.domainEvents.emit('proposal.reviewed', {
+      ...base(job),
+      proposalId: proposal._id.toHexString(),
+      kind,
+      status,
+      ...(activityId ? { activityId } : {}),
+      actorId,
+    });
+  }
+
+  /**
+   * Acepta una propuesta (FR-005, FR-006): la reclama antes (de dos aceptaciones simultáneas solo
+   * una sigue) y crea la actividad con el servicio del editor de la 003 (`source: detected`). Si
+   * la actividad no se puede crear, la propuesta vuelve a quedar pendiente.
+   */
+  async function acceptOne(
+    proposal: ActivityProposalDoc,
+    input: ProposalAcceptInput,
+    actorId: string,
+  ): Promise<Activity> {
+    const type = input.type ?? proposal.type;
+    const label = (input.label ?? proposal.label).trim() || DEFAULT_LABEL[type] || '';
+    if (!label) {
+      throw new HttpError(
+        422,
+        'LABEL_REQUIRED',
+        'Escribe el nombre de la actividad antes de aceptarla.',
+        {},
+        { label: 'Escribe el nombre de la actividad.' },
+      );
+    }
+    const bbox = input.bbox ?? proposal.bbox;
+    const edited =
+      label !== proposal.label || type !== proposal.type || !sameBox(bbox, proposal.bbox);
+
+    const version = await Versions.findById(proposal.versionId).lean<DiagramVersion>();
+    if (!version) throw new HttpError(404, 'NOT_FOUND', 'Recurso no encontrado');
+    const claimed = await ActivityProposals.findOneAndUpdate(
+      { _id: proposal._id, status: 'pending' },
+      {
+        $set: {
+          status: 'accepted',
+          reviewedBy: new Types.ObjectId(actorId),
+          reviewedAt: new Date(),
+        },
+      },
+      { returnDocument: 'after' },
+    ).lean<ActivityProposalDoc>();
+    if (!claimed) throw alreadyReviewed();
+    let activity: Activity;
+    try {
+      activity = await activities.create(
+        version,
+        { label, type, bbox },
+        { actorId, source: 'detected' },
+      );
+    } catch (error) {
+      await ActivityProposals.updateOne(
+        { _id: proposal._id },
+        { $set: { status: 'pending', reviewedBy: null, reviewedAt: null } },
+      );
+      throw error;
+    }
+    await ActivityProposals.updateOne(
+      { _id: proposal._id },
+      { $set: { activityId: new Types.ObjectId(activity.id) } },
+    );
+    await Jobs.updateOne(
+      { _id: proposal.jobId },
+      { $inc: { 'metrics.accepted': 1, 'metrics.edited': edited ? 1 : 0 } },
+    );
+    await reviewed(claimed, 'activity', 'accepted', actorId, activity.id);
+    return activity;
+  }
 
   const base = (job: DetectionJobDoc) => ({
     projectId: job.projectId.toHexString(),
@@ -179,6 +281,89 @@ export function detectionService(app: FastifyInstance) {
       };
     },
 
+    loadProposal: (id: string) =>
+      Types.ObjectId.isValid(id)
+        ? ActivityProposals.findById(id).lean<ActivityProposalDoc>()
+        : Promise.resolve(null),
+
+    accept: acceptOne,
+
+    async discard(proposal: ActivityProposalDoc, actorId: string) {
+      const claimed = await ActivityProposals.findOneAndUpdate(
+        { _id: proposal._id, status: 'pending' },
+        {
+          $set: {
+            status: 'discarded',
+            reviewedBy: new Types.ObjectId(actorId),
+            reviewedAt: new Date(),
+          },
+        },
+        { returnDocument: 'after' },
+      ).lean<ActivityProposalDoc>();
+      if (!claimed) throw alreadyReviewed();
+      // Las flechas que salían o llegaban a ella ya no se pueden aceptar.
+      await TransitionProposals.updateMany(
+        {
+          status: 'pending',
+          $or: [{ fromProposalId: proposal._id }, { toProposalId: proposal._id }],
+        },
+        {
+          $set: {
+            status: 'discarded',
+            reviewedBy: new Types.ObjectId(actorId),
+            reviewedAt: new Date(),
+          },
+        },
+      );
+      await Jobs.updateOne({ _id: proposal.jobId }, { $inc: { 'metrics.discarded': 1 } });
+      await reviewed(claimed, 'activity', 'discarded', actorId);
+    },
+
+    /**
+     * Acepta en bloque las de confianza alta (FR-006), salvo los posibles duplicados (FR-008) y
+     * las acciones sin nombre, que requieren revisión individual.
+     */
+    async acceptHigh(versionId: Types.ObjectId, actorId: string) {
+      const candidates = await ActivityProposals.find({
+        versionId,
+        status: 'pending',
+        confidenceLevel: 'high',
+        flags: { $ne: 'possible_duplicate' },
+      })
+        .sort({ 'bbox.y': 1, 'bbox.x': 1 })
+        .lean<ActivityProposalDoc[]>();
+      let accepted = 0;
+      for (const proposal of candidates) {
+        if (proposal.type === 'action' && !proposal.label.trim()) continue;
+        try {
+          await acceptOne(proposal, {}, actorId);
+          accepted++;
+        } catch (error) {
+          // Otra pestaña la revisó a la vez: se sigue con las demás.
+          if (!(error instanceof HttpError && error.code === 'PROPOSAL_NOT_PENDING')) throw error;
+        }
+      }
+      return { accepted };
+    },
+
+    /** Condición de publicación (FR-007): ninguna propuesta pendiente en la versión. */
+    async pendingError(versionId: Types.ObjectId): Promise<HttpError | null> {
+      const [activities, transitions] = await Promise.all([
+        ActivityProposals.countDocuments({ versionId, status: 'pending' }),
+        TransitionProposals.countDocuments({ versionId, status: 'pending' }),
+      ]);
+      const pending = activities + transitions;
+      if (pending === 0) return null;
+      return new HttpError(
+        422,
+        'PENDING_PROPOSALS',
+        `Revisa las ${pending} propuesta(s) de la detección (acéptalas o descártalas) antes de publicar.`,
+        {},
+        undefined,
+        { pending },
+      );
+    },
+
     /** El worker empezó (`active`): idempotente, también si llega más de una vez. */
     async markRunning(jobId: string) {
       await Jobs.updateOne(
@@ -191,7 +376,7 @@ export function detectionService(app: FastifyInstance) {
       const job = await Jobs.findOneAndUpdate(
         { _id: jobId, status: { $in: ['pending', 'running'] } },
         { $set: { status: 'running', progress } },
-        { new: true },
+        { returnDocument: 'after' },
       ).lean<DetectionJobDoc>();
       if (job) await app.domainEvents.emit('detection.progress', { ...base(job), ...progress });
     },
@@ -212,32 +397,15 @@ export function detectionService(app: FastifyInstance) {
         return this.fail(jobId, 'INTERNAL');
       }
       const result = parsed.data;
+      // Se reclama antes de guardar: el job solo pasa a `done` con las propuestas ya guardadas
+      // (quien consulte el estado nunca ve un `done` sin propuestas).
       const job = await Jobs.findOneAndUpdate(
-        { _id: jobId, status: { $in: ['pending', 'running'] } },
-        {
-          $set: {
-            status: 'done',
-            progress: { stage: 'refine', pct: 100 },
-            finishedAt: new Date(),
-            'metrics.proposed': result.activities.length,
-            'metrics.durationMs': result.stats.durationMs,
-            'metrics.llmUsed': result.stats.llmUsed,
-          },
-        },
-        { new: true },
+        { _id: jobId, status: { $in: ['pending', 'running'] }, storingAt: null },
+        { $set: { storingAt: new Date() } },
+        { returnDocument: 'after' },
       ).lean<DetectionJobDoc>();
       if (!job) return;
 
-      await Promise.all([
-        ActivityProposals.updateMany(
-          { versionId: job.versionId, status: 'pending', jobId: { $ne: job._id } },
-          { $set: { status: 'superseded' } },
-        ),
-        TransitionProposals.updateMany(
-          { versionId: job.versionId, status: 'pending', jobId: { $ne: job._id } },
-          { $set: { status: 'superseded' } },
-        ),
-      ]);
       const existing = await Activities.find({ versionId: job.versionId }, { bbox: 1 }).lean<
         Array<{ bbox: BBox }>
       >();
@@ -273,6 +441,30 @@ export function detectionService(app: FastifyInstance) {
         confidence: transition.confidence,
       }));
       if (transitions.length) await TransitionProposals.insertMany(transitions);
+      // Después de insertar las nuevas: quien consulte nunca ve la lista vacía entre medias.
+      await Promise.all([
+        ActivityProposals.updateMany(
+          { versionId: job.versionId, status: 'pending', jobId: { $ne: job._id } },
+          { $set: { status: 'superseded' } },
+        ),
+        TransitionProposals.updateMany(
+          { versionId: job.versionId, status: 'pending', jobId: { $ne: job._id } },
+          { $set: { status: 'superseded' } },
+        ),
+      ]);
+      await Jobs.updateOne(
+        { _id: job._id },
+        {
+          $set: {
+            status: 'done',
+            progress: { stage: 'refine', pct: 100 },
+            finishedAt: new Date(),
+            'metrics.proposed': result.activities.length,
+            'metrics.durationMs': result.stats.durationMs,
+            'metrics.llmUsed': result.stats.llmUsed,
+          },
+        },
+      );
       app.log.info(
         { jobId, proposed: docs.length, durationMs: result.stats.durationMs },
         'Detección completada',
@@ -283,9 +475,9 @@ export function detectionService(app: FastifyInstance) {
     async fail(jobId: string, code: string) {
       const error = failureFor(code);
       const job = await Jobs.findOneAndUpdate(
-        { _id: jobId, status: { $in: ['pending', 'running'] } },
+        { _id: jobId, status: { $in: ['pending', 'running'] }, storingAt: null },
         { $set: { status: 'failed', error, finishedAt: new Date() } },
-        { new: true },
+        { returnDocument: 'after' },
       ).lean<DetectionJobDoc>();
       if (!job) return;
       app.log.warn({ jobId, code: error.code }, 'Detección fallida');

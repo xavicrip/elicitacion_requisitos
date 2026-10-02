@@ -23,6 +23,8 @@ export type DetectionJobDoc = {
     llmUsed: boolean;
   };
   requestedBy: Types.ObjectId;
+  /** Una réplica de `api` está guardando el resultado (evita guardarlo dos veces). */
+  storingAt: Date | null;
   startedAt: Date | null;
   finishedAt: Date | null;
   createdAt: Date;
@@ -65,6 +67,7 @@ const JobSchema = new Schema<DetectionJobDoc>(
       llmUsed: { type: Boolean, required: true, default: false },
     },
     requestedBy: { type: Schema.Types.ObjectId, required: true },
+    storingAt: { type: Date, default: null },
     startedAt: { type: Date, default: null },
     finishedAt: { type: Date, default: null },
   },
