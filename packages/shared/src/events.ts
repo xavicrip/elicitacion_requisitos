@@ -1,4 +1,5 @@
 import type { Comment, Detail, DetailStatus } from './details';
+import type { DetectionEvents } from './detection';
 import type { ProjectStatus } from './projects';
 
 /**
@@ -62,5 +63,5 @@ export type ProjectEvents = {
   'project.deleted': ProjectBase;
 };
 
-export type DomainEvents = DetailEvents & ProjectEvents;
+export type DomainEvents = DetailEvents & ProjectEvents & DetectionEvents;
 export type DomainEventName = keyof DomainEvents;

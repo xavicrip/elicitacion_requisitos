@@ -210,9 +210,44 @@ export type DetectionEvents = {
   };
 };
 
+export type DetectionEventName = keyof DetectionEvents;
+
 export const DETECTION_EVENTS = [
   'detection.progress',
   'detection.completed',
   'detection.failed',
   'proposal.reviewed',
-] as const satisfies readonly (keyof DetectionEvents)[];
+] as const satisfies readonly DetectionEventName[];
+
+// Esquemas de los eventos tal como llegan por el socket (prueba de contrato, constitución III).
+const Id = z.string().min(1);
+const DetectionEnvelope = {
+  eventId: z.uuid(),
+  projectId: Id,
+  diagramId: Id,
+  versionId: Id,
+  jobId: Id,
+  at: z.iso.datetime(),
+};
+
+export const DETECTION_EVENT_SCHEMAS = {
+  'detection.progress': z
+    .object({ ...DetectionEnvelope, ...DetectionProgressSchema.shape })
+    .strict(),
+  'detection.completed': z
+    .object({ ...DetectionEnvelope, proposed: z.number().int().min(0) })
+    .strict(),
+  'detection.failed': z
+    .object({ ...DetectionEnvelope, error: z.object({ code: Id, message: Id }).strict() })
+    .strict(),
+  'proposal.reviewed': z
+    .object({
+      ...DetectionEnvelope,
+      proposalId: Id,
+      kind: z.enum(['activity', 'transition']),
+      status: ProposalStatusSchema,
+      activityId: Id.optional(),
+      actorId: Id,
+    })
+    .strict(),
+} satisfies Record<DetectionEventName, z.ZodType>;
