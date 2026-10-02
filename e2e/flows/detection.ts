@@ -22,7 +22,11 @@ export async function draftWithoutActivities(page: Page, accessToken: string) {
 }
 
 /** Lanza la detección por la API (`202`) y devuelve el job. */
-export async function startDetection(page: Page, accessToken: string, versionId: string) {
+export async function startDetection(
+  page: Pick<Page, 'request'>,
+  accessToken: string,
+  versionId: string,
+) {
   const response = await page.request.post(`/api/diagram-versions/${versionId}/detections`, {
     headers: auth(accessToken),
     data: {},
@@ -32,7 +36,11 @@ export async function startDetection(page: Page, accessToken: string, versionId:
 }
 
 /** Última detección de la versión. */
-export async function latestDetection(page: Page, accessToken: string, versionId: string) {
+export async function latestDetection(
+  page: Pick<Page, 'request'>,
+  accessToken: string,
+  versionId: string,
+) {
   const response = await page.request.get(`/api/diagram-versions/${versionId}/detections`, {
     headers: auth(accessToken),
   });
@@ -42,7 +50,7 @@ export async function latestDetection(page: Page, accessToken: string, versionId
 
 /** Espera a que la última detección termine (`done` o `failed`) y la devuelve. */
 export async function waitForDetection(
-  page: Page,
+  page: Pick<Page, 'request'>,
   accessToken: string,
   versionId: string,
   timeoutMs = 90_000,

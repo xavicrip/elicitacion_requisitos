@@ -153,7 +153,7 @@ actividades
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T046 [P] Mediciones en `e2e/perf/detection.perf.spec.ts` y en `evaluate_detection.py --timing`: detección de un diagrama de 50 actividades del conjunto de validación en < 60 s (SC-003) en Compose, memoria máxima del worker < 400 MB (plan, ajuste 9) y el resultado del gate de precisión; anotarlo en `plan.md` — `perf(e2e)`
+- [X] T046 [P] Mediciones en `e2e/perf/detection.perf.spec.ts` y en `evaluate_detection.py --timing`: detección de un diagrama de 50 actividades del conjunto de validación en < 60 s (SC-003) en Compose, memoria máxima del worker < 400 MB (plan, ajuste 9) y el resultado del gate de precisión; anotarlo en `plan.md` — `perf(e2e)`
 - [ ] T047 [P] Completar el ADR 0008 con las mediciones de T046 y el resultado del gate de precisión — `docs(adr)`
 - [ ] T048 [P] README (sección de detección asistida: flujo, flags `detection` y `detection-llm`, `analytics-worker` en Compose, `pnpm test:py` y la evaluación) y revisar que `quickstart.md` siga al día — `docs(repo)`
 - [ ] T049 Desplegar `analytics-worker`: añadirlo al bucle de `scripts/railway/deploy-service.sh` en `.github/workflows/deploy.yml` (y a `scripts/rollback.sh`), su configuración en `apps/analytics/railway.worker.json` (fuente de verdad; Railway no la lee y se aplica con `railway environment edit`, ADR 0002), y registrarlo en `docs/adr/0002-despliegue-railway.md` — `ci(deploy)`

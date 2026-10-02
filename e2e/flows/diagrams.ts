@@ -43,7 +43,10 @@ export async function login(page: Page, user: TestUser) {
 }
 
 /** Proyecto abierto del usuario, creado por la API a través del proxy de web. */
-export async function openProject(page: Page, accessToken: string): Promise<string> {
+export async function openProject(
+  page: Pick<Page, 'request'>,
+  accessToken: string,
+): Promise<string> {
   const headers = { authorization: `Bearer ${accessToken}` };
   const created = await page.request.post('/api/projects', {
     headers,
