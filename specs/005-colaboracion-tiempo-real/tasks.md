@@ -142,7 +142,7 @@ imagen, con su nombre, y puede ocultarlos
 
 - [X] T036 [P] [US3] Pruebas de integración en `apps/api/tests/integration/cursors.test.ts`: `cursor:move` se reparte a `diagram:{versionId}` sin el emisor y como evento volátil; más de 20 por segundo se descartan (y se cuentan en el log); coordenadas inválidas se descartan; un socket que no está en la sala no puede emitir en ella. Amplía `socket-events.contract.test.ts` con `cursor:moved` y los payloads inválidos de `cursor:move` — `test(api)`
 - [X] T037 [P] [US3] Pruebas de `CursorsLayer` en `apps/web/tests/cursors.test.tsx`: un cursor en coordenadas de imagen queda sobre el mismo punto con cámaras distintas; el envío se limita a uno cada 50 ms; el movimiento se interpola; un cursor sin novedades en 5 s se oculta; "Ocultar cursores" se guarda en `localStorage` (con `try/catch`) y oculta los ajenos — `test(web)`
-- [ ] T038 [P] [US3] E2E en `e2e/flows/cursors.spec.ts`: Ana con zoom al 200 % y Luis al 50 % (con `__canvasState`); el cursor de Luis sobre "Validar pago" aparece en la pantalla de Ana sobre esa misma actividad; Ana activa "Ocultar cursores" y deja de verlo — `test(e2e)`
+- [X] T038 [P] [US3] E2E en `e2e/flows/cursors.spec.ts`: Ana con zoom al 200 % y Luis al 50 % (con `__canvasState`); el cursor de Luis sobre "Validar pago" aparece en la pantalla de Ana sobre esa misma actividad; Ana activa "Ocultar cursores" y deja de verlo — `test(e2e)`
 
 ### Implementation for User Story 3
 
