@@ -46,6 +46,33 @@ uv run python tests/eval/evaluate_detection.py --subset digital --llm   # manual
 SC-004: cronometrar la preparación de un diagrama de 20 actividades con detección y sin ella
 (003) y comparar.
 
+## Recorrido en staging (T051, 2026-10-02)
+
+Sobre `aca929a` (flag `detection` activado solo en staging), por la API pública de staging con una
+cuenta nueva (`recorrido-006-…@example.com`) y un proyecto abierto. La interfaz no se recorrió en
+staging: la cubren los E2E contra Compose (`e2e/flows/detection.spec.ts`).
+
+| Paso | Resultado |
+| --- | --- |
+| §1 `compra-simple.png` | `done` en 2,5 s de punta a punta (0,8 s en el worker): 6 zonas de confianza alta con su nombre y 5 flechas |
+| §2 Publicar con propuestas pendientes | `422` |
+| §2 Aceptar en bloque | 6 aceptadas, todas con `source: detected` |
+| §3 Aceptar las flechas | 5 aceptadas → 5 transiciones en el editor |
+| §2 Publicar ya revisado | `200`; volver a detectar sobre la versión publicada → `409` |
+| SC-003 `020.png` (50 actividades) | `done` en 8,6 s de punta a punta (6,8 s en el worker): 50 zonas y 54 flechas |
+
+`analytics-worker` en staging (métricas de Railway, promedio por minuto): 111 MB en reposo y
+161 MB de pico durante las detecciones, con CPU de 0,18 vCPU como máximo. El límite del servicio
+es de 24 GB y 24 vCPU: la cuenta no está en el plan Free de 0,5 GB que temía el plan (ajuste 9).
+`api /health/deep` incluye `detection-worker: up`.
+
+SC-004 (preparar un diagrama de 20 actividades con y sin detección) no se cronometró con una
+persona: con detección, la parte automática son unos 3 s más la revisión (aceptar en bloque y
+corregir lo que haga falta), frente a marcar las 20 zonas una a una en el editor de la 003. Queda
+pendiente medirlo en una sesión real.
+
+- El proyecto y la cuenta de prueba se quedan en staging: no hay borrado de cuentas.
+
 ## 5. Pruebas
 
 ```bash
