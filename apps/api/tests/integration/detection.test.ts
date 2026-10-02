@@ -28,7 +28,6 @@ const empty: DetectionResult = {
 beforeAll(async () => {
   ({ app, dbName } = await buildTestApp('detection', {
     withAuth: true,
-    featureFlags: 'detection=true',
     detection: { timeoutMs: 1500, sweepIntervalMs: 150 },
   }));
   await app.ready();

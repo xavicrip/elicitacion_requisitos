@@ -5,7 +5,6 @@ import { useAuthStore } from '../../lib/auth-store';
 import { DetailsWorkspacePage } from '../details/DetailsWorkspacePage';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { projectKeys, projectsApi } from '../projects/api';
-import { useFlags } from '../../lib/flags';
 import { DetectionPanel } from '../detection/DetectionPanel';
 import { ProposalReviewPanel } from '../detection/ProposalReviewPanel';
 import { DetectionProposals } from '../detection/ProposalsLayer';
@@ -26,8 +25,6 @@ export function RealtimeWorkspace() {
   const socket = useRealtimeSocket();
   const versionId = useWorkspaceStore((state) => state.versionId);
   const editing = useWorkspaceStore((state) => state.mode === 'edit');
-  // Detección asistida (feature 006), detrás de su flag.
-  const detection = Boolean(useFlags().flags.detection);
   const user = useAuthStore((state) => state.user);
   const project = useQuery({
     queryKey: projectKeys.detail(projectId),
@@ -68,9 +65,7 @@ export function RealtimeWorkspace() {
         extraBadge={badge}
         overlay={({ image, versionId: shown }) => (
           <>
-            {detection && editing && (
-              <DetectionProposals versionId={shown} socket={socket} image={image} />
-            )}
+            {editing && <DetectionProposals versionId={shown} socket={socket} image={image} />}
             {socket && (
               <CursorsLayer
                 socket={socket}
@@ -82,16 +77,12 @@ export function RealtimeWorkspace() {
             )}
           </>
         )}
-        editorPanel={
-          detection
-            ? ({ versionId: shown }) => (
-                <>
-                  <DetectionPanel versionId={shown} socket={socket} />
-                  <ProposalReviewPanel versionId={shown} socket={socket} />
-                </>
-              )
-            : undefined
-        }
+        editorPanel={({ versionId: shown }) => (
+          <>
+            <DetectionPanel versionId={shown} socket={socket} />
+            <ProposalReviewPanel versionId={shown} socket={socket} />
+          </>
+        )}
       />
     </>
   );

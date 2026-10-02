@@ -19,7 +19,6 @@ let worker: ReturnType<typeof startFakeWorker>;
 beforeAll(async () => {
   ({ app, dbName } = await buildTestApp('transitions', {
     withAuth: true,
-    featureFlags: 'detection=true',
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');

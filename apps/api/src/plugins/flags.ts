@@ -17,11 +17,7 @@ export type FlagGates = Partial<Record<string, RegExp>>;
  * (constitución IV: funcionalidad incompleta integrada detrás de un flag). Cada feature añade
  * aquí las suyas mientras su flag exista.
  */
-export const GATED_PREFIXES: FlagGates = {
-  // Detección asistida (feature 006): iniciar y consultar la detección y revisar propuestas.
-  detection:
-    /^\/(diagram-versions\/[^/?]+\/(detections|proposals)|proposals|transition-proposals)(\/|\?|$)/,
-};
+export const GATED_PREFIXES: FlagGates = {};
 
 export const featureGatePlugin = fp<{ flags: ActiveFlags; gates?: FlagGates }>(
   async (app, { flags, gates = GATED_PREFIXES }) => {

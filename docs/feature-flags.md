@@ -30,30 +30,30 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag            | Por defecto | Feature                  | Qué oculta                                                                                                                              |
-| --------------- | ----------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `detection`     | `true`      | `006-deteccion-asistida` | La detección asistida: `POST /diagram-versions/:id/detections`, las propuestas y su revisión; en `web`, el botón _Detectar actividades_ |
-| `detection-llm` | `false`     | `006-deteccion-asistida` | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste                                  |
-| `invite-email`  | `false`     | `002-auth-proyectos`     | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)                                               |
+| Flag            | Por defecto | Feature                  | Qué oculta                                                                                             |
+| --------------- | ----------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `detection-llm` | `false`     | `006-deteccion-asistida` | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste |
+| `invite-email`  | `false`     | `002-auth-proyectos`     | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)              |
 
-`detection` está activado por defecto desde que se recorrió en staging (T051); se retira en un
-commit posterior. `detection-llm` sigue desactivado: es un flag operativo por su coste.
+`detection-llm` es un flag operativo por su coste: queda desactivado aunque la detección ya no
+dependa de ningún flag.
 
 ## Flags retirados
 
-| Flag       | Feature                        | Activado por defecto | Retirado   |
-| ---------- | ------------------------------ | -------------------- | ---------- |
-| `accounts` | `002-auth-proyectos`           | 2026-09-30 (T067)    | 2026-10-01 |
-| `diagrams` | `003-diagramas-canvas`         | 2026-10-01 (T059)    | 2026-10-01 |
-| `details`  | `004-detalles-requisitos`      | 2026-10-01 (T053)    | 2026-10-01 |
-| `realtime` | `005-colaboracion-tiempo-real` | 2026-10-02 (T047)    | 2026-10-02 |
+| Flag        | Feature                        | Activado por defecto | Retirado   |
+| ----------- | ------------------------------ | -------------------- | ---------- |
+| `accounts`  | `002-auth-proyectos`           | 2026-09-30 (T067)    | 2026-10-01 |
+| `diagrams`  | `003-diagramas-canvas`         | 2026-10-01 (T059)    | 2026-10-01 |
+| `details`   | `004-detalles-requisitos`      | 2026-10-01 (T053)    | 2026-10-01 |
+| `realtime`  | `005-colaboracion-tiempo-real` | 2026-10-02 (T047)    | 2026-10-02 |
+| `detection` | `006-deteccion-asistida`       | 2026-10-02 (T052)    | 2026-10-02 |
 
 ## Activarlo por entorno
 
 Variable `FEATURE_FLAGS` en Railway (o en `.env` en local):
 
 ```text
-FEATURE_FLAGS=invite-email=true,detection=false
+FEATURE_FLAGS=invite-email=true,detection-llm=true
 ```
 
 Un nombre desconocido o un valor distinto de `true`/`false` genera un aviso en el log y no

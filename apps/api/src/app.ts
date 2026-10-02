@@ -178,16 +178,14 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(voteRoutes);
         await app.register(commentRoutes);
 
-        // Detección asistida (feature 006): cola con analytics-worker, detrás del flag.
-        if (flags.detection) {
-          await app.register(detectionPlugin, {
-            redisUrl: services.redisUrl,
-            queuePrefix: `${redisNameSpace}bull`,
-            keyPrefix: redisNameSpace,
-            ...services.detection,
-          });
-          await app.register(detectionRoutes);
-        }
+        // Detección asistida (feature 006): cola con analytics-worker.
+        await app.register(detectionPlugin, {
+          redisUrl: services.redisUrl,
+          queuePrefix: `${redisNameSpace}bull`,
+          keyPrefix: redisNameSpace,
+          ...services.detection,
+        });
+        await app.register(detectionRoutes);
 
         // Colaboración en tiempo real (feature 005): Socket.IO atiende /socket.io/ fuera del
         // router (plan de la 005, ajuste 2).
