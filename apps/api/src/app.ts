@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
@@ -18,6 +19,7 @@ import { voteRoutes } from './modules/details/votes.routes.js';
 import { registerDiagramsCascade } from './modules/diagrams/cascade.js';
 import { activityDependentsPlugin } from './modules/diagrams/dependents.js';
 import { publishGuardsPlugin } from './modules/diagrams/publish-guards.js';
+import { detectionRoutes } from './modules/detection/routes.js';
 import { imageRoutes } from './modules/diagrams/image.routes.js';
 import { diagramRoutes } from './modules/diagrams/routes.js';
 import { invitationRoutes } from './modules/invitations/routes.js';
@@ -53,9 +55,11 @@ export type ServicesConfig = {
   storage?: StorageConfig;
   /** Colaboración en tiempo real (feature 005): tiempos y prefijos para las pruebas. */
   realtime?: RealtimeConfig;
+  /** Detección asistida (feature 006): prefijos y tiempos para las pruebas. */
+  detection?: DetectionConfig;
 };
 
-export type { RealtimeConfig };
+export type { DetectionConfig, RealtimeConfig };
 
 export type StorageConfig = {
   endpoint: string;
@@ -173,6 +177,17 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(coverageRoutes);
         await app.register(voteRoutes);
         await app.register(commentRoutes);
+
+        // Detección asistida (feature 006): cola con analytics-worker, detrás del flag.
+        if (flags.detection) {
+          await app.register(detectionPlugin, {
+            redisUrl: services.redisUrl,
+            queuePrefix: `${redisNameSpace}bull`,
+            keyPrefix: redisNameSpace,
+            ...services.detection,
+          });
+          await app.register(detectionRoutes);
+        }
 
         // Colaboración en tiempo real (feature 005): Socket.IO atiende /socket.io/ fuera del
         // router (plan de la 005, ajuste 2).

@@ -1,6 +1,12 @@
 import type { Writable } from 'node:stream';
 import type { FastifyInstance } from 'fastify';
-import { buildApp, type AuthConfig, type DeletionConfig, type RealtimeConfig } from '../../src/app';
+import {
+  buildApp,
+  type AuthConfig,
+  type DeletionConfig,
+  type DetectionConfig,
+  type RealtimeConfig,
+} from '../../src/app';
 import { runMigrations } from '../../src/db/migrations';
 import {
   MONGO_TEST_URL,
@@ -25,6 +31,8 @@ type TestAppOptions = {
   deletion?: DeletionConfig;
   /** Tiempos de la colaboración en tiempo real (feature 005), cortos en las pruebas. */
   realtime?: RealtimeConfig;
+  /** Tiempos de la detección (feature 006), cortos en las pruebas. */
+  detection?: DetectionConfig;
   /** Reutiliza la base de datos de otra app: dos instancias de `api` (réplicas, feature 005). */
   dbName?: string;
   logStream?: Writable;
@@ -62,6 +70,7 @@ export async function buildTestApp(
       featureFlags: options.featureFlags,
       auth,
       realtime: options.realtime,
+      detection: options.detection,
       deletion: {
         attempts: 3,
         backoffMs: 10,

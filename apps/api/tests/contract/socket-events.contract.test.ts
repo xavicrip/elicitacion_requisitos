@@ -1,5 +1,6 @@
 import {
   AccessRevokedSchema,
+  DETECTION_EVENT_SCHEMAS,
   CursorMovedSchema,
   PresenceUpdateSchema,
   ProjectRoomSchema,
@@ -12,6 +13,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { createDetail, publishedDiagram } from '../helpers/details';
 import { uploadVersion } from '../helpers/diagrams';
+import { EXAMPLE_RESULT, startFakeWorker } from '../helpers/detection-worker';
 import {
   closeSockets,
   collect,
@@ -33,11 +35,18 @@ let ana: TestUser;
 let luis: TestUser;
 let projectId: string;
 let diagram: { diagramId: string; versionId: string; keys: Record<string, string> };
+let detectionWorker: ReturnType<typeof startFakeWorker>;
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('socketcontract', {
+  let dbName: string;
+  ({ app, dbName } = await buildTestApp('socketcontract', {
     withAuth: true,
+    featureFlags: 'detection=true',
   }));
+  detectionWorker = startFakeWorker(`test-${dbName}:bull`, async (_data, job) => {
+    await job.updateProgress({ stage: 'shapes', pct: 20 });
+    return EXAMPLE_RESULT;
+  });
   url = await app.listen({ port: 0, host: '127.0.0.1' });
   ana = await registerTestUser(app, 'Ana');
   luis = await registerTestUser(app, 'Luis');
@@ -51,7 +60,10 @@ beforeAll(async () => {
   diagram = await publishedDiagram(app, authHeaders(ana), projectId);
 });
 afterEach(() => closeSockets());
-afterAll(() => closeTestApp(app));
+afterAll(async () => {
+  await detectionWorker.close();
+  await closeTestApp(app);
+});
 
 async function listener(): Promise<ClientSocket> {
   const socket = await connect(url, luis.accessToken);
@@ -211,6 +223,38 @@ describe('cursores (US3)', () => {
     }
     await pause(300);
     expect(received).toEqual([]);
+  });
+});
+
+describe('detección asistida (feature 006)', () => {
+  it('progreso, fin y fallo validan contra su esquema y solo llegan a la sala del borrador', async () => {
+    const draft = (await uploadVersion(app, authHeaders(ana), diagram.diagramId)).json();
+    const admin = await connect(url, ana.accessToken);
+    expect(
+      await admin.timeout(2000).emitWithAck('room:join', { versionId: draft.id }),
+    ).toMatchObject({ ok: true });
+    // Luis (Participante) no puede unirse a la sala del borrador; en la publicada no los recibe.
+    expect(
+      await (await connect(url, luis.accessToken)).timeout(2000).emitWithAck('room:join', {
+        versionId: draft.id,
+      }),
+    ).toMatchObject({ ok: false });
+    const participant = await listener();
+    const leaked = collect(participant, 'detection.completed');
+
+    const progress = nextEvent(admin, 'detection.progress', 5000);
+    const completed = nextEvent(admin, 'detection.completed', 5000);
+    await inject('POST', `/diagram-versions/${draft.id}/detections`, ana, {});
+    for (const [name, payload] of [
+      ['detection.progress', await progress],
+      ['detection.completed', await completed],
+    ] as const) {
+      expect(DETECTION_EVENT_SCHEMAS[name].safeParse(payload).error?.issues ?? [], name).toEqual(
+        [],
+      );
+    }
+    await pause(200);
+    expect(leaked).toEqual([]);
   });
 });
 
