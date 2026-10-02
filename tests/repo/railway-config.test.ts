@@ -3,16 +3,18 @@ import { describe, expect, it } from 'vitest';
 
 // Validación ligera de los railway.json (el esquema oficial está en railway.schema.json).
 const services = ['api', 'analytics', 'web'] as const;
-const read = (service: string) =>
-  JSON.parse(readFileSync(`apps/${service}/railway.json`, 'utf8')) as {
-    build: { builder: string; dockerfilePath: string };
-    deploy: {
-      healthcheckPath: string;
-      restartPolicyType: string;
-      restartPolicyMaxRetries: number;
-      preDeployCommand?: string[];
-    };
+type RailwayConfig = {
+  build: { builder: string; dockerfilePath: string };
+  deploy: {
+    startCommand?: string;
+    healthcheckPath: string;
+    restartPolicyType: string;
+    restartPolicyMaxRetries: number;
+    preDeployCommand?: string[];
   };
+};
+const parse = (path: string) => JSON.parse(readFileSync(path, 'utf8')) as RailwayConfig;
+const read = (service: string) => parse(`apps/${service}/railway.json`);
 
 describe('railway.json', () => {
   it.each(services)('%s: Dockerfile propio, healthcheck y reinicio ON_FAILURE ×3', (service) => {
@@ -35,5 +37,21 @@ describe('railway.json', () => {
     expect(read('api').deploy.preDeployCommand).toEqual(['node dist/migrate.js auto']);
     expect(read('analytics').deploy.preDeployCommand).toBeUndefined();
     expect(read('web').deploy.preDeployCommand).toBeUndefined();
+  });
+
+  it('analytics-worker (006): imagen de analytics, su propio comando y healthcheck', () => {
+    const worker = parse('apps/analytics/railway.worker.json');
+    expect(worker.build).toEqual(read('analytics').build);
+    expect(worker.deploy.startCommand).toBe('python -m analytics.worker');
+    expect(worker.deploy.healthcheckPath).toBe('/health');
+    expect(worker.deploy.restartPolicyType).toBe('ON_FAILURE');
+    expect(worker.deploy.restartPolicyMaxRetries).toBe(3);
+    expect(worker.deploy.preDeployCommand).toBeUndefined();
+  });
+
+  it('deploy.yml despliega analytics-worker con los demás servicios', () => {
+    expect(readFileSync('.github/workflows/deploy.yml', 'utf8')).toContain(
+      'for service in analytics analytics-worker api web; do',
+    );
   });
 });

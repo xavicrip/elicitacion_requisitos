@@ -166,3 +166,28 @@ verdad) y se repite la comprobación de T046 con los logs de conexión.
 `realtime` se activó por defecto en la v0.6.0 y se retiró después (`docs/feature-flags.md`). La
 variable `FEATURE_FLAGS` de `api` en staging se elimina después de desplegar el retiro; mientras
 siga definida, `api` solo avisa en el log del flag desconocido. Producción nunca la definió.
+
+## Servicio `analytics-worker` de la feature 006 (2026-10-02)
+
+La 006 añade un sexto servicio de aplicación, `analytics-worker` (ADR 0008): la imagen de
+`analytics` con otro comando, que consume la cola `detection` de BullMQ. Sin dominio público y
+sin `preDeployCommand`. Su configuración está en `apps/analytics/railway.worker.json` (fuente de
+verdad, validada por `tests/repo/railway-config.test.ts`); como el resto, Railway no la lee y se
+aplica con `railway environment edit`. `deploy.yml` lo despliega en el mismo bucle que los demás
+servicios; `scripts/rollback.sh` no cambia porque relanza `deploy.yml`.
+
+Lo crea el propietario en staging y producción **antes de fusionar** (si no existe, el paso de
+despliegue falla):
+
+| Ajuste        | Valor                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------- |
+| Origen        | CLI (`railway up`), Dockerfile `apps/analytics/Dockerfile`                             |
+| Start command | `python -m analytics.worker`                                                           |
+| Healthcheck   | `GET /health` (Redis y bucle de BullMQ vivos), reinicio `ON_FAILURE` ×3                |
+| Variables     | `REDIS_URL=${{Redis.REDIS_URL}}`, `DETECTION_CONCURRENCY=1`, `DETECTION_TIMEOUT_S=180` |
+| Opcional      | `ANTHROPIC_API_KEY` (y `DETECTION_LLM_MODEL`) solo si se quiere el refinamiento        |
+
+Railway pone `PORT`. `api` en staging pasa a `FEATURE_FLAGS=detection=true`; producción sigue
+sin definirla (`detection` desactivado). Con el flag activo, `api /health/deep` incluye el check
+`detection-worker`, que comprueba el latido del worker en Redis: los smoke tests del despliegue
+cubren así un worker caído.
