@@ -17,6 +17,7 @@ import { detailRoutes } from './modules/details/routes.js';
 import { voteRoutes } from './modules/details/votes.routes.js';
 import { registerDiagramsCascade } from './modules/diagrams/cascade.js';
 import { activityDependentsPlugin } from './modules/diagrams/dependents.js';
+import { publishGuardsPlugin } from './modules/diagrams/publish-guards.js';
 import { imageRoutes } from './modules/diagrams/image.routes.js';
 import { diagramRoutes } from './modules/diagrams/routes.js';
 import { invitationRoutes } from './modules/invitations/routes.js';
@@ -159,6 +160,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       // Diagramas (feature 003): requieren el bucket de las imágenes.
       if (services.storage) {
         await app.register(activityDependentsPlugin);
+        await app.register(publishGuardsPlugin);
         await app.register(diagramRoutes);
         await app.register(imageRoutes);
         await app.register(activityRoutes);

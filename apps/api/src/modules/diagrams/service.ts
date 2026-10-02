@@ -211,6 +211,8 @@ export function diagramsService(app: FastifyInstance) {
           'Marca al menos una actividad antes de publicar el diagrama.',
         );
       }
+      // Condiciones de otras features (la 006 bloquea con propuestas pendientes).
+      await app.publishGuards.check(version);
       const claimed = await Versions.updateOne(
         { _id: version._id, status: 'draft', rev: version.rev },
         { $inc: { rev: 1 } },
