@@ -310,6 +310,16 @@ export const AnalysisRunSchema = z.object({
   createdAt: z.iso.datetime(),
   finishedAt: z.iso.datetime().nullable(),
   results: AnalysisResultsSchema.optional(),
+  /**
+   * Conjunto analizado (junto a `results`): las actividades y los detalles tal como estaban al
+   * lanzar el análisis, para mostrar sus textos sin más consultas. Nunca lleva el autor.
+   */
+  input: z
+    .object({
+      activities: AnalysisInputFileSchema.shape.activities,
+      details: z.array(AnalysisInputDetailSchema),
+    })
+    .optional(),
 });
 
 const CountSchema = z.object({ key: z.string(), label: z.string(), count: z.number().int() });

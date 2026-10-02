@@ -68,7 +68,7 @@ export async function analysisRoutes(app: FastifyInstance) {
         .sort({ createdAt: -1 })
         .lean<AnalysisRunDoc>();
       if (!run) throw new HttpError(404, 'NOT_FOUND', 'Todavía no hay ningún análisis.');
-      return analysis.toDto(run, await analysis.results(run));
+      return analysis.toFullDto(run);
     },
   );
 
@@ -80,7 +80,7 @@ export async function analysisRoutes(app: FastifyInstance) {
     },
     async (request) => {
       const run = request.resource as AnalysisRunDoc;
-      return analysis.toDto(run, await analysis.results(run));
+      return analysis.toFullDto(run);
     },
   );
 }

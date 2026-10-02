@@ -80,8 +80,16 @@ components:
         createdAt: { type: string, format: date-time }
         finishedAt: { type: [string, 'null'], format: date-time }
         results:
-          description: Ver analysis-results.schema.json (solo en GET por id)
+          description: Ver analysis-results.schema.json (en GET por id y en latest, si terminó)
           type: object
+        input:
+          description: >-
+            Conjunto analizado (junto a results): actividades y detalles tal como estaban al lanzar
+            el análisis, sin datos del autor. Ver el archivo de entrada en analysis-job.md.
+          type: object
+          properties:
+            activities: { type: array, items: { type: object } }
+            details: { type: array, items: { type: object } }
 paths:
   /projects/{projectId}/dashboard/descriptive:
     parameters:

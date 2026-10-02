@@ -2,6 +2,7 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import {
   ANALYSIS_CONTRACT_VERSION,
   ANALYSIS_STAGES,
+  AnalysisInputFileSchema,
   AnalysisJobReturnSchema,
   AnalysisResultsSchema,
   type AnalysisInputFile,
@@ -303,6 +304,20 @@ export function analysisService(app: FastifyInstance) {
       if (run.status !== 'done') return null;
       const parsed = AnalysisResultsSchema.safeParse(await readResults(run.resultsKey));
       return parsed.success ? parsed.data : null;
+    },
+
+    /** Conjunto analizado de un run terminado (la entrada del bucket), o `null`. */
+    async input(run: AnalysisRunDoc): Promise<AnalysisRun['input'] | null> {
+      if (run.status !== 'done') return null;
+      const parsed = AnalysisInputFileSchema.safeParse(await readResults(run.inputKey));
+      if (!parsed.success) return null;
+      return { activities: parsed.data.activities, details: parsed.data.details };
+    },
+
+    /** Run con sus resultados y el conjunto analizado, si terminó. */
+    async toFullDto(run: AnalysisRunDoc): Promise<AnalysisRun> {
+      const [results, input] = await Promise.all([this.results(run), this.input(run)]);
+      return { ...(await this.toDto(run, results)), ...(results && input ? { input } : {}) };
     },
 
     /** Run tal como lo ve la web, con la obsolescencia respecto a los datos actuales. */
