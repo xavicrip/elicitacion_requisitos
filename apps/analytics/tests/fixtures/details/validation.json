@@ -1,0 +1,5975 @@
+{
+ "input": {
+  "v": 1,
+  "projectId": "66f000000000000000000001",
+  "filters": {
+   "diagramIds": null,
+   "from": null,
+   "to": null,
+   "types": null,
+   "statuses": [
+    "pending",
+    "validated"
+   ]
+  },
+  "activities": [
+   {
+    "key": "act-01",
+    "diagramId": "66f100000000000000000001",
+    "label": "Seleccionar producto"
+   },
+   {
+    "key": "act-02",
+    "diagramId": "66f100000000000000000001",
+    "label": "Agregar al carrito"
+   },
+   {
+    "key": "act-03",
+    "diagramId": "66f100000000000000000001",
+    "label": "Iniciar sesión"
+   },
+   {
+    "key": "act-04",
+    "diagramId": "66f100000000000000000001",
+    "label": "Validar pago"
+   },
+   {
+    "key": "act-05",
+    "diagramId": "66f100000000000000000001",
+    "label": "Emitir factura"
+   },
+   {
+    "key": "act-06",
+    "diagramId": "66f100000000000000000001",
+    "label": "Enviar confirmación"
+   },
+   {
+    "key": "act-07",
+    "diagramId": "66f100000000000000000001",
+    "label": "Preparar pedido"
+   },
+   {
+    "key": "act-08",
+    "diagramId": "66f100000000000000000001",
+    "label": "Enviar pedido"
+   },
+   {
+    "key": "act-09",
+    "diagramId": "66f100000000000000000001",
+    "label": "Gestionar devoluciones"
+   },
+   {
+    "key": "act-10",
+    "diagramId": "66f100000000000000000001",
+    "label": "Auditar accesos"
+   }
+  ],
+  "details": [
+   {
+    "id": "66f200000000000000000001",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-09",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario empaca el pedido",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-01T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000002",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 2,
+    "createdAt": "2026-09-01T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000003",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "confirma el pago del pedido",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "business_rule",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-09-02T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000004",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente compara dos productos",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-02T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000005",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 6,
+    "commentCount": 5,
+    "createdAt": "2026-09-02T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000006",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el reembolso se procesa en un máximo de 5 días hábiles",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 5,
+    "createdAt": "2026-09-03T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000007",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "business_rule",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-03T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000008",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 8,
+    "commentCount": 5,
+    "createdAt": "2026-09-03T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000009",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente compara dos productos",
+    "then": "la pantalla es mínimo y clara",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-03T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000010",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario solicita restablecer la contraseña",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 2,
+    "createdAt": "2026-09-04T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000011",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-09-04T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000012",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 5,
+    "commentCount": 3,
+    "createdAt": "2026-09-04T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000013",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "hoy el proceso es frustrante y los clientes se quejan de que la tienda tiene una promoción de temporada",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-05T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000014",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el usuario solicita restablecer la contraseña",
+    "then": "se registra el acceso con la IP y la fecha",
+    "type": "constraint",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 6,
+    "createdAt": "2026-09-05T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000015",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 5,
+    "createdAt": "2026-09-05T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000016",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 6,
+    "createdAt": "2026-09-05T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000017",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente compara dos productos",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-09-06T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000018",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente compara dos productos",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-06T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000019",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "se agrupan las notificaciones del día",
+    "then": "el cliente deja de recibir promociones en menos de 24 horas",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-06T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000020",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "business_rule",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 3,
+    "createdAt": "2026-09-07T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000021",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido lleva 48 horas sin despacharse",
+    "when": "el cliente consulta el estado de su envío",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-07T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000022",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-09-07T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000023",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 2,
+    "createdAt": "2026-09-08T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000024",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el repartidor está a menos de 2 kilómetros",
+    "when": "se agrupan las notificaciones del día",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-08T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000025",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "elige transferencia bancaria",
+    "then": "la respuesta del sistema es amigable",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 5,
+    "createdAt": "2026-09-08T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000026",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "se programa el recordatorio de la entrega",
+    "then": "el historial de mensajes enviados queda disponible para soporte",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-08T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000027",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente registró su correo y su teléfono",
+    "when": "el operador reenvía el comprobante",
+    "then": "el historial de mensajes enviados queda disponible para soporte",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-09T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000028",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el usuario solicita restablecer la contraseña",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 4,
+    "createdAt": "2026-09-09T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000029",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente compara dos productos",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "business_rule",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-09-09T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000030",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 2,
+    "createdAt": "2026-09-10T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000031",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 2,
+    "createdAt": "2026-09-10T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000032",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el pedido supera los 500 dólares",
+    "when": "confirma el pago del pedido",
+    "then": "el reembolso se procesa en un máximo de 5 días hábiles",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-10T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000033",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "la pantalla es mínimo y clara",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 3,
+    "createdAt": "2026-09-10T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000034",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "el proceso resulta y/o para el cliente",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 4,
+    "createdAt": "2026-09-11T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000035",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "la respuesta del sistema es eficiente",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-09-11T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000036",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "es inaceptable y molesto que actualmente la pasarela de pagos está disponible",
+    "when": "introduce los datos de la tarjeta",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-11T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000037",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 2,
+    "createdAt": "2026-09-12T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000038",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-12T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000039",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente activó las notificaciones push",
+    "when": "se programa el recordatorio de la entrega",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Repartidor",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-12T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000040",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-09-12T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000041",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 6,
+    "commentCount": 6,
+    "createdAt": "2026-09-13T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000042",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-13T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000043",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 2,
+    "createdAt": "2026-09-13T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000044",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-14T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000045",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el operario empaca el pedido",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-09-14T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000046",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "es inaceptable y molesto que actualmente el cliente registró su correo y su teléfono",
+    "when": "el sistema envía la confirmación del pedido",
+    "then": "el historial de mensajes enviados queda disponible para soporte",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-14T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000047",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-15T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000048",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "hoy el proceso es frustrante y los clientes se quejan de que el cliente tiene saldo en su monedero electrónico",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 3,
+    "createdAt": "2026-09-15T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000049",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario empaca el pedido",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-15T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000050",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "el sistema envía la confirmación del pedido",
+    "then": "el mensaje se envía una sola vez aunque haya reintentos",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-15T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000051",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "aplica el cupón antes de pagar",
+    "then": "el reembolso se procesa en un máximo de 5 días hábiles",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 6,
+    "createdAt": "2026-09-16T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000052",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "elige transferencia bancaria",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 6,
+    "createdAt": "2026-09-16T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000053",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido lleva 48 horas sin despacharse",
+    "when": "se agrupan las notificaciones del día",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-16T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000054",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el repartidor está a menos de 2 kilómetros",
+    "when": "el operador reenvía el comprobante",
+    "then": "la respuesta del sistema es mínimo",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-17T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000055",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el proceso resulta adecuado para el cliente",
+    "type": "business_rule",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-09-17T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000056",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "el cliente consulta el estado de su envío",
+    "then": "la pantalla es etc. y clara",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-17T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000057",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "introduce los datos de la tarjeta",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "business_rule",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-17T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000058",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "confirma el pago del pedido",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-09-18T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000059",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-09-18T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000060",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente compara dos productos",
+    "then": "la respuesta del sistema es rápido",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-18T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000061",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "es inaceptable y molesto que actualmente el pedido lleva 48 horas sin despacharse",
+    "when": "el operador reenvía el comprobante",
+    "then": "la notificación push incluye un enlace al pedido",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-19T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000062",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-19T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000063",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el almacén tiene stock del producto",
+    "when": "el operario empaca el pedido",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-19T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000064",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-19T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000065",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "aplica el cupón antes de pagar",
+    "then": "la pantalla es amigable y clara",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-09-20T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000066",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-20T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000067",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 4,
+    "createdAt": "2026-09-20T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000068",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la respuesta del sistema es etc.",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-09-21T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000069",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "es inaceptable y molesto que actualmente el pedido supera los 500 dólares",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 3,
+    "createdAt": "2026-09-21T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000070",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-09-21T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000071",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "el proceso resulta eficiente para el cliente",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 4,
+    "createdAt": "2026-09-22T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000072",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-09-22T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000073",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 3,
+    "createdAt": "2026-09-22T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000074",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-22T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000075",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 9,
+    "commentCount": 2,
+    "createdAt": "2026-09-23T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000076",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-09-23T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000077",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente activó las notificaciones push",
+    "when": "se agrupan las notificaciones del día",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-23T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000078",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el proceso resulta etc. para el cliente",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-09-24T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000079",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-24T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000080",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "el sistema envía la confirmación del pedido",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-24T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000081",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-09-24T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000082",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente compara dos productos",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-09-25T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000083",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "confirma el pago del pedido",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 5,
+    "commentCount": 2,
+    "createdAt": "2026-09-25T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000084",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "los usuarios odian que en la versión actual el almacén tiene stock del producto",
+    "when": "el cliente compara dos productos",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-09-25T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000085",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-09-26T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000086",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 3,
+    "createdAt": "2026-09-26T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000087",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el almacén tiene stock del producto",
+    "when": "el operario empaca el pedido",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-26T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000088",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-26T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000089",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente compara dos productos",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-27T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000090",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "confirma el pago del pedido",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 2,
+    "createdAt": "2026-09-27T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000091",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 2,
+    "createdAt": "2026-09-27T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000092",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "los usuarios odian que en la versión actual el usuario activó la verificación en dos pasos",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "se registra el acceso con la IP y la fecha",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 8,
+    "commentCount": 3,
+    "createdAt": "2026-09-28T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000093",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-09-28T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000094",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 6,
+    "createdAt": "2026-09-28T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000095",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-09-29T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000096",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el resultado se presenta de forma rápido",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-09-29T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000097",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "elige transferencia bancaria",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 2,
+    "createdAt": "2026-09-29T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000098",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el usuario solicita restablecer la contraseña",
+    "then": "la respuesta del sistema es amigable",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-09-29T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000099",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-09-30T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000100",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "confirma el pago del pedido",
+    "then": "el proceso resulta flexible para el cliente",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-09-30T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000101",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "business_rule",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 4,
+    "commentCount": 4,
+    "createdAt": "2026-09-30T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000102",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "introduce los datos de la tarjeta",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-10-01T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000103",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-10-01T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000104",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el almacén tiene stock del producto",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-01T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000105",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "la pantalla es fácil y clara",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-10-01T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000106",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-02T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000107",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-10-02T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000108",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-10-02T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000109",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "business_rule",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-10-03T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000110",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente compara dos productos",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-10-03T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000111",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-03T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000112",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario empaca el pedido",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 4,
+    "createdAt": "2026-10-03T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000113",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "business_rule",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-10-04T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000114",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "la pantalla es flexible y clara",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 2,
+    "createdAt": "2026-10-04T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000115",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "aplica el cupón antes de pagar",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 6,
+    "createdAt": "2026-10-04T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000116",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 4,
+    "createdAt": "2026-10-05T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000117",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "el cliente desactiva los correos promocionales",
+    "then": "la pantalla es amigable y clara",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-05T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000118",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 3,
+    "createdAt": "2026-10-05T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000119",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "confirma el pago del pedido",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 3,
+    "createdAt": "2026-10-06T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000120",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-10-06T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000121",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario empaca el pedido",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "business_rule",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-10-06T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000122",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cajero",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 2,
+    "createdAt": "2026-10-06T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000123",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "la pantalla es y/o y clara",
+    "type": "business_rule",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-07T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000124",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "confirma el pago del pedido",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-10-07T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000125",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "los usuarios odian que en la versión actual el cliente navega desde un teléfono móvil",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-10-07T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000126",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "elige transferencia bancaria",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 6,
+    "createdAt": "2026-10-08T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000127",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-08T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000128",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "business_rule",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-10-08T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000129",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente activó las notificaciones push",
+    "when": "el cliente consulta el estado de su envío",
+    "then": "el mensaje se envía una sola vez aunque haya reintentos",
+    "type": "constraint",
+    "priority": null,
+    "authorRole": "Cliente",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-10-08T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000130",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario empaca el pedido",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-09T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000131",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "existe un cupón de descuento vigente",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "el proceso resulta flexible para el cliente",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-10-09T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000132",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el proceso resulta adecuado para el cliente",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-10-09T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000133",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "el resultado se presenta de forma fácil",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 6,
+    "createdAt": "2026-10-10T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000134",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 5,
+    "createdAt": "2026-10-10T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000135",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "los usuarios odian que en la versión actual el cliente eligió pagar con tarjeta de crédito",
+    "when": "elige transferencia bancaria",
+    "then": "el reembolso se procesa en un máximo de 5 días hábiles",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 2,
+    "createdAt": "2026-10-10T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000136",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "confirma el pago del pedido",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 9,
+    "commentCount": 3,
+    "createdAt": "2026-10-10T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000137",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "el cliente desactiva los correos promocionales",
+    "then": "el cliente deja de recibir promociones en menos de 24 horas",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-11T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000138",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente compara dos productos",
+    "then": "la pantalla es fácil y clara",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-10-11T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000139",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-11T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000140",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "aplica el cupón antes de pagar",
+    "then": "el resultado se presenta de forma intuitivo",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 5,
+    "createdAt": "2026-10-12T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000141",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "introduce los datos de la tarjeta",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 4,
+    "createdAt": "2026-10-12T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000142",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 5,
+    "createdAt": "2026-10-12T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000143",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "confirma el pago del pedido",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 5,
+    "createdAt": "2026-10-13T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000144",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "el operador reenvía el comprobante",
+    "then": "el historial de mensajes enviados queda disponible para soporte",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-10-13T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000145",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-13T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000146",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 9,
+    "commentCount": 3,
+    "createdAt": "2026-10-13T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000147",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 4,
+    "createdAt": "2026-10-14T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000148",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "la pasarela de pagos está disponible",
+    "when": "confirma el pago del pedido",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-14T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000149",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "aplica el cupón antes de pagar",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 4,
+    "createdAt": "2026-10-14T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000150",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "la respuesta del sistema es eficiente",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-10-15T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000151",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-10-15T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000152",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "confirma el pago del pedido",
+    "then": "el proceso resulta mínimo para el cliente",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 4,
+    "createdAt": "2026-10-15T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000153",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-10-15T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000154",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "aplica el cupón antes de pagar",
+    "then": "el proceso resulta y/o para el cliente",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-16T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000155",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente activó las notificaciones push",
+    "when": "el cliente consulta el estado de su envío",
+    "then": "el historial de mensajes enviados queda disponible para soporte",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-16T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000156",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 6,
+    "createdAt": "2026-10-16T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000157",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente registró su correo y su teléfono",
+    "when": "se agrupan las notificaciones del día",
+    "then": "el resultado se presenta de forma eficiente",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-17T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000158",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente compara dos productos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 6,
+    "createdAt": "2026-10-17T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000159",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "se agrupan las notificaciones del día",
+    "then": "la notificación push incluye un enlace al pedido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-17T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000160",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-10-17T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000161",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "elige transferencia bancaria",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 4,
+    "createdAt": "2026-10-18T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000162",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente usa una tarjeta de débito extranjera",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "el reembolso se procesa en un máximo de 5 días hábiles",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 9,
+    "commentCount": 2,
+    "createdAt": "2026-10-18T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000163",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "el resultado se presenta de forma intuitivo",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 6,
+    "createdAt": "2026-10-18T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000164",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "confirma el pago del pedido",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 4,
+    "createdAt": "2026-10-19T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000165",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 5,
+    "createdAt": "2026-10-19T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000166",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente activó las notificaciones push",
+    "when": "se agrupan las notificaciones del día",
+    "then": "la notificación push incluye un enlace al pedido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-10-19T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000167",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-10-20T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000168",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se muestra el motivo del rechazo devuelto por el banco",
+    "type": "business_rule",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 6,
+    "createdAt": "2026-10-20T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000169",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-10-20T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000170",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-20T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000171",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 2,
+    "createdAt": "2026-10-21T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000172",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-10-21T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000173",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-10-21T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000174",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "el proceso resulta intuitivo para el cliente",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-10-22T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000175",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "la pantalla es rápido y clara",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-22T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000176",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "el sistema envía la confirmación del pedido",
+    "then": "la notificación push incluye un enlace al pedido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-22T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000177",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "se registra el acceso con la IP y la fecha",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 6,
+    "commentCount": 6,
+    "createdAt": "2026-10-22T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000178",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 6,
+    "createdAt": "2026-10-23T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000179",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "se programa el recordatorio de la entrega",
+    "then": "el mensaje se envía una sola vez aunque haya reintentos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-23T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000180",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 6,
+    "createdAt": "2026-10-23T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000181",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el reembolso se procesa en un máximo de 5 días hábiles",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-10-24T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000182",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "la pantalla es adecuado y clara",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 4,
+    "createdAt": "2026-10-24T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000183",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el pedido supera los 500 dólares",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-10-24T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000184",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario solicita restablecer la contraseña",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 8,
+    "commentCount": 3,
+    "createdAt": "2026-10-24T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000185",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 6,
+    "createdAt": "2026-10-25T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000186",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "el proceso resulta rápido para el cliente",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 2,
+    "createdAt": "2026-10-25T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000187",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 2,
+    "createdAt": "2026-10-25T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000188",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-10-26T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000189",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 2,
+    "createdAt": "2026-10-26T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000190",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario empaca el pedido",
+    "then": "el resultado se presenta de forma adecuado",
+    "type": "business_rule",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-26T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000191",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente activó las notificaciones push",
+    "when": "el operador reenvía el comprobante",
+    "then": "el cliente deja de recibir promociones en menos de 24 horas",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-10-27T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000192",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "hoy el proceso es frustrante y los clientes se quejan de que un administrador revisa los registros de acceso",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 3,
+    "createdAt": "2026-10-27T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000193",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "el sistema envía la confirmación del pedido",
+    "then": "el cliente deja de recibir promociones en menos de 24 horas",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-27T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000194",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "la respuesta del sistema es flexible",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 4,
+    "createdAt": "2026-10-27T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000195",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-10-28T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000196",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente registró su correo y su teléfono",
+    "when": "el cliente desactiva los correos promocionales",
+    "then": "el mensaje se envía una sola vez aunque haya reintentos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-28T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000197",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "la respuesta del sistema es y/o",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 5,
+    "commentCount": 2,
+    "createdAt": "2026-10-28T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000198",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "business_rule",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-10-29T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000199",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "la pantalla es etc. y clara",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-10-29T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000200",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 6,
+    "createdAt": "2026-10-29T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000201",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente eligió pagar con tarjeta de crédito",
+    "when": "reintenta un pago rechazado por el banco",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 9,
+    "commentCount": 2,
+    "createdAt": "2026-10-29T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000202",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "se emite la factura electrónica con el valor pagado",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 3,
+    "createdAt": "2026-10-30T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000203",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 8,
+    "commentCount": 2,
+    "createdAt": "2026-10-30T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000204",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido supera los 500 dólares",
+    "when": "introduce los datos de la tarjeta",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 2,
+    "createdAt": "2026-10-30T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000205",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-10-31T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000206",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 5,
+    "commentCount": 6,
+    "createdAt": "2026-10-31T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000207",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-10-31T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000208",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene productos en el carrito",
+    "when": "aplica el cupón antes de pagar",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 5,
+    "createdAt": "2026-10-31T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000209",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente activó las notificaciones push",
+    "when": "se programa el recordatorio de la entrega",
+    "then": "el cliente deja de recibir promociones en menos de 24 horas",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-01T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000210",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario introduce su correo y su contraseña",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 5,
+    "createdAt": "2026-11-01T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000211",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 2,
+    "createdAt": "2026-11-01T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000212",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "business_rule",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-02T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000213",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "los usuarios odian que en la versión actual el cliente tiene productos en el carrito",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 2,
+    "createdAt": "2026-11-02T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000214",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el operario empaca el pedido",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "constraint",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 4,
+    "commentCount": 6,
+    "createdAt": "2026-11-02T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000215",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-11-03T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000216",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "se envía un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-11-03T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000217",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 4,
+    "createdAt": "2026-11-03T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000218",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el cliente tiene saldo en su monedero electrónico",
+    "when": "introduce los datos de la tarjeta",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 8,
+    "commentCount": 4,
+    "createdAt": "2026-11-03T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000219",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 3,
+    "createdAt": "2026-11-04T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000220",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "se registra el acceso con la IP y la fecha",
+    "type": "constraint",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-11-04T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000221",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "la pantalla es fácil y clara",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 8,
+    "commentCount": 6,
+    "createdAt": "2026-11-04T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000222",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el cliente prefiere recibir mensajes por WhatsApp",
+    "when": "el operador reenvía el comprobante",
+    "then": "el cliente recibe un correo con el número de seguimiento",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-05T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000223",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "los usuarios odian que en la versión actual la sesión lleva 15 minutos inactiva",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-11-05T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000224",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 4,
+    "createdAt": "2026-11-05T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000225",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "el cliente desactiva los correos promocionales",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-05T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000226",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 7,
+    "commentCount": 5,
+    "createdAt": "2026-11-06T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000227",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-11-06T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000228",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "los usuarios odian que en la versión actual el pedido supera los 500 dólares",
+    "when": "introduce los datos de la tarjeta",
+    "then": "el cobro se registra con el número de autorización del banco",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 8,
+    "commentCount": 6,
+    "createdAt": "2026-11-06T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000229",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el operario empaca el pedido",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-07T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000230",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 9,
+    "commentCount": 5,
+    "createdAt": "2026-11-07T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000231",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cajero",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-07T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000232",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el sistema detecta un intento de acceso sospechoso",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-11-07T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000233",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el repartidor está a menos de 2 kilómetros",
+    "when": "el operador reenvía el comprobante",
+    "then": "el mensaje se envía una sola vez aunque haya reintentos",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-08T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000234",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "los usuarios odian que en la versión actual el usuario inicia sesión desde un dispositivo nuevo",
+    "when": "el usuario confirma el código enviado a su teléfono",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 6,
+    "createdAt": "2026-11-08T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000235",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 5,
+    "commentCount": 3,
+    "createdAt": "2026-11-08T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000236",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario empaca el pedido",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-09T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000237",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario activó la verificación en dos pasos",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "se registra el acceso con la IP y la fecha",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 4,
+    "commentCount": 3,
+    "createdAt": "2026-11-09T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000238",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-09T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000239",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario tiene una cuenta activa",
+    "when": "el usuario cierra la sesión en todos sus dispositivos",
+    "then": "el resultado se presenta de forma intuitivo",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 7,
+    "commentCount": 4,
+    "createdAt": "2026-11-10T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000240",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "el usuario falló la contraseña tres veces seguidas",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 6,
+    "commentCount": 3,
+    "createdAt": "2026-11-10T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000241",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "la pasarela de pagos está disponible",
+    "when": "aprueba el pago del pedido",
+    "then": "la pasarela autoriza la transacción en un tiempo inferior a 3 segundos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-10T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000242",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el pedido cambió de estado a enviado",
+    "when": "el comprador desactiva los correos promocionales",
+    "then": "llega un SMS con la hora estimada de entrega",
+    "type": "non_functional",
+    "priority": "wont",
+    "authorRole": "Administrador",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-10T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000243",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-11T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000244",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el comprador registró su correo y su teléfono",
+    "when": "el comprador desactiva los correos promocionales",
+    "then": "el mensaje se manda una sola vez aunque haya reintentos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-11T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000245",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la persona usuaria activó la verificación en dos pasos",
+    "when": "la persona usuaria cierra la sesión en todos sus dispositivos",
+    "then": "la contraseña se guarda con un hash argon2",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-11T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000246",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "la plataforma detecta un intento de acceso sospechoso",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-12T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000247",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "la persona usuaria cierra la sesión en todos sus dispositivos",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-12T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000248",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "el total cobrado coincide con el total del pedido incluido el IVA",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-12T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000249",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "elige transferencia bancaria",
+    "then": "la pasarela autoriza la transacción en un tiempo inferior a 3 segundos",
+    "type": "non_functional",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "pagos"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-12T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000250",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "la persona usuaria solicita restablecer la contraseña",
+    "then": "queda registrado el acceso con la IP y la fecha",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-13T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000251",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la persona usuaria tiene una cuenta activa",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-13T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000252",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "se manda un código de verificación de 6 dígitos",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-13T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000253",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la persona usuaria tiene una cuenta activa",
+    "when": "la persona usuaria introduce su correo y su contraseña",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-14T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000254",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "la pasarela de pagos está disponible",
+    "when": "aprueba el pago del pedido",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-14T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000255",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la persona usuaria falló la contraseña tres veces seguidas",
+    "when": "la plataforma detecta un intento de acceso sospechoso",
+    "then": "todas las sesiones abiertas se invalidan",
+    "type": "constraint",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-14T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000256",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el comprador guarda un producto en su lista de deseos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-14T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000257",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el comprador usa una tarjeta de débito extranjera",
+    "when": "cancela el pago antes de autorizarlo",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-15T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000258",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el comprador guarda un producto en su lista de deseos",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-15T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000259",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "existe un cupón de descuento vigente",
+    "when": "solicita pagar en tres cuotas sin intereses",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-15T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000260",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el comprador registró su correo y su teléfono",
+    "when": "el operador reenvía el comprobante",
+    "then": "el historial de mensajes enviados queda disponible para soporte",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "notificaciones"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-16T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000261",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el comprador usa una tarjeta de débito extranjera",
+    "when": "aprueba el pago del pedido",
+    "then": "se cifra el número de tarjeta y nunca se guarda completo",
+    "type": "non_functional",
+    "priority": "could",
+    "authorRole": "Administrador",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-16T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000262",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el comprador compró antes en la tienda",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "aparecen solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-16T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000263",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-04",
+    "given": "el comprador tiene productos en el carrito",
+    "when": "aplica el cupón antes de pagar",
+    "then": "la pasarela autoriza la transacción en un tiempo inferior a 3 segundos",
+    "type": "non_functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [
+     "pagos"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-17T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000264",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el comprador compró antes en la tienda",
+    "when": "el comprador agrega un producto al carrito",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-17T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000265",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "la plataforma detecta un intento de acceso sospechoso",
+    "then": "se manda un código de verificación de 6 dígitos",
+    "type": "non_functional",
+    "priority": null,
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-17T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000266",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "la persona usuaria aprueba el código enviado a su teléfono",
+    "then": "el enlace de restablecimiento caduca en 30 minutos",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-17T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000267",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "la sesión lleva 15 minutos inactiva",
+    "when": "la persona usuaria solicita restablecer la contraseña",
+    "then": "se manda un código de verificación de 6 dígitos",
+    "type": "constraint",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-18T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000268",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-03",
+    "given": "un administrador revisa los registros de acceso",
+    "when": "el administrador bloquea una cuenta comprometida",
+    "then": "la cuenta se bloquea durante 15 minutos",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Repartidor",
+    "tags": [
+     "seguridad"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-18T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000269",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-18T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000270",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el stock disponible se descuenta al apruebar el pedido",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-19T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000271",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "constraint",
+    "priority": "should",
+    "authorRole": "Soporte",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-19T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000272",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente compara dos productos",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Repartidor",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-19T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000273",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el operario empaca el pedido",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-19T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000274",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente compara dos productos",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-20T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000275",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente compara dos productos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cajero",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-20T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000276",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [
+     "logística"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-20T19:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000277",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Soporte",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-21T02:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000278",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-21T09:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000279",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el operario empaca el pedido",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Cliente",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-21T16:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000280",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-21T23:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000281",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el almacén tiene stock del producto",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-22T06:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000282",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-22T13:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000283",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-01",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cliente",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-22T20:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000284",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": null,
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-23T03:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000285",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el operario empaca el pedido",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-23T10:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000286",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el pedido contiene productos frágiles",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el stock disponible se descuenta al confirmar el pedido",
+    "type": "functional",
+    "priority": "should",
+    "authorRole": "Repartidor",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-23T17:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000287",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el cliente compró antes en la tienda",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-24T00:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000288",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-06",
+    "given": "el almacén tiene stock del producto",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "business_rule",
+    "priority": null,
+    "authorRole": "Cliente",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-24T07:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000289",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el almacén tiene stock del producto",
+    "when": "el operario empaca el pedido",
+    "then": "el producto aparece en la lista de deseos al volver a entrar",
+    "type": "business_rule",
+    "priority": null,
+    "authorRole": "Cajero",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-24T14:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000290",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario empaca el pedido",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "must",
+    "authorRole": "Operario de almacén",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-24T21:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000291",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente compara dos productos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-25T04:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000292",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "business_rule",
+    "priority": "wont",
+    "authorRole": "Soporte",
+    "tags": [],
+    "status": "validated",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-25T11:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000293",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-05",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el operario empaca el pedido",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "constraint",
+    "priority": null,
+    "authorRole": "Administrador",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-25T18:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000294",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Soporte",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-26T01:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000295",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente compara dos productos",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Repartidor",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 1,
+    "createdAt": "2026-11-26T08:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000296",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el cliente filtra por precio y por marca",
+    "then": "el carrito muestra la cantidad y el subtotal actualizados",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Cajero",
+    "tags": [],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 0,
+    "createdAt": "2026-11-26T15:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000297",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el cliente agrega un producto al carrito",
+    "then": "el paquete lleva la etiqueta con el código de barras",
+    "type": "functional",
+    "priority": "could",
+    "authorRole": "Cliente",
+    "tags": [
+     "logística"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 1,
+    "createdAt": "2026-11-26T22:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000298",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-08",
+    "given": "el catálogo tiene productos de varias categorías",
+    "when": "el operario imprime la etiqueta de envío",
+    "then": "la tabla comparativa muestra las especificaciones lado a lado",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 1,
+    "commentCount": 0,
+    "createdAt": "2026-11-27T05:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000299",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-07",
+    "given": "la tienda tiene una promoción de temporada",
+    "when": "el operario empaca el pedido",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "constraint",
+    "priority": "could",
+    "authorRole": "Cajero",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 0,
+    "commentCount": 0,
+    "createdAt": "2026-11-27T12:00:00Z"
+   },
+   {
+    "id": "66f200000000000000000300",
+    "diagramId": "66f100000000000000000001",
+    "activityKey": "act-02",
+    "given": "el cliente navega desde un teléfono móvil",
+    "when": "el cliente guarda un producto en su lista de deseos",
+    "then": "se muestran solo los productos dentro del rango elegido",
+    "type": "functional",
+    "priority": "wont",
+    "authorRole": "Operario de almacén",
+    "tags": [
+     "catálogo"
+    ],
+    "status": "pending",
+    "voteCount": 2,
+    "commentCount": 1,
+    "createdAt": "2026-11-27T19:00:00Z"
+   }
+  ],
+  "duplicateDecisions": []
+ },
+ "truth": {
+  "topics": {
+   "66f200000000000000000001": "noise",
+   "66f200000000000000000002": "seguridad",
+   "66f200000000000000000003": "pagos",
+   "66f200000000000000000004": "noise",
+   "66f200000000000000000005": "seguridad",
+   "66f200000000000000000006": "pagos",
+   "66f200000000000000000007": "noise",
+   "66f200000000000000000008": "noise",
+   "66f200000000000000000009": "noise",
+   "66f200000000000000000010": "seguridad",
+   "66f200000000000000000011": "seguridad",
+   "66f200000000000000000012": "noise",
+   "66f200000000000000000013": "noise",
+   "66f200000000000000000014": "seguridad",
+   "66f200000000000000000015": "seguridad",
+   "66f200000000000000000016": "seguridad",
+   "66f200000000000000000017": "noise",
+   "66f200000000000000000018": "noise",
+   "66f200000000000000000019": "notificaciones",
+   "66f200000000000000000020": "noise",
+   "66f200000000000000000021": "notificaciones",
+   "66f200000000000000000022": "pagos",
+   "66f200000000000000000023": "pagos",
+   "66f200000000000000000024": "notificaciones",
+   "66f200000000000000000025": "pagos",
+   "66f200000000000000000026": "notificaciones",
+   "66f200000000000000000027": "notificaciones",
+   "66f200000000000000000028": "seguridad",
+   "66f200000000000000000029": "noise",
+   "66f200000000000000000030": "pagos",
+   "66f200000000000000000031": "seguridad",
+   "66f200000000000000000032": "pagos",
+   "66f200000000000000000033": "pagos",
+   "66f200000000000000000034": "seguridad",
+   "66f200000000000000000035": "noise",
+   "66f200000000000000000036": "pagos",
+   "66f200000000000000000037": "seguridad",
+   "66f200000000000000000038": "noise",
+   "66f200000000000000000039": "notificaciones",
+   "66f200000000000000000040": "noise",
+   "66f200000000000000000041": "pagos",
+   "66f200000000000000000042": "noise",
+   "66f200000000000000000043": "pagos",
+   "66f200000000000000000044": "noise",
+   "66f200000000000000000045": "noise",
+   "66f200000000000000000046": "notificaciones",
+   "66f200000000000000000047": "noise",
+   "66f200000000000000000048": "pagos",
+   "66f200000000000000000049": "noise",
+   "66f200000000000000000050": "notificaciones",
+   "66f200000000000000000051": "pagos",
+   "66f200000000000000000052": "pagos",
+   "66f200000000000000000053": "notificaciones",
+   "66f200000000000000000054": "notificaciones",
+   "66f200000000000000000055": "noise",
+   "66f200000000000000000056": "notificaciones",
+   "66f200000000000000000057": "pagos",
+   "66f200000000000000000058": "pagos",
+   "66f200000000000000000059": "seguridad",
+   "66f200000000000000000060": "noise",
+   "66f200000000000000000061": "notificaciones",
+   "66f200000000000000000062": "noise",
+   "66f200000000000000000063": "noise",
+   "66f200000000000000000064": "noise",
+   "66f200000000000000000065": "pagos",
+   "66f200000000000000000066": "noise",
+   "66f200000000000000000067": "noise",
+   "66f200000000000000000068": "seguridad",
+   "66f200000000000000000069": "pagos",
+   "66f200000000000000000070": "seguridad",
+   "66f200000000000000000071": "seguridad",
+   "66f200000000000000000072": "seguridad",
+   "66f200000000000000000073": "noise",
+   "66f200000000000000000074": "pagos",
+   "66f200000000000000000075": "noise",
+   "66f200000000000000000076": "noise",
+   "66f200000000000000000077": "notificaciones",
+   "66f200000000000000000078": "pagos",
+   "66f200000000000000000079": "noise",
+   "66f200000000000000000080": "notificaciones",
+   "66f200000000000000000081": "seguridad",
+   "66f200000000000000000082": "noise",
+   "66f200000000000000000083": "pagos",
+   "66f200000000000000000084": "noise",
+   "66f200000000000000000085": "noise",
+   "66f200000000000000000086": "seguridad",
+   "66f200000000000000000087": "noise",
+   "66f200000000000000000088": "noise",
+   "66f200000000000000000089": "noise",
+   "66f200000000000000000090": "pagos",
+   "66f200000000000000000091": "pagos",
+   "66f200000000000000000092": "seguridad",
+   "66f200000000000000000093": "pagos",
+   "66f200000000000000000094": "seguridad",
+   "66f200000000000000000095": "seguridad",
+   "66f200000000000000000096": "noise",
+   "66f200000000000000000097": "pagos",
+   "66f200000000000000000098": "seguridad",
+   "66f200000000000000000099": "seguridad",
+   "66f200000000000000000100": "pagos",
+   "66f200000000000000000101": "pagos",
+   "66f200000000000000000102": "pagos",
+   "66f200000000000000000103": "pagos",
+   "66f200000000000000000104": "noise",
+   "66f200000000000000000105": "noise",
+   "66f200000000000000000106": "noise",
+   "66f200000000000000000107": "seguridad",
+   "66f200000000000000000108": "pagos",
+   "66f200000000000000000109": "noise",
+   "66f200000000000000000110": "noise",
+   "66f200000000000000000111": "pagos",
+   "66f200000000000000000112": "noise",
+   "66f200000000000000000113": "noise",
+   "66f200000000000000000114": "seguridad",
+   "66f200000000000000000115": "pagos",
+   "66f200000000000000000116": "pagos",
+   "66f200000000000000000117": "notificaciones",
+   "66f200000000000000000118": "seguridad",
+   "66f200000000000000000119": "pagos",
+   "66f200000000000000000120": "seguridad",
+   "66f200000000000000000121": "noise",
+   "66f200000000000000000122": "noise",
+   "66f200000000000000000123": "noise",
+   "66f200000000000000000124": "pagos",
+   "66f200000000000000000125": "noise",
+   "66f200000000000000000126": "pagos",
+   "66f200000000000000000127": "noise",
+   "66f200000000000000000128": "noise",
+   "66f200000000000000000129": "notificaciones",
+   "66f200000000000000000130": "noise",
+   "66f200000000000000000131": "pagos",
+   "66f200000000000000000132": "noise",
+   "66f200000000000000000133": "seguridad",
+   "66f200000000000000000134": "noise",
+   "66f200000000000000000135": "pagos",
+   "66f200000000000000000136": "pagos",
+   "66f200000000000000000137": "notificaciones",
+   "66f200000000000000000138": "noise",
+   "66f200000000000000000139": "noise",
+   "66f200000000000000000140": "pagos",
+   "66f200000000000000000141": "pagos",
+   "66f200000000000000000142": "pagos",
+   "66f200000000000000000143": "pagos",
+   "66f200000000000000000144": "notificaciones",
+   "66f200000000000000000145": "noise",
+   "66f200000000000000000146": "pagos",
+   "66f200000000000000000147": "seguridad",
+   "66f200000000000000000148": "pagos",
+   "66f200000000000000000149": "pagos",
+   "66f200000000000000000150": "seguridad",
+   "66f200000000000000000151": "noise",
+   "66f200000000000000000152": "pagos",
+   "66f200000000000000000153": "pagos",
+   "66f200000000000000000154": "pagos",
+   "66f200000000000000000155": "notificaciones",
+   "66f200000000000000000156": "pagos",
+   "66f200000000000000000157": "notificaciones",
+   "66f200000000000000000158": "noise",
+   "66f200000000000000000159": "notificaciones",
+   "66f200000000000000000160": "pagos",
+   "66f200000000000000000161": "pagos",
+   "66f200000000000000000162": "pagos",
+   "66f200000000000000000163": "seguridad",
+   "66f200000000000000000164": "pagos",
+   "66f200000000000000000165": "seguridad",
+   "66f200000000000000000166": "notificaciones",
+   "66f200000000000000000167": "noise",
+   "66f200000000000000000168": "pagos",
+   "66f200000000000000000169": "noise",
+   "66f200000000000000000170": "noise",
+   "66f200000000000000000171": "noise",
+   "66f200000000000000000172": "noise",
+   "66f200000000000000000173": "seguridad",
+   "66f200000000000000000174": "pagos",
+   "66f200000000000000000175": "noise",
+   "66f200000000000000000176": "notificaciones",
+   "66f200000000000000000177": "seguridad",
+   "66f200000000000000000178": "seguridad",
+   "66f200000000000000000179": "notificaciones",
+   "66f200000000000000000180": "seguridad",
+   "66f200000000000000000181": "pagos",
+   "66f200000000000000000182": "pagos",
+   "66f200000000000000000183": "pagos",
+   "66f200000000000000000184": "seguridad",
+   "66f200000000000000000185": "seguridad",
+   "66f200000000000000000186": "pagos",
+   "66f200000000000000000187": "noise",
+   "66f200000000000000000188": "noise",
+   "66f200000000000000000189": "seguridad",
+   "66f200000000000000000190": "noise",
+   "66f200000000000000000191": "notificaciones",
+   "66f200000000000000000192": "seguridad",
+   "66f200000000000000000193": "notificaciones",
+   "66f200000000000000000194": "pagos",
+   "66f200000000000000000195": "seguridad",
+   "66f200000000000000000196": "notificaciones",
+   "66f200000000000000000197": "seguridad",
+   "66f200000000000000000198": "noise",
+   "66f200000000000000000199": "noise",
+   "66f200000000000000000200": "seguridad",
+   "66f200000000000000000201": "pagos",
+   "66f200000000000000000202": "pagos",
+   "66f200000000000000000203": "noise",
+   "66f200000000000000000204": "pagos",
+   "66f200000000000000000205": "noise",
+   "66f200000000000000000206": "seguridad",
+   "66f200000000000000000207": "noise",
+   "66f200000000000000000208": "pagos",
+   "66f200000000000000000209": "notificaciones",
+   "66f200000000000000000210": "seguridad",
+   "66f200000000000000000211": "seguridad",
+   "66f200000000000000000212": "noise",
+   "66f200000000000000000213": "pagos",
+   "66f200000000000000000214": "noise",
+   "66f200000000000000000215": "seguridad",
+   "66f200000000000000000216": "seguridad",
+   "66f200000000000000000217": "seguridad",
+   "66f200000000000000000218": "pagos",
+   "66f200000000000000000219": "pagos",
+   "66f200000000000000000220": "seguridad",
+   "66f200000000000000000221": "seguridad",
+   "66f200000000000000000222": "notificaciones",
+   "66f200000000000000000223": "seguridad",
+   "66f200000000000000000224": "seguridad",
+   "66f200000000000000000225": "notificaciones",
+   "66f200000000000000000226": "seguridad",
+   "66f200000000000000000227": "seguridad",
+   "66f200000000000000000228": "pagos",
+   "66f200000000000000000229": "noise",
+   "66f200000000000000000230": "seguridad",
+   "66f200000000000000000231": "noise",
+   "66f200000000000000000232": "seguridad",
+   "66f200000000000000000233": "notificaciones",
+   "66f200000000000000000234": "seguridad",
+   "66f200000000000000000235": "seguridad",
+   "66f200000000000000000236": "noise",
+   "66f200000000000000000237": "seguridad",
+   "66f200000000000000000238": "noise",
+   "66f200000000000000000239": "seguridad",
+   "66f200000000000000000240": "seguridad",
+   "66f200000000000000000241": "pagos",
+   "66f200000000000000000242": "notificaciones",
+   "66f200000000000000000243": "seguridad",
+   "66f200000000000000000244": "notificaciones",
+   "66f200000000000000000245": "seguridad",
+   "66f200000000000000000246": "seguridad",
+   "66f200000000000000000247": "seguridad",
+   "66f200000000000000000248": "pagos",
+   "66f200000000000000000249": "pagos",
+   "66f200000000000000000250": "seguridad",
+   "66f200000000000000000251": "seguridad",
+   "66f200000000000000000252": "seguridad",
+   "66f200000000000000000253": "seguridad",
+   "66f200000000000000000254": "pagos",
+   "66f200000000000000000255": "seguridad",
+   "66f200000000000000000256": "noise",
+   "66f200000000000000000257": "pagos",
+   "66f200000000000000000258": "noise",
+   "66f200000000000000000259": "pagos",
+   "66f200000000000000000260": "notificaciones",
+   "66f200000000000000000261": "pagos",
+   "66f200000000000000000262": "noise",
+   "66f200000000000000000263": "pagos",
+   "66f200000000000000000264": "noise",
+   "66f200000000000000000265": "seguridad",
+   "66f200000000000000000266": "seguridad",
+   "66f200000000000000000267": "seguridad",
+   "66f200000000000000000268": "seguridad",
+   "66f200000000000000000269": "noise",
+   "66f200000000000000000270": "noise",
+   "66f200000000000000000271": "noise",
+   "66f200000000000000000272": "noise",
+   "66f200000000000000000273": "noise",
+   "66f200000000000000000274": "noise",
+   "66f200000000000000000275": "noise",
+   "66f200000000000000000276": "noise",
+   "66f200000000000000000277": "noise",
+   "66f200000000000000000278": "noise",
+   "66f200000000000000000279": "noise",
+   "66f200000000000000000280": "noise",
+   "66f200000000000000000281": "noise",
+   "66f200000000000000000282": "noise",
+   "66f200000000000000000283": "noise",
+   "66f200000000000000000284": "noise",
+   "66f200000000000000000285": "noise",
+   "66f200000000000000000286": "noise",
+   "66f200000000000000000287": "noise",
+   "66f200000000000000000288": "noise",
+   "66f200000000000000000289": "noise",
+   "66f200000000000000000290": "noise",
+   "66f200000000000000000291": "noise",
+   "66f200000000000000000292": "noise",
+   "66f200000000000000000293": "noise",
+   "66f200000000000000000294": "noise",
+   "66f200000000000000000295": "noise",
+   "66f200000000000000000296": "noise",
+   "66f200000000000000000297": "noise",
+   "66f200000000000000000298": "noise",
+   "66f200000000000000000299": "noise",
+   "66f200000000000000000300": "noise"
+  },
+  "duplicatePairs": [
+   [
+    "66f200000000000000000148",
+    "66f200000000000000000241"
+   ],
+   [
+    "66f200000000000000000225",
+    "66f200000000000000000242"
+   ],
+   [
+    "66f200000000000000000230",
+    "66f200000000000000000243"
+   ],
+   [
+    "66f200000000000000000196",
+    "66f200000000000000000244"
+   ],
+   [
+    "66f200000000000000000118",
+    "66f200000000000000000245"
+   ],
+   [
+    "66f200000000000000000002",
+    "66f200000000000000000246"
+   ],
+   [
+    "66f200000000000000000037",
+    "66f200000000000000000247"
+   ],
+   [
+    "66f200000000000000000219",
+    "66f200000000000000000248"
+   ],
+   [
+    "66f200000000000000000097",
+    "66f200000000000000000249"
+   ],
+   [
+    "66f200000000000000000014",
+    "66f200000000000000000250"
+   ],
+   [
+    "66f200000000000000000200",
+    "66f200000000000000000251"
+   ],
+   [
+    "66f200000000000000000206",
+    "66f200000000000000000252"
+   ],
+   [
+    "66f200000000000000000016",
+    "66f200000000000000000253"
+   ],
+   [
+    "66f200000000000000000083",
+    "66f200000000000000000254"
+   ],
+   [
+    "66f200000000000000000232",
+    "66f200000000000000000255"
+   ],
+   [
+    "66f200000000000000000012",
+    "66f200000000000000000256"
+   ],
+   [
+    "66f200000000000000000108",
+    "66f200000000000000000257"
+   ],
+   [
+    "66f200000000000000000073",
+    "66f200000000000000000258"
+   ],
+   [
+    "66f200000000000000000116",
+    "66f200000000000000000259"
+   ],
+   [
+    "66f200000000000000000027",
+    "66f200000000000000000260"
+   ],
+   [
+    "66f200000000000000000143",
+    "66f200000000000000000261"
+   ],
+   [
+    "66f200000000000000000134",
+    "66f200000000000000000262"
+   ],
+   [
+    "66f200000000000000000208",
+    "66f200000000000000000263"
+   ],
+   [
+    "66f200000000000000000076",
+    "66f200000000000000000264"
+   ],
+   [
+    "66f200000000000000000094",
+    "66f200000000000000000265"
+   ],
+   [
+    "66f200000000000000000178",
+    "66f200000000000000000266"
+   ],
+   [
+    "66f200000000000000000028",
+    "66f200000000000000000267"
+   ],
+   [
+    "66f200000000000000000235",
+    "66f200000000000000000268"
+   ],
+   [
+    "66f200000000000000000145",
+    "66f200000000000000000269"
+   ],
+   [
+    "66f200000000000000000151",
+    "66f200000000000000000270"
+   ]
+  ],
+  "ambiguous": {
+   "66f200000000000000000186": [
+    "rápido"
+   ],
+   "66f200000000000000000105": [
+    "fácil"
+   ],
+   "66f200000000000000000098": [
+    "amigable"
+   ],
+   "66f200000000000000000163": [
+    "intuitivo"
+   ],
+   "66f200000000000000000150": [
+    "eficiente"
+   ],
+   "66f200000000000000000055": [
+    "adecuado"
+   ],
+   "66f200000000000000000078": [
+    "etc."
+   ],
+   "66f200000000000000000123": [
+    "y/o"
+   ],
+   "66f200000000000000000131": [
+    "flexible"
+   ],
+   "66f200000000000000000054": [
+    "mínimo"
+   ],
+   "66f200000000000000000060": [
+    "rápido"
+   ],
+   "66f200000000000000000221": [
+    "fácil"
+   ],
+   "66f200000000000000000117": [
+    "amigable"
+   ],
+   "66f200000000000000000174": [
+    "intuitivo"
+   ],
+   "66f200000000000000000035": [
+    "eficiente"
+   ],
+   "66f200000000000000000182": [
+    "adecuado"
+   ],
+   "66f200000000000000000068": [
+    "etc."
+   ],
+   "66f200000000000000000154": [
+    "y/o"
+   ],
+   "66f200000000000000000114": [
+    "flexible"
+   ],
+   "66f200000000000000000152": [
+    "mínimo"
+   ],
+   "66f200000000000000000096": [
+    "rápido"
+   ],
+   "66f200000000000000000138": [
+    "fácil"
+   ],
+   "66f200000000000000000065": [
+    "amigable"
+   ],
+   "66f200000000000000000239": [
+    "intuitivo"
+   ],
+   "66f200000000000000000157": [
+    "eficiente"
+   ],
+   "66f200000000000000000132": [
+    "adecuado"
+   ],
+   "66f200000000000000000056": [
+    "etc."
+   ],
+   "66f200000000000000000034": [
+    "y/o"
+   ],
+   "66f200000000000000000194": [
+    "flexible"
+   ],
+   "66f200000000000000000033": [
+    "mínimo"
+   ],
+   "66f200000000000000000175": [
+    "rápido"
+   ],
+   "66f200000000000000000133": [
+    "fácil"
+   ],
+   "66f200000000000000000025": [
+    "amigable"
+   ],
+   "66f200000000000000000140": [
+    "intuitivo"
+   ],
+   "66f200000000000000000071": [
+    "eficiente"
+   ],
+   "66f200000000000000000190": [
+    "adecuado"
+   ],
+   "66f200000000000000000199": [
+    "etc."
+   ],
+   "66f200000000000000000197": [
+    "y/o"
+   ],
+   "66f200000000000000000100": [
+    "flexible"
+   ],
+   "66f200000000000000000009": [
+    "mínimo"
+   ]
+  },
+  "negative": [
+   "66f200000000000000000036",
+   "66f200000000000000000084",
+   "66f200000000000000000192",
+   "66f200000000000000000228",
+   "66f200000000000000000069",
+   "66f200000000000000000223",
+   "66f200000000000000000213",
+   "66f200000000000000000013",
+   "66f200000000000000000125",
+   "66f200000000000000000048",
+   "66f200000000000000000135",
+   "66f200000000000000000061",
+   "66f200000000000000000234",
+   "66f200000000000000000092",
+   "66f200000000000000000046"
+  ],
+  "hot": [
+   "act-04",
+   "act-03"
+  ],
+  "cold": [
+   "act-09",
+   "act-10"
+  ],
+  "rules": [
+   {
+    "antecedent": "tag:pagos",
+    "consequent": "type:non_functional",
+    "confidence": 0.896
+   }
+  ]
+ }
+}
