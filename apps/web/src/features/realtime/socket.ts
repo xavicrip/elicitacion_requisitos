@@ -75,7 +75,23 @@ async function create(): Promise<RealtimeSocket> {
     if (created.connected) created.emit('auth:refresh', { token: state.accessToken }, () => {});
     scheduleRefresh();
   });
-  cleanups = [unsubscribe, () => clearTimeout(refreshTimer)];
+  // El navegador sabe antes que el socket que no hay red: sin esto, Socket.IO solo lo notaría
+  // al no recibir el ping (hasta 45 s). Cerrar el transporte activa el aviso y la reconexión.
+  const onOffline = () => {
+    if (users > 0 && created.connected) created.io.engine.close();
+  };
+  const onOnline = () => {
+    if (users > 0 && !created.connected) created.connect();
+  };
+  window.addEventListener('offline', onOffline);
+  window.addEventListener('online', onOnline);
+
+  cleanups = [
+    unsubscribe,
+    () => clearTimeout(refreshTimer),
+    () => window.removeEventListener('offline', onOffline),
+    () => window.removeEventListener('online', onOnline),
+  ];
   return created;
 }
 
@@ -107,7 +123,7 @@ export function resetSocketForTests() {
   socket = null;
   creating = null;
   users = 0;
-  useConnectionStore.getState().setStatus('idle');
+  useConnectionStore.getState().reset();
 }
 
 /** Socket para un componente, solo con el flag `realtime`; `null` mientras no hay. */

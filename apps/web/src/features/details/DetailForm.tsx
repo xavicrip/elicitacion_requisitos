@@ -8,10 +8,12 @@ import {
   type Facets,
 } from '@reqcanvas/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { lazy, Suspense, useId, useState } from 'react';
+import { lazy, Suspense, useEffect, useId, useState } from 'react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { applyApiError, FormError } from '../../components/form';
+import { useCanWrite } from '../realtime/connection';
+import { clearDraft, draftKey, loadDraft, saveDraft } from '../realtime/drafts';
 import { ApiError } from '../../lib/api-client';
 import { detailKeys, detailsApi } from './api';
 import { DETAIL_TYPE_LABEL, PRIORITY_LABEL } from './labels';
@@ -147,13 +149,34 @@ export function DetailForm({
   const [error, setError] = useState('');
   const [conflict, setConflict] = useState<{ mine: DetailInput; current: Detail } | null>(null);
   const editing = Boolean(detail);
-  // El `rev` con que se abrió: si llega un cambio de otra persona por el socket (005), guardar
-  // con él da 409 y la comparación, en lugar de pisar ese cambio en silencio.
-  const [openedRev] = useState(detail?.rev);
+  const canWrite = useCanWrite();
+  // Borrador de la 005 (FR-007): lo escrito sobrevive a una desconexión o a una recarga.
+  const key = draftKey(diagramId, activityKey, detail?.id);
+  const [draft] = useState(() => loadDraft(key));
+  const [base] = useState<FormValues>(() => (detail ? fromDetail(detail) : EMPTY));
+  // El `rev` con que se abrió (o con que se empezó el borrador): si llega un cambio de otra
+  // persona por el socket, guardar con él da 409 y la comparación, en lugar de pisarlo.
+  const [openedRev] = useState(draft?.rev ?? detail?.rev);
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    defaultValues: detail ? fromDetail(detail) : EMPTY,
+    defaultValues: draft ? { ...base, ...(draft.values as Partial<FormValues>) } : base,
   });
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const subscription = form.watch((values) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        // Sin cambios respecto a lo que se abrió, no hay borrador que guardar.
+        if (JSON.stringify(values) === JSON.stringify(base)) clearDraft(key);
+        else saveDraft(key, { values: values as Record<string, string>, rev: openedRev });
+      }, 300);
+    });
+    return () => {
+      clearTimeout(timer);
+      subscription.unsubscribe();
+    };
+  }, [form, key, base, openedRev]);
   const values = form.watch();
   const errors = form.formState.errors;
 
@@ -169,6 +192,7 @@ export function DetailForm({
         ? detailsApi.update(detail.id, rev ?? openedRev ?? detail.rev, input)
         : detailsApi.create(diagramId, activityKey, input),
     onSuccess: async () => {
+      clearDraft(key);
       setError('');
       setConflict(null);
       if (!editing) form.reset(EMPTY);
@@ -290,13 +314,21 @@ export function DetailForm({
       <div className="flex gap-3">
         <button
           type="submit"
-          disabled={save.isPending}
+          disabled={save.isPending || !canWrite}
           className="rounded bg-blue-700 px-4 py-2 font-medium text-white disabled:opacity-50"
         >
           {editing ? 'Guardar cambios' : 'Guardar requisito'}
         </button>
         {editing && (
-          <button type="button" onClick={onDone} className="rounded border px-4 py-2">
+          <button
+            type="button"
+            onClick={() => {
+              // Cancelar a propósito descarta el borrador.
+              clearDraft(key);
+              onDone?.();
+            }}
+            className="rounded border px-4 py-2"
+          >
             Cancelar
           </button>
         )}
@@ -309,6 +341,7 @@ export function DetailForm({
             saving={save.isPending}
             onKeepMine={() => save.mutate({ input: conflict.mine, rev: conflict.current.rev })}
             onUseCurrent={async () => {
+              clearDraft(key);
               setConflict(null);
               await refresh();
               onDone?.();

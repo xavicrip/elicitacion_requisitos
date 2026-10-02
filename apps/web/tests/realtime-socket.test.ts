@@ -17,7 +17,11 @@ class FakeSocket {
   connected = false;
   connectCalls = 0;
   options: { auth: (cb: (data: object) => void) => void } & Record<string, unknown>;
-  io = { on: (name: string, handler: Handler) => this.add(this.managerHandlers, name, handler) };
+  engineClosed = 0;
+  io = {
+    on: (name: string, handler: Handler) => this.add(this.managerHandlers, name, handler),
+    engine: { close: () => void (this.engineClosed += 1) },
+  };
 
   constructor(options: FakeSocket['options']) {
     this.options = options;
@@ -217,5 +221,32 @@ describe('token', () => {
     expect(refreshSession).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(2_000);
     expect(refreshSession).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('red del navegador', () => {
+  it('al pasar a offline cierra el transporte para que se note al instante y reintente', async () => {
+    await acquireSocket();
+    const socket = created[0]!;
+    socket.fire('connect');
+    window.dispatchEvent(new Event('offline'));
+    expect(socket.engineClosed).toBe(1);
+  });
+
+  it('al volver online intenta conectar si no lo está', async () => {
+    await acquireSocket();
+    const socket = created[0]!;
+    const before = socket.connectCalls;
+    window.dispatchEvent(new Event('online'));
+    expect(socket.connectCalls).toBe(before + 1);
+  });
+
+  it('sin socket en uso no escucha la red', async () => {
+    await acquireSocket();
+    const socket = created[0]!;
+    socket.fire('connect');
+    releaseSocket();
+    window.dispatchEvent(new Event('offline'));
+    expect(socket.engineClosed).toBe(0);
   });
 });

@@ -2,6 +2,7 @@ import type { Detail } from '@reqcanvas/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { ApiError } from '../../lib/api-client';
+import { useCanWrite } from '../realtime/connection';
 import { detailKeys, detailsApi } from './api';
 
 /**
@@ -19,6 +20,7 @@ export function VoteButton({ detail, projectOpen }: { detail: Detail; projectOpe
     setState({ voteCount: detail.voteCount, votedByMe: detail.votedByMe });
   }, [detail.voteCount, detail.votedByMe]);
 
+  const canWrite = useCanWrite();
   const canToggle = detail.permissions.canVote || (projectOpen && state.votedByMe);
 
   const toggle = async () => {
@@ -44,7 +46,7 @@ export function VoteButton({ detail, projectOpen }: { detail: Detail; projectOpe
       <button
         type="button"
         aria-pressed={state.votedByMe}
-        disabled={pending || !canToggle}
+        disabled={pending || !canToggle || !canWrite}
         title={canToggle ? undefined : 'No puedes votar este requisito'}
         onClick={() => void toggle()}
         className="rounded border px-2 py-1 aria-pressed:bg-blue-100 disabled:opacity-50"
