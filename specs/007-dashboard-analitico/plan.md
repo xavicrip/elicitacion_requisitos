@@ -141,9 +141,12 @@ paquete `mining/` de `analytics`, con un módulo por técnica. La infraestructur
    `analytics` (pydantic), con la prueba de contrato en ambos lados sobre los mismos ejemplos.
    `attempts: 1` y un límite de `ANALYSIS_TIMEOUT_S=900` (15 min), como `DETECTION_TIMEOUT_S`.
 3. **Servicio aparte para la minería**: los modelos (spaCy, sentence-transformers, pysentimiento,
-   torch) añaden más de 1,5 GB que la detección no necesita. El `Dockerfile` de `analytics` gana
-   una etapa `mining` (torch **CPU** desde el índice de PyTorch, modelos descargados en el build)
-   y un servicio nuevo, `analysis-worker`, la ejecuta con `python -m analytics.mining.worker`;
+   torch) añaden más de 1,5 GB que la detección no necesita. Un `Dockerfile` propio,
+   `apps/analytics/Dockerfile.mining` (torch **CPU** desde el índice de PyTorch, modelos
+   descargados en el build), construye la imagen de un servicio nuevo, `analysis-worker`, que
+   ejecuta `python -m analytics.mining.worker` (Railway construye la última etapa de un
+   `Dockerfile`, así que no sirve una etapa extra en el de `analytics`); el job `build` del CI la
+   añade a su matriz;
    `analytics` y `analytics-worker` siguen con la imagen ligera. Railway: mismas reglas que el
    worker de la 006 (configuración en `apps/analytics/railway.mining.json`, servicio creado antes
    de fusionar, `deploy.yml` lo añade al bucle). La cuenta admite 24 GB por servicio (medido en
@@ -175,11 +178,11 @@ paquete `mining/` de `analytics`, con un módulo por técnica. La infraestructur
    `POST /details/:id/status`), no inserta directamente.
 8. **Progreso sin socket**: las salas de la 005 son del espacio de trabajo de un diagrama
    (`room:join` con `versionId`); el dashboard no se une a ninguna. Un análisis tarda minutos, así
-   que la web consulta `GET /analysis-runs/:id` cada 3 s mientras está `queued` o `running`; no
+   que la web consulta `GET /analysis-runs/:id` cada 3 s mientras está `pending` o `running`; no
    se añaden eventos de Socket.IO.
 9. **Análisis programado**: `upsertJobScheduler` de BullMQ en `api` (un scheduler por proyecto con
    la programación activada), que solo encola si hubo cambios desde el último run
-   (`dataFingerprint`). Es P3 dentro de la feature: puede quedar fuera sin afectar a US1–US5.
+   (`dataFingerprint`). Es P3 dentro de la feature y va después de US1–US5.
 10. **Web**: página `/proyectos/:id/dashboard` (solo Administrador; enlace en la cabecera del
     proyecto). Gráficos con ECharts siguiendo la guía *dataviz* (paleta validada en claro y
     oscuro, texto alternativo y tabla accesible por gráfico). El mapa de cobertura reutiliza
@@ -191,6 +194,23 @@ paquete `mining/` de `analytics`, con un módulo por técnica. La infraestructur
     obligatorios de `main` (en la 006, `detection-eval` no lo es).
 12. **Migración**: `20261029000000-analysis-indexes.js` (posterior a la de la 006), sin el índice
     TTL de `analysis_embeddings`.
+13. **Estados del run (constitución VI)**: `pending`, `running`, `done` y `failed`, como la
+    detección de la 006. Un análisis con alguna etapa fallida termina `done` con
+    `partial: true`, y `stages` indica cuáles fallaron, se omitieron o terminaron.
+14. **Definiciones y filtros**: un *participante activo* es quien creó al menos un detalle, votó o
+    comentó dentro del rango filtrado; la serie temporal agrupa por día en la zona horaria del
+    proyecto (`analysis_settings.schedule.timezone`, `America/Guayaquil` por defecto). El
+    análisis acepta los mismos filtros que lo descriptivo (FR-003) al lanzarse, y el dashboard
+    muestra con qué filtros se calculó. Si tras verificar las evidencias quedan menos de 3
+    insights, se reintenta una vez indicando los descartados; si siguen faltando, se muestran
+    los que haya con un aviso.
+15. **Seguridad de los gráficos (constitución V)**: los tooltips y etiquetas de ECharts con
+    texto de los detalles pasan por un formateador que lo escapa (ECharts interpreta HTML en los
+    tooltips).
+16. **Imagen pesada en el CI**: `analysis-worker` va en el perfil `mining` de Compose. El job
+    `e2e-smoke` no lo activa (los E2E que necesitan el worker se saltan sin él); el job
+    `analysis-eval` construye `Dockerfile.mining` con caché de GitHub Actions y ejecuta los gates
+    y el E2E del análisis. La cobertura de `analytics` combina `test-python` y `analysis-eval`.
 
 ## Complexity Tracking
 
