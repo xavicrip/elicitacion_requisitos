@@ -27,23 +27,15 @@ from pydantic import Field, RedisDsn, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from redis.asyncio import Redis
 
+from analytics.detection.errors import DetectionError
 from analytics.detection.schemas import DetectionJobInput, DetectionResult, Stage
 from analytics.logging import bind_request_id, configure_logging, reset_request_id
 from analytics.main import dual_stack_socket
 
 QUEUE = "detection"
 SERVICE = "analytics-worker"
-ErrorCode = Literal["IMAGE_DOWNLOAD_FAILED", "TIMEOUT", "INTERNAL"]
 
 logger = logging.getLogger("analytics.worker")
-
-
-class DetectionError(Exception):
-    """Fallo esperado del job: el mensaje es solo el código del contrato."""
-
-    def __init__(self, code: ErrorCode) -> None:
-        super().__init__(code)
-        self.code = code
 
 
 ProgressFn = Callable[[Stage, int], Awaitable[None]]
@@ -226,13 +218,11 @@ def create_health_app(worker: DetectionWorker) -> FastAPI:
     return app
 
 
-async def _unavailable(job: DetectionJobInput, progress: ProgressFn) -> DetectionResult:
-    """Hasta tener el pipeline (T029), cualquier job falla con un error interno."""
-    raise DetectionError("INTERNAL")
-
-
 def default_processor() -> Processor:
-    return _unavailable
+    """El pipeline real; se importa aquí para que el worker arranque sin cargar OpenCV antes."""
+    from analytics.detection.pipeline import process
+
+    return process
 
 
 async def serve(settings: WorkerSettings, process: Processor) -> None:
