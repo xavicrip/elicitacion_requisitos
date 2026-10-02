@@ -110,6 +110,16 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng
       - run: pnpm test:py
 
+  # Gate de precisión de la detección (feature 006, SC-001 y SC-002) sobre los 20 diagramas
+  # digitales del conjunto de validación. Se ejecuta siempre: tarda en torno a un minuto.
+  detection-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng
+      - run: uv run --directory apps/analytics python tests/eval/evaluate_detection.py --subset digital --timing
+
   migrations:
     runs-on: ubuntu-latest
     services:

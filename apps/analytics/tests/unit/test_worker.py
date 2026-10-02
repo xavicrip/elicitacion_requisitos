@@ -15,10 +15,10 @@ import pytest_asyncio
 from bullmq import Job, Queue
 from redis.asyncio import Redis
 
+from analytics.detection.errors import DetectionError
 from analytics.detection.schemas import DetectionJobInput, DetectionResult
 from analytics.worker import (
     QUEUE,
-    DetectionError,
     DetectionWorker,
     ProgressFn,
     WorkerSettings,
