@@ -66,6 +66,16 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
         }
       : {};
 
+  // Análisis del dashboard (feature 007): algún analysis-worker vivo, si el flag está activo.
+  const analysisChecks = async (): Promise<Record<string, HealthCheck>> =>
+    app.hasDecorator('analysis')
+      ? {
+          'analysis-worker': await runCheck(async () => {
+            if ((await app.analysis.workers()) === 0) throw new Error('NoWorker');
+          }, checkTimeoutMs),
+        }
+      : {};
+
   const respond = (checks: Record<string, HealthCheck>): Health => ({
     status: overallStatus(checks),
     service: 'api',
@@ -81,13 +91,14 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
   });
 
   app.get('/health/deep', async (_request, reply) => {
-    const [direct, analytics, storage, detection] = await Promise.all([
+    const [direct, analytics, storage, detection, analysis] = await Promise.all([
       directChecks(),
       analyticsCheck(),
       storageChecks(),
       detectionChecks(),
+      analysisChecks(),
     ]);
-    const body = respond({ ...direct, analytics, ...storage, ...detection });
+    const body = respond({ ...direct, analytics, ...storage, ...detection, ...analysis });
     return reply.code(body.status === 'ok' ? 200 : 503).send(body);
   });
 
