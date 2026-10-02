@@ -10,7 +10,7 @@ prueba en `api` con dos instancias de la app sobre el mismo Redis, y en staging 
    panel abierto, el detalle nuevo.
 3. Ana vota y valida el detalle → Luis ve el voto y el estado sin recargar.
 4. En staging, con 2 réplicas, repetir el paso 2 comprobando en los logs que Ana y Luis están
-   en réplicas distintas.
+   en réplicas distintas (líneas `socket.connected` con su `userId` y el campo `replica`).
 
 ## 2. Presencia (US2)
 

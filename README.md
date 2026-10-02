@@ -118,6 +118,25 @@ número de requisitos o la marca «Sin detalles», sus notas y un mapa de calor.
 [quickstart de la 004](specs/004-detalles-requisitos/quickstart.md) y el
 [ADR 0006](docs/adr/0006-detalles-de-requisitos.md).
 
+### Colaboración en tiempo real (feature 005)
+
+Con el flag `realtime` (activado en Compose y CI con `FEATURE_FLAGS=realtime=true`), el
+espacio de trabajo se conecta por WebSocket (Socket.IO, a través de `/socket.io` en el proxy de `web`):
+
+- Los requisitos, votos, comentarios y publicaciones de otras personas aparecen sin recargar.
+- La barra _Conectados_ muestra quién está en el diagrama, y cada actividad seleccionada por
+  otra persona lleva su indicador de color.
+- Los cursores de los demás se mueven sobre el diagrama con su nombre, en el mismo punto de la
+  imagen aunque cada uno tenga su zoom; _Ocultar cursores_ los oculta y el navegador lo recuerda.
+- Sin conexión aparece «Sin conexión: reintentando…», guardar, votar y comentar se deshabilitan
+  y lo que se está escribiendo se conserva como borrador; al volver, se resincroniza solo.
+- Quien es retirado del proyecto, o lo pierde porque se borra, vuelve a _Mis proyectos_ con un
+  aviso; si el proyecto se cierra, pasa a solo lectura al momento.
+
+Varias réplicas de `api` se reparten los eventos con el adaptador de Redis. Ver el
+[quickstart de la 005](specs/005-colaboracion-tiempo-real/quickstart.md) y el
+[ADR 0007](docs/adr/0007-colaboracion-en-tiempo-real.md).
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash
