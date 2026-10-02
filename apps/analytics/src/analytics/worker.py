@@ -3,34 +3,26 @@
 Proceso aparte (`python -m analytics.worker`, servicio `analytics-worker` en Railway) para que el
 OCR no bloquee el `/health` ni las peticiones de `analytics`. Consume los jobs que encola `api`,
 publica el progreso, devuelve el resultado validado (nunca escribe en MongoDB, Principio II) y
-falla con el código en el mensaje. Expone `GET /health` para el healthcheck y escribe un latido
-en Redis que `api /health/deep` comprueba (plan, ajuste 10).
+falla con el código en el mensaje. La conexión, el latido en Redis y `GET /health` son los de
+`analytics.queue_worker` (plan, ajuste 10).
 """
 
 import asyncio
-import json
 import logging
-import os
-import signal
-import socket
-import sys
 import time
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
-import uvicorn
-from bullmq import Job, Worker
+from bullmq import Job
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from pydantic import Field, RedisDsn, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from redis.asyncio import Redis
 
+from analytics import queue_worker
 from analytics.detection.errors import DetectionError
 from analytics.detection.schemas import DetectionJobInput, DetectionResult, Stage
 from analytics.logging import bind_request_id, configure_logging, reset_request_id
-from analytics.main import dual_stack_socket
+from analytics.queue_worker import QueueOptions, QueueWorker
 
 QUEUE = "detection"
 SERVICE = "analytics-worker"
@@ -62,71 +54,23 @@ class WorkerSettings(BaseSettings):
     git_sha: str = Field(default="unknown", validation_alias="GIT_SHA")
 
 
-class DetectionWorker:
+class DetectionWorker(QueueWorker):
     def __init__(self, settings: WorkerSettings, process: Processor) -> None:
+        super().__init__(
+            QueueOptions(
+                queue=QUEUE,
+                redis_url=str(settings.redis_url),
+                queue_prefix=settings.queue_prefix,
+                heartbeat_key=f"{settings.key_prefix}detection:worker",
+                concurrency=settings.concurrency,
+                lock_ms=int((settings.timeout_s + 30) * 1000),
+                heartbeat_s=settings.heartbeat_s,
+                heartbeat_ttl_s=settings.heartbeat_ttl_s,
+            ),
+            self._handle,
+        )
         self.settings = settings
         self.process = process
-        self.id = f"{socket.gethostname()}-{os.getpid()}"
-        self._worker: Worker | None = None
-        self._redis: Redis | None = None
-        self._heartbeat: asyncio.Task[None] | None = None
-
-    @property
-    def running(self) -> bool:
-        return self._worker is not None and not self._worker.closing
-
-    @property
-    def redis(self) -> Redis:
-        assert self._redis is not None, "El worker no está iniciado"
-        return self._redis
-
-    async def start(self) -> None:
-        self._redis = Redis.from_url(str(self.settings.redis_url), socket_connect_timeout=2)
-        self._worker = Worker(
-            QUEUE,
-            self._handle,
-            {
-                "connection": str(self.settings.redis_url),
-                "prefix": self.settings.queue_prefix,
-                "concurrency": self.settings.concurrency,
-                # El lock dura más que el job: un OCR largo no se toma por atascado.
-                "lockDuration": int((self.settings.timeout_s + 30) * 1000),
-            },
-        )
-        self._heartbeat = asyncio.create_task(self._beat())
-        logger.info(
-            "worker iniciado",
-            extra={"worker_id": self.id, "concurrency": self.settings.concurrency},
-        )
-
-    async def stop(self) -> None:
-        if self._heartbeat:
-            self._heartbeat.cancel()
-            self._heartbeat = None
-        if self._worker and not self._worker.closing:
-            await self._worker.close()
-        if self._redis:
-            await self.redis.delete(self._heartbeat_key)
-        logger.info("worker detenido", extra={"worker_id": self.id})
-
-    async def aclose(self) -> None:
-        await self.stop()
-        if self._redis:
-            await self._redis.aclose()
-            self._redis = None
-
-    @property
-    def _heartbeat_key(self) -> str:
-        return f"{self.settings.key_prefix}detection:worker:{self.id}"
-
-    async def _beat(self) -> None:
-        while True:
-            try:
-                value = json.dumps({"at": datetime.now(UTC).isoformat()})
-                await self.redis.set(self._heartbeat_key, value, ex=self.settings.heartbeat_ttl_s)
-            except Exception as error:  # noqa: BLE001 - Redis caído: se reintenta en el siguiente latido
-                logger.warning("latido fallido", extra={"error": type(error).__name__})
-            await asyncio.sleep(self.settings.heartbeat_s)
 
     async def _handle(self, job: Job, token: str) -> dict[str, Any]:
         started = time.perf_counter()
@@ -175,47 +119,10 @@ class DetectionWorker:
             reset_request_id(request_token)
 
 
-async def _check(check: Callable[[], Awaitable[Any]]) -> dict[str, Any]:
-    started = time.perf_counter()
-    try:
-        await asyncio.wait_for(check(), timeout=2)
-        return {"status": "up", "latencyMs": round((time.perf_counter() - started) * 1000)}
-    except Exception as error:  # noqa: BLE001 - cualquier fallo marca la dependencia como caída
-        return {
-            "status": "down",
-            "latencyMs": round((time.perf_counter() - started) * 1000),
-            "error": "timeout" if isinstance(error, TimeoutError) else type(error).__name__,
-        }
-
-
 def create_health_app(worker: DetectionWorker) -> FastAPI:
-    """`GET /health` del worker (constitución VI): Redis responde y BullMQ sigue consumiendo."""
-    app = FastAPI(title="ReqCanvas analytics-worker")
-
-    async def ping_redis() -> None:
-        # redis-py tipa `ping` como síncrono o asíncrono según el cliente.
-        await cast(Awaitable[bool], worker.redis.ping())
-
-    async def worker_alive() -> None:
-        if not worker.running:
-            raise RuntimeError("stopped")
-
-    @app.get("/health")
-    async def health() -> JSONResponse:
-        redis, alive = await asyncio.gather(_check(ping_redis), _check(worker_alive))
-        checks = {"redis": redis, "worker": alive}
-        ok = all(check["status"] == "up" for check in checks.values())
-        body = {
-            "status": "ok" if ok else "degraded",
-            "service": SERVICE,
-            "version": worker.settings.app_version,
-            "commit": worker.settings.git_sha,
-            "checks": checks,
-            "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
-        }
-        return JSONResponse(body, status_code=200 if ok else 503)
-
-    return app
+    return queue_worker.create_health_app(
+        worker, SERVICE, worker.settings.app_version, worker.settings.git_sha
+    )
 
 
 def default_processor() -> Processor:
@@ -227,33 +134,11 @@ def default_processor() -> Processor:
 
 async def serve(settings: WorkerSettings, process: Processor) -> None:
     worker = DetectionWorker(settings, process)
-    await worker.start()
-    server = uvicorn.Server(uvicorn.Config(create_health_app(worker), log_config=None))
-    loop = asyncio.get_running_loop()
-    for signum in (signal.SIGTERM, signal.SIGINT):
-        loop.add_signal_handler(signum, lambda: setattr(server, "should_exit", True))
-    try:
-        await server.serve(sockets=[dual_stack_socket(settings.host, settings.port)])
-    finally:
-        # Cierre ordenado: el job en curso termina o se libera para otro worker.
-        await worker.aclose()
+    await queue_worker.serve(worker, create_health_app(worker), settings.host, settings.port)
 
 
 def run() -> None:
-    try:
-        settings = WorkerSettings.model_validate(
-            {key: value for key, value in os.environ.items() if value != ""}
-        )
-    except ValidationError as error:
-        variables = sorted({str(issue["loc"][0]) for issue in error.errors()})
-        record = {
-            "level": "CRITICAL",
-            "message": "Configuración inválida o incompleta. Revisa las variables: "
-            + ", ".join(variables),
-            "variables": variables,
-        }
-        print(json.dumps(record, ensure_ascii=False), file=sys.stderr)
-        sys.exit(1)
+    settings = queue_worker.load_settings(WorkerSettings)
     configure_logging(settings.log_level, service=SERVICE)
     asyncio.run(serve(settings, default_processor()))
 
