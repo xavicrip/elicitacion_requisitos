@@ -66,6 +66,33 @@ services:
         ]
       <<: *http-healthcheck
 
+  # Worker de la detección (feature 006): misma imagen que analytics, otro proceso.
+  analytics-worker:
+    build:
+      context: ..
+      dockerfile: apps/analytics/Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+        GIT_SHA: ${GIT_SHA:-local}
+    command: ['python', '-m', 'analytics.worker']
+    environment:
+      PORT: 8001
+      REDIS_URL: redis://redis:6379
+      DETECTION_CONCURRENCY: 1
+      DETECTION_TIMEOUT_S: 180
+      LOG_LEVEL: INFO
+    depends_on:
+      redis: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          'import urllib.request; urllib.request.urlopen("http://localhost:8001/health", timeout=2)',
+        ]
+      <<: *http-healthcheck
+
   api:
     build:
       context: ..

@@ -5,7 +5,7 @@ import os
 import re
 import sys
 import time
-from contextvars import ContextVar
+from contextvars import ContextVar, Token
 from typing import IO
 
 from pythonjsonlogger.json import JsonFormatter
@@ -15,6 +15,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 REQUEST_ID_HEADER = "x-request-id"
 _VALID_REQUEST_ID = re.compile(r"^[\w.-]{1,64}$")
 _request_id: ContextVar[str | None] = ContextVar("request_id", default=None)
+_service = "analytics"
 
 logger = logging.getLogger("analytics.http")
 
@@ -32,15 +33,28 @@ def current_request_id() -> str | None:
     return _request_id.get()
 
 
+def bind_request_id(request_id: str) -> Token[str | None]:
+    """Asocia el `requestId` de un job a sus logs (worker de la detección, feature 006)."""
+    return _request_id.set(request_id)
+
+
+def reset_request_id(token: Token[str | None]) -> None:
+    _request_id.reset(token)
+
+
 class _ContextFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         record.request_id = _request_id.get()
-        record.service = "analytics"
+        record.service = _service
         return True
 
 
-def configure_logging(level: str = "INFO", stream: IO[str] | None = None) -> None:
+def configure_logging(
+    level: str = "INFO", stream: IO[str] | None = None, service: str = "analytics"
+) -> None:
     """Configura el logger raíz para emitir JSON a stdout (o al stream indicado)."""
+    global _service
+    _service = service
     handler = logging.StreamHandler(stream or sys.stdout)
     handler.setFormatter(
         JsonFormatter(
