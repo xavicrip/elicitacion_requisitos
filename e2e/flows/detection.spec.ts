@@ -24,8 +24,9 @@ test('detectar actividades en un borrador propone las zonas con su nombre', asyn
   await expect(panel.getByRole('status')).toContainText('Se propusieron', { timeout: 60_000 });
 
   const proposals = page.getByRole('list', { name: 'Propuestas de la detección' });
-  const items = proposals.getByRole('listitem');
-  await expect(items).toHaveCount(6);
+  await expect(proposals.getByRole('listitem', { name: /^Propuesta:/ })).toHaveCount(6);
+  // US3: las cinco flechas del flujo, dibujadas discontinuas.
+  await expect(page.getByTestId('proposed-transition')).toHaveCount(5);
   for (const name of ['Seleccionar producto', 'Validar pago', 'Emitir factura', 'Enviar pedido']) {
     await expect(
       proposals.getByRole('listitem', { name: new RegExp(`Propuesta: ${name} ·`) }),
@@ -58,17 +59,31 @@ test('revisar las propuestas: corregir, descartar, aceptar en bloque y publicar'
     .getByRole('button', { name: 'Descartar' })
     .click();
   await expect(review.getByRole('heading', { name: 'Propuestas pendientes (4)' })).toBeVisible();
+  // Descartar «Fin» descarta también la flecha que llegaba a ella.
+  await expect(review.getByRole('heading', { name: 'Flechas propuestas (4)' })).toBeVisible();
   const editor = page.getByRole('complementary', { name: 'Editor de actividades' });
   await expect(editor.getByRole('button', { name: /Validar el pago/ })).toBeVisible();
 
   // Con propuestas pendientes no se publica.
   await page.getByRole('button', { name: 'Publicar' }).click();
-  await expect(page.getByText('Revisa las 4 propuesta(s) de la detección')).toBeVisible();
+  await expect(page.getByText('Revisa las 8 propuesta(s) de la detección')).toBeVisible();
 
   // Acepta el resto en bloque y publica.
   await review.getByRole('button', { name: /Aceptar todas las de confianza alta \(4\)/ }).click();
-  await expect(review).toHaveCount(0);
   await expect(editor.getByRole('heading', { name: 'Actividades (5)' })).toBeVisible();
+
+  // Con sus dos actividades aceptadas, las flechas se aceptan una a una.
+  for (let pending = 4; pending > 0; pending--) {
+    await expect(
+      review.getByRole('heading', { name: `Flechas propuestas (${pending})` }),
+    ).toBeVisible();
+    await review
+      .getByRole('listitem', { name: /^Flecha / })
+      .first()
+      .getByRole('button', { name: 'Aceptar' })
+      .click();
+  }
+  await expect(review).toHaveCount(0);
   await page.getByRole('button', { name: 'Publicar' }).click();
   await expect(page.getByText(/· Publicado/)).toBeVisible();
 
