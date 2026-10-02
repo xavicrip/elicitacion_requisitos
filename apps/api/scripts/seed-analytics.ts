@@ -36,7 +36,7 @@ type Validation = {
   input: { activities: Array<{ key: string; label: string }>; details: ValidationDetail[] };
   truth: { duplicatePairs: string[][]; ambiguous: Record<string, string[]>; cold: string[] };
 };
-type Person = { name: string; email: string; accessToken: string; id: string };
+type Person = { name: string; email: string; password: string; accessToken: string; id: string };
 
 export type SeededDetail = ValidationDetail & { apiId: string; authorIndex: number };
 export type SeededProject = {
@@ -89,6 +89,9 @@ export function expectedIndicators(seeded: Pick<SeededProject, 'details' | 'acti
   };
 }
 
+/** Cabeceras extra de cada petición (los E2E envían su `x-real-ip`). */
+let extraHeaders: Record<string, string> = {};
+
 async function call<T>(
   apiUrl: string,
   method: string,
@@ -99,6 +102,7 @@ async function call<T>(
   const response = await fetch(`${apiUrl}${path}`, {
     method,
     headers: {
+      ...extraHeaders,
       ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...(body instanceof FormData || body === undefined
         ? {}
@@ -115,17 +119,22 @@ async function call<T>(
 async function register(apiUrl: string, name: string): Promise<Person> {
   const suffix = randomUUID().slice(0, 8);
   const email = `tienda-${suffix}@example.com`;
+  const password = `clave-tienda-${suffix}`;
   const session = await call<{ accessToken: string; user: { id: string } }>(
     apiUrl,
     'POST',
     '/auth/register',
     null,
-    { name: `${name} ${suffix}`, email, password: `clave-tienda-${suffix}` },
+    { name: `${name} ${suffix}`, email, password },
   );
-  return { name, email, accessToken: session.accessToken, id: session.user.id };
+  return { name, email, password, accessToken: session.accessToken, id: session.user.id };
 }
 
-export async function seedAnalyticsProject(apiUrl: string): Promise<SeededProject> {
+export async function seedAnalyticsProject(
+  apiUrl: string,
+  headers: Record<string, string> = {},
+): Promise<SeededProject> {
+  extraHeaders = headers;
   const validation = JSON.parse(readFileSync(VALIDATION, 'utf8')) as Validation;
   const boxes = (
     JSON.parse(readFileSync(BOXES, 'utf8')) as {
@@ -235,7 +244,7 @@ async function main() {
   const seeded = await seedAnalyticsProject(apiUrl);
   console.log(
     `Tienda demo: proyecto ${seeded.projectId} · Administradora ${seeded.admin.email} ` +
-      `(contraseña clave-tienda-${seeded.admin.email.slice(7, 15)})`,
+      `(contraseña ${seeded.admin.password})`,
   );
   if (args.includes('--print-expected')) {
     console.log(JSON.stringify(expectedIndicators(seeded), null, 2));

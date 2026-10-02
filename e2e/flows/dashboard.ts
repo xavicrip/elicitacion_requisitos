@@ -5,10 +5,14 @@ import { expect } from './fixtures';
 // Helpers del dashboard analítico (feature 007): el proyecto "Tienda demo" sembrado por la API
 // y la espera a que un análisis termine.
 
-const apiUrl = () => process.env.API_URL || 'http://localhost:3000';
+const baseURL = () => process.env.BASE_URL || 'http://localhost:5173';
 
-/** "Tienda demo": 6 personas, 10 actividades y 80 detalles del conjunto de validación. */
-export const seedTiendaDemo = () => seedAnalyticsProject(apiUrl());
+/**
+ * "Tienda demo": 6 personas, 10 actividades y 80 detalles del conjunto de validación, por el
+ * proxy de web y con la IP de la prueba (el rate limit de /auth es por IP).
+ */
+export const seedTiendaDemo = (clientIp: string) =>
+  seedAnalyticsProject(`${baseURL()}/api`, { 'x-real-ip': clientIp });
 
 export type AnalysisRun = {
   id: string;
