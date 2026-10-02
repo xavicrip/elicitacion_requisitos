@@ -93,6 +93,33 @@ services:
         ]
       <<: *http-healthcheck
 
+  # Worker de la minería de texto (feature 007): imagen propia con los modelos (~3 GB), en el
+  # perfil `mining` para no construirla siempre (`docker compose --profile mining up -d`).
+  analysis-worker:
+    profiles: [mining]
+    build:
+      context: ..
+      dockerfile: apps/analytics/Dockerfile.mining
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+        GIT_SHA: ${GIT_SHA:-local}
+    environment:
+      PORT: 8001
+      REDIS_URL: redis://redis:6379
+      ANALYSIS_TIMEOUT_S: 900
+      LOG_LEVEL: INFO
+    depends_on:
+      redis: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          'import urllib.request; urllib.request.urlopen("http://localhost:8001/health", timeout=2)',
+        ]
+      <<: *http-healthcheck
+
   api:
     build:
       context: ..
