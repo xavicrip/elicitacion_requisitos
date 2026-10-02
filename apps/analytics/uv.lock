@@ -118,7 +118,6 @@ dev = [
     { name = "types-pyyaml" },
 ]
 mining = [
-    { name = "bertopic" },
     { name = "es-core-news-md" },
     { name = "mlxtend" },
     { name = "networkx" },
@@ -161,7 +160,6 @@ dev = [
     { name = "types-pyyaml", specifier = ">=6.0.12.20260906" },
 ]
 mining = [
-    { name = "bertopic", specifier = ">=0.17.4" },
     { name = "es-core-news-md", url = "https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.8.0/es_core_news_md-3.8.0-py3-none-any.whl" },
     { name = "mlxtend", specifier = ">=0.25.0" },
     { name = "networkx", specifier = ">=3.7" },
@@ -273,26 +271,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/9a/8e/82a0fe20a541c03148528be8cac2408564a6c9a0cc7e9171802bc1d26985/attrs-26.1.0.tar.gz", hash = "sha256:d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32", size = 952055, upload-time = "2026-03-19T14:22:25.026Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl", hash = "sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309", size = 67548, upload-time = "2026-03-19T14:22:23.645Z" },
-]
-
-[[package]]
-name = "bertopic"
-version = "0.17.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "hdbscan" },
-    { name = "llvmlite" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "scikit-learn" },
-    { name = "sentence-transformers" },
-    { name = "tqdm" },
-    { name = "umap-learn" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/72/ab/358923a516216964e150af7176dd3ea13737ddd25503517104f5562e301f/bertopic-0.17.4.tar.gz", hash = "sha256:f92aa560cdf2bcbf9e22c8ee83dd3bfb225b8dc29381dec7327cc0b21bd852ad", size = 121632, upload-time = "2025-12-03T14:19:34.402Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/d2/2eb2fec18b3d2cf487d5d1d9b484c6483c7f0f1a3c6f64e2bb9cb7972a3f/bertopic-0.17.4-py3-none-any.whl", hash = "sha256:0dbe7ee22c18fb76efe7f4fbf3a14b51c1e67d9fccc569e3f81e75b8f32646d1", size = 154669, upload-time = "2025-12-03T14:19:32.884Z" },
 ]
 
 [[package]]
@@ -673,23 +651,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1", size = 101250, upload-time = "2025-04-24T03:35:25.427Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86", size = 37515, upload-time = "2025-04-24T03:35:24.344Z" },
-]
-
-[[package]]
-name = "hdbscan"
-version = "0.8.44"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "joblib" },
-    { name = "numpy" },
-    { name = "scikit-learn" },
-    { name = "scipy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b0/51/b476849d27980d1ce5ba0a172891d37441b0112047894350951f6b169266/hdbscan-0.8.44.tar.gz", hash = "sha256:1ac6196fabdd42072284b60c9be7b9b504b5f4f25cf7a551a8af29a3c7963a4d", size = 7094270, upload-time = "2026-06-01T18:56:31.342Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/f0/4f719c1275158a13918124ce7d798be4b4ae2898469b467216fde974e443/hdbscan-0.8.44-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:cc4917a57f73984137bc6f14cddd1a140907102522174af8d8add42668a5e196", size = 2590501, upload-time = "2026-06-01T18:55:52.587Z" },
-    { url = "https://files.pythonhosted.org/packages/5c/95/4f08d8adeba894453a057f1b87d24fb155e040601137cb82536d9708ff30/hdbscan-0.8.44-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d67f2b3628a80764a07fff3a994df2c6b2d9a6b9c8024edde7b36c184f6657f6", size = 5868686, upload-time = "2026-06-01T18:56:33.787Z" },
-    { url = "https://files.pythonhosted.org/packages/b5/a2/959f617dbff9ebe0ef9b55f61c84b7ad00e5eb91b47b838b3a1a2bf0aa95/hdbscan-0.8.44-cp312-cp312-win_amd64.whl", hash = "sha256:29bffe0ef8a8191e6cd5af3dc7fdf5e7f6334eea8fa39ee8488f2f16911c1cdf", size = 1947427, upload-time = "2026-06-01T18:56:14.433Z" },
 ]
 
 [[package]]
@@ -1297,19 +1258,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/20/20/25e0f4dc178a6bc0696793720055519a0de89e7661dae886992decbd2f81/pillow-12.3.0-cp312-cp312-win32.whl", hash = "sha256:dbce0b29841537a2fa4a214c2bbf14de3587c9680caa9b4e217568472490b28f", size = 6472684, upload-time = "2026-07-01T11:54:19.839Z" },
     { url = "https://files.pythonhosted.org/packages/45/89/da2f7971a317f83d807fdd4065c0af40208e59e692cc43d315a71a0e96d1/pillow-12.3.0-cp312-cp312-win_amd64.whl", hash = "sha256:a2b55dd6b2a4c4b7d87ffa56bdb33fdc5fdb9a462173861a7bc097f17d91cb09", size = 7227137, upload-time = "2026-07-01T11:54:22.025Z" },
     { url = "https://files.pythonhosted.org/packages/de/47/4845a0a6c0dbf1db8456bd9fc791f13c5ced7ced20606d08a0aacfd25b49/pillow-12.3.0-cp312-cp312-win_arm64.whl", hash = "sha256:331b624368d4f1d069149002f25f44bc61c8919ce8ddb3c45bdad8f6e2d89510", size = 2568267, upload-time = "2026-07-01T11:54:24.051Z" },
-]
-
-[[package]]
-name = "plotly"
-version = "7.1.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "narwhals" },
-    { name = "packaging" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/49/c3/72b369f5ed7701b04ab0ea3dcf83e9bbce71c0b3bc6f07f87568550d09ea/plotly-7.1.0.tar.gz", hash = "sha256:f860166a4a3d78c69cb1f4a15f28a5c8283eade98a282a698f3bb853a449ace5", size = 6689315, upload-time = "2026-09-15T19:21:21.75Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/7d/905a3a3d51087515719058c94cfbda2ff0fc14417c20d557ae3e82d8b250/plotly-7.1.0-py3-none-any.whl", hash = "sha256:dbb7fa18afce40d0a8e80d1bf162eceb3faa0ce5a77fe741ad09a74cf78f53f3", size = 9692368, upload-time = "2026-09-15T19:21:18.331Z" },
 ]
 
 [[package]]

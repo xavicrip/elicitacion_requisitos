@@ -1,0 +1,12 @@
+# Cobertura de la minería de texto con los modelos reales (job `analysis-eval`).
+[run]
+source = analytics.mining
+omit =
+    */analytics/mining/worker.py
+    */analytics/mining/schemas.py
+
+[report]
+# Principio III de la constitución: cobertura mínima del 70 %.
+fail_under = 70
+show_missing = true
+skip_covered = true

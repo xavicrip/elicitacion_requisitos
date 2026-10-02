@@ -33,7 +33,7 @@
 - **Decision**: `paraphrase-multilingual-MiniLM-L12-v2` (384 dimensiones, rápido en CPU,
   multilingüe). Sin caché persistente: el worker no accede a MongoDB (plan, ajuste 1); se mide en
   T056 si hace falta una.
-  - **Temas**: BERTopic con los embeddings precalculados, UMAP (5D) + HDBSCAN
+  - **Temas**: la cadena de BERTopic implementada directamente (sin la dependencia): UMAP (5D) + HDBSCAN
     de scikit-learn (`min_cluster_size = max(5, n/50)`) y el vectorizador c-TF-IDF con los lemas de R2; salida:
     tema, términos, número de detalles y actividades. Con menos de 20 detalles no se ejecuta
     (US2-5).
@@ -46,7 +46,9 @@
 ## R5. Casi duplicados
 
 - **Decision**: similitud coseno entre todos los pares (n ≤ 5 000 → matriz por bloques);
-  candidatos con `sim ≥ 0,85` **y** misma actividad o `sim ≥ 0,92` entre actividades. Se excluyen
+  candidatos con `sim ≥ 0,85` **y** misma actividad o `sim ≥ 0,92` entre actividades, y además
+  similitud ≥ 0,80 en **cada** parte (Dado, Cuando y Entonces): dos requisitos que comparten el
+  contexto y la acción pero piden un resultado distinto no son duplicados. Se excluyen
   los pares con una decisión previa (`duplicate_decisions`: confirmed/rejected), como pide
   US3-3. Confirmar → `POST /details/:id/status {duplicate}` de la 004.
 - **Validación**: umbral calibrado sobre el conjunto de validación para lograr recall ≥ 0,80 y

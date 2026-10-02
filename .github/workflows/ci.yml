@@ -133,7 +133,7 @@ jobs:
         with:
           path: .cache/huggingface
           key: hf-${{ hashFiles('apps/analytics/uv.lock') }}
-      - run: uv run --directory apps/analytics --group mining pytest tests/mining -q
+      - run: uv run --directory apps/analytics --group mining pytest tests/mining tests/unit/test_mining_run.py -q --cov --cov-config=.coveragerc.mining
 
   migrations:
     runs-on: ubuntu-latest
