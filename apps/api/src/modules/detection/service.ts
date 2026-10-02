@@ -16,8 +16,8 @@ import {
 import type { FastifyInstance } from 'fastify';
 import { Types } from 'mongoose';
 import { HttpError } from '../../lib/errors.js';
-import { activitiesService } from '../diagrams/activities.service.js';
-import { activitiesModel } from '../diagrams/models/activity.js';
+import { activitiesService, RevConflict } from '../diagrams/activities.service.js';
+import { activitiesModel, type Activity as ActivityDoc } from '../diagrams/models/activity.js';
 import { versionsModel, type DiagramVersion } from '../diagrams/models/version.js';
 import { activityProposalsModel, type ActivityProposalDoc } from './models/activity-proposal.js';
 import { detectionJobsModel, type DetectionJobDoc } from './models/job.js';
@@ -82,8 +82,26 @@ export function toActivityProposalDto(proposal: ActivityProposalDoc): ActivityPr
   };
 }
 
-export function toTransitionProposalDto(proposal: TransitionProposalDoc): TransitionProposal {
+type Ends = Map<string, ActivityProposalDoc>;
+
+const endOf = (ends: Ends, id: Types.ObjectId) => {
+  const end = ends.get(id.toHexString());
   return {
+    label: end?.label ?? '',
+    bbox: end
+      ? { x: end.bbox.x, y: end.bbox.y, w: end.bbox.w, h: end.bbox.h }
+      : { x: 0, y: 0, w: 0.01, h: 0.01 },
+    status: end?.status ?? ('discarded' as const),
+  };
+};
+
+export function toTransitionProposalDto(
+  proposal: TransitionProposalDoc,
+  ends: Ends,
+): TransitionProposal {
+  return {
+    from: endOf(ends, proposal.fromProposalId),
+    to: endOf(ends, proposal.toProposalId),
     id: proposal._id.toHexString(),
     jobId: proposal.jobId.toHexString(),
     versionId: proposal.versionId.toHexString(),
@@ -275,9 +293,16 @@ export function detectionService(app: FastifyInstance) {
           .lean<ActivityProposalDoc[]>(),
         TransitionProposals.find({ versionId, status: 'pending' }).lean<TransitionProposalDoc[]>(),
       ]);
+      // Los extremos de las flechas, aunque ya estén aceptados (para dibujarlas y nombrarlas).
+      const endIds = transitions.flatMap((t) => [t.fromProposalId, t.toProposalId]);
+      const ends: Ends = new Map(
+        (await ActivityProposals.find({ _id: { $in: endIds } }).lean<ActivityProposalDoc[]>()).map(
+          (end) => [end._id.toHexString(), end],
+        ),
+      );
       return {
         activities: activities.map(toActivityProposalDto),
-        transitions: transitions.map(toTransitionProposalDto),
+        transitions: transitions.map((transition) => toTransitionProposalDto(transition, ends)),
       };
     },
 
@@ -344,6 +369,96 @@ export function detectionService(app: FastifyInstance) {
         }
       }
       return { accepted };
+    },
+
+    loadTransition: (id: string) =>
+      Types.ObjectId.isValid(id)
+        ? TransitionProposals.findById(id).lean<TransitionProposalDoc>()
+        : Promise.resolve(null),
+
+    /**
+     * Acepta una flecha (US3): exige las dos actividades ya aceptadas y añade la `key` de la de
+     * destino al `next` de la de origen, con el servicio del editor de la 003.
+     */
+    async acceptTransition(transition: TransitionProposalDoc, actorId: string) {
+      if (transition.status !== 'pending') throw alreadyReviewed();
+      const [from, to] = await Promise.all([
+        ActivityProposals.findById(transition.fromProposalId).lean<ActivityProposalDoc>(),
+        ActivityProposals.findById(transition.toProposalId).lean<ActivityProposalDoc>(),
+      ]);
+      if (
+        from?.status !== 'accepted' ||
+        to?.status !== 'accepted' ||
+        !from.activityId ||
+        !to.activityId
+      ) {
+        throw new HttpError(
+          422,
+          'ENDS_NOT_ACCEPTED',
+          'Acepta antes las dos actividades que une esta flecha.',
+        );
+      }
+      const target = await Activities.findById(to.activityId).lean<{ key: string }>();
+      if (!target)
+        throw new HttpError(
+          422,
+          'ENDS_NOT_ACCEPTED',
+          'Acepta antes las dos actividades que une esta flecha.',
+        );
+      const claimed = await TransitionProposals.findOneAndUpdate(
+        { _id: transition._id, status: 'pending' },
+        {
+          $set: {
+            status: 'accepted',
+            reviewedBy: new Types.ObjectId(actorId),
+            reviewedAt: new Date(),
+          },
+        },
+        { returnDocument: 'after' },
+      ).lean<TransitionProposalDoc>();
+      if (!claimed) throw alreadyReviewed();
+      try {
+        // Otro cambio de la actividad a la vez (rev): se reintenta con la versión actual.
+        for (let attempt = 0; ; attempt++) {
+          const source = await Activities.findById(from.activityId).lean<ActivityDoc>();
+          if (!source) throw new HttpError(404, 'NOT_FOUND', 'Recurso no encontrado');
+          if (source.next.includes(target.key)) break;
+          try {
+            await activities.update(
+              source,
+              source.rev,
+              { next: [...source.next, target.key] },
+              { actorId },
+            );
+            break;
+          } catch (error) {
+            if (!(error instanceof RevConflict) || attempt >= 2) throw error;
+          }
+        }
+      } catch (error) {
+        await TransitionProposals.updateOne(
+          { _id: transition._id },
+          { $set: { status: 'pending', reviewedBy: null, reviewedAt: null } },
+        );
+        throw error;
+      }
+      await reviewed(claimed, 'transition', 'accepted', actorId);
+    },
+
+    async discardTransition(transition: TransitionProposalDoc, actorId: string) {
+      const claimed = await TransitionProposals.findOneAndUpdate(
+        { _id: transition._id, status: 'pending' },
+        {
+          $set: {
+            status: 'discarded',
+            reviewedBy: new Types.ObjectId(actorId),
+            reviewedAt: new Date(),
+          },
+        },
+        { returnDocument: 'after' },
+      ).lean<TransitionProposalDoc>();
+      if (!claimed) throw alreadyReviewed();
+      await reviewed(claimed, 'transition', 'discarded', actorId);
     },
 
     /** Condición de publicación (FR-007): ninguna propuesta pendiente en la versión. */

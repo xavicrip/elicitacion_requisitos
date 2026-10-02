@@ -147,6 +147,13 @@ export const ActivityProposalSchema = z.object({
   activityId: z.string().nullable().optional(),
 });
 
+/** Extremo de una flecha propuesta: para dibujarla y nombrarla aunque ya esté aceptado. */
+export const TransitionEndSchema = z.object({
+  label: z.string(),
+  bbox: BBoxSchema,
+  status: ProposalStatusSchema,
+});
+
 export const TransitionProposalSchema = z.object({
   id: z.string(),
   jobId: z.string(),
@@ -155,6 +162,8 @@ export const TransitionProposalSchema = z.object({
   toProposalId: z.string(),
   confidence: Confidence,
   status: ProposalStatusSchema,
+  from: TransitionEndSchema,
+  to: TransitionEndSchema,
 });
 
 export const ProposalsSchema = z.object({
@@ -184,6 +193,7 @@ export type DetectionMetrics = z.infer<typeof DetectionMetricsSchema>;
 export type DetectionJob = z.infer<typeof DetectionJobSchema>;
 export type DetectionStartInput = z.input<typeof DetectionStartInputSchema>;
 export type ActivityProposal = z.infer<typeof ActivityProposalSchema>;
+export type TransitionEnd = z.infer<typeof TransitionEndSchema>;
 export type TransitionProposal = z.infer<typeof TransitionProposalSchema>;
 export type Proposals = z.infer<typeof ProposalsSchema>;
 export type ProposalAcceptInput = z.infer<typeof ProposalAcceptInputSchema>;

@@ -11,6 +11,7 @@ import { z } from 'zod';
 import type { DiagramVersion } from '../diagrams/models/version.js';
 import { diagramsService } from '../diagrams/service.js';
 import type { ActivityProposalDoc } from './models/activity-proposal.js';
+import type { TransitionProposalDoc } from './models/transition-proposal.js';
 import { detectionService } from './service.js';
 
 const IdParams = z.object({ id: z.string() });
@@ -98,6 +99,30 @@ export async function detectionRoutes(app: FastifyInstance) {
     { preHandler: reviewer, schema: { params: IdParams } },
     async (request, reply) => {
       await detection.discard(request.resource as ActivityProposalDoc, request.user.id);
+      return reply.code(204).send();
+    },
+  );
+
+  const transitionReviewer = [
+    app.requireAuth,
+    app.requireResourceProject(detection.loadTransition, 'admin'),
+    app.requireProjectStatus([...WRITABLE]),
+  ];
+
+  routes.post(
+    '/transition-proposals/:id/accept',
+    { preHandler: transitionReviewer, schema: { params: IdParams } },
+    async (request, reply) => {
+      await detection.acceptTransition(request.resource as TransitionProposalDoc, request.user.id);
+      return reply.code(200).send({ accepted: true });
+    },
+  );
+
+  routes.post(
+    '/transition-proposals/:id/discard',
+    { preHandler: transitionReviewer, schema: { params: IdParams } },
+    async (request, reply) => {
+      await detection.discardTransition(request.resource as TransitionProposalDoc, request.user.id);
       return reply.code(204).send();
     },
   );

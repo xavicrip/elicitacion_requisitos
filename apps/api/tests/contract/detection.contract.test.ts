@@ -1,4 +1,9 @@
-import { ActivitySchema, DetectionJobSchema, ProposalsSchema } from '@reqcanvas/shared';
+import {
+  ActivitySchema,
+  DetectionJobSchema,
+  ProposalsSchema,
+  TransitionProposalSchema,
+} from '@reqcanvas/shared';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -14,6 +19,7 @@ import { authHeaders, registerTestUser } from '../helpers/users';
 let app: FastifyInstance;
 let admin: Record<string, string>;
 let versionId: string;
+let adminProject: string;
 let worker: ReturnType<typeof startFakeWorker>;
 
 beforeAll(async () => {
@@ -26,8 +32,8 @@ beforeAll(async () => {
   worker = startFakeWorker(`test-${dbName}:bull`, async () => EXAMPLE_RESULT);
   const user = await registerTestUser(app);
   admin = authHeaders(user);
-  const projectId = await seedProject(app, { status: 'open', members: [[user, 'admin']] });
-  versionId = (await uploadDiagram(app, admin, projectId)).json().id;
+  adminProject = await seedProject(app, { status: 'open', members: [[user, 'admin']] });
+  versionId = (await uploadDiagram(app, admin, adminProject)).json().id;
 });
 afterAll(async () => {
   await worker.close();
@@ -164,5 +170,56 @@ describe('revisión de propuestas', () => {
     ).toEqual({
       accepted: 1,
     });
+  });
+});
+
+describe('transiciones propuestas', () => {
+  it('GET proposals devuelve TransitionProposal con sus extremos; accept 200 y discard 204', async () => {
+    const fresh = (await uploadDiagram(app, admin, adminProject)).json().id as string;
+    await app.inject({
+      method: 'POST',
+      url: `/diagram-versions/${fresh}/detections`,
+      headers: admin,
+      payload: {},
+    });
+    let body: { activities: Array<{ id: string }>; transitions: Array<{ id: string }> } = {
+      activities: [],
+      transitions: [],
+    };
+    await vi.waitFor(
+      async () => {
+        body = (
+          await app.inject({ url: `/diagram-versions/${fresh}/proposals`, headers: admin })
+        ).json();
+        expect(body.transitions).toHaveLength(2);
+      },
+      { timeout: 5000, interval: 50 },
+    );
+    for (const transition of body.transitions) {
+      expect(TransitionProposalSchema.strict().safeParse(transition).error?.issues ?? []).toEqual(
+        [],
+      );
+    }
+    for (const activity of body.activities) {
+      await app.inject({
+        method: 'POST',
+        url: `/proposals/${activity.id}/accept`,
+        headers: admin,
+        payload: {},
+      });
+    }
+    const [first, second] = body.transitions;
+    const accepted = await app.inject({
+      method: 'POST',
+      url: `/transition-proposals/${first!.id}/accept`,
+      headers: admin,
+    });
+    expect(accepted.statusCode).toBe(200);
+    const discarded = await app.inject({
+      method: 'POST',
+      url: `/transition-proposals/${second!.id}/discard`,
+      headers: admin,
+    });
+    expect(discarded.statusCode).toBe(204);
   });
 });
