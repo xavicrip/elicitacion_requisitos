@@ -13,6 +13,7 @@ Uso: ``uv run --directory apps/analytics python tests/eval/evaluate_detection.py
 from __future__ import annotations
 
 import argparse
+import asyncio
 import importlib.util
 import json
 import sys
@@ -25,6 +26,7 @@ from typing import Any
 
 import cv2
 
+from analytics.detection.llm_refine import LlmSettings, refine
 from analytics.detection.pipeline import DetectionOptions, detect
 from analytics.detection.schemas import DetectionResult
 
@@ -163,6 +165,8 @@ def evaluate(
         image = cv2.imread(str(folder / f"{truth['id']}.png"))
         started = time.perf_counter()
         result = detect(image, DetectionOptions(llm_refine=llm))
+        if llm:  # manual y con coste: necesita ANTHROPIC_API_KEY
+            result = asyncio.run(refine(image, result, LlmSettings.from_env()))
         result_score = score(truth, result, time.perf_counter() - started)
         per_diagram[truth["id"]] = result_score
         totals.setdefault(truth["subset"], Score()).add(result_score)

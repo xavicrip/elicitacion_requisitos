@@ -146,8 +146,8 @@ actividades
 
 **Goal**: mejorar los nombres leídos (SC-002) sin depender del modelo para funcionar
 
-- [ ] T044 [P] [US1] Pruebas en `apps/analytics/tests/unit/test_llm_refine.py` con un cliente de Anthropic simulado: se envía solo la imagen y las zonas (sin datos de usuarios) y se pide salida estructurada con el esquema de correcciones; una corrección sustituye `label` y `type` solo con IoU ≥ 0,7 (`llm_corrected`); las zonas nuevas entran con confianza `medium` y `llm_added`; con `stop_reason` `refusal`, error de la API o más de 30 s, se devuelve el resultado local sin fallar el job; conserva el idioma del diagrama (pide no traducir y una corrección traducida se descarta); sin `ANTHROPIC_API_KEY` o con `detection-llm` desactivado no se llama; `stats.llmUsed` lo refleja — `test(analytics)`
-- [ ] T045 [US1] Implementar `apps/analytics/src/analytics/detection/llm_refine.py` con el SDK `anthropic` (`DETECTION_LLM_MODEL`, por defecto `claude-opus-5-5`; plan, ajuste 11), etapa `refine` del pipeline y la opción `llmRefine` del job según el flag — `feat(analytics)`
+- [X] T044 [P] [US1] Pruebas en `apps/analytics/tests/unit/test_llm_refine.py` con un cliente de Anthropic simulado: se envía solo la imagen y las zonas (sin datos de usuarios) y se pide salida estructurada con el esquema de correcciones; una corrección sustituye `label` y `type` solo con IoU ≥ 0,7 (`llm_corrected`); las zonas nuevas entran con confianza `medium` y `llm_added`; con `stop_reason` `refusal`, error de la API o más de 30 s, se devuelve el resultado local sin fallar el job; conserva el idioma del diagrama (pide no traducir y una corrección traducida se descarta); sin `ANTHROPIC_API_KEY` o con `detection-llm` desactivado no se llama; `stats.llmUsed` lo refleja — `test(analytics)`
+- [X] T045 [US1] Implementar `apps/analytics/src/analytics/detection/llm_refine.py` con el SDK `anthropic` (`DETECTION_LLM_MODEL`, por defecto `claude-opus-5-5`; plan, ajuste 11), etapa `refine` del pipeline y la opción `llmRefine` del job según el flag — `feat(analytics)`
 
 ---
 

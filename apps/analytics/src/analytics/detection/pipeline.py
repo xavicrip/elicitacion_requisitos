@@ -9,6 +9,7 @@ import httpx
 
 from analytics.detection.arrows import detect_arrows
 from analytics.detection.errors import DetectionError
+from analytics.detection.llm_refine import LlmSettings, refine
 from analytics.detection.ocr import read_label
 from analytics.detection.preprocess import Image8, UnreadableImageError, decode, downscale
 from analytics.detection.schemas import (
@@ -151,4 +152,9 @@ async def process(
         arrows=job.options.arrows,
         languages=tuple(job.options.languages),
     )
-    return await asyncio.to_thread(detect, image, options, report)
+    result = await asyncio.to_thread(detect, image, options, report)
+    if options.llm_refine:
+        # Opcional (flag `detection-llm`): sin clave, o si el modelo falla, el resultado local.
+        await progress("refine", 92)
+        result = await refine(image, result, LlmSettings.from_env())
+    return result
