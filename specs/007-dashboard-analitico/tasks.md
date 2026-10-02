@@ -157,12 +157,12 @@ frías se clasifican así, y cada regla tiene soporte, confianza y frase
 ### Tests for User Story 4 ⚠️
 
 - [X] T044 [P] [US4] Pruebas de `apps/analytics/tests/mining/test_patterns.py`: sentimiento con un clasificador falso (distribución por actividad, solo NEG ≥ 0,7 destacado, top 10), Apriori con soporte ≥ 0,05, confianza ≥ 0,6 y lift > 1,2 (top 30 con frase de plantilla) y calientes/frías por z-score con el motivo dominante; el modelo real se prueba en `analysis-eval` — `test(analytics)`
-- [ ] T045 [P] [US4] Pruebas de `web` en `apps/web/tests/dashboard-patterns.test.tsx`: distribución de sentimiento por actividad y detalles más negativos, reglas con soporte, confianza y frase, actividades calientes y frías con su motivo — `test(web)`
+- [X] T045 [P] [US4] Pruebas de `web` en `apps/web/tests/dashboard-patterns.test.tsx`: distribución de sentimiento por actividad y detalles más negativos, reglas con soporte, confianza y frase, actividades calientes y frías con su motivo — `test(web)`
 
 ### Implementation for User Story 4
 
 - [X] T046 [US4] Implementar `apps/analytics/src/analytics/mining/{sentiment,association,hotcold}.py` — `feat(analytics)`
-- [ ] T047 [US4] Implementar en `web` `patterns/{Sentiment,AssociationRules,HotColdActivities}.tsx` — `feat(web)`
+- [X] T047 [US4] Implementar en `web` `patterns/{Sentiment,AssociationRules,HotColdActivities}.tsx` — `feat(web)`
 
 ---
 

@@ -1,6 +1,9 @@
 import type { AnalysisRun, DashboardFilters } from '@reqcanvas/shared';
 import { useMemo } from 'react';
 import { FormError } from '../../../components/form';
+import { AssociationRules } from '../patterns/AssociationRules';
+import { HotColdActivities } from '../patterns/HotColdActivities';
+import { Sentiment } from '../patterns/Sentiment';
 import { DuplicatePairs } from '../quality/DuplicatePairs';
 import { QualityList } from '../quality/QualityList';
 import { TermsSettings } from '../quality/TermsSettings';
@@ -86,6 +89,27 @@ function tabsOf(run: AnalysisRun): Tab[] {
       id: 'duplicates',
       label: `Duplicados (${results.duplicates.length})`,
       content: <DuplicatePairs pairs={results.duplicates} lookup={lookup} />,
+    });
+  }
+  if (results.sentiment) {
+    tabs.push({
+      id: 'sentiment',
+      label: 'Sentimiento',
+      content: <Sentiment sentiment={results.sentiment} lookup={lookup} />,
+    });
+  }
+  if (results.association) {
+    tabs.push({
+      id: 'association',
+      label: 'Patrones',
+      content: <AssociationRules rules={results.association} />,
+    });
+  }
+  if (results.hotcold) {
+    tabs.push({
+      id: 'hotcold',
+      label: 'Actividades críticas',
+      content: <HotColdActivities heat={results.hotcold} lookup={lookup} />,
     });
   }
   return tabs;
