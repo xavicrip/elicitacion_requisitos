@@ -12,6 +12,8 @@ export const VIZ = {
   series: ['#2a78d6', '#eb6834', '#1baf7a'],
   /** Lo que no pertenece a ninguna categoría destacada. */
   neutral: '#b8b7b0',
+  /** Escala divergente (guía dataviz): polos frío y cálido con un punto medio gris. */
+  diverging: { negative: '#e34948', midpoint: '#d9d8d3', positive: '#2a78d6' },
 } as const;
 
 const ESCAPES: Record<string, string> = {
