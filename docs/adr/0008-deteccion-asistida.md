@@ -43,6 +43,10 @@ réplica por servicio y quizá solo 0,5 GB de RAM (ADR 0002).
    escribe un latido en Redis que `api /health/deep` comprueba.
 7. **Estados del job**: `pending`, `running`, `done` y `failed` (constitución VI), con el
    progreso por etapas publicado en tiempo real por Socket.IO (005) y consultable por REST.
+8. **Detrás del flag `detection` mientras se construyó.** Sin él, `api` no montaba la cola ni
+   las rutas y la web no mostraba la detección; se activó por defecto tras el recorrido en
+   staging y se retiró después (`docs/feature-flags.md`). `detection-llm` sigue como flag
+   operativo por su coste.
 
 ## Resultados (T046, 2026-10-02)
 
