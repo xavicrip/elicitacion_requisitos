@@ -33,6 +33,39 @@ prueba en `api` con dos instancias de la app sobre el mismo Redis, y en staging 
 3. Ana retira a Luis del proyecto → Luis ve "Ya no tienes acceso" al instante.
 4. Ana cierra el proyecto → las demás sesiones pasan a solo lectura sin recargar.
 
+## Recorrido en staging (T046, 2026-10-02)
+
+Con un Administrador y dos Participantes nuevos, sobre `289ce45` (flag `realtime` activado solo
+en staging). Automatizado con Playwright y la ventana visible; como en staging no hay
+`__canvasState`, las actividades se eligen con la lista accesible del canvas, que centra la
+cámara en la actividad.
+
+| § | Comprobación | Resultado |
+|---|--------------|-----------|
+| — | WebSocket a través del borde de Railway y el proxy de `web` | Los tres navegadores conectados y unidos a la sala (`/socket.io`, solo WebSocket) |
+| 1 | Luis crea un detalle en "Validar pago" | Aparece en el panel de Ana en 217 ms, contando el `POST` |
+| 1 | Ana vota y valida | Luis ve "1 voto(s)" y "Validado" sin recargar |
+| 2 | Presencia con tres cuentas | Cada una ve a las otras dos; la selección de Luis aparece en "Emitir factura" para Ana; una segunda pestaña no lo duplica |
+| 3 | Cursores con Ana a 195 % y Luis a 51 % | El cursor de Luis cae sobre "Validar pago" en la pantalla de Ana (a menos de 6 px del centro); "Ocultar cursores" lo oculta |
+| 4 | Luis sin red | Aviso y guardar deshabilitado; al volver ve los 2 detalles que Ana creó mientras tanto y conserva su borrador |
+| 4 | Ana retira a Luis | Luis vuelve a "Mis proyectos" con "Ya no tienes acceso a este proyecto." en 480 ms |
+| 4 | Ana cierra el proyecto | Marta pasa a solo lectura sin recargar |
+
+Latencia de extremo a extremo (8 sockets de `socket.io-client` desde el equipo local contra staging, 20
+detalles, 160 recepciones): del envío del `POST` a la llegada del evento, p50 213 ms y p95
+552 ms; `recepción − at` (solo el reparto desde que el servidor confirma la escritura; relojes
+sincronizados por NTP), p50 70 ms y p95 95 ms (SC-001: < 500 ms). Ningún evento se perdió. El
+p95 del extremo a extremo incluye la ida y vuelta del `POST` hasta Railway (`us-west2`), que no
+forma parte de la propagación.
+
+Réplicas: el plan de Railway de la cuenta no aplicó las 2 réplicas de `api` (la configuración
+del entorno sigue en 1 y los logs muestran un solo `RAILWAY_REPLICA_ID`), así que el reparto entre
+réplicas queda validado por las pruebas de integración con dos instancias de la app sobre el
+mismo Redis (`realtime-sync`, `presence`, `revocation`, `cursors`), no en staging.
+
+- El proyecto y las cuentas de prueba (`e2e-…@example.com`) se quedan en staging: no hay borrado
+  de cuentas.
+
 ## 5. Pruebas y carga
 
 ```bash

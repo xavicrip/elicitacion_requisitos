@@ -160,7 +160,7 @@ imagen, con su nombre, y puede ocultarlos
 - [X] T043 [P] ADR `docs/adr/0007-colaboracion-en-tiempo-real.md` (solo WebSocket por la falta de sesiones persistentes en Railway, adaptador Redis en lugar de publicar los eventos aparte, aplicar los payloads en lugar de volver a pedir, resincronizar invalidando en lugar de reenviar eventos perdidos, presencia en Redis con barrido) — `docs(adr)`
 - [X] T044 [P] Actualizar el README (sección de colaboración en tiempo real: presencia, cursores, aviso de conexión, flag `realtime`) y revisar que `quickstart.md` siga al día con lo construido — `docs(repo)`
 - [X] T045 Configurar Railway **antes de fusionar**: `FEATURE_FLAGS=realtime=true` en `api` de staging (producción sin cambios) y 2 réplicas de `api` en staging para validar el reparto (plan, ajuste 5); registrarlo en `docs/adr/0002-despliegue-railway.md` — `docs(infra)`
-- [ ] T046 Recorrer quickstart.md en staging (§1–§4) con un Administrador y dos Participantes, comprobar que el borde de Railway mantiene el WebSocket abierto (ajuste 3) y que con 2 réplicas los eventos llegan entre ellas, y medir la latencia de extremo a extremo; registrar el resultado en `quickstart.md` — `docs(repo)`
+- [X] T046 Recorrer quickstart.md en staging (§1–§4) con un Administrador y dos Participantes, comprobar que el borde de Railway mantiene el WebSocket abierto (ajuste 3) y que con 2 réplicas los eventos llegan entre ellas, y medir la latencia de extremo a extremo; registrar el resultado en `quickstart.md` — `docs(repo)`
 - [ ] T047 Activar `realtime` por defecto (`default: true`) cuando las cuatro historias y T046 estén en verde; retirar el flag en un commit posterior y separado (constitución IV) — `feat(shared)`
 
 ---

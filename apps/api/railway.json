@@ -11,16 +11,5 @@
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3,
     "drainingSeconds": 10
-  },
-  "environments": {
-    "staging": {
-      "deploy": {
-        "multiRegionConfig": {
-          "us-west2": {
-            "numReplicas": 2
-          }
-        }
-      }
-    }
   }
 }
