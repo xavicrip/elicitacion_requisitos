@@ -5,6 +5,9 @@ import { useAuthStore } from '../../lib/auth-store';
 import { DetailsWorkspacePage } from '../details/DetailsWorkspacePage';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { projectKeys, projectsApi } from '../projects/api';
+import { useFlags } from '../../lib/flags';
+import { DetectionPanel } from '../detection/DetectionPanel';
+import { DetectionProposals } from '../detection/ProposalsLayer';
 import { ConnectionBanner } from './ConnectionBanner';
 import { CursorsLayer, CursorsToggle } from './CursorsLayer';
 import { PresenceBar } from './PresenceBar';
@@ -21,6 +24,9 @@ export function RealtimeWorkspace() {
   const { projectId = '' } = useParams();
   const socket = useRealtimeSocket();
   const versionId = useWorkspaceStore((state) => state.versionId);
+  const editing = useWorkspaceStore((state) => state.mode === 'edit');
+  // Detección asistida (feature 006), detrás de su flag.
+  const detection = Boolean(useFlags().flags.detection);
   const user = useAuthStore((state) => state.user);
   const project = useQuery({
     queryKey: projectKeys.detail(projectId),
@@ -59,17 +65,25 @@ export function RealtimeWorkspace() {
       )}
       <DetailsWorkspacePage
         extraBadge={badge}
-        overlay={
-          socket
-            ? ({ image, versionId: shown }) => (
-                <CursorsLayer
-                  socket={socket}
-                  versionId={shown}
-                  joined={joined && shown === versionId}
-                  image={image}
-                  presence={presence}
-                />
-              )
+        overlay={({ image, versionId: shown }) => (
+          <>
+            {detection && editing && (
+              <DetectionProposals versionId={shown} socket={socket} image={image} />
+            )}
+            {socket && (
+              <CursorsLayer
+                socket={socket}
+                versionId={shown}
+                joined={joined && shown === versionId}
+                image={image}
+                presence={presence}
+              />
+            )}
+          </>
+        )}
+        editorPanel={
+          detection
+            ? ({ versionId: shown }) => <DetectionPanel versionId={shown} socket={socket} />
             : undefined
         }
       />

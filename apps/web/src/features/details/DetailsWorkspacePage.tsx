@@ -15,11 +15,14 @@ import { coverageHotspots, heatmapScale } from './overlays/Heatmap';
 export function DetailsWorkspacePage({
   extraBadge,
   overlay,
+  editorPanel,
 }: {
   /** Indicadores de otras features junto a los de cobertura, p. ej. la presencia (005). */
   extraBadge?: HotspotExtensions['renderBadge'];
   /** Capa sobre el canvas, p. ej. los cursores (005). */
   overlay?: WorkspacePageProps['overlay'];
+  /** Contenido extra del panel del editor, p. ej. la detección (006). */
+  editorPanel?: WorkspacePageProps['editorPanel'];
 } = {}) {
   const [preferPublished, setPreferPublished] = useState(false);
   const [openNotes, setOpenNotes] = useState<Set<string>>(new Set());
@@ -56,6 +59,7 @@ export function DetailsWorkspacePage({
       preferPublished={preferPublished}
       onPreferPublishedChange={setPreferPublished}
       overlay={overlay}
+      editorPanel={editorPanel}
       {...hotspots}
       renderBadge={
         hotspots.renderBadge || extraBadge

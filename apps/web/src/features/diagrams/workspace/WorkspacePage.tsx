@@ -51,6 +51,8 @@ export type WorkspacePageProps = HotspotExtensions & {
   onPreferPublishedChange?: (preferPublished: boolean) => void;
   /** Capa HTML sobre el canvas, p. ej. los cursores de la 005. */
   overlay?: (context: { image: Size; versionId: string }) => ReactNode;
+  /** Contenido extra del panel del editor (modo edit), p. ej. la detección de la 006. */
+  editorPanel?: (context: { versionId: string }) => ReactNode;
 };
 
 export function WorkspacePage({
@@ -58,6 +60,7 @@ export function WorkspacePage({
   preferPublished = false,
   onPreferPublishedChange,
   overlay,
+  editorPanel,
   ...hotspots
 }: WorkspacePageProps = {}) {
   const { projectId = '', diagramId = '' } = useParams();
@@ -151,7 +154,12 @@ export function WorkspacePage({
             hotspots={hotspots}
             overlay={overlay}
           />
-          {editing && <EditorPanel versionId={version.data.id} />}
+          {editing && (
+            <div className="space-y-4">
+              {editorPanel?.({ versionId: version.data.id })}
+              <EditorPanel versionId={version.data.id} />
+            </div>
+          )}
           {!editing &&
             sidePanel?.(selectedKey, { project: project.data, diagramId, version: version.data })}
           {!editing && !sidePanel && (
