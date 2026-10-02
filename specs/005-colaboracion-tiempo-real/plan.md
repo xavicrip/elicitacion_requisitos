@@ -149,6 +149,22 @@ feature `realtime` en `web`, que se engancha al workspace mediante `useWorkspace
     en `e2e/perf` en lugar de Artillery (sin dependencia nueva; Principio VII), y medición en
     staging como en T052.
 
+## Mediciones (T042, 2026-10-01)
+
+En local (Docker Compose con una réplica de `api`, Apple M1, Chrome de Playwright con ventana),
+con `pnpm e2e --project perf -g realtime`:
+
+| Medida | Objetivo | Resultado |
+|--------|----------|-----------|
+| `recepción − at` de `detail.created` con 50 clientes en el diagrama, cursores a 20 Hz y un detalle cada 30 s durante 2 min (200 recepciones) | p95 < 500 ms (SC-001) | p50 41 ms, p95 58 ms, máx. 58 ms |
+| Desconexiones durante la prueba | 0 (SC-002) | 0 |
+| Cada cliente recibe cada evento de detalle (conteo por `eventId`) | exactamente una vez (SC-004) | 4 de 4 en los 50 clientes, sin duplicados |
+| FPS con 50 cursores moviéndose sobre `cien-actividades.png` | ≥ 50 (ajuste 9) | 60 FPS al hacer zoom y al desplazar (p95 de 17 ms) |
+
+- Los relojes coinciden porque cliente y servidor están en el mismo host; en staging la medida
+  de extremo a extremo se repite a mano (T046).
+- Con 60 FPS, la capa HTML de cursores no necesita pasar a sprites de three.js.
+
 ## Complexity Tracking
 
 Sin violaciones.
