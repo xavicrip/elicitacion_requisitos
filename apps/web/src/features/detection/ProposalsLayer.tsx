@@ -1,4 +1,4 @@
-import type { ActivityProposal } from '@reqcanvas/shared';
+import type { ActivityProposal, BBox, TransitionProposal } from '@reqcanvas/shared';
 import { imageToScreen, type Size } from '../diagrams/workspace/camera/zoom';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { TYPE_LABEL } from '../diagrams/labels';
@@ -12,14 +12,22 @@ import { useDetection } from './useDetection';
  */
 export function ProposalsLayer({
   proposals,
+  transitions = [],
   image,
 }: {
   proposals: ActivityProposal[];
+  transitions?: TransitionProposal[];
   image: Size;
 }) {
   const camera = useWorkspaceStore((state) => state.camera);
   const viewport = useWorkspaceStore((state) => state.viewport);
-  if (proposals.length === 0) return null;
+  if (proposals.length === 0 && transitions.length === 0) return null;
+  const center = (bbox: BBox) =>
+    imageToScreen(
+      { x: (bbox.x + bbox.w / 2) * image.width, y: (bbox.y + bbox.h / 2) * image.height },
+      camera,
+      viewport,
+    );
 
   return (
     <div
@@ -27,6 +35,47 @@ export function ProposalsLayer({
       role="list"
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
+      {transitions.length > 0 && (
+        <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
+          <defs>
+            <marker
+              id="proposal-arrow"
+              markerWidth="10"
+              markerHeight="10"
+              refX="9"
+              refY="3"
+              orient="auto"
+            >
+              <path d="M0,0 L9,3 L0,6 z" fill="#B45309" />
+            </marker>
+          </defs>
+          {transitions.map((transition) => {
+            const from = center(transition.from.bbox);
+            const to = center(transition.to.bbox);
+            return (
+              <line
+                key={transition.id}
+                data-testid="proposed-transition"
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+                stroke="#B45309"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+                markerEnd="url(#proposal-arrow)"
+              />
+            );
+          })}
+        </svg>
+      )}
+      {transitions.map((transition) => (
+        <span
+          key={transition.id}
+          role="listitem"
+          className="sr-only"
+        >{`Flecha propuesta: ${transition.from.label || 'Sin nombre'} → ${transition.to.label || 'Sin nombre'}`}</span>
+      ))}
       {proposals.map((proposal) => {
         const topLeft = imageToScreen(
           { x: proposal.bbox.x * image.width, y: proposal.bbox.y * image.height },
@@ -74,5 +123,11 @@ export function DetectionProposals({
   image: Size;
 }) {
   const { proposals } = useDetection(versionId, socket);
-  return <ProposalsLayer proposals={proposals?.activities ?? []} image={image} />;
+  return (
+    <ProposalsLayer
+      proposals={proposals?.activities ?? []}
+      transitions={proposals?.transitions ?? []}
+      image={image}
+    />
+  );
 }
