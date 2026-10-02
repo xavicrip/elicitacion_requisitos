@@ -1,4 +1,9 @@
-import { AnalysisRunSchema, DescriptiveDashboardSchema } from '@reqcanvas/shared';
+import {
+  AnalysisRunSchema,
+  AnalysisSettingsSchema,
+  DescriptiveDashboardSchema,
+  DuplicateDecisionSchema,
+} from '@reqcanvas/shared';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -134,5 +139,55 @@ describe('análisis (US2)', () => {
     expect(response.statusCode).toBe(200);
     expect(StrictRun.safeParse(response.json()).error?.issues ?? []).toEqual([]);
     expect(response.json().id).toBe(runId);
+  });
+});
+
+describe('decisiones y ajustes (US3)', () => {
+  it('POST /projects/{projectId}/duplicate-decisions 201 devuelve la decisión', async () => {
+    const diagram = await publishedDiagram(app, admin, projectId, ['Otra actividad']);
+    const ids: string[] = [];
+    for (const given of ['el cliente paga', 'el comprador paga']) {
+      const created = await createDetail(
+        app,
+        admin,
+        diagram.diagramId,
+        diagram.keys['Otra actividad']!,
+        {
+          given,
+        },
+      );
+      ids.push(created.json().id);
+    }
+    const response = await app.inject({
+      method: 'POST',
+      url: `/projects/${projectId}/duplicate-decisions`,
+      headers: admin,
+      payload: { pair: ids, decision: 'rejected' },
+    });
+    expect(response.statusCode).toBe(201);
+    expect(
+      z.strictObject(DuplicateDecisionSchema.shape).safeParse(response.json()).error?.issues ?? [],
+    ).toEqual([]);
+  });
+
+  it('GET y PUT /projects/{projectId}/analysis-settings 200 devuelven AnalysisSettings', async () => {
+    const StrictSettings = z.strictObject({
+      ...AnalysisSettingsSchema.shape,
+      schedule: z.strictObject(AnalysisSettingsSchema.shape.schedule.shape),
+    });
+    const current = await app.inject({
+      url: `/projects/${projectId}/analysis-settings`,
+      headers: admin,
+    });
+    expect(current.statusCode).toBe(200);
+    expect(StrictSettings.safeParse(current.json()).error?.issues ?? []).toEqual([]);
+    const saved = await app.inject({
+      method: 'PUT',
+      url: `/projects/${projectId}/analysis-settings`,
+      headers: admin,
+      payload: { ...(current.json() as object), extraAmbiguousTerms: ['ágil'] },
+    });
+    expect(saved.statusCode).toBe(200);
+    expect(StrictSettings.safeParse(saved.json()).error?.issues ?? []).toEqual([]);
   });
 });

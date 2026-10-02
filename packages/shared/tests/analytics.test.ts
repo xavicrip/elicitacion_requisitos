@@ -10,6 +10,8 @@ import {
   AnalysisResultsSchema,
   AnalysisRunSchema,
   AnalysisRunStatusSchema,
+  AnalysisSettingsInputSchema,
+  DuplicateDecisionInputSchema,
   DashboardFiltersSchema,
   DescriptiveDashboardSchema,
 } from '../src/analytics';
@@ -254,5 +256,45 @@ describe('estados y filtros', () => {
         }),
       ),
     ).toEqual([]);
+  });
+});
+
+describe('decisiones de duplicados y ajustes (US3)', () => {
+  it('confirmar exige el detalle que se conserva, que debe ser del par', () => {
+    const pair = ['a', 'b'];
+    expect(DuplicateDecisionInputSchema.safeParse({ pair, decision: 'rejected' }).success).toBe(
+      true,
+    );
+    expect(DuplicateDecisionInputSchema.safeParse({ pair, decision: 'confirmed' }).success).toBe(
+      false,
+    );
+    expect(
+      DuplicateDecisionInputSchema.safeParse({ pair, decision: 'confirmed', keep: 'a' }).success,
+    ).toBe(true);
+    expect(
+      DuplicateDecisionInputSchema.safeParse({ pair, decision: 'confirmed', keep: 'c' }).success,
+    ).toBe(false);
+    expect(
+      DuplicateDecisionInputSchema.safeParse({ pair: ['a', 'a'], decision: 'rejected' }).success,
+    ).toBe(false);
+  });
+
+  it('los términos se guardan en minúsculas y sin repetir; el cron tiene cinco campos', () => {
+    const schedule = { enabled: true, cron: '0 3 * * *', timezone: 'America/Guayaquil' };
+    const parsed = AnalysisSettingsInputSchema.parse({
+      extraAmbiguousTerms: ['Ágil', 'ágil', ' bonito '],
+      extraStopwords: [],
+      schedule,
+    });
+    expect(parsed.extraAmbiguousTerms).toEqual(['ágil', 'bonito']);
+    const invalid = (change: object) =>
+      AnalysisSettingsInputSchema.safeParse({
+        extraAmbiguousTerms: [],
+        extraStopwords: [],
+        schedule,
+        ...change,
+      }).success;
+    expect(invalid({ schedule: { ...schedule, cron: 'a las tres' } })).toBe(false);
+    expect(invalid({ schedule: { ...schedule, timezone: 'Marte/Olimpo' } })).toBe(false);
   });
 });

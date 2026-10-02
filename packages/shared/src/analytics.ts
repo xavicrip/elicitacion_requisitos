@@ -322,6 +322,73 @@ export const AnalysisRunSchema = z.object({
     .optional(),
 });
 
+/** Decisión del Administrador sobre un par de posibles duplicados (US3, FR-007). */
+export const DuplicateDecisionInputSchema = z
+  .object({
+    pair: PairSchema.refine(([a, b]) => a !== b, {
+      error: 'El par necesita dos detalles distintos.',
+    }),
+    decision: z.enum(['confirmed', 'rejected']),
+    /** Al confirmar: el detalle que se conserva; el otro queda como duplicado suyo. */
+    keep: z.string().min(1).optional(),
+    similarity: z.number().min(0).max(1).optional(),
+  })
+  .refine((input) => input.decision === 'rejected' || input.keep !== undefined, {
+    error: 'Indica cuál de los dos detalles se conserva.',
+    path: ['keep'],
+  })
+  .refine((input) => input.keep === undefined || input.pair.includes(input.keep), {
+    error: 'El detalle que se conserva debe ser uno de los dos del par.',
+    path: ['keep'],
+  });
+
+export const DuplicateDecisionSchema = z.object({
+  id: z.string(),
+  pair: PairSchema,
+  decision: z.enum(['confirmed', 'rejected']),
+  decidedAt: z.iso.datetime(),
+});
+
+const TermList = (max: number, what: string) =>
+  z
+    .array(Term)
+    .max(max, { error: `Como máximo ${max} ${what}.` })
+    .transform((terms) => [...new Set(terms.map((term) => term.toLowerCase()))]);
+
+/** Ajustes del análisis de un proyecto tal como se devuelven (FR-009, FR-013). */
+export const AnalysisSettingsSchema = z.object({
+  extraAmbiguousTerms: z.array(z.string()),
+  extraStopwords: z.array(z.string()),
+  schedule: z.object({ enabled: z.boolean(), cron: z.string(), timezone: z.string() }),
+});
+
+/** Ajustes al guardarlos: términos en minúsculas y sin repetir, cron y zona horaria válidos. */
+export const AnalysisSettingsInputSchema = z.object({
+  extraAmbiguousTerms: TermList(100, 'términos ambiguos'),
+  extraStopwords: TermList(200, 'palabras vacías'),
+  schedule: z.object({
+    enabled: z.boolean(),
+    /** Cron de cinco campos (minuto hora día mes día-de-la-semana). */
+    cron: z
+      .string()
+      .trim()
+      .regex(/^(\S+\s+){4}\S+$/, {
+        error: 'Usa un cron de cinco campos, por ejemplo «0 3 * * *».',
+      }),
+    timezone: z.string().refine(
+      (zone) => {
+        try {
+          new Intl.DateTimeFormat('es', { timeZone: zone });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      { error: 'Zona horaria desconocida.' },
+    ),
+  }),
+});
+
 const CountSchema = z.object({ key: z.string(), label: z.string(), count: z.number().int() });
 
 /** Capa descriptiva (US1, FR-002), calculada al momento en `api`. */
@@ -362,3 +429,7 @@ export type Insight = z.infer<typeof InsightSchema>;
 export type AnalysisResults = z.infer<typeof AnalysisResultsSchema>;
 export type AnalysisRun = z.infer<typeof AnalysisRunSchema>;
 export type DescriptiveDashboard = z.infer<typeof DescriptiveDashboardSchema>;
+export type DuplicateDecisionInput = z.infer<typeof DuplicateDecisionInputSchema>;
+export type DuplicateDecision = z.infer<typeof DuplicateDecisionSchema>;
+export type AnalysisSettings = z.infer<typeof AnalysisSettingsSchema>;
+export type AnalysisSettingsInput = z.input<typeof AnalysisSettingsInputSchema>;
