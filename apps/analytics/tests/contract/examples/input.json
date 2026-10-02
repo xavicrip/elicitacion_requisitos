@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "jobId": "66f4a1b2c3d4e5f601234567",
+  "versionId": "66f3a1b2c3d4e5f601234567",
+  "image": {
+    "url": "https://bucket.example.com/diagrams/v1/display.webp?X-Amz-Signature=abc",
+    "width": 3200,
+    "height": 2400
+  },
+  "options": { "llmRefine": false, "arrows": true, "languages": ["spa", "eng"] },
+  "requestId": "0192f3a4-5b6c-7d8e-9f01-23456789abcd"
+}
