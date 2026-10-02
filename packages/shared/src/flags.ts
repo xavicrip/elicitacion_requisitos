@@ -20,8 +20,8 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
 export const FLAGS = defineFlags({
   detection: {
     description:
-      'Detección asistida de actividades en la imagen del diagrama; oculta hasta completar la feature',
-    default: false,
+      'Detección asistida de actividades en la imagen del diagrama (propuestas con revisión humana)',
+    default: true,
     owner: '006-deteccion-asistida',
   },
   'detection-llm': {

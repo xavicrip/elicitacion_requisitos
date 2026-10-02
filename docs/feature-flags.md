@@ -32,12 +32,12 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 | Flag            | Por defecto | Feature                  | Qué oculta                                                                                                                              |
 | --------------- | ----------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `detection`     | `false`     | `006-deteccion-asistida` | La detección asistida: `POST /diagram-versions/:id/detections`, las propuestas y su revisión; en `web`, el botón _Detectar actividades_ |
+| `detection`     | `true`      | `006-deteccion-asistida` | La detección asistida: `POST /diagram-versions/:id/detections`, las propuestas y su revisión; en `web`, el botón _Detectar actividades_ |
 | `detection-llm` | `false`     | `006-deteccion-asistida` | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste                                  |
 | `invite-email`  | `false`     | `002-auth-proyectos`     | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)                                               |
 
-En local y en CI, Compose activa `detection` (`infra/docker-compose.yml`); en Railway, solo en
-`staging` hasta completar la feature.
+`detection` está activado por defecto desde que se recorrió en staging (T051); se retira en un
+commit posterior. `detection-llm` sigue desactivado: es un flag operativo por su coste.
 
 ## Flags retirados
 
