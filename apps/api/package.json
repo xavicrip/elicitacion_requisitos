@@ -14,7 +14,8 @@
     "migrate:down": "tsx --env-file-if-exists=../../.env src/db/cli.ts down",
     "migrate:status": "tsx --env-file-if-exists=../../.env src/db/cli.ts status",
     "migrate:create": "migrate-mongo create",
-    "migrate:deploy": "node dist/migrate.js auto"
+    "migrate:deploy": "node dist/migrate.js auto",
+    "seed:analytics": "tsx scripts/seed-analytics.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
