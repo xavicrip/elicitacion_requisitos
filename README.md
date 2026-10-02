@@ -10,14 +10,15 @@ diagrama, y el administrador los analiza con técnicas de minería de datos y de
 
 ## Arquitectura
 
-| Servicio    | Tecnología                                 | Puerto local       |
-| ----------- | ------------------------------------------ | ------------------ |
-| `web`       | React + Vite + three.js, servido por Caddy | 5173               |
-| `api`       | Node.js 24 + Fastify + Mongoose            | 3000               |
-| `analytics` | Python 3.12 + FastAPI                      | 8000               |
-| `mongodb`   | MongoDB 7                                  | (solo red interna) |
-| `redis`     | Redis 7                                    | (solo red interna) |
-| `s3`        | RustFS (bucket S3; en Railway, un Bucket)  | (solo red interna) |
+| Servicio           | Tecnología                                                              | Puerto local       |
+| ------------------ | ----------------------------------------------------------------------- | ------------------ |
+| `web`              | React + Vite + three.js, servido por Caddy                              | 5173               |
+| `api`              | Node.js 24 + Fastify + Mongoose                                         | 3000               |
+| `analytics`        | Python 3.12 + FastAPI                                                   | 8000               |
+| `analytics-worker` | Python 3.12 + BullMQ, OpenCV y Tesseract (misma imagen que `analytics`) | (solo red interna) |
+| `mongodb`          | MongoDB 7                                                               | (solo red interna) |
+| `redis`            | Redis 7                                                                 | (solo red interna) |
+| `s3`               | RustFS (bucket S3; en Railway, un Bucket)                               | (solo red interna) |
 
 ```text
 apps/web          Frontend
@@ -136,6 +137,35 @@ Varias réplicas de `api` se reparten los eventos con el adaptador de Redis. Ver
 [quickstart de la 005](specs/005-colaboracion-tiempo-real/quickstart.md) y el
 [ADR 0007](docs/adr/0007-colaboracion-en-tiempo-real.md).
 
+### Detección asistida (feature 006)
+
+En un diagrama en borrador, el Administrador pulsa _Detectar actividades_ y el sistema propone
+las zonas (acciones, decisiones, inicio y fin), el nombre de cada una y las flechas entre ellas:
+
+- `api` encola la detección en BullMQ y `analytics-worker` la procesa con OpenCV y Tesseract;
+  el progreso llega por el socket de la 005 (o consultando cada 3 s sin conexión).
+- Las propuestas aparecen punteadas sobre el diagrama con su confianza. Nada se convierte en
+  actividad sin revisión: se aceptan (corrigiendo nombre o tipo si hace falta), se descartan o
+  se aceptan en bloque las de confianza alta, salvo los posibles duplicados.
+- Una flecha se acepta cuando sus dos actividades ya están aceptadas.
+- No se publica mientras queden propuestas pendientes.
+
+Flags: `detection` activa la función (Compose la activa) y `detection-llm` añade un
+refinamiento opcional con Claude, que solo se usa con `ANTHROPIC_API_KEY` (tiene coste; modelo
+configurable con `DETECTION_LLM_MODEL`). `pnpm dev:up` incluye `analytics-worker`.
+
+Para evaluar la precisión con el conjunto de validación (se genera, no se versiona):
+
+```bash
+cd apps/analytics
+uv run python tests/fixtures/generate.py
+uv run python tests/eval/evaluate_detection.py --timing   # zonas, nombres y flechas por subconjunto
+```
+
+El CI falla si en los diagramas digitales las zonas bajan del 85 % o los nombres del 80 %. Ver
+el [quickstart de la 006](specs/006-deteccion-asistida/quickstart.md) y el
+[ADR 0008](docs/adr/0008-deteccion-asistida.md).
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash
@@ -152,8 +182,9 @@ docker compose -f infra/docker-compose.yml logs api analytics | grep prueba-456
 | `pnpm typecheck`                                                              | TypeScript (todos los paquetes y `e2e/`) + mypy                           |
 | `pnpm test:services:up` / `test:services:down`                                | MongoDB, Redis y S3 (RustFS) para las pruebas de integración              |
 | `pnpm test`                                                                   | Vitest (shared, api, web) + pytest (analytics)                            |
+| `pnpm test:py`                                                                | Solo pytest de `analytics` (unitarias, contrato y gate de precisión)      |
 | `pnpm e2e`                                                                    | Pruebas de humo contra `BASE_URL` / `API_URL` y, en local, los flujos E2E |
-| `pnpm e2e:perf`                                                               | Mediciones de rendimiento del canvas (local, abre Chrome)                 |
+| `pnpm e2e:perf`                                                               | Mediciones de rendimiento del canvas y de la detección (local)            |
 | `pnpm --filter @reqcanvas/api migrate:up` / `migrate:down` / `migrate:status` | Migraciones (lee `MONGO_URL` y `MONGO_DB`)                                |
 | `pnpm --filter @reqcanvas/api migrate:create <nombre>`                        | Nueva migración a partir de `migrations/sample-migration.js`              |
 
