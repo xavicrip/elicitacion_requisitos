@@ -19,7 +19,6 @@
     "d3-scale-chromatic": "^3.1.0",
     "diff": "^9.0.0",
     "echarts": "^5.6.0",
-    "echarts-for-react": "^3.0.6",
     "echarts-wordcloud": "^2.1.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
