@@ -153,16 +153,23 @@ por separado.
    worker (objetivo < 400 MB). Railway no lee los `railway.json` (ADR 0002): la configuración del
    servicio nuevo la crea el propietario y se aplica con `railway environment edit`;
    `deploy.yml` añade el servicio al bucle de `scripts/railway/deploy-service.sh`.
-10. **Salud del worker**: sin servidor HTTP, el worker escribe un latido en Redis cada 10 s
-    (`detection:worker:{id}`, TTL 30 s) y `api /health/deep` añade el check `detection-worker`
-    cuando el flag `detection` está activo (constitución VI).
+10. **Salud del worker** (constitución VI): el worker expone un `GET /health` mínimo en `PORT`
+    (servidor HTTP ligero en el mismo proceso) que responde `200` si Redis responde y el bucle de
+    BullMQ está vivo; Railway lo usa como healthcheck, como en los demás servicios. Además
+    escribe un latido en Redis cada 10 s (`detection:worker:{id}`, TTL 30 s) y `api /health/deep`
+    añade el check `detection-worker` cuando el flag `detection` está activo, para saber desde
+    `api` si hay algún worker consumiendo la cola.
 11. **Refinamiento con Claude (opcional)**: el modelo se configura con `DETECTION_LLM_MODEL`
     (por defecto `claude-opus-5-5`; `claude-sonnet-5-5` es la alternativa más barata, a decidir
     al medir), con el SDK `anthropic` de Python, salidas estructuradas (`output_config.format`
     con el esquema de correcciones), comprobación de `stop_reason` (`refusal`) y timeout de 30 s;
     si falla, se sigue con el resultado local. Sin `ANTHROPIC_API_KEY` o con `detection-llm`
     desactivado, no se llama. El coste por detección se registra en `metrics`.
-12. **Pruebas**: integración de `api` con un worker falso en Node que consume la cola
+12. **Estados del job** (constitución VI): `pending`, `running`, `done` y `failed`, los que
+    nombra la constitución para los trabajos asíncronos, en `detection_jobs`, el contrato,
+    `packages/shared` y la web; la correspondencia con los estados de BullMQ queda dentro de
+    `apps/api/src/jobs/detection.ts`.
+13. **Pruebas**: integración de `api` con un worker falso en Node que consume la cola
     `detection` y devuelve un `DetectionResult` fijo; pytest del pipeline con el conjunto de
     validación; E2E en `e2e/flows/detection.spec.ts` contra Compose con el worker real
     (servicio `analytics-worker` en `infra/docker-compose.yml`) y `compra-simple.png`, que ya
