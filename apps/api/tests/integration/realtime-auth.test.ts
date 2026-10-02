@@ -85,7 +85,10 @@ describe('handshake', () => {
 describe('room:join', () => {
   it('un miembro se une a la versión publicada', async () => {
     const socket = await connect(url, luis.accessToken);
-    expect(await join(socket, { versionId: published })).toEqual({ ok: true, presence: [] });
+    expect(await join(socket, { versionId: published })).toEqual({
+      ok: true,
+      presence: [expect.objectContaining({ userId: luis.id, name: luis.name })],
+    });
   });
 
   it('el borrador solo para el Administrador (canSeeVersion de la 003)', async () => {
