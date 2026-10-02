@@ -255,6 +255,18 @@ describe('detección asistida (feature 006)', () => {
     }
     await pause(200);
     expect(leaked).toEqual([]);
+
+    const proposals = (
+      await app.inject({
+        url: `/diagram-versions/${draft.id}/proposals`,
+        headers: authHeaders(ana),
+      })
+    ).json().activities as Array<{ id: string }>;
+    const reviewed = nextEvent(admin, 'proposal.reviewed', 5000);
+    await inject('POST', `/proposals/${proposals[0]!.id}/discard`, ana);
+    expect(
+      DETECTION_EVENT_SCHEMAS['proposal.reviewed'].safeParse(await reviewed).error?.issues ?? [],
+    ).toEqual([]);
   });
 });
 
