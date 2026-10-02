@@ -26,7 +26,11 @@ const notDraft = () =>
     'Esta versión ya está publicada: sube una versión nueva para cambiar sus actividades.',
   );
 
-type Actor = { actorId: string };
+type Actor = {
+  actorId: string;
+  /** `detected` al aceptar una propuesta de la detección (feature 006). */
+  source?: 'manual' | 'detected';
+};
 
 export function activitiesService(app: FastifyInstance) {
   const Activities = activitiesModel(app.mongo);
@@ -69,7 +73,7 @@ export function activitiesService(app: FastifyInstance) {
   return {
     loadActivity: (id: string) => Activities.findById(id).lean<Activity>(),
 
-    async create(version: DiagramVersion, input: ActivityInput, { actorId }: Actor) {
+    async create(version: DiagramVersion, input: ActivityInput, { actorId, source }: Actor) {
       if (version.status !== 'draft') throw notDraft();
       const next = input.next ?? [];
       await checkNext(version._id, next);
@@ -81,6 +85,7 @@ export function activitiesService(app: FastifyInstance) {
         type: input.type,
         bbox: input.bbox,
         next,
+        ...(source ? { source } : {}),
       });
       const activity = created.toObject();
       await record('activity.created', activity, actorId, {

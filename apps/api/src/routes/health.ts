@@ -56,6 +56,16 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
       ? { storage: await runCheck(() => app.storage.ping(), checkTimeoutMs) }
       : {};
 
+  // Detección (feature 006): algún analytics-worker con latido reciente, si el flag está activo.
+  const detectionChecks = async (): Promise<Record<string, HealthCheck>> =>
+    app.hasDecorator('detection')
+      ? {
+          'detection-worker': await runCheck(async () => {
+            if ((await app.detection.workers()) === 0) throw new Error('NoWorker');
+          }, checkTimeoutMs),
+        }
+      : {};
+
   const respond = (checks: Record<string, HealthCheck>): Health => ({
     status: overallStatus(checks),
     service: 'api',
@@ -71,12 +81,13 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
   });
 
   app.get('/health/deep', async (_request, reply) => {
-    const [direct, analytics, storage] = await Promise.all([
+    const [direct, analytics, storage, detection] = await Promise.all([
       directChecks(),
       analyticsCheck(),
       storageChecks(),
+      detectionChecks(),
     ]);
-    const body = respond({ ...direct, analytics, ...storage });
+    const body = respond({ ...direct, analytics, ...storage, ...detection });
     return reply.code(body.status === 'ok' ? 200 : 503).send(body);
   });
 
