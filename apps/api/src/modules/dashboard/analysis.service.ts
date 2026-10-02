@@ -254,7 +254,10 @@ export function analysisService(app: FastifyInstance) {
       if (!run || (run.status !== 'pending' && run.status !== 'running')) return;
       const results = AnalysisResultsSchema.safeParse(await readResults(run.resultsKey));
       if (!results.success) {
-        app.log.error({ runId }, 'Resultados del análisis inválidos');
+        app.log.error(
+          { runId, issues: results.error.issues.slice(0, 3) },
+          'Resultados del análisis inválidos',
+        );
         return this.fail(runId, 'INTERNAL');
       }
       const done = await Runs.findOneAndUpdate(

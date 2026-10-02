@@ -83,7 +83,7 @@ async def process(
     stages: dict[Stage, StageResult] = {}
     if previous is not None:
         # Regenerar insights: se conservan las demás secciones del run original.
-        sections = previous.model_dump(mode="json", by_alias=True, exclude_none=True)
+        sections = previous.model_dump(mode="json", by_alias=True, exclude_unset=True)
         stages = dict(previous.stages)
 
     for index, stage in enumerate(job.stages):
@@ -116,6 +116,6 @@ async def process(
     sections.update(context.extra)
     sections["schemaVersion"] = 1
     sections["stages"] = {
-        name: result.model_dump(exclude_none=True) for name, result in stages.items()
+        name: result.model_dump(exclude_unset=True) for name, result in stages.items()
     }
     return Outcome(results=AnalysisResults.model_validate(sections), detail_count=len(data.details))

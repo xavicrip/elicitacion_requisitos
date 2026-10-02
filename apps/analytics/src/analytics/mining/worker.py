@@ -172,8 +172,10 @@ class AnalysisWorker(QueueWorker):
             outcome = await self.process(payload, data, previous, progress)
 
             await progress("upload", 100)
+            # Se omiten las secciones que no se calcularon, no los nulos con significado (un punto
+            # sin grupo lleva `groupId: null`).
             body = gzip.compress(
-                outcome.results.model_dump_json(by_alias=True, exclude_none=True).encode()
+                outcome.results.model_dump_json(by_alias=True, exclude_unset=True).encode()
             )
             try:
                 response = await client.put(
