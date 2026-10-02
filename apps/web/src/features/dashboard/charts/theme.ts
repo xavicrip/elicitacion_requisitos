@@ -10,6 +10,8 @@ export const VIZ = {
   grid: '#e4e3df',
   /** Orden fijo: azul, naranja, aguamarina. No se reasignan al filtrar. */
   series: ['#2a78d6', '#eb6834', '#1baf7a'],
+  /** Lo que no pertenece a ninguna categoría destacada. */
+  neutral: '#b8b7b0',
 } as const;
 
 const ESCAPES: Record<string, string> = {
