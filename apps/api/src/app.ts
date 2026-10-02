@@ -10,6 +10,7 @@ import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
+import { registerDashboardCascade } from './modules/dashboard/cascade.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
 import { commentRoutes } from './modules/details/comments.routes.js';
 import { coverageRoutes } from './modules/details/coverage.routes.js';
@@ -177,6 +178,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(coverageRoutes);
         await app.register(voteRoutes);
         await app.register(commentRoutes);
+
+        // Dashboard analítico (feature 007): la cascada existe aunque el flag esté desactivado.
+        registerDashboardCascade(app);
 
         // Detección asistida (feature 006): cola con analytics-worker.
         await app.register(detectionPlugin, {
