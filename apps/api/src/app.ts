@@ -12,6 +12,7 @@ import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { registerDashboardCascade } from './modules/dashboard/cascade.js';
+import { descriptiveRoutes } from './modules/dashboard/descriptive.routes.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
 import { registerDetectionCascade } from './modules/detection/cascade.js';
 import { commentRoutes } from './modules/details/comments.routes.js';
@@ -186,6 +187,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         // Dashboard analítico (feature 007): la cascada existe aunque el flag esté desactivado.
         registerDashboardCascade(app);
         if (flags.dashboard) {
+          await app.register(descriptiveRoutes);
           await app.register(analysisPlugin, {
             redisUrl: services.redisUrl,
             queuePrefix: `${redisNameSpace}bull`,
