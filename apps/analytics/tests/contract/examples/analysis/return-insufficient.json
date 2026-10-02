@@ -1,0 +1,48 @@
+{
+  "v": 1,
+  "status": "done",
+  "partial": false,
+  "detailCount": 12,
+  "stages": {
+    "keywords": {
+      "status": "done",
+      "durationMs": 30
+    },
+    "cooccurrence": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    },
+    "topics": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    },
+    "clusters": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    },
+    "duplicates": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    },
+    "sentiment": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    },
+    "quality": {
+      "status": "done",
+      "durationMs": 30
+    },
+    "association": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    },
+    "hotcold": {
+      "status": "done",
+      "durationMs": 30
+    },
+    "insights": {
+      "status": "skipped",
+      "reason": "INSUFFICIENT_DATA"
+    }
+  }
+}
