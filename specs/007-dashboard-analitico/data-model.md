@@ -2,33 +2,33 @@
 
 **Feature**: 007-dashboard-analitico | **Date**: 2026-09-25
 
-## analysis_runs — **compartida** (`api` crea; `analytics` actualiza `status`, `progress`, `results`, `error`, `startedAt`, `finishedAt`)
+## analysis_runs — propiedad de `api`
+
+El worker no accede a MongoDB (plan, ajuste 1): `api` crea el documento, exporta la entrada al
+bucket, procesa el retorno del job y guarda los resultados.
 
 | Campo | Tipo | Reglas |
 |-------|------|--------|
 | `_id` | ObjectId | También es el `jobId` |
 | `projectId` | ObjectId | Índice `{projectId, createdAt: -1}` |
 | `trigger` | `manual \| scheduled` | |
-| `filters` | `{ diagramIds?, from?, to?, types?, includeStatuses }` | `includeStatuses` por defecto: `pending`, `validated` |
-| `status` | `queued \| running \| completed \| partial \| failed` | `partial` si alguna etapa falló |
+| `kind` | `full \| insights` | `insights` = regeneración solo de esa etapa sobre un run anterior |
+| `filters` | `{ diagramIds?, from?, to?, types?, statuses }` | Los de lo descriptivo; `statuses` por defecto `pending`, `validated` |
+| `status` | `pending \| running \| done \| failed` | Constitución VI |
+| `partial` | boolean | `done` con alguna etapa fallida |
 | `progress` | `{ stage, pct }` | |
+| `stages` | `{ [etapa]: { status: done \| failed \| skipped, reason?, durationMs? } }` | Del retorno del job |
 | `dataFingerprint` | `{ count, maxUpdatedAt }` | Para detectar la obsolescencia |
 | `detailCount` | number | Detalles analizados (los duplicados cuentan una vez) |
-| `results` | `AnalysisResults` | Esquema en `contracts/analysis-results.schema.json` (`schemaVersion: 1`) |
-| `error` | `{code, message}?` | |
+| `inputKey`, `resultsKey` | string | `projects/{projectId}/analysis/{runId}/input.json.gz` y `…/results.json.gz` en el bucket |
+| `error` | `{code, message}?` | Mensaje en español para el Administrador |
 | `requestedBy` | ObjectId? | Null si es programado |
 | `createdAt`, `startedAt`, `finishedAt` | Date | |
 
-Regla: máximo 1 run `queued|running` por proyecto (índice único parcial). Se conservan los
-10 últimos runs por proyecto (limpieza tras completar).
-
-## analysis_embeddings — propiedad de `analytics` (caché)
-
-| Campo | Tipo | Reglas |
-|-------|------|--------|
-| `_id` | string | `sha256(model + texto normalizado)` |
-| `vector` | Binary (float32 × 384) | |
-| `createdAt` | Date | Índice TTL de 180 días |
+Regla: máximo 1 run `pending|running` por proyecto (índice único parcial). Se conservan los
+10 últimos runs por proyecto; al borrar uno se borran también sus archivos del bucket. Al borrar
+el proyecto, la cascada elimina sus runs, decisiones, valoraciones y ajustes, y
+`deletePrefix(projects/{id})` sus archivos.
 
 ## duplicate_decisions — propiedad de `api`
 
@@ -59,12 +59,13 @@ Regla: máximo 1 run `queued|running` por proyecto (índice único parcial). Se 
 | `extraStopwords` | string[] | ≤ 200 |
 | `schedule` | `{ enabled: boolean, cron: string, timezone: string }` | Por defecto `{true, "0 3 * * *", "America/Guayaquil"}` |
 
-## Lecturas compartidas (declaradas en la 004)
+## Sin colecciones compartidas
 
-`analytics` lee `details` (proyección **sin** `authorId`), `activities` y `diagram_versions`
-(etiquetas de actividad) del proyecto indicado en el job.
+`analytics` no lee `details`, `activities` ni `diagram_versions`: recibe en el archivo de entrada
+los detalles filtrados (sin `authorId` ni datos del autor, con `authorRole`), los nombres de las
+actividades de la versión publicada y las decisiones de duplicados previas.
 
 ## Migración
 
-`20261029000000-analysis-indexes.js`: índices anteriores, índice único parcial de runs
-activos e índice TTL de `analysis_embeddings`; `down` los elimina.
+`20261029000000-analysis-indexes.js`: los índices anteriores y el único parcial de runs
+`pending|running` por proyecto; `down` los elimina y conserva los datos.

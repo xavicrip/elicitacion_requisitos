@@ -30,10 +30,10 @@ El frontend usa **ECharts**.
 ## Technical Context
 
 **Language/Version**: Python 3.12 (`analytics`); TypeScript 5.x / Node.js 24 LTS (`api`, `web`)
-**Primary Dependencies**: `analytics`: `bullmq`, `spacy` + `es_core_news_md`, `scikit-learn`, `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`), `bertopic`, `umap-learn`, `hdbscan`, `pysentimiento`, `mlxtend`, `networkx`, `pymongo`, `anthropic`. `web`: `echarts` + `echarts-for-react` + `echarts-wordcloud`
-**Storage**: MongoDB: `analysis_runs` (escritura de `analytics`, lectura de `api`), `duplicate_decisions`, `insight_feedback`, `analysis_settings` (propiedad de `api`); lectura de `details`, `activities` y `diagram_versions`
+**Primary Dependencies**: `analytics` (grupo `mining`): `spacy` + `es_core_news_md`, `scikit-learn` (con `HDBSCAN`), `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`), `torch` CPU, `bertopic`, `umap-learn`, `pysentimiento`, `mlxtend`, `networkx`; ya presentes: `bullmq`, `anthropic`. `web`: `echarts` 5 + `echarts-for-react` + `echarts-wordcloud`
+**Storage**: MongoDB, todo propiedad de `api`: `analysis_runs`, `duplicate_decisions`, `insight_feedback`, `analysis_settings`. Bucket: entrada y resultados de cada run bajo `projects/{id}/analysis/` (ajuste 1)
 **Testing**: pytest por técnica con el **conjunto de validación etiquetado** (300 detalles sintéticos con temas, duplicados y ambigüedades conocidos) y gates de métricas; Vitest (agregaciones descriptivas contra datos semilla con resultados calculados a mano); Playwright (dashboard y filtros); evaluación manual de insights con analistas (SC-005)
-**Target Platform**: `analytics-worker` con 4 GB de RAM y CPU (sin GPU)
+**Target Platform**: servicio `analysis-worker` en Railway (imagen `Dockerfile.mining`, CPU sin GPU; la cuenta admite 24 GB por servicio)
 **Project Type**: Aplicación web + servicio analítico
 **Performance Goals**: dashboard descriptivo < 3 s con 2 000 detalles (SC-001); análisis completo < 5 min con 2 000 detalles (SC-002)
 **Constraints**: modelos incluidos en la imagen (sin descargas en tiempo de ejecución); el análisis no degrada la API (proceso separado, concurrencia 1 por réplica); al LLM no se envían nombres ni emails; los análisis de texto exigen ≥ 20 detalles
@@ -77,22 +77,26 @@ specs/007-dashboard-analitico/
 
 ```text
 packages/shared/src/analytics.ts                      # Filtros, KPIs, AnalysisRun, AnalysisResults (zod)
+apps/api/src/jobs/analysis.ts                         # cola "analysis" (patrón de jobs/detection.ts)
+apps/api/src/jobs/analysis-schedule.ts                # schedulers por proyecto (FR-013)
 apps/api/src/modules/dashboard/
 ├── descriptive.routes.ts                             # KPIs, distribuciones, serie temporal
 ├── descriptive.service.ts                            # pipelines de agregación
 ├── analysis.routes.ts                                # lanzar, estado, resultados, decisiones, feedback
-├── analysis.queue.ts                                 # cola "analysis" + job programado nocturno
+├── analysis.service.ts                               # run, export al bucket, retorno, retención
 └── models/{analysis-run,duplicate-decision,insight-feedback,analysis-settings}.ts
 apps/api/migrations/20261029000000-analysis-indexes.js
 apps/analytics/src/analytics/
-├── worker.py                                         # (compartido con la 006) + cola "analysis"
+├── queue_worker.py                                   # común a los workers de la 006 y la 007
 └── mining/
+    ├── worker.py                                     # cola "analysis" (analysis-worker)
+    ├── schemas.py                                    # contrato v1 (pydantic)
     ├── run.py                                        # orquestador con progreso y fallos parciales
-    ├── loader.py                                     # lectura de detalles (proyección sin autor)
+    ├── loader.py                                     # descarga de la entrada (URL firmada)
     ├── preprocess.py                                 # spaCy: normalización, lemas, stopwords
     ├── keywords.py                                   # c-TF-IDF por actividad + n-gramas
     ├── cooccurrence.py                               # red de términos (networkx)
-    ├── embeddings.py                                 # sentence-transformers (caché por hash del texto)
+    ├── embeddings.py                                 # sentence-transformers
     ├── topics.py                                     # BERTopic
     ├── clusters.py                                   # HDBSCAN sobre embeddings
     ├── duplicates.py                                 # similitud coseno + decisiones previas
@@ -103,10 +107,12 @@ apps/analytics/src/analytics/
     ├── insights.py                                   # Claude + structured outputs + verificación de evidencias
     └── lexicon/ambiguous_es.txt
 apps/analytics/tests/
-├── fixtures/validation_set.json                      # 300 detalles etiquetados
-├── unit/test_{preprocess,keywords,quality,duplicates,association,hotcold}.py
-├── eval/test_quality_gates.py                        # SC-003, SC-004 y pureza de temas
+├── fixtures/generate_details.py + details/validation.json   # 300 detalles etiquetados
+├── unit/test_{mining_worker,preprocess,keywords,quality,duplicates,patterns,insights}.py
+├── eval/test_{topics,quality_gates}.py               # SC-003, SC-004 y pureza de temas (analysis-eval)
 └── contract/test_analysis_job.py
+apps/analytics/Dockerfile.mining                      # imagen de analysis-worker con los modelos
+apps/analytics/railway.mining.json
 apps/web/src/features/dashboard/
 ├── DashboardPage.tsx, FiltersBar.tsx, StaleBanner.tsx
 ├── descriptive/{KpiTiles,Distributions,Timeline,CoverageMap}.tsx
@@ -114,13 +120,14 @@ apps/web/src/features/dashboard/
 ├── quality/{QualityList,DuplicatePairs}.tsx
 ├── patterns/{Sentiment,AssociationRules,HotColdActivities}.tsx
 └── insights/{InsightsPanel,EvidenceDrawer}.tsx
-e2e/{dashboard-descriptive,dashboard-analysis}.spec.ts
+e2e/flows/{dashboard-descriptive,dashboard-analysis}.spec.ts
+e2e/perf/dashboard.perf.spec.ts
 ```
 
 **Structure Decision**: la capa descriptiva en `api` (rápida, sin cola) y la analítica en el
-paquete `mining/` de `analytics`, con un módulo por técnica. La infraestructura del worker
-(`worker.py`, servicio `analytics-worker` en Railway) la crea la primera de las features 006 o
-007 que se integre en `main`; la segunda solo registra su cola.
+paquete `mining/` de `analytics`, con un módulo por técnica y su propio servicio,
+`analysis-worker` (ajuste 3). La infraestructura común de los workers (conexión, latido, salud)
+se extrae de la 006 a `queue_worker.py`.
 
 ## Ajustes tras implementar la 002–006 (2026-10-02)
 

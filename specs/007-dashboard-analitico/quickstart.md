@@ -1,7 +1,9 @@
 # Quickstart: Dashboard analítico con minería de datos y de texto
 
-Requiere 001–004, el worker de `analytics` (`pnpm dev:up`) y los flags `analytics-text=true` e
-`insights=true` (con `ANTHROPIC_API_KEY`). Datos: `pnpm --filter api seed:analytics` crea el
+Requiere 001–006, el flag `dashboard=true` (Compose lo activa) y, para el análisis, el worker de
+minería: `docker compose -f infra/docker-compose.yml --profile mining up -d` levanta
+`analysis-worker` (imagen de ~3 GB). Para los insights: `FEATURE_FLAGS=dashboard=true,insights=true`
+y `ANTHROPIC_API_KEY` en `.env`. Datos: `pnpm --filter @reqcanvas/api seed:analytics` crea el
 proyecto "Tienda demo" (10 actividades, 80 detalles, 6 participantes) con 3 temas conocidos
 (pagos, notificaciones, seguridad), 5 detalles ambiguos y 3 pares de duplicados.
 
@@ -20,6 +22,8 @@ proyecto "Tienda demo" (10 actividades, 80 detalles, 6 participantes) con 3 tema
 3. *Temas* → aparecen los 3 temas sembrados como temas distintos.
 4. *Grupos* → dispersión 2D; clic en un grupo → sus detalles.
 5. En un proyecto con 10 detalles → aviso "Datos insuficientes" y solo lo descriptivo.
+6. Lanzar el análisis con *Tipo = No funcional* → el resultado indica con qué filtros se
+   calculó.
 
 ## 3. Calidad y duplicados (US3)
 
@@ -42,15 +46,14 @@ proyecto "Tienda demo" (10 actividades, 80 detalles, 6 participantes) con 3 tema
 
 ## 6. Obsolescencia y programación
 
-Crear 3 detalles nuevos → banner "Análisis desactualizado: 3 detalles nuevos". El job
-nocturno se prueba con `pnpm --filter api analysis:schedule --run-now`.
+Crear 3 detalles nuevos → banner "Análisis desactualizado: 3 detalles nuevos". La
+programación se prueba con las pruebas de integración (`analysis-schedule`).
 
 ## 7. Gates de calidad
 
 ```bash
-cd apps/analytics
-uv run pytest tests/unit tests/contract
-uv run pytest tests/eval/test_quality_gates.py   # duplicados recall ≥ 0.80 y FP < 0.20; ambiguos ≥ 0.80
-uv run python -m analytics.mining.run --bench 2000   # < 5 min (SC-002)
-pnpm e2e -- dashboard-descriptive dashboard-analysis
+pnpm test:py                                                    # unitarias y contrato (sin modelos)
+cd apps/analytics && uv run --group mining pytest tests/eval    # temas, duplicados y ambiguos (job analysis-eval)
+pnpm e2e --project flows dashboard                              # el del análisis necesita el perfil mining
+pnpm e2e:perf -g dashboard                                      # SC-001 y SC-002
 ```

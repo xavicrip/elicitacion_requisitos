@@ -2,7 +2,10 @@ openapi: 3.1.0
 info:
   title: ReqCanvas API - Dashboard analítico
   version: 1.0.0
-  description: Todas las rutas son solo para Administradores del proyecto (Participante → 403).
+  description: >-
+    Todas las rutas son solo para Administradores del proyecto (Participante → 403) y están
+    detrás del flag `dashboard` (sin él responden 404). La regeneración de insights exige además
+    el flag `insights`.
 servers:
   - url: /api
 security:
@@ -32,7 +35,7 @@ components:
           type: object
           properties:
             totalDetails: { type: integer }
-            activeParticipants: { type: integer, description: Autores o votantes en el rango }
+            activeParticipants: { type: integer, description: 'Quien creó un detalle, votó o comentó en el rango filtrado (plan, ajuste 14)' }
             coveredActivitiesPct: { type: number }
             validatedPct: { type: number }
         byActivity: { type: array, items: { $ref: '#/components/schemas/Count' } }
@@ -45,7 +48,7 @@ components:
           items:
             type: object
             properties:
-              date: { type: string, format: date }
+              date: { type: string, format: date, description: Día en la zona horaria del proyecto }
               created: { type: integer }
               votes: { type: integer }
               comments: { type: integer }
@@ -54,7 +57,19 @@ components:
       required: [id, status, progress, createdAt, stale]
       properties:
         id: { type: string }
-        status: { type: string, enum: [queued, running, completed, partial, failed] }
+        status: { type: string, enum: [pending, running, done, failed], description: Constitución VI }
+        partial: { type: boolean, description: 'done con alguna etapa fallida (ver stages)' }
+        filters: { type: object, description: Filtros con los que se calculó (los de lo descriptivo) }
+        stages:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status: { type: string, enum: [done, failed, skipped] }
+              reason: { type: string }
+        error:
+          type: [object, 'null']
+          properties: { code: { type: string }, message: { type: string } }
         progress:
           type: object
           properties: { stage: { type: string }, pct: { type: integer } }
@@ -109,11 +124,11 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/AnalysisRun' }
-        '409': { description: Ya hay un análisis en curso (devuelve su id) }
+        '409': { description: 'Ya hay un análisis en curso (ANALYSIS_IN_PROGRESS, devuelve su id)' }
   /projects/{projectId}/analysis-runs/latest:
     parameters: [{ $ref: '#/components/parameters/ProjectId' }]
     get:
-      summary: Último run completado o parcial, con results
+      summary: Último run terminado (`done`), con results
       responses:
         '200':
           content:
@@ -145,6 +160,7 @@ paths:
                 keep: { type: string, description: 'Si se confirma: id del original; el otro se marca como duplicado' }
       responses:
         '201': { description: Decisión registrada (y moderación aplicada si se confirmó) }
+        '409': { description: Ya decidido o proyecto cerrado }
   /analysis-runs/{runId}/insights/{insightId}/feedback:
     parameters:
       - { name: runId, in: path, required: true, schema: { type: string } }
@@ -166,6 +182,7 @@ paths:
       summary: Relanzar solo la etapa insights sobre los resultados del run
       responses:
         '202': { description: Encolado }
+        '409': { description: 'Flag insights desactivado o análisis en curso' }
   /projects/{projectId}/analysis-settings:
     parameters: [{ $ref: '#/components/parameters/ProjectId' }]
     get:
