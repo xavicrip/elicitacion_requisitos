@@ -1,5 +1,7 @@
 import {
+  AccessRevokedSchema,
   PresenceUpdateSchema,
+  ProjectRoomSchema,
   RELAYED_EVENT_SCHEMAS,
   type RelayedEventName,
 } from '@reqcanvas/shared';
@@ -186,5 +188,21 @@ describe('presencia (US2)', () => {
     socket.emit('presence:heartbeat', { versionId: 7 } as never);
     await pause(300);
     expect(updates).toEqual([]);
+  });
+});
+
+describe('revocación y estado del proyecto (US4)', () => {
+  it('project:closed, project:reopened y access:revoked validan contra su esquema', async () => {
+    const socket = await listener();
+    const closed = nextEvent(socket, 'project:closed');
+    await inject('POST', `/projects/${projectId}/status`, ana, { action: 'close' });
+    expect(ProjectRoomSchema.safeParse(await closed).error?.issues ?? []).toEqual([]);
+    const reopened = nextEvent(socket, 'project:reopened');
+    await inject('POST', `/projects/${projectId}/status`, ana, { action: 'reopen' });
+    expect(ProjectRoomSchema.safeParse(await reopened).error?.issues ?? []).toEqual([]);
+
+    const revoked = nextEvent(socket, 'access:revoked');
+    await inject('DELETE', `/projects/${projectId}/members/${luis.id}`, ana);
+    expect(AccessRevokedSchema.safeParse(await revoked).error?.issues ?? []).toEqual([]);
   });
 });

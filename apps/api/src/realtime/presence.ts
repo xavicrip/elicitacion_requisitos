@@ -137,7 +137,12 @@ export function createPresence(
     },
 
     async leave(versionId: string, socket: RealtimeSocket) {
-      await app.redis.hdel(key(versionId), field(socket));
+      await service.remove(versionId, socket.data.userId, socket.id);
+    },
+
+    /** Quita un socket por su id: también uno de otra réplica (revocación). */
+    async remove(versionId: string, userId: string, socketId: string) {
+      await app.redis.hdel(key(versionId), `${userId}:${socketId}`);
       await broadcast(versionId);
     },
 

@@ -12,6 +12,7 @@ import { Server, type Socket } from 'socket.io';
 import { usersModel } from '../modules/users/model.js';
 import { registerBridge } from './bridge.js';
 import { createPresence, type PresenceConfig } from './presence.js';
+import { registerRevocation } from './revocation.js';
 import { registerRooms } from './rooms.js';
 
 export type RealtimeConfig = PresenceConfig & {
@@ -28,8 +29,12 @@ export type SocketData = {
   name: string;
   /** Caducidad del access token vigente (epoch ms). */
   tokenExpiresAt: number;
-  /** Versiones a cuya sala se ha unido, con su proyecto. */
-  joined: Map<string, string>;
+  /**
+   * Versiones a cuya sala se ha unido, con su proyecto. Objeto plano: viaja entre réplicas con
+   * `fetchSockets` (revocación). Las comprobaciones de sala usan `socket.rooms`, que es lo que
+   * cuenta tras un `socketsLeave` remoto.
+   */
+  joined: Record<string, string>;
 };
 
 export type RealtimeServer = Server<
@@ -115,7 +120,7 @@ export const realtimePlugin = fp<RealtimeConfig>(
         userId: payload.sub,
         name: user.name,
         tokenExpiresAt: payload.exp * 1000,
-        joined: new Map(),
+        joined: {},
       };
       next();
     });
@@ -150,6 +155,7 @@ export const realtimePlugin = fp<RealtimeConfig>(
     app.decorate('io', io);
     app.decorate('presence', presence);
     registerBridge(app);
+    registerRevocation(app, presence);
     // Antes de cerrar el servidor HTTP: Fastify lo cierra después.
     app.addHook('preClose', async () => {
       presence.stop();
