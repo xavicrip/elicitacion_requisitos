@@ -59,6 +59,31 @@ test('ejecutar el análisis de texto y explorar sus resultados', async ({
   await page.waitForTimeout(800);
   await page.screenshot({ path: test.info().outputPath('analysis.png'), fullPage: true });
 
+  // Calidad: los detalles con términos ambiguos aparecen primero, con su explicación (US3).
+  await analysis.getByRole('tab', { name: 'Calidad' }).click();
+  const worst = analysis
+    .getByRole('list', { name: 'Detalles por calidad' })
+    .getByRole('listitem')
+    .first();
+  await expect(worst).toContainText(/Puntaje \d+ de 100/);
+  await expect(worst).toContainText('Término ambiguo');
+
+  // Duplicados: confirmar un par marca el otro detalle como duplicado (moderación de la 004).
+  const duplicatesTab = analysis.getByRole('tab', { name: /^Duplicados \(\d+\)$/ });
+  const before = Number((await duplicatesTab.textContent())!.match(/\d+/)![0]);
+  expect(before).toBeGreaterThanOrEqual(2);
+  await duplicatesTab.click();
+  const pair = analysis.getByRole('listitem', { name: 'Posible duplicado' }).first();
+  await expect(pair).toContainText(/Similitud: \d+\s%/);
+  await pair.getByRole('button', { name: 'Confirmar duplicado' }).click();
+  await expect(analysis.getByRole('tab', { name: `Duplicados (${before - 1})` })).toBeVisible();
+  const orphansOrDuplicates = await request.get(
+    `/api/projects/${seeded.projectId}/dashboard/descriptive?status=pending&status=validated`,
+    { headers: { authorization: `Bearer ${seeded.admin.accessToken}` } },
+  );
+  // El duplicado confirmado deja de contarse: 80 detalles menos uno.
+  expect((await orphansOrDuplicates.json()).kpis.totalDetails).toBe(79);
+
   // Un detalle nuevo después del análisis: aviso de desactualizado (FR-014).
   const [activityKey] = [...seeded.activityKeys.values()];
   const created = await request.post(
@@ -75,7 +100,8 @@ test('ejecutar el análisis de texto y explorar sus resultados', async ({
   );
   expect(created.status()).toBe(201);
   await page.reload();
+  // El detalle nuevo y el que pasó a duplicado cambian los datos analizados.
   await expect(
-    page.getByText(/Análisis desactualizado: 1 detalle nuevo o modificado/),
+    page.getByText(/Análisis desactualizado: \d+ detalles? nuevos? o modificados?/),
   ).toBeVisible();
 });
