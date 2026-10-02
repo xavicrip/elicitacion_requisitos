@@ -101,7 +101,7 @@ components:
       required: [id, status, progress, createdAt]
       properties:
         id: { type: string }
-        status: { type: string, enum: [queued, running, completed, failed] }
+        status: { type: string, enum: [pending, running, done, failed] }
         progress:
           type: object
           properties:

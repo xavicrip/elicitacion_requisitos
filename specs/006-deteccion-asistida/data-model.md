@@ -8,17 +8,17 @@
 |-------|------|--------|
 | `_id` | ObjectId | También es el `jobId` de BullMQ |
 | `projectId`, `diagramId`, `versionId` | ObjectId | Índice `{versionId, createdAt: -1}` |
-| `status` | `queued \| running \| completed \| failed` | |
+| `status` | `pending \| running \| done \| failed` | Estados de la constitución VI |
 | `progress` | `{ stage: 'download' \| 'shapes' \| 'ocr' \| 'arrows' \| 'refine', pct: 0–100 }` | |
-| `options` | `{ llmRefine: boolean, arrows: boolean }` | |
+| `options` | `{ llmRefine: boolean, arrows: boolean, languages: string[] }` | `languages` por defecto `['spa', 'eng']`, como en el contrato |
 | `error` | `{ code, message }?` | Mensaje en español, sin detalles internos |
 | `metrics` | `{ proposed, accepted, edited, discarded, durationMs, llmUsed }` | `accepted/edited/discarded` se actualizan durante la revisión (FR-009) |
 | `requestedBy` | ObjectId | Admin |
 | `createdAt`, `startedAt`, `finishedAt` | Date | |
 
-Regla: como máximo un job `queued|running` por versión (índice único parcial).
+Regla: como máximo un job `pending|running` por versión (índice único parcial).
 
-**Transiciones**: `queued → running → completed | failed`; `failed → queued` (reintentar).
+**Transiciones**: `pending → running → done | failed`; `failed → pending` (reintentar).
 
 ## activity_proposals
 
