@@ -122,7 +122,8 @@ export async function createDetail(
   return (await response.json()) as { id: string; rev: number };
 }
 
-const IMAGE = { width: 900, height: 1200 };
+/** Tamaño de `compra-simple.png`, la fixture de `projectWithPublishedDiagram`. */
+export const IMAGE = { width: 900, height: 1200 };
 
 /** Abre el diagrama, hace clic en la zona de una actividad y devuelve el panel de requisitos. */
 export async function selectActivity(page: Page, diagram: PublishedDiagram, label: string) {
