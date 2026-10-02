@@ -1,6 +1,7 @@
 import type { DetectionEvents, DetectionJob, DetectionProgress, Relayed } from '@reqcanvas/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { diagramKeys } from '../diagrams/api';
 import { useConnectionStore } from '../realtime/connection';
 import type { RealtimeSocket } from '../realtime/socket';
 import { detectionApi, detectionKeys, isRunning } from './api';
@@ -52,13 +53,21 @@ export function useDetection(versionId: string, socket: RealtimeSocket | null) {
       void client.invalidateQueries({ queryKey: detectionKeys.job(versionId) });
       void client.invalidateQueries({ queryKey: detectionKeys.proposals(versionId) });
     };
+    // Otra pestaña (u otro Administrador) revisó una propuesta: lista y actividades al día.
+    const onReviewed = (payload: { versionId: string }) => {
+      if (!mine(payload)) return;
+      void client.invalidateQueries({ queryKey: detectionKeys.proposals(versionId) });
+      void client.invalidateQueries({ queryKey: diagramKeys.version(versionId) });
+    };
     listener.on('detection.progress', onProgress);
     listener.on('detection.completed', onFinished);
     listener.on('detection.failed', onFinished);
+    listener.on('proposal.reviewed', onReviewed);
     return () => {
       listener.off('detection.progress', onProgress);
       listener.off('detection.completed', onFinished);
       listener.off('detection.failed', onFinished);
+      listener.off('proposal.reviewed', onReviewed);
     };
   }, [socket, versionId, client]);
 

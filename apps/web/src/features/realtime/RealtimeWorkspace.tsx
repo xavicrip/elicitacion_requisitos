@@ -7,6 +7,7 @@ import { useWorkspaceStore } from '../diagrams/workspace/store';
 import { projectKeys, projectsApi } from '../projects/api';
 import { useFlags } from '../../lib/flags';
 import { DetectionPanel } from '../detection/DetectionPanel';
+import { ProposalReviewPanel } from '../detection/ProposalReviewPanel';
 import { DetectionProposals } from '../detection/ProposalsLayer';
 import { ConnectionBanner } from './ConnectionBanner';
 import { CursorsLayer, CursorsToggle } from './CursorsLayer';
@@ -83,7 +84,12 @@ export function RealtimeWorkspace() {
         )}
         editorPanel={
           detection
-            ? ({ versionId: shown }) => <DetectionPanel versionId={shown} socket={socket} />
+            ? ({ versionId: shown }) => (
+                <>
+                  <DetectionPanel versionId={shown} socket={socket} />
+                  <ProposalReviewPanel versionId={shown} socket={socket} />
+                </>
+              )
             : undefined
         }
       />
