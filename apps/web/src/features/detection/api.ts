@@ -1,4 +1,10 @@
-import type { DetectionJob, DetectionStartInput, Proposals } from '@reqcanvas/shared';
+import type {
+  Activity,
+  DetectionJob,
+  DetectionStartInput,
+  ProposalAcceptInput,
+  Proposals,
+} from '@reqcanvas/shared';
 import { ApiError, apiFetch } from '../../lib/api-client';
 
 /** Llamadas a la detección asistida (feature 006, contracts/detection.openapi.yaml). */
@@ -18,6 +24,14 @@ export const detectionApi = {
     }
   },
   proposals: (versionId: string) => apiFetch<Proposals>(`/diagram-versions/${versionId}/proposals`),
+  accept: (proposalId: string, input: ProposalAcceptInput = {}) =>
+    apiFetch<Activity>(`/proposals/${proposalId}/accept`, { method: 'POST', body: input }),
+  discard: (proposalId: string) =>
+    apiFetch<void>(`/proposals/${proposalId}/discard`, { method: 'POST' }),
+  acceptHigh: (versionId: string) =>
+    apiFetch<{ accepted: number }>(`/diagram-versions/${versionId}/proposals/accept-high`, {
+      method: 'POST',
+    }),
 };
 
 export const detectionKeys = {
