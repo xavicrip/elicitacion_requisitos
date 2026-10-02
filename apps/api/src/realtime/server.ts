@@ -11,6 +11,7 @@ import { Types } from 'mongoose';
 import { Server, type Socket } from 'socket.io';
 import { usersModel } from '../modules/users/model.js';
 import { registerBridge } from './bridge.js';
+import { registerCursors } from './cursors.js';
 import { createPresence, type PresenceConfig } from './presence.js';
 import { registerRevocation } from './revocation.js';
 import { registerRooms } from './rooms.js';
@@ -150,6 +151,7 @@ export const realtimePlugin = fp<RealtimeConfig>(
       });
 
       registerRooms(app, socket, presence);
+      registerCursors(app, socket);
     });
 
     app.decorate('io', io);

@@ -1,5 +1,6 @@
 import {
   AccessRevokedSchema,
+  CursorMovedSchema,
   PresenceUpdateSchema,
   ProjectRoomSchema,
   RELAYED_EVENT_SCHEMAS,
@@ -191,6 +192,30 @@ describe('presencia (US2)', () => {
   });
 });
 
+describe('cursores (US3)', () => {
+  it('cursor:moved valida contra su esquema', async () => {
+    const sender = await connect(url, ana.accessToken);
+    await sender.timeout(2000).emitWithAck('room:join', { versionId: diagram.versionId });
+    const socket = await listener();
+    const moved = nextEvent(socket, 'cursor:moved');
+    sender.emit('cursor:move', { versionId: diagram.versionId, x: 10, y: 20.5 });
+    expect(CursorMovedSchema.safeParse(await moved).error?.issues ?? []).toEqual([]);
+  });
+
+  it('cursor:move con un payload inválido se descarta', async () => {
+    const sender = await connect(url, ana.accessToken);
+    await sender.timeout(2000).emitWithAck('room:join', { versionId: diagram.versionId });
+    const socket = await listener();
+    const received = collect(socket, 'cursor:moved');
+    for (const payload of [{ versionId: diagram.versionId, x: -5, y: 0 }, { x: 1, y: 1 }, 'x']) {
+      sender.emit('cursor:move', payload as never);
+    }
+    await pause(300);
+    expect(received).toEqual([]);
+  });
+});
+
+// Al final: retira a Luis del proyecto.
 describe('revocación y estado del proyecto (US4)', () => {
   it('project:closed, project:reopened y access:revoked validan contra su esquema', async () => {
     const socket = await listener();
