@@ -111,8 +111,8 @@ services:
       ANALYTICS_URL: http://analytics:8000
       CORS_ORIGINS: http://localhost:5173
       LOG_LEVEL: info
-      # Sin flags activados por defecto; `.env` puede definirlos (docs/feature-flags.md).
-      FEATURE_FLAGS: ${FEATURE_FLAGS:-}
+      # En local y en CI, `dashboard` activado para desarrollar y probar la feature 007.
+      FEATURE_FLAGS: ${FEATURE_FLAGS:-dashboard=true}
       # Solo para desarrollo local; en Railway es un secreto por entorno.
       JWT_SECRET: dev-only-jwt-secret-not-for-production-use
       APP_BASE_URL: http://localhost:5173

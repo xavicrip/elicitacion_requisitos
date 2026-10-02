@@ -18,11 +18,23 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
  * Ver docs/feature-flags.md.
  */
 export const FLAGS = defineFlags({
+  dashboard: {
+    description:
+      'Dashboard analítico: indicadores, minería de texto, calidad y duplicados; oculto hasta completar la feature',
+    default: false,
+    owner: '007-dashboard-analitico',
+  },
   'detection-llm': {
     description:
       'Refinamiento opcional de la detección con Claude (coste por diagrama); requiere ANTHROPIC_API_KEY',
     default: false,
     owner: '006-deteccion-asistida',
+  },
+  insights: {
+    description:
+      'Resumen de hallazgos con Claude en el dashboard (coste por análisis); requiere ANTHROPIC_API_KEY',
+    default: false,
+    owner: '007-dashboard-analitico',
   },
   'invite-email': {
     description:

@@ -192,6 +192,8 @@ jobs:
         run: docker compose -f infra/docker-compose.yml up -d --build --wait --wait-timeout 300
         env:
           APP_VERSION: ci
+          # Los E2E de `flows` prueban el dashboard, detrás del flag `dashboard` (feature 007).
+          FEATURE_FLAGS: dashboard=true
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
         env:
