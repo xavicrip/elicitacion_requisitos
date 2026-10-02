@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useWorkspaceStore } from '../diagrams/workspace/store';
+import type { HotspotExtensions } from '../diagrams/workspace/ActivityHotspots';
 import { WorkspacePage } from '../diagrams/workspace/WorkspacePage';
 import { detailKeys, detailsApi } from './api';
 import { DetailsPanel } from './DetailsPanel';
@@ -11,7 +12,12 @@ import { coverageHotspots, heatmapScale } from './overlays/Heatmap';
  * detalles, indicadores de cobertura en las zonas (contador, «sin detalles», mapa de calor y
  * notas) y, para el Administrador, el cambio entre el borrador y la versión publicada.
  */
-export function DetailsWorkspacePage() {
+export function DetailsWorkspacePage({
+  extraBadge,
+}: {
+  /** Indicadores de otras features junto a los de cobertura, p. ej. la presencia (005). */
+  extraBadge?: HotspotExtensions['renderBadge'];
+} = {}) {
   const [preferPublished, setPreferPublished] = useState(false);
   const [openNotes, setOpenNotes] = useState<Set<string>>(new Set());
   const versionId = useWorkspaceStore((state) => state.versionId);
@@ -47,6 +53,21 @@ export function DetailsWorkspacePage() {
       preferPublished={preferPublished}
       onPreferPublishedChange={setPreferPublished}
       {...hotspots}
+      renderBadge={
+        hotspots.renderBadge || extraBadge
+          ? (activity) => {
+              // Sin nada que mostrar, null: un fragmento vacío crearía un overlay por zona.
+              const coverageBadge = hotspots.renderBadge?.(activity);
+              const other = extraBadge?.(activity);
+              return coverageBadge || other ? (
+                <>
+                  {coverageBadge}
+                  {other}
+                </>
+              ) : null;
+            }
+          : undefined
+      }
       sidePanel={(activityKey, context) => (
         <DetailsPanel
           activityKey={activityKey}
