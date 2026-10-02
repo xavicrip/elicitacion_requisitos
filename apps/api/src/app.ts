@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { analysisPlugin, type AnalysisConfig } from './jobs/analysis.js';
 import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
@@ -59,9 +60,11 @@ export type ServicesConfig = {
   realtime?: RealtimeConfig;
   /** Detección asistida (feature 006): prefijos y tiempos para las pruebas. */
   detection?: DetectionConfig;
+  /** Análisis del dashboard (feature 007), solo con el flag `dashboard`. */
+  analysis?: AnalysisConfig;
 };
 
-export type { DetectionConfig, RealtimeConfig };
+export type { AnalysisConfig, DetectionConfig, RealtimeConfig };
 
 export type StorageConfig = {
   endpoint: string;
@@ -182,6 +185,14 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
         // Dashboard analítico (feature 007): la cascada existe aunque el flag esté desactivado.
         registerDashboardCascade(app);
+        if (flags.dashboard) {
+          await app.register(analysisPlugin, {
+            redisUrl: services.redisUrl,
+            queuePrefix: `${redisNameSpace}bull`,
+            keyPrefix: redisNameSpace,
+            ...services.analysis,
+          });
+        }
 
         // Detección asistida (feature 006): cola con analytics-worker.
         registerDetectionCascade(app);
