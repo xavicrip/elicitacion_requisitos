@@ -30,21 +30,18 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag           | Por defecto | Feature                        | Qué oculta                                                                                                                                                               |
-| -------------- | ----------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `realtime`     | `true`      | `005-colaboracion-tiempo-real` | Colaboración en tiempo real. Desactivado, `api` no monta el servidor Socket.IO (`/socket.io/`) y `web` no abre el socket: los cambios se ven al recargar, como en la 004 |
-| `invite-email` | `false`     | `002-auth-proyectos`           | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)                                                                                |
-
-`realtime` está activado por defecto desde T047 (2026-10-02), tras el recorrido en staging; se
-retira en un cambio posterior y separado. `FEATURE_FLAGS=realtime=false` lo desactiva.
+| Flag           | Por defecto | Feature              | Qué oculta                                                                                |
+| -------------- | ----------- | -------------------- | ----------------------------------------------------------------------------------------- |
+| `invite-email` | `false`     | `002-auth-proyectos` | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace) |
 
 ## Flags retirados
 
-| Flag       | Feature                   | Activado por defecto | Retirado   |
-| ---------- | ------------------------- | -------------------- | ---------- |
-| `accounts` | `002-auth-proyectos`      | 2026-09-30 (T067)    | 2026-10-01 |
-| `diagrams` | `003-diagramas-canvas`    | 2026-10-01 (T059)    | 2026-10-01 |
-| `details`  | `004-detalles-requisitos` | 2026-10-01 (T053)    | 2026-10-01 |
+| Flag       | Feature                        | Activado por defecto | Retirado   |
+| ---------- | ------------------------------ | -------------------- | ---------- |
+| `accounts` | `002-auth-proyectos`           | 2026-09-30 (T067)    | 2026-10-01 |
+| `diagrams` | `003-diagramas-canvas`         | 2026-10-01 (T059)    | 2026-10-01 |
+| `details`  | `004-detalles-requisitos`      | 2026-10-01 (T053)    | 2026-10-01 |
+| `realtime` | `005-colaboracion-tiempo-real` | 2026-10-02 (T047)    | 2026-10-02 |
 
 ## Activarlo por entorno
 

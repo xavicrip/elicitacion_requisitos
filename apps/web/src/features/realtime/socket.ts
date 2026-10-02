@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 import { refreshSession } from '../../lib/api-client';
 import { useAuthStore } from '../../lib/auth-store';
-import { useFlags } from '../../lib/flags';
 import { useConnectionStore } from './connection';
 
 export type RealtimeSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -126,14 +125,11 @@ export function resetSocketForTests() {
   useConnectionStore.getState().reset();
 }
 
-/** Socket para un componente, solo con el flag `realtime`; `null` mientras no hay. */
+/** Socket para un componente; `null` mientras no hay. */
 export function useRealtimeSocket(): RealtimeSocket | null {
-  const { flags } = useFlags();
-  const enabled = Boolean(flags.realtime);
   const [current, setCurrent] = useState<RealtimeSocket | null>(null);
 
   useEffect(() => {
-    if (!enabled) return;
     let active = true;
     void acquireSocket().then((acquired) => {
       if (active) setCurrent(acquired);
@@ -143,7 +139,7 @@ export function useRealtimeSocket(): RealtimeSocket | null {
       releaseSocket();
       setCurrent(null);
     };
-  }, [enabled]);
+  }, []);
 
   return current;
 }

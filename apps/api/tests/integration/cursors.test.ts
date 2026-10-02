@@ -32,7 +32,6 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('cursors', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     logStream: new Writable({
       write(chunk, _encoding, done) {
         logs.push(String(chunk));
@@ -42,7 +41,6 @@ beforeAll(async () => {
   }));
   ({ app: replica } = await buildTestApp('cursors', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     dbName,
   }));
   url = await app.listen({ port: 0, host: '127.0.0.1' });

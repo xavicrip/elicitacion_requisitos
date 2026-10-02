@@ -50,7 +50,7 @@ export type ServicesConfig = {
   deletion?: DeletionConfig;
   /** Bucket S3 de las imágenes de diagramas (feature 003). */
   storage?: StorageConfig;
-  /** Colaboración en tiempo real (feature 005), solo con el flag `realtime`. */
+  /** Colaboración en tiempo real (feature 005): tiempos y prefijos para las pruebas. */
   realtime?: RealtimeConfig;
 };
 
@@ -173,14 +173,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(commentRoutes);
 
         // Colaboración en tiempo real (feature 005): Socket.IO atiende /socket.io/ fuera del
-        // router, así que el flag decide si se monta (plan de la 005, ajuste 2).
-        if (flags.realtime) {
-          await app.register(realtimePlugin, {
-            adapterKey: `${redisNameSpace}socket.io`,
-            keyPrefix: redisNameSpace,
-            ...services.realtime,
-          });
-        }
+        // router (plan de la 005, ajuste 2).
+        await app.register(realtimePlugin, {
+          adapterKey: `${redisNameSpace}socket.io`,
+          keyPrefix: redisNameSpace,
+          ...services.realtime,
+        });
       }
     }
   }

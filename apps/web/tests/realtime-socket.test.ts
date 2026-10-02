@@ -1,9 +1,6 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { createElement, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAuthStore } from '../src/lib/auth-store';
-import { json, mockApi } from './helpers/api';
 
 // Cliente de Socket.IO de la feature 005 (contracts/socket-events.md, research R2 y R4).
 
@@ -111,24 +108,11 @@ afterEach(() => {
   useAuthStore.getState().clear();
 });
 
-function renderSocketHook(flags: Record<string, boolean>) {
-  mockApi({ 'GET /api/config': () => json(200, { flags }) });
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const wrapper = ({ children }: { children: ReactNode }) =>
-    createElement(QueryClientProvider, { client }, children);
-  return renderHook(() => useRealtimeSocket(), { wrapper });
-}
+const renderSocketHook = () => renderHook(() => useRealtimeSocket());
 
-describe('flag realtime', () => {
-  it('sin el flag no se crea el socket', async () => {
-    const { result } = renderSocketHook({});
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(result.current).toBeNull();
-    expect(io).not.toHaveBeenCalled();
-  });
-
-  it('con el flag se crea y se libera al desmontar', async () => {
-    const { result, unmount } = renderSocketHook({ realtime: true });
+describe('useRealtimeSocket', () => {
+  it('crea el socket y lo libera al desmontar', async () => {
+    const { result, unmount } = renderSocketHook();
     await waitFor(() => expect(result.current).not.toBeNull());
     expect(io).toHaveBeenCalledTimes(1);
     created[0]!.fire('connect');
