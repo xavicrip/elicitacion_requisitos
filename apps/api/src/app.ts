@@ -12,6 +12,7 @@ import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { registerDashboardCascade } from './modules/dashboard/cascade.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
+import { registerDetectionCascade } from './modules/detection/cascade.js';
 import { commentRoutes } from './modules/details/comments.routes.js';
 import { coverageRoutes } from './modules/details/coverage.routes.js';
 import { detailAuditPlugin } from './modules/details/events.js';
@@ -183,6 +184,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         registerDashboardCascade(app);
 
         // Detección asistida (feature 006): cola con analytics-worker.
+        registerDetectionCascade(app);
         await app.register(detectionPlugin, {
           redisUrl: services.redisUrl,
           queuePrefix: `${redisNameSpace}bull`,
