@@ -1,7 +1,8 @@
-import { DescriptiveDashboardSchema } from '@reqcanvas/shared';
+import { AnalysisRunSchema, DescriptiveDashboardSchema } from '@reqcanvas/shared';
 import type { FastifyInstance } from 'fastify';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
+import { startFakeAnalysisWorker } from '../helpers/analysis-worker';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { createDetail, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
@@ -14,20 +15,26 @@ import { authHeaders, registerTestUser } from '../helpers/users';
 let app: FastifyInstance;
 let admin: Record<string, string>;
 let projectId: string;
+let worker: ReturnType<typeof startFakeAnalysisWorker>;
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('dashboardcontract', {
+  let dbName: string;
+  ({ app, dbName } = await buildTestApp('dashboardcontract', {
     withAuth: true,
     featureFlags: 'dashboard=true',
   }));
   await app.ready();
+  worker = startFakeAnalysisWorker(`test-${dbName}:bull`);
   const user = await registerTestUser(app);
   admin = authHeaders(user);
   projectId = await seedProject(app, { status: 'open', members: [[user, 'admin']] });
   const diagram = await publishedDiagram(app, admin, projectId);
   await createDetail(app, admin, diagram.diagramId, diagram.keys['Validar pago']!);
 });
-afterAll(() => closeTestApp(app));
+afterAll(async () => {
+  await worker.close();
+  await closeTestApp(app);
+});
 
 const Count = z.strictObject({ key: z.string(), label: z.string(), count: z.number().int() });
 const StrictDescriptive = z.strictObject({
@@ -66,5 +73,66 @@ describe('GET /projects/{projectId}/dashboard/descriptive', () => {
         })
         .safeParse(response.json()).success,
     ).toBe(true);
+  });
+});
+
+describe('análisis (US2)', () => {
+  const StrictRun = z.strictObject(AnalysisRunSchema.shape);
+  const ErrorBody = z.strictObject({ code: z.string(), message: z.string() });
+  let runId: string;
+
+  it('GET /projects/{projectId}/analysis-runs/latest 404 antes del primer análisis', async () => {
+    const response = await app.inject({
+      url: `/projects/${projectId}/analysis-runs/latest`,
+      headers: admin,
+    });
+    expect(response.statusCode).toBe(404);
+    expect(ErrorBody.safeParse(response.json()).success).toBe(true);
+  });
+
+  it('POST /projects/{projectId}/analysis-runs 202 devuelve AnalysisRun sin results', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/projects/${projectId}/analysis-runs`,
+      headers: admin,
+      payload: { filters: { types: ['non_functional'] } },
+    });
+    expect(response.statusCode).toBe(202);
+    expect(StrictRun.safeParse(response.json()).error?.issues ?? []).toEqual([]);
+    expect(response.json()).not.toHaveProperty('results');
+    runId = response.json().id;
+  });
+
+  it('GET /analysis-runs/{runId} 200 devuelve AnalysisRun con results al terminar', async () => {
+    await vi.waitFor(
+      async () => {
+        const response = await app.inject({ url: `/analysis-runs/${runId}`, headers: admin });
+        expect(response.statusCode).toBe(200);
+        expect(StrictRun.safeParse(response.json()).error?.issues ?? []).toEqual([]);
+        expect(response.json().status).toBe('done');
+        expect(response.json().results.schemaVersion).toBe(1);
+      },
+      { timeout: 10_000, interval: 50 },
+    );
+  });
+
+  it('GET /projects/{projectId}/analysis-runs 200 devuelve el historial sin results', async () => {
+    const response = await app.inject({
+      url: `/projects/${projectId}/analysis-runs`,
+      headers: admin,
+    });
+    expect(response.statusCode).toBe(200);
+    expect(z.array(StrictRun).safeParse(response.json()).error?.issues ?? []).toEqual([]);
+    expect(response.json()[0]).not.toHaveProperty('results');
+  });
+
+  it('GET /projects/{projectId}/analysis-runs/latest 200 devuelve el último con results', async () => {
+    const response = await app.inject({
+      url: `/projects/${projectId}/analysis-runs/latest`,
+      headers: admin,
+    });
+    expect(response.statusCode).toBe(200);
+    expect(StrictRun.safeParse(response.json()).error?.issues ?? []).toEqual([]);
+    expect(response.json().id).toBe(runId);
   });
 });

@@ -11,6 +11,7 @@ import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
+import { analysisRoutes } from './modules/dashboard/analysis.routes.js';
 import { registerDashboardCascade } from './modules/dashboard/cascade.js';
 import { descriptiveRoutes } from './modules/dashboard/descriptive.routes.js';
 import { registerDetailsCascade } from './modules/details/cascade.js';
@@ -194,6 +195,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
             keyPrefix: redisNameSpace,
             ...services.analysis,
           });
+          await app.register(analysisRoutes);
         }
 
         // Detección asistida (feature 006): cola con analytics-worker.
