@@ -145,11 +145,18 @@ funcionalidades ya no dependen de `FEATURE_FLAGS`. La variable de `api` en stagi
 después de desplegar el retiro; mientras siga definida, `api` solo avisa en el log de los flags
 desconocidos. Producción nunca la definió.
 
-## Variables y réplicas de la feature 005 (2026-10-01)
+## Variables y réplicas de la feature 005 (2026-10-02)
 
-Antes de integrar la 005 (T045), `api` en staging tiene `FEATURE_FLAGS=realtime=true` y 2
-réplicas en `us-west2` (`environments.staging.deploy.multiRegionConfig` de
-`apps/api/railway.json`: el panel de este plan no muestra el número de réplicas), para comprobar en un entorno real que el adaptador de Redis reparte los eventos entre
-réplicas sin sesiones persistentes (ADR 0007). Producción sigue sin definir `FEATURE_FLAGS`
-(`realtime` desactivado) y con una réplica. No hacen falta variables nuevas: Socket.IO usa el
-Redis existente y Railway pone `RAILWAY_REPLICA_ID`, que aparece en los logs de conexión.
+Antes de integrar la 005 (T045), `api` en staging tiene `FEATURE_FLAGS=realtime=true`.
+Producción sigue sin definirla (`realtime` desactivado). No hacen falta variables nuevas:
+Socket.IO usa el Redis existente y Railway pone `RAILWAY_REPLICA_ID`, que aparece en los logs de
+conexión (`socket.connected`).
+
+El plan preveía 2 réplicas de `api` en staging para validar el reparto entre réplicas (ADR 0007),
+pero el plan de Railway de la cuenta solo admite una: el panel no muestra el número de réplicas y
+`railway environment edit -e staging --service-config api deploy.multiRegionConfig.us-west2.numReplicas 2`
+no cambió la configuración. Staging y producción siguen con una réplica; el reparto entre
+réplicas queda validado por las pruebas de integración con dos instancias de la app sobre el
+mismo Redis. Al pasar a un plan con réplicas, se aplica ese mismo comando (y se añade
+`environments.staging.deploy.multiRegionConfig` a `apps/api/railway.json`, que es la fuente de
+verdad) y se repite la comprobación de T046 con los logs de conexión.
