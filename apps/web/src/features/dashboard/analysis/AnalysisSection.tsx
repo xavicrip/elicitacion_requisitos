@@ -4,6 +4,7 @@ import { FormError } from '../../../components/form';
 import { AssociationRules } from '../patterns/AssociationRules';
 import { HotColdActivities } from '../patterns/HotColdActivities';
 import { Sentiment } from '../patterns/Sentiment';
+import { InsightsPanel } from '../insights/InsightsPanel';
 import { DuplicatePairs } from '../quality/DuplicatePairs';
 import { QualityList } from '../quality/QualityList';
 import { TermsSettings } from '../quality/TermsSettings';
@@ -32,11 +33,20 @@ function Progress({ run }: { run: AnalysisRun | undefined }) {
   );
 }
 
-function tabsOf(run: AnalysisRun): Tab[] {
+function tabsOf(run: AnalysisRun, running: boolean, onRegenerate: () => void): Tab[] {
   const results = run.results;
   if (!results) return [];
   const lookup = lookupOf(run);
   const tabs: Tab[] = [];
+  if (run.stages.insights) {
+    tabs.push({
+      id: 'insights',
+      label: 'Resumen',
+      content: (
+        <InsightsPanel run={run} lookup={lookup} running={running} onRegenerate={onRegenerate} />
+      ),
+    });
+  }
   if (results.keywords?.byActivity) {
     tabs.push({
       id: 'keywords',
@@ -128,7 +138,12 @@ export function AnalysisSection({
 }) {
   const analysis = useAnalysisRun(projectId, true);
   const run = analysis.latest;
-  const tabs = useMemo(() => (run ? tabsOf(run) : []), [run]);
+  const { running, regenerate } = analysis;
+  const tabs = useMemo(
+    () => (run ? tabsOf(run, running, () => regenerate(run.id)) : []),
+    // `regenerate` cambia en cada render; solo importan el run y si hay un análisis en curso.
+    [run, running],
+  );
   const stages = Object.values(run?.stages ?? {});
   const insufficient = stages.some((stage) => stage.reason === 'INSUFFICIENT_DATA');
   const failedStages = Object.entries(run?.stages ?? {})

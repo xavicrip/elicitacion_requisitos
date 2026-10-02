@@ -6,6 +6,8 @@ export type Lookup = {
   projectId: string;
   detail: (id: string) => AnalysisInputDetail | undefined;
   activityLabel: (key: string) => string;
+  /** Número de detalles analizados de una actividad. */
+  detailsOf: (key: string) => number;
 };
 
 export function lookupOf(run: AnalysisRun): Lookup {
@@ -17,6 +19,8 @@ export function lookupOf(run: AnalysisRun): Lookup {
     projectId: run.projectId,
     detail: (id) => details.get(id),
     activityLabel: (key) => activities.get(key) ?? 'Actividad sin publicar',
+    detailsOf: (key) =>
+      (run.input?.details ?? []).filter((detail) => detail.activityKey === key).length,
   };
 }
 
