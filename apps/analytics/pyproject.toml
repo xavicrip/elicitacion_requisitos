@@ -105,6 +105,8 @@ omit = [
     "*/analytics/mining/topics.py",
     "*/analytics/mining/clusters.py",
     "*/analytics/mining/techniques.py",
+    "*/analytics/mining/quality.py",
+    "*/analytics/mining/duplicates.py",
 ]
 
 [tool.coverage.report]

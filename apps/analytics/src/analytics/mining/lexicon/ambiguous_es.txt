@@ -1,0 +1,31 @@
+# Términos ambiguos en un requisito (feature 007, research R7): no dicen cuánto ni cómo se
+# comprueba. Uno por línea; cada proyecto puede añadir los suyos (`extraAmbiguousTerms`).
+rápido
+fácil
+amigable
+intuitivo
+eficiente
+adecuado
+etc.
+y/o
+flexible
+mínimo
+óptimo
+suficiente
+razonable
+sencillo
+simple
+robusto
+moderno
+ágil
+cómodo
+apropiado
+oportuno
+usable
+aceptable
+normalmente
+generalmente
+lo antes posible
+en lo posible
+si es posible
+tan pronto como sea posible

@@ -132,15 +132,15 @@ duplicado (004) y rechazarlo evita que vuelva a proponerse
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T036 [P] [US3] Pruebas de `apps/analytics/tests/unit/test_quality.py`: cada penalización de R7 con su explicación (término ambiguo del léxico y de `extraAmbiguousTerms` con la sugerencia "hazlo medible", Entonces sin verbo observable o sin cifra en No funcional, componentes cortos, Cuando sin verbo, pronombres sin antecedente) y el puntaje 0–100 — `test(analytics)`
-- [ ] T037 [P] [US3] Pruebas de `apps/analytics/tests/unit/test_duplicates.py` con embeddings fijos: umbrales 0,85 en la misma actividad y 0,92 entre actividades, similitud en porcentaje, pares con una decisión previa excluidos, detalles ya `duplicate` fuera — `test(analytics)`
-- [ ] T038 [P] [US3] Gates en `apps/analytics/tests/eval/test_quality_gates.py` (job `analysis-eval` de T017): duplicados recall ≥ 0,80 y falsos positivos < 0,20 (SC-003), ambiguos recall ≥ 0,80 (SC-004), pureza de temas ≥ 0,8 — `test(analytics)`
+- [X] T036 [P] [US3] Pruebas de `apps/analytics/tests/mining/test_quality.py`: cada penalización de R7 con su explicación (término ambiguo del léxico y de `extraAmbiguousTerms` con la sugerencia "hazlo medible", Entonces sin verbo observable o sin cifra en No funcional, componentes cortos, Cuando sin verbo, pronombres sin antecedente) y el puntaje 0–100 — `test(analytics)`
+- [X] T037 [P] [US3] Pruebas de `apps/analytics/tests/mining/test_duplicates.py`: umbrales 0,85 en la misma actividad y 0,92 entre actividades, cada parte (Dado, Cuando, Entonces) ≥ 0,80, pares con una decisión previa excluidos, detalles ya `duplicate` fuera — `test(analytics)`
+- [X] T038 [P] [US3] Gates en `apps/analytics/tests/mining/test_quality_gates.py` (job `analysis-eval` de T017): duplicados recall ≥ 0,80 y falsos positivos < 0,20 (SC-003), ambiguos recall ≥ 0,80 (SC-004), pureza de temas ≥ 0,8 — `test(analytics)`
 - [ ] T039 [P] [US3] Pruebas de integración en `apps/api/tests/integration/duplicate-decisions.test.ts` y de contrato de esas rutas en `apps/api/tests/contract/dashboard.contract.test.ts`: confirmar un par aplica la moderación de la 004 (`status: duplicate`, `duplicateOf`) y registra la decisión; rechazarlo la registra y el siguiente export la incluye; decidir dos veces o con el proyecto cerrado → `409`; Participante → `403`; `GET/PUT /projects/:id/analysis-settings` valida los términos (≤ 100 ambiguos, ≤ 200 palabras vacías) — `test(api)`
 - [ ] T040 [P] [US3] Pruebas de `web` en `apps/web/tests/dashboard-quality.test.tsx`: lista de calidad ordenable por puntaje con el término resaltado, la explicación y el enlace al detalle; pares de duplicados con su porcentaje, *Confirmar* y *Rechazar* (el par desaparece) — `test(web)`
 
 ### Implementation for User Story 3
 
-- [ ] T041 [US3] Implementar `apps/analytics/src/analytics/mining/{quality,duplicates}.py` y `apps/analytics/src/analytics/mining/lexicon/ambiguous_es.txt` — `feat(analytics)`
+- [X] T041 [US3] Implementar `apps/analytics/src/analytics/mining/{quality,duplicates}.py` y `apps/analytics/src/analytics/mining/lexicon/ambiguous_es.txt` — `feat(analytics)`
 - [ ] T042 [US3] Implementar en `api` `POST /projects/:id/duplicate-decisions` (reutiliza el servicio de moderación de `modules/details`) y `GET/PUT /projects/:id/analysis-settings` — `feat(api)`
 - [ ] T043 [US3] Implementar en `web` `quality/{QualityList,DuplicatePairs}.tsx` y la edición de los términos del proyecto — `feat(web)`
 
