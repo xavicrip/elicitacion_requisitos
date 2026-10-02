@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router';
 import { applyApiError, Field, FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
+import { FlagGate } from '../../lib/flags';
 import { projectKeys, projectsApi } from './api';
 import { DeleteProjectDialog } from './DeleteProjectDialog';
 import { MembersPanel } from './MembersPanel';
@@ -42,10 +43,17 @@ export function ProjectSettingsPage() {
           <span>{ROLE_LABEL[project.myRole]}</span>
         </p>
         {!isAdmin && project.description && <p>{project.description}</p>}
-        <nav>
+        <nav className="flex gap-4">
           <Link to={`/proyectos/${project.id}/diagramas`} className="text-blue-700 underline">
             Diagramas
           </Link>
+          {isAdmin && (
+            <FlagGate flag="dashboard">
+              <Link to={`/proyectos/${project.id}/dashboard`} className="text-blue-700 underline">
+                Dashboard
+              </Link>
+            </FlagGate>
+          )}
         </nav>
       </header>
       <MembersPanel project={project} />

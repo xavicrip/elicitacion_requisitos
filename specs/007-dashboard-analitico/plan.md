@@ -193,7 +193,10 @@ se extrae de la 006 a `queue_worker.py`.
 10. **Web**: página `/proyectos/:id/dashboard` (solo Administrador; enlace en la cabecera del
     proyecto). Gráficos con ECharts siguiendo la guía *dataviz* (paleta validada en claro y
     oscuro, texto alternativo y tabla accesible por gráfico). El mapa de cobertura reutiliza
-    el canvas de la 003 con el overlay de mapa de calor de la 004, en solo lectura.
+    la escala de color del mapa de calor de la 004 sobre la imagen del diagrama, con una
+    zona pulsable por actividad publicada. No reutiliza el canvas de three.js de la 003: está
+    acoplado a su página (cámara, edición, tiempo real) y aquí basta una imagen con zonas
+    accesibles (constitución VII).
 11. **Conjunto de validación**: generado y versionado como el de la 006
     (`apps/analytics/tests/fixtures/generate_details.py`, 300 detalles con 3 temas, pares de
     duplicados y términos ambiguos etiquetados), con un job `analysis-eval` en el CI que falla
