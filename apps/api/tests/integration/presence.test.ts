@@ -29,12 +29,10 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('presence', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     realtime: PRESENCE,
   }));
   ({ app: replica } = await buildTestApp('presence', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     realtime: PRESENCE,
     dbName,
   }));

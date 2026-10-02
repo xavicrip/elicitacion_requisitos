@@ -28,11 +28,9 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('revocation', {
     withAuth: true,
-    featureFlags: 'realtime=true',
   }));
   ({ app: replica } = await buildTestApp('revocation', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     dbName,
   }));
   url = await app.listen({ port: 0, host: '127.0.0.1' });

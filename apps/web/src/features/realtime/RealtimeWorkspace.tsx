@@ -15,7 +15,7 @@ import { useRealtimeLifecycle, useRealtimeSync } from './useRealtimeSync';
 /**
  * Espacio de trabajo con colaboración en tiempo real (feature 005, plan ajuste 9): envuelve el
  * de la 004 como este envuelve el de la 003. Se une a la sala de la versión mostrada y aplica
- * los eventos sobre la caché. Sin el flag `realtime`, es el espacio de trabajo de la 004.
+ * los eventos sobre la caché.
  */
 export function RealtimeWorkspace() {
   const { projectId = '' } = useParams();

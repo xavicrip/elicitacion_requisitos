@@ -120,8 +120,7 @@ número de requisitos o la marca «Sin detalles», sus notas y un mapa de calor.
 
 ### Colaboración en tiempo real (feature 005)
 
-Con el flag `realtime` (activado en Compose y CI con `FEATURE_FLAGS=realtime=true`), el
-espacio de trabajo se conecta por WebSocket (Socket.IO, a través de `/socket.io` en el proxy de `web`):
+El espacio de trabajo se conecta por WebSocket (Socket.IO, a través de `/socket.io` en el proxy de `web`):
 
 - Los requisitos, votos, comentarios y publicaciones de otras personas aparecen sin recargar.
 - La barra _Conectados_ muestra quién está en el diagrama, y cada actividad seleccionada por

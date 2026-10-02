@@ -24,13 +24,8 @@ test('el proxy de web llega a api (/api/health, feature 002)', async ({ request 
 });
 
 test('el WebSocket de Socket.IO atraviesa web hasta api (/socket.io, feature 005)', async ({
-  request,
   baseURL,
 }) => {
-  const { flags } = (await (await request.get('/api/config')).json()) as {
-    flags: Record<string, boolean>;
-  };
-  test.skip(!flags.realtime, 'flag realtime desactivado en este entorno');
   // Sin token, la respuesta `unauthorized` solo puede venir del middleware de api.
   const socket = io(baseURL!, { transports: ['websocket'], reconnection: false, timeout: 5000 });
   try {

@@ -37,7 +37,6 @@ let diagram: { diagramId: string; versionId: string; keys: Record<string, string
 beforeAll(async () => {
   ({ app } = await buildTestApp('socketcontract', {
     withAuth: true,
-    featureFlags: 'realtime=true',
   }));
   url = await app.listen({ port: 0, host: '127.0.0.1' });
   ana = await registerTestUser(app, 'Ana');

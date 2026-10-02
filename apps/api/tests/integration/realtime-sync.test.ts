@@ -31,12 +31,10 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('realtimesync', {
     withAuth: true,
-    featureFlags: 'realtime=true',
   }));
   // Segunda instancia con la misma base de datos y el mismo Redis (plan, ajuste 5).
   ({ app: replica } = await buildTestApp('realtimesync', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     dbName,
   }));
   url = await app.listen({ port: 0, host: '127.0.0.1' });

@@ -32,7 +32,6 @@ beforeAll(async () => {
   const { Writable } = await import('node:stream');
   ({ app } = await buildTestApp('realtimeauth', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     realtime: { tokenGraceMs: 300 },
     logStream: new Writable({
       write(chunk, _encoding, done) {

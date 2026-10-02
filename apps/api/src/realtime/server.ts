@@ -58,7 +58,7 @@ export type RealtimeSocket = Socket<
 
 declare module 'fastify' {
   interface FastifyInstance {
-    /** Servidor Socket.IO (feature 005), solo con el flag `realtime`. */
+    /** Servidor Socket.IO (feature 005). */
     io: RealtimeServer;
   }
 }

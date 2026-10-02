@@ -19,7 +19,6 @@ beforeAll(async () => {
   const { Writable } = await import('node:stream');
   ({ app } = await buildTestApp('realtimeobs', {
     withAuth: true,
-    featureFlags: 'realtime=true',
     realtime: { replicaId: 'replica-a', pingIntervalMs: 100 },
     logStream: new Writable({
       write(chunk, _encoding, done) {

@@ -32,6 +32,6 @@ export const isOffline = (state: Pick<ConnectionState, 'status' | 'everConnected
 
 /**
  * ¿Se puede guardar? Sin conexión en tiempo real, no: lo guardado no llegaría a los demás y el
- * borrador se conserva (FR-007). Sin el flag `realtime`, siempre.
+ * borrador se conserva (FR-007).
  */
 export const useCanWrite = () => useConnectionStore((state) => !isOffline(state));
