@@ -122,6 +122,12 @@ describe('lanzar y consultar', () => {
     const done = await finished(run.id);
     expect(done).toMatchObject({ status: 'done', detailCount: 2, progress: null });
     expect(done.results).toEqual(EXAMPLE_RESULTS);
+    // El conjunto analizado acompaña a los resultados, sin datos del autor.
+    const input = done.input as { activities: unknown[]; details: Array<Record<string, unknown>> };
+    expect(input.activities).toHaveLength(3);
+    expect(input.details).toHaveLength(2);
+    expect(input.details[0]).toMatchObject({ when: 'paga con tarjeta', status: 'pending' });
+    expect(input.details[0]).not.toHaveProperty('authorId');
     expect(done.stages).toEqual(EXAMPLE_RESULTS.stages);
   });
 
@@ -215,6 +221,7 @@ describe('último análisis y obsolescencia (FR-014)', () => {
     const list = (await get(`/projects/${target.projectId}/analysis-runs`)).json();
     expect(list.map((run: { id: string }) => run.id)).toEqual([second.id, first.id]);
     expect(list[1]).not.toHaveProperty('results');
+    expect(list[1]).not.toHaveProperty('input');
   });
 });
 
