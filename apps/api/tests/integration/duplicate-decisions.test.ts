@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { duplicateDecisionsModel } from '../../src/modules/dashboard/models/duplicate-decision';
 import { detailsModel } from '../../src/modules/details/models/detail';
-import { startFakeAnalysisWorker } from '../helpers/analysis-worker';
+import { EXAMPLE_RESULTS, startFakeAnalysisWorker } from '../helpers/analysis-worker';
 import { buildTestApp, closeTestApp } from '../helpers/app';
 import { createDetail, publishedDiagram } from '../helpers/details';
 import { seedProject } from '../helpers/seed';
@@ -17,6 +17,8 @@ let app: FastifyInstance;
 let ana: TestUser;
 let luis: TestUser;
 let worker: ReturnType<typeof startFakeAnalysisWorker>;
+/** Resultados que el worker falso devuelve para un proyecto (por defecto, los del ejemplo). */
+const handlerResults = new Map<string, unknown>();
 
 beforeAll(async () => {
   let dbName: string;
@@ -27,7 +29,10 @@ beforeAll(async () => {
   await app.ready();
   ana = await registerTestUser(app, 'Ana');
   luis = await registerTestUser(app, 'Luis');
-  worker = startFakeAnalysisWorker(`test-${dbName}:bull`);
+  worker = startFakeAnalysisWorker(`test-${dbName}:bull`, async (input) => ({
+    results: handlerResults.get(input.projectId) ?? EXAMPLE_RESULTS,
+    summary: { detailCount: input.details.length },
+  }));
 });
 afterAll(async () => {
   await worker.close();
@@ -148,6 +153,39 @@ describe('rechazar un par', () => {
       { timeout: 5000, interval: 50 },
     );
     expect(input!.duplicateDecisions).toEqual([{ pair: [a, b].sort(), decision: 'rejected' }]);
+  });
+
+  it('un par decidido deja de aparecer en el último análisis, sin relanzarlo', async () => {
+    const { projectId, a, b } = await projectWithPair();
+    const pair = [a, b].sort() as [string, string];
+    handlerResults.set(projectId, {
+      ...EXAMPLE_RESULTS,
+      duplicates: [
+        { pair, similarity: 0.93 },
+        { pair: ['x', 'y'], similarity: 0.9 },
+      ],
+    });
+    const run = (
+      await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/analysis-runs`,
+        headers: authHeaders(ana),
+      })
+    ).json();
+    const latest = async () =>
+      (
+        await app.inject({
+          url: `/projects/${projectId}/analysis-runs/latest`,
+          headers: authHeaders(ana),
+        })
+      ).json();
+    await vi.waitFor(async () => expect((await latest()).id).toBe(run.id), {
+      timeout: 5000,
+      interval: 50,
+    });
+    expect((await latest()).results.duplicates).toHaveLength(2);
+    await decide(projectId, { pair: [b, a], decision: 'rejected' });
+    expect((await latest()).results.duplicates).toEqual([{ pair: ['x', 'y'], similarity: 0.9 }]);
   });
 
   it('decidir dos veces el mismo par (en cualquier orden) → 409', async () => {

@@ -319,7 +319,24 @@ export function analysisService(app: FastifyInstance) {
 
     /** Run con sus resultados y el conjunto analizado, si terminó. */
     async toFullDto(run: AnalysisRunDoc): Promise<AnalysisRun> {
-      const [results, input] = await Promise.all([this.results(run), this.input(run)]);
+      const [stored, input] = await Promise.all([this.results(run), this.input(run)]);
+      let results = stored;
+      if (results?.duplicates) {
+        // Los pares ya decididos después del análisis no se vuelven a mostrar (US3-3).
+        const decided = new Set(
+          (
+            await duplicateDecisionsModel(app.mongo)
+              .find({ projectId: run.projectId }, { pair: 1 })
+              .lean<Array<{ pair: [string, string] }>>()
+          ).map(({ pair }) => pair.join('|')),
+        );
+        results = {
+          ...results,
+          duplicates: results.duplicates.filter(
+            ({ pair }) => !decided.has([...pair].sort().join('|')),
+          ),
+        };
+      }
       return { ...(await this.toDto(run, results)), ...(results && input ? { input } : {}) };
     },
 
