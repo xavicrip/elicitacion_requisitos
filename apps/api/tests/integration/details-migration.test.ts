@@ -31,7 +31,9 @@ afterAll(async () => {
   await client.close();
 });
 
-describe(`migración ${FILE} (data-model.md §Migración)`, () => {
+// `up` aplica todas las migraciones (crecen con cada feature): con cobertura y las pruebas en
+// paralelo del CI supera los 5 s por defecto, y un timeout deja el bloqueo de migraciones tomado.
+describe(`migración ${FILE} (data-model.md §Migración)`, { timeout: 30_000 }, () => {
   it('no es destructiva', async () => {
     const migration = (await import(`${MIGRATIONS_DIR}/${FILE}`)) as { destructive: unknown };
     expect(migration.destructive).toBe(false);
