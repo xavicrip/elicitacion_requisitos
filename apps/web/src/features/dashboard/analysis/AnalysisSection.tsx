@@ -1,6 +1,9 @@
 import type { AnalysisRun, DashboardFilters } from '@reqcanvas/shared';
 import { useMemo } from 'react';
 import { FormError } from '../../../components/form';
+import { DuplicatePairs } from '../quality/DuplicatePairs';
+import { QualityList } from '../quality/QualityList';
+import { TermsSettings } from '../quality/TermsSettings';
 import { StaleBanner } from '../StaleBanner';
 import { Clusters } from '../text/Clusters';
 import { CooccurrenceGraph } from '../text/CooccurrenceGraph';
@@ -64,6 +67,25 @@ function tabsOf(run: AnalysisRun): Tab[] {
       id: 'clusters',
       label: 'Grupos',
       content: <Clusters clusters={results.clusters} lookup={lookup} />,
+    });
+  }
+  if (results.quality) {
+    tabs.push({
+      id: 'quality',
+      label: 'Calidad',
+      content: (
+        <div className="space-y-3">
+          <TermsSettings projectId={run.projectId} />
+          <QualityList quality={results.quality} lookup={lookup} />
+        </div>
+      ),
+    });
+  }
+  if (results.duplicates) {
+    tabs.push({
+      id: 'duplicates',
+      label: `Duplicados (${results.duplicates.length})`,
+      content: <DuplicatePairs pairs={results.duplicates} lookup={lookup} />,
     });
   }
   return tabs;

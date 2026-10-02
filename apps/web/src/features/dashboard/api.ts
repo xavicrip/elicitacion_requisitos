@@ -1,4 +1,12 @@
-import type { AnalysisRun, DashboardFilters, DescriptiveDashboard } from '@reqcanvas/shared';
+import type {
+  AnalysisRun,
+  AnalysisSettings,
+  AnalysisSettingsInput,
+  DashboardFilters,
+  DescriptiveDashboard,
+  DuplicateDecision,
+  DuplicateDecisionInput,
+} from '@reqcanvas/shared';
 import { ApiError, apiFetch } from '../../lib/api-client';
 
 /** Filtros por defecto del dashboard (FR-003): detalles pendientes y validados. */
@@ -47,6 +55,18 @@ export const dashboardApi = {
       method: 'POST',
       body: { filters },
     }),
+  decideDuplicate: (projectId: string, input: DuplicateDecisionInput) =>
+    apiFetch<DuplicateDecision>(`/projects/${projectId}/duplicate-decisions`, {
+      method: 'POST',
+      body: input,
+    }),
+  settings: (projectId: string) =>
+    apiFetch<AnalysisSettings>(`/projects/${projectId}/analysis-settings`),
+  saveSettings: (projectId: string, input: AnalysisSettingsInput) =>
+    apiFetch<AnalysisSettings>(`/projects/${projectId}/analysis-settings`, {
+      method: 'PUT',
+      body: input,
+    }),
 };
 
 export const dashboardKeys = {
@@ -54,4 +74,5 @@ export const dashboardKeys = {
     ['projects', projectId, 'dashboard', 'descriptive', filters] as const,
   latest: (projectId: string) => ['projects', projectId, 'analysis', 'latest'] as const,
   run: (runId: string) => ['analysis-runs', runId] as const,
+  settings: (projectId: string) => ['projects', projectId, 'analysis', 'settings'] as const,
 };
