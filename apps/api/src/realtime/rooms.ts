@@ -123,7 +123,14 @@ export function registerRooms(
       const parsed = PresenceSelectSchema.safeParse(input);
       if (!parsed.success) return logInvalid(app, socket, 'presence:select');
       const { versionId, activityKey } = parsed.data;
-      if (!socket.rooms.has(diagramRoom(versionId)) || !allowSelect()) return;
+      if (!socket.rooms.has(diagramRoom(versionId))) return;
+      if (!allowSelect()) {
+        app.log.warn(
+          { event: 'presence:select', socketId: socket.id, userId: socket.data.userId },
+          'Selección descartada por superar el límite',
+        );
+        return;
+      }
       await presence.select(versionId, socket, activityKey);
     }),
   );

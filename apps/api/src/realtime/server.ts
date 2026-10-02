@@ -1,3 +1,4 @@
+import { hostname } from 'node:os';
 import { createAdapter } from '@socket.io/redis-adapter';
 import {
   AuthRefreshSchema,
@@ -23,6 +24,10 @@ export type RealtimeConfig = PresenceConfig & {
   adapterKey?: string;
   /** Prefijo de las claves de Redis (presencia); las pruebas usan uno propio. */
   keyPrefix?: string;
+  /** Identificador de la réplica en los logs (`RAILWAY_REPLICA_ID` o el hostname). */
+  replicaId?: string;
+  /** Intervalo del ping de Engine.IO (25 s por defecto); las pruebas lo acortan. */
+  pingIntervalMs?: number;
 };
 
 export type SocketData = {
@@ -71,6 +76,52 @@ function verifyToken(app: FastifyInstance, token: unknown): AccessPayload | null
   }
 }
 
+/**
+ * Observabilidad (constitución VI): conexiones y desconexiones por réplica, con la latencia del
+ * ping de Engine.IO (el servidor envía `ping` y el cliente responde `pong`). Sin tokens ni
+ * payloads: solo identificadores.
+ */
+function observe(
+  app: FastifyInstance,
+  io: RealtimeServer,
+  socket: RealtimeSocket,
+  replica: string,
+) {
+  const connectedAt = Date.now();
+  const context = { socketId: socket.id, userId: socket.data.userId, replica };
+  app.log.info(
+    { ...context, event: 'socket.connected', connections: io.engine.clientsCount },
+    'Socket conectado',
+  );
+  let pingSentAt: number | undefined;
+  let pingMs: number | undefined;
+  let pingMaxMs: number | undefined;
+  socket.conn.on('packetCreate', (packet: { type: string }) => {
+    if (packet.type === 'ping') pingSentAt = Date.now();
+  });
+  socket.conn.on('packet', (packet: { type: string }) => {
+    if (packet.type !== 'pong' || pingSentAt === undefined) return;
+    pingMs = Date.now() - pingSentAt;
+    pingMaxMs = Math.max(pingMaxMs ?? 0, pingMs);
+    pingSentAt = undefined;
+    app.log.debug({ ...context, event: 'socket.ping', pingMs }, 'Latencia del ping');
+  });
+  socket.on('disconnect', (reason) =>
+    app.log.info(
+      {
+        ...context,
+        event: 'socket.disconnected',
+        reason,
+        durationMs: Date.now() - connectedAt,
+        pingMs,
+        pingMaxMs,
+        connections: io.engine.clientsCount,
+      },
+      'Socket desconectado',
+    ),
+  );
+}
+
 function duplicate(app: FastifyInstance, role: string): Redis {
   const client = app.redis.duplicate();
   client.on('error', (error: Error) =>
@@ -101,12 +152,23 @@ async function closeClient(client: Redis) {
  * emisiones entre réplicas y el JWT de la 002 en el handshake.
  */
 export const realtimePlugin = fp<RealtimeConfig>(
-  async (app, { tokenGraceMs = 60_000, adapterKey = 'socket.io', keyPrefix = '', ...timings }) => {
+  async (
+    app,
+    {
+      tokenGraceMs = 60_000,
+      adapterKey = 'socket.io',
+      keyPrefix = '',
+      replicaId = process.env.RAILWAY_REPLICA_ID ?? hostname(),
+      pingIntervalMs = 25_000,
+      ...timings
+    },
+  ) => {
     const pub = duplicate(app, 'pub');
     const sub = duplicate(app, 'sub');
     const io: RealtimeServer = new Server(app.server, {
       transports: ['websocket'],
       serveClient: false,
+      pingInterval: pingIntervalMs,
       adapter: createAdapter(pub, sub, { key: adapterKey }),
     });
     const Users = usersModel(app.mongo);
@@ -128,6 +190,7 @@ export const realtimePlugin = fp<RealtimeConfig>(
 
     io.on('connection', (socket: RealtimeSocket) => {
       void socket.join(`user:${socket.data.userId}`);
+      observe(app, io, socket, replicaId);
 
       // Sin renovar el token, el socket se desconecta pasado el margen (research R2).
       let expiry: NodeJS.Timeout | undefined;
