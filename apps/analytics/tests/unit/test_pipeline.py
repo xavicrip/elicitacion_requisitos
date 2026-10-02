@@ -125,3 +125,32 @@ async def test_una_url_caducada_o_una_imagen_ilegible_falla_con_image_download_f
     with pytest.raises(DetectionError) as error:
         await process(job(f"{server}{path}"), report)
     assert error.value.code == "IMAGE_DOWNLOAD_FAILED"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("llm_refine", [True, False])
+async def test_process_refina_con_claude_solo_si_el_job_lo_pide(
+    server: str, llm_refine: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import analytics.detection.pipeline as pipeline
+
+    calls: list[object] = []
+
+    async def fake_refine(image: object, result: object, settings: object) -> object:
+        calls.append(settings)
+        return result
+
+    monkeypatch.setattr(pipeline, "refine", fake_refine)
+    progress: list[str] = []
+
+    async def report(stage: Stage, pct: int) -> None:
+        progress.append(stage)
+
+    data = job(f"{server}/004.png").model_copy(
+        update={
+            "options": job(f"{server}/004.png").options.model_copy(update={"llmRefine": llm_refine})
+        }
+    )
+    await process(data, report)
+    assert len(calls) == (1 if llm_refine else 0)
+    assert ("refine" in progress) is llm_refine
