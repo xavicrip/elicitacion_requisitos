@@ -28,6 +28,12 @@ export const detectionApi = {
     apiFetch<Activity>(`/proposals/${proposalId}/accept`, { method: 'POST', body: input }),
   discard: (proposalId: string) =>
     apiFetch<void>(`/proposals/${proposalId}/discard`, { method: 'POST' }),
+  acceptTransition: (proposalId: string) =>
+    apiFetch<{ accepted: boolean }>(`/transition-proposals/${proposalId}/accept`, {
+      method: 'POST',
+    }),
+  discardTransition: (proposalId: string) =>
+    apiFetch<void>(`/transition-proposals/${proposalId}/discard`, { method: 'POST' }),
   acceptHigh: (versionId: string) =>
     apiFetch<{ accepted: number }>(`/diagram-versions/${versionId}/proposals/accept-high`, {
       method: 'POST',

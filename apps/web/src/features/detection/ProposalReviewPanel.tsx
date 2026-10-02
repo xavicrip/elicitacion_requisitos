@@ -1,4 +1,9 @@
-import type { ActivityProposal, ActivityType, ProposalAcceptInput } from '@reqcanvas/shared';
+import type {
+  ActivityProposal,
+  ActivityType,
+  ProposalAcceptInput,
+  TransitionProposal,
+} from '@reqcanvas/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ApiError } from '../../lib/api-client';
@@ -33,6 +38,14 @@ function useReview(versionId: string) {
     }),
     discard: useMutation({
       mutationFn: (proposalId: string) => detectionApi.discard(proposalId),
+      onSuccess: refresh,
+    }),
+    acceptTransition: useMutation({
+      mutationFn: (proposalId: string) => detectionApi.acceptTransition(proposalId),
+      onSuccess: refresh,
+    }),
+    discardTransition: useMutation({
+      mutationFn: (proposalId: string) => detectionApi.discardTransition(proposalId),
       onSuccess: refresh,
     }),
     acceptHigh: useMutation({
@@ -137,6 +150,50 @@ function ProposalItem({
   );
 }
 
+function TransitionItem({
+  transition,
+  review,
+  disabled,
+}: {
+  transition: TransitionProposal;
+  review: ReturnType<typeof useReview>;
+  disabled: boolean;
+}) {
+  const [error, setError] = useState('');
+  const name = `${transition.from.label || 'Sin nombre'} → ${transition.to.label || 'Sin nombre'}`;
+  const ready = transition.from.status === 'accepted' && transition.to.status === 'accepted';
+  const onError = (err: unknown) => setError(message(err));
+  return (
+    <li aria-label={`Flecha ${name}`} className="space-y-2 rounded border p-2">
+      <p className="text-sm">{name}</p>
+      {!ready && <p className="text-sm text-gray-600">Acepta antes las dos actividades que une.</p>}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => review.acceptTransition.mutate(transition.id, { onError })}
+          disabled={disabled || !ready}
+          className="rounded border px-2 py-1 disabled:opacity-50"
+        >
+          Aceptar
+        </button>
+        <button
+          type="button"
+          onClick={() => review.discardTransition.mutate(transition.id, { onError })}
+          disabled={disabled}
+          className="rounded border px-2 py-1 disabled:opacity-50"
+        >
+          Descartar
+        </button>
+      </div>
+      {error && (
+        <p role="alert" className="text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </li>
+  );
+}
+
 /**
  * Revisión de las propuestas (US2, FR-005 y FR-006): aceptar, corregir y aceptar, o descartar
  * cada una, y aceptar en bloque las de confianza alta. Aceptada, es una actividad normal: su
@@ -154,9 +211,15 @@ export function ProposalReviewPanel({
   const canWrite = useCanWrite();
   const [bulkError, setBulkError] = useState('');
   const pending = proposals?.activities ?? [];
-  if (pending.length === 0) return null;
+  const arrows = proposals?.transitions ?? [];
+  if (pending.length === 0 && arrows.length === 0) return null;
   const bulk = pending.filter(acceptableInBulk).length;
-  const busy = review.accept.isPending || review.discard.isPending || review.acceptHigh.isPending;
+  const busy =
+    review.accept.isPending ||
+    review.discard.isPending ||
+    review.acceptHigh.isPending ||
+    review.acceptTransition.isPending ||
+    review.discardTransition.isPending;
 
   return (
     <section aria-label="Propuestas pendientes" className="space-y-2">
@@ -186,6 +249,21 @@ export function ProposalReviewPanel({
           />
         ))}
       </ul>
+      {arrows.length > 0 && (
+        <>
+          <h3 className="font-semibold">Flechas propuestas ({arrows.length})</h3>
+          <ul className="space-y-2">
+            {arrows.map((transition) => (
+              <TransitionItem
+                key={transition.id}
+                transition={transition}
+                review={review}
+                disabled={busy || !canWrite}
+              />
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   );
 }
