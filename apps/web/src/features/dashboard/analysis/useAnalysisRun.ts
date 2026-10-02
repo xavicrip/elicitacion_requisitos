@@ -60,13 +60,30 @@ export function useAnalysisRun(projectId: string, enabled: boolean) {
     },
   });
 
+  const regenerate = useMutation({
+    mutationFn: (sourceRunId: string) => dashboardApi.regenerateInsights(sourceRunId),
+    onMutate: () => setError(''),
+    onSuccess: (run) => {
+      client.setQueryData(dashboardKeys.run(run.id), run);
+      setRunId(run.id);
+    },
+    onError: (err) =>
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'No se pudo regenerar el resumen. Inténtalo de nuevo.',
+      ),
+  });
+
   return {
     latest: latest.data ?? null,
     loading: latest.isLoading,
     /** El run lanzado en esta sesión: en curso o recién terminado. */
     current: current.data,
-    running: start.isPending || active(current.data),
+    running: start.isPending || regenerate.isPending || active(current.data),
     error,
     start: (filters: DashboardFilters) => start.mutate(filters),
+    /** Regenera solo el resumen de hallazgos del análisis indicado. */
+    regenerate: (sourceRunId: string) => regenerate.mutate(sourceRunId),
   };
 }

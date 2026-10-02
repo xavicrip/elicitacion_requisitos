@@ -55,6 +55,15 @@ export const dashboardApi = {
       method: 'POST',
       body: { filters },
     }),
+  /** Valora un insight; los marcados como no útiles se ocultan (US5-3). */
+  insightFeedback: (runId: string, insightId: string, useful: boolean) =>
+    apiFetch<void>(`/analysis-runs/${runId}/insights/${insightId}/feedback`, {
+      method: 'POST',
+      body: { useful },
+    }),
+  /** Relanza solo el resumen sobre los resultados de un análisis; devuelve el run nuevo. */
+  regenerateInsights: (runId: string) =>
+    apiFetch<AnalysisRun>(`/analysis-runs/${runId}/insights/regenerate`, { method: 'POST' }),
   decideDuplicate: (projectId: string, input: DuplicateDecisionInput) =>
     apiFetch<DuplicateDecision>(`/projects/${projectId}/duplicate-decisions`, {
       method: 'POST',

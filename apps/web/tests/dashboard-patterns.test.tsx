@@ -153,6 +153,7 @@ describe('sentimiento', () => {
       projectId: 'p1',
       detail: () => undefined,
       activityLabel: () => XSS,
+      detailsOf: () => 0,
     }) as { tooltip: { formatter: (params: object[]) => string }; series: Array<{ name: string }> };
     expect(
       option.tooltip.formatter([{ axisValueLabel: XSS, seriesName: 'Negativo', value: 1 }]),
