@@ -148,10 +148,17 @@ jobs:
       matrix:
         include:
           - service: api
+            file: apps/api/Dockerfile
             max_mb: 300
           - service: analytics
+            file: apps/analytics/Dockerfile
             max_mb: 1200
+          # Minería de texto con los modelos incluidos (feature 007, ADR 0009).
+          - service: analysis-worker
+            file: apps/analytics/Dockerfile.mining
+            max_mb: 3500
           - service: web
+            file: apps/web/Dockerfile
             max_mb: 150
     steps:
       - uses: actions/checkout@v5
@@ -159,7 +166,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/${{ matrix.service }}/Dockerfile
+          file: ${{ matrix.file }}
           tags: reqcanvas-${{ matrix.service }}:ci
           load: true
           build-args: |
