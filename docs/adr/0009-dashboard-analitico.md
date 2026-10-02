@@ -23,8 +23,9 @@ minutos de CPU.
 2. **Minería en Python** (`analytics`, grupo de dependencias `mining`): spaCy con
    `es_core_news_md` para el preprocesamiento, c-TF-IDF y networkx para palabras clave y
    coocurrencia, `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`) para los
-   embeddings, BERTopic con UMAP y el `HDBSCAN` de scikit-learn para temas y grupos, similitud
-   coseno para los casi duplicados, `pysentimiento` para el sentimiento, reglas explicables con
+   embeddings, UMAP y el `HDBSCAN` de scikit-learn con c-TF-IDF para temas y grupos (la cadena de
+   BERTopic, sin su envoltorio ni sus dependencias), similitud coseno del texto y de cada parte
+   (Dado, Cuando, Entonces) para los casi duplicados, `pysentimiento` para el sentimiento, reglas explicables con
    un léxico configurable para la calidad y `mlxtend` (Apriori) para las reglas de asociación.
    torch se instala en su variante CPU.
 3. **El worker no accede a MongoDB**: `api` exporta el conjunto analizado (detalles filtrados sin
@@ -59,6 +60,9 @@ minutos de CPU.
 - **Una sola imagen para `analytics`, la detección y la minería**: triplicaría el peso de los
   servicios que no usan los modelos.
 - **LDA** para los temas: rinde mal con textos de 20–60 palabras.
+- **BERTopic como dependencia**: su cadena (embeddings, UMAP, HDBSCAN y c-TF-IDF) se implementa
+  directamente en pocas líneas, con pureza de 0,99 en el conjunto de validación y una imagen más
+  ligera.
 - **NLTK con stemming**: degrada la legibilidad de las palabras clave.
 - **Un clasificador supervisado de calidad**: no hay datos etiquetados reales; las reglas son
   explicables, como pide la spec.

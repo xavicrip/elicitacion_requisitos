@@ -48,6 +48,16 @@ packages = ["analytics"]
 module = ["bullmq", "bullmq.*", "pytesseract"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+# Grupo `mining` (feature 007): sin tipos publicados, y ausente en el entorno de `typecheck`.
+module = [
+    "spacy", "spacy.*", "sentence_transformers", "sklearn", "sklearn.*", "umap", "umap.*",
+    "networkx", "networkx.*", "mlxtend", "mlxtend.*", "pysentimiento", "pysentimiento.*",
+    "torch", "torch.*", "transformers", "transformers.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
+
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
@@ -62,7 +72,6 @@ dev = [
     "types-pyyaml>=6.0.12.20260906",
 ]
 mining = [
-    "bertopic>=0.17.4",
     "es-core-news-md",
     "mlxtend>=0.25.0",
     "networkx>=3.7",
@@ -86,6 +95,17 @@ es-core-news-md = { url = "https://github.com/explosion/spacy-models/releases/do
 
 [tool.coverage.run]
 source = ["analytics"]
+# Las técnicas que necesitan los modelos del grupo `mining` se miden en el job `analysis-eval`
+# (`.coveragerc.mining`), no en `test-python` (plan de la 007, ajuste 16).
+omit = [
+    "*/analytics/mining/preprocess.py",
+    "*/analytics/mining/keywords.py",
+    "*/analytics/mining/cooccurrence.py",
+    "*/analytics/mining/embeddings.py",
+    "*/analytics/mining/topics.py",
+    "*/analytics/mining/clusters.py",
+    "*/analytics/mining/techniques.py",
+]
 
 [tool.coverage.report]
 # Principio III de la constitución: cobertura mínima del 70 %.

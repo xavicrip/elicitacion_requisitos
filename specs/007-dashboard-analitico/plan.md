@@ -30,7 +30,7 @@ El frontend usa **ECharts**.
 ## Technical Context
 
 **Language/Version**: Python 3.12 (`analytics`); TypeScript 5.x / Node.js 24 LTS (`api`, `web`)
-**Primary Dependencies**: `analytics` (grupo `mining`): `spacy` + `es_core_news_md`, `scikit-learn` (con `HDBSCAN`), `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`), `torch` CPU, `bertopic`, `umap-learn`, `pysentimiento`, `mlxtend`, `networkx`; ya presentes: `bullmq`, `anthropic`. `web`: `echarts` 5 + `echarts-for-react` + `echarts-wordcloud`
+**Primary Dependencies**: `analytics` (grupo `mining`): `spacy` + `es_core_news_md`, `scikit-learn` (con `HDBSCAN`), `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`), `torch` CPU, `umap-learn`, `pysentimiento`, `mlxtend`, `networkx`; ya presentes: `bullmq`, `anthropic`. `web`: `echarts` 5 + `echarts-for-react` + `echarts-wordcloud`
 **Storage**: MongoDB, todo propiedad de `api`: `analysis_runs`, `duplicate_decisions`, `insight_feedback`, `analysis_settings`. Bucket: entrada y resultados de cada run bajo `projects/{id}/analysis/` (ajuste 1)
 **Testing**: pytest por técnica con el **conjunto de validación etiquetado** (300 detalles sintéticos con temas, duplicados y ambigüedades conocidos) y gates de métricas; Vitest (agregaciones descriptivas contra datos semilla con resultados calculados a mano); Playwright (dashboard y filtros); evaluación manual de insights con analistas (SC-005)
 **Target Platform**: servicio `analysis-worker` en Railway (imagen `Dockerfile.mining`, CPU sin GPU; la cuenta admite 24 GB por servicio)
@@ -97,7 +97,7 @@ apps/analytics/src/analytics/
     ├── keywords.py                                   # c-TF-IDF por actividad + n-gramas
     ├── cooccurrence.py                               # red de términos (networkx)
     ├── embeddings.py                                 # sentence-transformers
-    ├── topics.py                                     # BERTopic
+    ├── topics.py                                     # UMAP + HDBSCAN + c-TF-IDF
     ├── clusters.py                                   # HDBSCAN sobre embeddings
     ├── duplicates.py                                 # similitud coseno + decisiones previas
     ├── sentiment.py                                  # pysentimiento
@@ -160,8 +160,9 @@ se extrae de la 006 a `queue_worker.py`.
    la 006), así que los 4 GB previstos no son un límite. **Aviso local**: la imagen ocupa ~3 GB;
    el disco del equipo de desarrollo tiene poco margen.
 4. **Dependencias**: `scikit-learn` ≥ 1.3 trae `HDBSCAN`, así que no se añade el paquete
-   `hdbscan`; BERTopic acepta ese modelo como `hdbscan_model`. Se mantienen `umap-learn`,
-   `bertopic`, `sentence-transformers`, `spacy` + `es_core_news_md`, `pysentimiento`, `mlxtend` y
+   `hdbscan`. Tampoco `bertopic`: su cadena (embeddings → UMAP → HDBSCAN → c-TF-IDF) se
+   implementa directamente y da una pureza de 0,99 en el conjunto de validación. Se mantienen
+   `umap-learn`, `sentence-transformers`, `spacy` + `es_core_news_md`, `pysentimiento`, `mlxtend` y
    `networkx`. Sin `pymongo` en el worker.
 5. **Flags (constitución IV)**: uno por feature más uno operativo, como en la 006: `dashboard`
    (`default: false`; oculta las rutas `/projects/:id/dashboard`, `/projects/:id/analysis-runs`,
