@@ -97,6 +97,7 @@ services:
   # perfil `mining` para no construirla siempre (`docker compose --profile mining up -d`).
   analysis-worker:
     profiles: [mining]
+    image: reqcanvas-analysis-worker:local
     build:
       context: ..
       dockerfile: apps/analytics/Dockerfile.mining

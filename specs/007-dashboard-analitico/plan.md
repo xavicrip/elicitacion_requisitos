@@ -217,10 +217,14 @@ se extrae de la 006 a `queue_worker.py`.
 15. **Seguridad de los gráficos (constitución V)**: los tooltips y etiquetas de ECharts con
     texto de los detalles pasan por un formateador que lo escapa (ECharts interpreta HTML en los
     tooltips).
-16. **Imagen pesada en el CI**: `analysis-worker` va en el perfil `mining` de Compose. El job
-    `e2e-smoke` no lo activa (los E2E que necesitan el worker se saltan sin él); el job
-    `analysis-eval` construye `Dockerfile.mining` con caché de GitHub Actions y ejecuta los gates
-    y el E2E del análisis. La cobertura de `analytics` combina `test-python` y `analysis-eval`.
+16. **Imagen pesada en el CI**: `analysis-worker` va en el perfil `mining` de Compose
+    (`pnpm dev:up:mining` en local). Con el flag `dashboard`, `api /health/deep` exige un
+    worker de minería vivo (como el de la detección), así que el job `e2e-smoke` levanta ese
+    perfil con la imagen tomada de la caché de GitHub Actions del job `build`, sin construirla
+    desde cero, y ejecuta también el E2E del análisis. El job `analysis-eval` ejecuta las
+    pruebas y los gates con los modelos reales en el runner (`uv run --group mining`), con los
+    modelos en la caché de Actions. La cobertura de `analytics` combina `test-python` y
+    `analysis-eval`.
 
 ## Complexity Tracking
 
