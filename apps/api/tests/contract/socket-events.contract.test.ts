@@ -41,7 +41,6 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('socketcontract', {
     withAuth: true,
-    featureFlags: 'detection=true',
   }));
   detectionWorker = startFakeWorker(`test-${dbName}:bull`, async (_data, job) => {
     await job.updateProgress({ stage: 'shapes', pct: 20 });

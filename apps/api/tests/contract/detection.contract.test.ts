@@ -26,7 +26,6 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('detectioncontract', {
     withAuth: true,
-    featureFlags: 'detection=true',
   }));
   await app.ready();
   worker = startFakeWorker(`test-${dbName}:bull`, async () => EXAMPLE_RESULT);

@@ -23,7 +23,6 @@ const NO_TRANSITIONS: DetectionResult = { ...EXAMPLE_RESULT, transitions: [] };
 beforeAll(async () => {
   ({ app, dbName } = await buildTestApp('proposals', {
     withAuth: true,
-    featureFlags: 'detection=true',
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');

@@ -20,7 +20,7 @@ const WRITABLE = ['draft', 'open'] as const;
 
 /**
  * Detección asistida (contracts/detection.openapi.yaml): solo el Administrador, sobre versiones
- * en borrador. Detrás del flag `detection` (`GATED_PREFIXES`).
+ * en borrador.
  */
 export async function detectionRoutes(app: FastifyInstance) {
   const detection = detectionService(app);

@@ -56,7 +56,7 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
       ? { storage: await runCheck(() => app.storage.ping(), checkTimeoutMs) }
       : {};
 
-  // Detección (feature 006): algún analytics-worker con latido reciente, si el flag está activo.
+  // Detección (feature 006): algún analytics-worker con latido reciente.
   const detectionChecks = async (): Promise<Record<string, HealthCheck>> =>
     app.hasDecorator('detection')
       ? {

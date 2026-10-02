@@ -18,12 +18,6 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
  * Ver docs/feature-flags.md.
  */
 export const FLAGS = defineFlags({
-  detection: {
-    description:
-      'Detección asistida de actividades en la imagen del diagrama (propuestas con revisión humana)',
-    default: true,
-    owner: '006-deteccion-asistida',
-  },
   'detection-llm': {
     description:
       'Refinamiento opcional de la detección con Claude (coste por diagrama); requiere ANTHROPIC_API_KEY',

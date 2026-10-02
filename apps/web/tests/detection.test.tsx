@@ -269,7 +269,7 @@ describe('en el espacio de trabajo', () => {
     activities: [],
   };
 
-  function renderWorkspace(flags: Record<string, boolean>) {
+  function renderWorkspace() {
     vi.stubGlobal('matchMedia', (query: string) => ({
       matches: query.includes('min-width'),
       media: query,
@@ -279,7 +279,7 @@ describe('en el espacio de trabajo', () => {
       removeListener: () => {},
     }));
     mockApi({
-      'GET /api/config': () => json(200, { flags }),
+      'GET /api/config': () => json(200, { flags: {} }),
       'GET /api/projects/p1': () => json(200, project('admin')),
       'GET /api/projects/p1/diagrams': () =>
         json(200, [
@@ -305,16 +305,9 @@ describe('en el espacio de trabajo', () => {
     );
   }
 
-  it('el Administrador ve "Detectar actividades" en el editor con el flag', async () => {
-    renderWorkspace({ detection: true });
+  it('el Administrador ve "Detectar actividades" en el editor', async () => {
+    renderWorkspace();
     expect(await screen.findByRole('button', { name: 'Detectar actividades' })).toBeInTheDocument();
     expect(useWorkspaceStore.getState().mode).toBe('edit');
-  });
-
-  it('sin el flag no aparece', async () => {
-    renderWorkspace({});
-    expect(await screen.findByRole('heading', { name: 'Proceso de compra' })).toBeInTheDocument();
-    await waitFor(() => expect(useWorkspaceStore.getState().mode).toBe('edit'));
-    expect(screen.queryByRole('button', { name: 'Detectar actividades' })).toBeNull();
   });
 });
