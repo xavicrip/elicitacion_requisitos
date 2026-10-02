@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.7.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.6.0...v0.7.0) (2026-10-02)
+
+
+### Funcionalidades
+
+* **analytics:** add the detection queue worker with health and heartbeat ([df56147](https://github.com/xavicrip/elicitacion_requisitos/commit/df561470f171f19e348c0096c1ae850e520204a2))
+* **analytics:** classify UML shapes by their inner contours ([e9b74df](https://github.com/xavicrip/elicitacion_requisitos/commit/e9b74df0143bce44582b9eb925475a27f8c9bda6))
+* **analytics:** mirror the detection job contract in pydantic ([99970d8](https://github.com/xavicrip/elicitacion_requisitos/commit/99970d84aa9cb9820ad12a2c21f6072fc687da19))
+* **analytics:** propose transitions from arrowheads between shapes ([e0d46a8](https://github.com/xavicrip/elicitacion_requisitos/commit/e0d46a87c2fbef87caa99d4783372a8bb925425f))
+* **analytics:** read zone labels with Tesseract ([fa79bd1](https://github.com/xavicrip/elicitacion_requisitos/commit/fa79bd18c59cb07abb5995f358b2f609468951f1))
+* **analytics:** refine detected labels with Claude when enabled ([e186128](https://github.com/xavicrip/elicitacion_requisitos/commit/e186128a6bf53baecc3a8c9b7f27d2de68300dac))
+* **analytics:** run the detection pipeline in the worker with an accuracy gate ([65cb6f6](https://github.com/xavicrip/elicitacion_requisitos/commit/65cb6f6b92f5c857e302969784a3558dad0b881c))
+* **api:** accept and discard proposed transitions ([30a8bfd](https://github.com/xavicrip/elicitacion_requisitos/commit/30a8bfdc78f3c1a24ebe7195d092626aaacf4a9c))
+* **api:** accept, discard and bulk-accept detection proposals ([9099521](https://github.com/xavicrip/elicitacion_requisitos/commit/9099521edcfff572239fd8ecf14970883accf73e))
+* **api:** add detection collections and indexes ([398d73f](https://github.com/xavicrip/elicitacion_requisitos/commit/398d73f77e3f2c97f03942eb77c8c022f159a360))
+* **api:** let features block publishing through registered guards ([2942b27](https://github.com/xavicrip/elicitacion_requisitos/commit/2942b2758ded0e1c587ceb8299be29fe3dc91977))
+* **api:** presign read URLs for stored images ([c890b05](https://github.com/xavicrip/elicitacion_requisitos/commit/c890b0562df702d280259d0838f0ac426658db2c))
+* **api:** queue detections and store their proposals ([1d95b05](https://github.com/xavicrip/elicitacion_requisitos/commit/1d95b05a2c4b461d72ab07f582bceb304fd44aa8))
+* **shared:** add detection domain and socket events ([d7ac635](https://github.com/xavicrip/elicitacion_requisitos/commit/d7ac635e3007463b5d772b21c9a7cb923453e791))
+* **shared:** add the detection feature flags ([387366c](https://github.com/xavicrip/elicitacion_requisitos/commit/387366cf8e2daa1f32214f854e7a147dda9bffe8))
+* **shared:** add the detection job contract ([f93d9a4](https://github.com/xavicrip/elicitacion_requisitos/commit/f93d9a46fdb933e87713ee334bf811f2b0ce34c7))
+* **shared:** enable detection by default (T052) ([5735c76](https://github.com/xavicrip/elicitacion_requisitos/commit/5735c76151bb76773b03a9c8b82bcf6ec02a045a))
+* **web:** draw and review proposed transitions ([a98af8e](https://github.com/xavicrip/elicitacion_requisitos/commit/a98af8ee8fe716d5c5af29c553e3fbf202b7412a))
+* **web:** review detection proposals in the editor ([f0d213f](https://github.com/xavicrip/elicitacion_requisitos/commit/f0d213f95414011b5688cfebcc9dc6b307a798ba))
+* **web:** start detections and show their progress and proposals ([9b12a3d](https://github.com/xavicrip/elicitacion_requisitos/commit/9b12a3decc4828f95556fa42ded99637655bb6f5))
+
+
+### Rendimiento
+
+* **e2e:** measure detection time and worker memory ([9e50ecf](https://github.com/xavicrip/elicitacion_requisitos/commit/9e50ecfddc2b8c0b3b5cbd0c82b4f4e41bb750b9))
+
+
+### Refactorizaciones
+
+* **shared:** retire the realtime feature flag ([460c239](https://github.com/xavicrip/elicitacion_requisitos/commit/460c23967fe1b0c01ac6d5c990941bac981e047e))
+
+
+### CI/CD
+
+* **infra:** deploy analytics-worker with the other services ([837b1ed](https://github.com/xavicrip/elicitacion_requisitos/commit/837b1edb6eb2ad7d20c72dd23dff6f96da37cf92))
+
 ## [0.6.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.5.0...v0.6.0) (2026-10-02)
 
 
