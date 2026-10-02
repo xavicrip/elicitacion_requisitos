@@ -4,6 +4,26 @@ Cada historia de la feature 007 añade aquí el import de su módulo; importar e
 las dependencias del grupo `mining`, así que solo lo hace el worker (`default_processor`).
 """
 
-from analytics.mining import clusters, cooccurrence, duplicates, keywords, quality, topics
+from analytics.mining import (
+    association,
+    clusters,
+    cooccurrence,
+    duplicates,
+    hotcold,
+    keywords,
+    quality,
+    sentiment,
+    topics,
+)
 
-__all__ = ["clusters", "cooccurrence", "duplicates", "keywords", "quality", "topics"]
+__all__ = [
+    "association",
+    "clusters",
+    "cooccurrence",
+    "duplicates",
+    "hotcold",
+    "keywords",
+    "quality",
+    "sentiment",
+    "topics",
+]
