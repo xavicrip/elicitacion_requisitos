@@ -76,6 +76,16 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
         }
       : {};
 
+  // Reporte PDF (feature 008): algún analytics-worker consumiendo la cola `export`.
+  const exportChecks = async (): Promise<Record<string, HealthCheck>> =>
+    app.hasDecorator('exportPdf')
+      ? {
+          'export-worker': await runCheck(async () => {
+            if ((await app.exportPdf.workers()) === 0) throw new Error('NoWorker');
+          }, checkTimeoutMs),
+        }
+      : {};
+
   const respond = (checks: Record<string, HealthCheck>): Health => ({
     status: overallStatus(checks),
     service: 'api',
@@ -91,14 +101,22 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
   });
 
   app.get('/health/deep', async (_request, reply) => {
-    const [direct, analytics, storage, detection, analysis] = await Promise.all([
+    const [direct, analytics, storage, detection, analysis, exports] = await Promise.all([
       directChecks(),
       analyticsCheck(),
       storageChecks(),
       detectionChecks(),
       analysisChecks(),
+      exportChecks(),
     ]);
-    const body = respond({ ...direct, analytics, ...storage, ...detection, ...analysis });
+    const body = respond({
+      ...direct,
+      analytics,
+      ...storage,
+      ...detection,
+      ...analysis,
+      ...exports,
+    });
     return reply.code(body.status === 'ok' ? 200 : 503).send(body);
   });
 

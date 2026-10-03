@@ -10,19 +10,22 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { Types } from 'mongoose';
 import { z } from 'zod';
 import type { ExportFilesConfig } from '../../jobs/export-files.js';
+import type { ExportPdfConfig } from '../../jobs/export-pdf.js';
 import { HttpError } from '../../lib/errors.js';
 import { projectsModel } from '../projects/model.js';
 import { auditService } from '../audit/service.js';
 import { exportsModel, type ExportDoc } from './models/export.js';
 import { exportQuery } from './query.js';
-import { CONTENT_TYPE, isFileFormat, renderExport } from './render.js';
+import { CONTENT_TYPE, renderExport } from './render.js';
+import { reportInput } from './report-input.js';
 import { exportFileName } from './sanitize.js';
 import { exportsService } from './service.js';
 
-export type ExportsConfig = ExportFilesConfig & {
-  /** Hasta este número de detalles la exportación se responde en streaming (1 000). */
-  syncLimit?: number;
-};
+export type ExportsConfig = ExportFilesConfig &
+  ExportPdfConfig & {
+    /** Hasta este número de detalles la exportación se responde en streaming (1 000). */
+    syncLimit?: number;
+  };
 
 const ProjectParams = z.object({ projectId: z.string() });
 const IdParams = z.object({ id: z.string() });
@@ -36,6 +39,7 @@ export async function exportRoutes(app: FastifyInstance, config: ExportsConfig =
   const exportsOf = exportsService(app);
   const audit = auditService(app.mongo, app.log);
   const query = exportQuery(app);
+  const buildReport = reportInput(app);
   const Exports = exportsModel(app.mongo);
   const routes = app.withTypeProvider<ZodTypeProvider>();
   const admin = [app.requireAuth, app.requireProjectRole('admin')];
@@ -71,17 +75,46 @@ export async function exportRoutes(app: FastifyInstance, config: ExportsConfig =
               statuses: options.includePending ? ['validated', 'pending'] : ['validated'],
             }
           : requested;
-      const count = await query.count(projectId, filters);
-      if (!isFileFormat(format)) {
-        // Respuesta temporal, fuera del contrato: cada historia de la 008 añade su formato.
-        throw new HttpError(501, 'FORMAT_NOT_AVAILABLE', 'Este formato aún no está disponible.');
-      }
-
       const project = await projectsModel(app.mongo)
         .findById(projectId, { name: 1 })
         .lean<{ name: string }>();
       const timeZone = await query.timeZone(projectId);
       const fileName = exportFileName(project?.name ?? '', format, new Date(), timeZone);
+
+      if (format === 'pdf') {
+        // El reporte lo genera `analytics-worker`, siempre en segundo plano (research R6).
+        if ((await app.exportPdf.workers()) === 0) {
+          throw new HttpError(
+            503,
+            'WORKER_UNAVAILABLE',
+            'El generador de reportes no está disponible. Inténtalo de nuevo en unos minutos.',
+          );
+        }
+        const report = await buildReport(projectId, filters, app.exportPdf.presignTtlSeconds);
+        if (report.file.diagrams.length === 0) {
+          throw new HttpError(
+            422,
+            'NO_DIAGRAMS',
+            'El reporte necesita al menos un diagrama publicado.',
+          );
+        }
+        const pending = await exportsOf.create(projectId, {
+          format,
+          filters,
+          options,
+          detailCount: report.file.details.length,
+          fileName,
+          requestedBy: request.user.id,
+          analysisRunId: report.analysisRunId,
+          mode: 'async',
+          status: 'pending',
+        });
+        await app.exportPdf.enqueue(pending, report.file);
+        reply.code(202);
+        return exportsOf.toDto(pending);
+      }
+
+      const count = await query.count(projectId, filters);
       const base = {
         format,
         filters,
