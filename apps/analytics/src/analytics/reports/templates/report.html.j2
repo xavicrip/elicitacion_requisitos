@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reporte de {{ project }}</title>
+<style>{{ css }}</style>
+</head>
+<body>
+
+<section class="cover">
+  <p class="muted">Reporte del levantamiento de requisitos</p>
+  <h1>{{ project }}</h1>
+  <p>Generado el {{ generated_at }}</p>
+  <ul class="facts">
+    <li><strong>Requisitos:</strong> {{ detail_count }}</li>
+    {% for name, value in filters %}<li><strong>{{ name }}:</strong> {{ value }}</li>{% endfor %}
+  </ul>
+</section>
+
+<section>
+  <h2>Resumen</h2>
+  <div class="kpis">
+    {% for name, value in kpis %}<div class="kpi"><strong>{{ value }}</strong>{{ name }}</div>{% endfor %}
+  </div>
+  {% if detail_count == 0 %}<p class="muted">No hay requisitos con estos filtros.</p>{% endif %}
+</section>
+
+<section>
+  <h2>Diagramas</h2>
+  {% for diagram in diagrams %}
+  <div class="diagram">
+    <h3>{{ diagram.name }}</h3>
+    <img src="{{ diagram.src }}" alt="">
+    {% if diagram.missing %}<p class="muted">No se pudo obtener la imagen del diagrama.</p>{% endif %}
+    <ul class="legend">
+      {% for label, color in diagram.legend %}<li><span style="background: {{ color }}"></span>{{ label }}</li>{% endfor %}
+      <li class="muted">requisitos por actividad ({{ diagram.activities }} actividades)</li>
+    </ul>
+  </div>
+  {% else %}
+  <p class="muted">No hay diagramas publicados.</p>
+  {% endfor %}
+</section>
+
+<section>
+  <h2>Distribuciones</h2>
+  {% if detail_count == 0 %}<p class="muted">No hay requisitos con estos filtros.</p>{% endif %}
+  {% for title, chart in charts %}
+  <div class="chart-block">
+    <h3>{{ title }}</h3>
+    {{ chart }}
+  </div>
+  {% endfor %}
+</section>
+
+<section>
+  <h2>Hallazgos</h2>
+  {% if findings is none %}
+  <p class="muted">{{ unavailable }}.</p>
+  {% else %}
+  <p class="muted">Según el análisis terminado el {{ analysis_at }}.</p>
+
+  <h3>Temas</h3>
+  {% if findings.topics is none %}<p class="muted">{{ unavailable }}.</p>
+  {% elif findings.topics %}
+  <ul>{% for topic in findings.topics %}<li>{{ topic.label }} ({{ topic.count }} requisitos)</li>{% endfor %}</ul>
+  {% else %}<p class="muted">No se identificaron temas.</p>{% endif %}
+
+  <h3>Calidad de la redacción</h3>
+  {% if findings.quality is none %}<p class="muted">{{ unavailable }}.</p>
+  {% elif findings.quality %}
+  <p class="muted">Los requisitos con menor puntaje.</p>
+  <ul>{% for item in findings.quality %}<li>#{{ item.id }}: {{ item.score }} de 100{% if item.issues %} ({{ item.issues | join(', ') }}){% endif %}</li>{% endfor %}</ul>
+  {% else %}<p class="muted">Ningún requisito con observaciones.</p>{% endif %}
+
+  <h3>Actividades calientes y frías</h3>
+  {% if findings.heat is none %}<p class="muted">{{ unavailable }}.</p>
+  {% elif findings.heat %}
+  <ul>{% for item in findings.heat %}<li>{{ item.kind }}: {{ item.activity }} ({{ item.reason }})</li>{% endfor %}</ul>
+  {% else %}<p class="muted">Ninguna actividad destaca.</p>{% endif %}
+
+  <h3>Reglas de asociación</h3>
+  {% if findings.rules is none %}<p class="muted">{{ unavailable }}.</p>
+  {% elif findings.rules %}
+  <ul>{% for rule in findings.rules %}<li>{{ rule.sentence }} <span class="muted">(confianza {{ rule.confidence }} %, lift {{ rule.lift }})</span></li>{% endfor %}</ul>
+  {% else %}<p class="muted">No se encontraron reglas.</p>{% endif %}
+
+  <h3>Insights</h3>
+  {% if findings.insights is none %}<p class="muted">{{ unavailable }}.</p>
+  {% elif findings.insights %}
+  {% for insight in findings.insights %}
+  <div class="insight">
+    <h4>{{ insight.title }}</h4>
+    <p>{{ insight.statement }}</p>
+    {% if insight.recommendation %}<p>Recomendación: {{ insight.recommendation }}</p>{% endif %}
+    <p class="muted">Evidencias: {{ insight.evidence | join('; ') }}</p>
+  </div>
+  {% endfor %}
+  {% else %}<p class="muted">No hay insights.</p>{% endif %}
+  {% endif %}
+</section>
+
+<section>
+  <h2>Anexo: requisitos por actividad</h2>
+  {% for diagram in annex %}
+  <h3>{{ diagram.name }}</h3>
+  {% for activity in diagram.activities %}
+  <h4>{{ activity.label }} ({{ activity.details | length }})</h4>
+  {% for detail in activity.details %}
+  <div class="detail">
+    <p><strong>#{{ detail.id }}</strong> Dado {{ detail.given }}</p>
+    <p>Cuando {{ detail.when }}</p>
+    <p>Entonces {{ detail.then }}</p>
+    <p class="meta">{{ detail.meta }}</p>
+  </div>
+  {% endfor %}
+  {% endfor %}
+  {% else %}
+  <p class="muted">No hay requisitos con estos filtros.</p>
+  {% endfor %}
+</section>
+
+</body>
+</html>

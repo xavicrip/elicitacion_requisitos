@@ -1,0 +1,40 @@
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm;
+  @bottom-center {
+    content: "Generado por ReqCanvas · Página " counter(page) " de " counter(pages);
+    font-family: "DejaVu Sans", sans-serif;
+    font-size: 8pt;
+    color: #52514e;
+  }
+}
+html {
+  font-family: "DejaVu Sans", sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  color: #0b0b0b;
+}
+h1 { font-size: 22pt; margin: 0 0 4mm; }
+h2 { font-size: 14pt; margin: 0 0 4mm; border-bottom: 1px solid #e4e3df; padding-bottom: 1mm; }
+h3 { font-size: 11pt; margin: 5mm 0 2mm; }
+h4 { font-size: 10pt; margin: 4mm 0 1.5mm; }
+p { margin: 0 0 2mm; }
+section { break-before: page; }
+section.cover { break-before: auto; padding-top: 60mm; }
+.muted { color: #52514e; }
+.facts { list-style: none; padding: 0; margin-top: 10mm; }
+.facts li { margin-bottom: 1.5mm; }
+.kpis { display: flex; gap: 4mm; }
+.kpi { flex: 1; border: 1px solid #e4e3df; border-radius: 2mm; padding: 3mm; }
+.kpi strong { display: block; font-size: 16pt; }
+.diagram { break-inside: avoid; margin-bottom: 6mm; }
+.diagram img { max-width: 100%; max-height: 180mm; border: 1px solid #e4e3df; }
+.legend { list-style: none; padding: 0; margin: 2mm 0 0; font-size: 8pt; }
+.legend li { display: inline-block; margin-right: 4mm; }
+.legend span { display: inline-block; width: 5mm; height: 3mm; margin-right: 1mm; vertical-align: middle; }
+.chart-block { break-inside: avoid; }
+ul { margin: 0 0 2mm; padding-left: 5mm; }
+.insight { break-inside: avoid; margin-bottom: 3mm; }
+.detail { break-inside: avoid; margin: 0 0 2.5mm; padding-left: 2mm; border-left: 2px solid #e4e3df; }
+.detail p { margin: 0; }
+.detail .meta { font-size: 8pt; color: #52514e; }
