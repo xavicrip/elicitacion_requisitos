@@ -228,8 +228,8 @@ y siempre para el PDF, la exportación se prepara en segundo plano: la página a
 lista y el archivo se puede descargar durante 24 h desde el _Historial de exportaciones_. Cada
 solicitud y cada descarga quedan en la auditoría.
 
-Flag: `exports` (desactivado por defecto; Compose y el CI lo activan con
-`FEATURE_FLAGS=exports=true`).
+Flag: `exports`, activo por defecto desde el recorrido en staging (se desactiva con
+`FEATURE_FLAGS=exports=false`).
 
 Ver el [quickstart de la 008](specs/008-exportacion-resultados/quickstart.md) y el
 [ADR 0010](docs/adr/0010-exportacion.md).

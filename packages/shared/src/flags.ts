@@ -26,8 +26,8 @@ export const FLAGS = defineFlags({
   },
   exports: {
     description:
-      'Exportación de requisitos (CSV, Excel, Gherkin) y reporte PDF; oculto hasta completar la feature',
-    default: false,
+      'Exportación de requisitos (CSV, Excel, Gherkin) y reporte PDF; activo por defecto tras el recorrido en staging',
+    default: true,
     owner: '008-exportacion-resultados',
   },
   insights: {
