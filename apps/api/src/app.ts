@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { exportFilesPlugin } from './jobs/export-files.js';
 import { analysisSchedulePlugin } from './jobs/analysis-schedule.js';
 import { analysisPlugin, type AnalysisConfig } from './jobs/analysis.js';
 import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
@@ -210,6 +211,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         // Exportación (feature 008): la cascada existe aunque el flag esté desactivado.
         registerExportsCascade(app);
         if (flags.exports) {
+          await app.register(exportFilesPlugin, {
+            redisUrl: services.redisUrl,
+            queuePrefix: `${redisNameSpace}bull`,
+            ...services.exports,
+          });
           await app.register(exportRoutes, services.exports ?? {});
         }
 
