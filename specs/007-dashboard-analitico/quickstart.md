@@ -57,6 +57,6 @@ proyecto "Tienda demo" (10 actividades, 80 detalles, 6 participantes) con 3 tema
 ```bash
 pnpm test:py                                                    # unitarias y contrato (sin modelos)
 cd apps/analytics && uv run --group mining pytest tests/mining  # temas, duplicados y ambiguos (job analysis-eval)
-pnpm e2e --project flows dashboard                              # el del análisis necesita el perfil mining
+pnpm e2e --project=flows dashboard                             # el del análisis necesita el perfil mining
 pnpm e2e:perf -g dashboard                                      # SC-001 y SC-002
 ```
