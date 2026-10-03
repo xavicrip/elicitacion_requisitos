@@ -22,14 +22,14 @@ const ROUTES: Array<['GET' | 'POST', string]> = [
 ];
 
 describe('registro', () => {
-  it('exports está desactivado por defecto y es de la 008', () => {
-    expect(FLAGS.exports).toMatchObject({ default: false, owner: '008-exportacion-resultados' });
+  it('exports está activado por defecto y es de la 008', () => {
+    expect(FLAGS.exports).toMatchObject({ default: true, owner: '008-exportacion-resultados' });
   });
 });
 
-describe('exports desactivado (valor por defecto)', () => {
+describe('exports desactivado', () => {
   it('las rutas de exportación responden 404 como si no existieran', async () => {
-    ({ app } = await buildTestApp('exportsoff', { withAuth: true }));
+    ({ app } = await buildTestApp('exportsoff', { withAuth: true, featureFlags: 'exports=false' }));
     const user = await registerTestUser(app, 'Ana');
     for (const [method, url] of ROUTES) {
       const response = await app.inject({
@@ -44,7 +44,7 @@ describe('exports desactivado (valor por defecto)', () => {
   });
 
   it('GET /config lo informa al frontend', async () => {
-    ({ app } = await buildTestApp('exportsconfig'));
+    ({ app } = await buildTestApp('exportsconfig', { featureFlags: 'exports=false' }));
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({ exports: false });
   });
 });
@@ -66,9 +66,9 @@ describe('patrón de rutas', () => {
   });
 });
 
-describe('exports activado', () => {
+describe('exports activado (valor por defecto)', () => {
   it('GET /config lo informa', async () => {
-    ({ app } = await buildTestApp('exportson', { featureFlags: 'exports=true' }));
+    ({ app } = await buildTestApp('exportson'));
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({ exports: true });
   });
 });

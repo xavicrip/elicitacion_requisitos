@@ -33,13 +33,13 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 | Flag            | Por defecto | Feature                      | Qué oculta                                                                                             |
 | --------------- | ----------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `detection-llm` | `false`     | `006-deteccion-asistida`     | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste |
-| `exports`       | `false`     | `008-exportacion-resultados` | La exportación: `/projects/:id/exports` y `/exports/*`; en `web`, el menú _Exportar_ del dashboard     |
+| `exports`       | `true`      | `008-exportacion-resultados` | La exportación: `/projects/:id/exports` y `/exports/*`; en `web`, el menú _Exportar_ del dashboard     |
 | `insights`      | `false`     | `007-dashboard-analitico`    | Los resúmenes de hallazgos con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste      |
 | `invite-email`  | `false`     | `002-auth-proyectos`         | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)              |
 
 `detection-llm` e `insights` son flags operativos por su coste: quedan desactivados aunque la
-detección y el dashboard ya no dependan de ningún flag. En local y en CI, Compose activa `exports`
-(`infra/docker-compose.yml`); en Railway, solo en `staging` hasta completar la feature 008.
+detección y el dashboard ya no dependan de ningún flag. `exports` está activo por defecto
+desde el recorrido en staging de la 008 y se retirará en un PR posterior.
 
 ## Flags retirados
 

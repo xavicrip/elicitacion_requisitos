@@ -147,7 +147,7 @@ y que sus indicadores coinciden con los del dashboard
 - [X] T047 Despliegue: comprobar que la imagen de `analytics` con WeasyPrint se construye en el job `build` y que `analytics-worker` arranca con las dos colas en `e2e-smoke`; documentar en `docs/adr/0002-despliegue-railway.md` que no hay servicios nuevos, la variable opcional `EXPORT_TIMEOUT_S` y `FEATURE_FLAGS=exports=true` en `api` de staging — `docs(infra)`
 - [X] T048 Configurar Railway **antes de fusionar**: `FEATURE_FLAGS=exports=true` en `api` de staging (conservando `insights=true` si sigue activo); producción sin cambios — `docs(infra)`
 - [X] T049 Recorrer quickstart.md en staging (CSV, Excel, Gherkin y PDF de «Tienda demo», permisos y auditoría), comprobar tiempo y memoria de `analytics-worker` en Railway y registrar el resultado en `quickstart.md` — `docs(specs)`
-- [ ] T050 Activar `exports` por defecto (`default: true`) cuando US1–US3 y T049 estén en verde y retirarlo en un PR posterior (constitución IV) — `feat(shared)`
+- [X] T050 Activar `exports` por defecto (`default: true`) cuando US1–US3 y T049 estén en verde y retirarlo en un PR posterior (constitución IV) — `feat(shared)`
 
 ---
 

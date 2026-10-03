@@ -275,3 +275,8 @@ proyecto; no hace falta ninguna regla de ciclo de vida.
 
 Estado (2026-10-03): `api` en staging tiene `FEATURE_FLAGS=insights=true,exports=true` (lo aplicó
 el propietario, sin redesplegar); producción no define `exports`.
+
+`exports` pasa a estar activo por defecto tras el recorrido en staging (T049–T050), así que llega
+a producción con la siguiente release: allí `/health/deep` incluirá el check `export-worker`, que
+`analytics-worker` cumple al desplegarse antes que `api`. La variable de `api` en staging puede
+volver a `FEATURE_FLAGS=insights=true`.
