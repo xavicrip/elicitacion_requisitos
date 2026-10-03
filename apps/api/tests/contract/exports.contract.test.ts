@@ -115,4 +115,22 @@ describe('POST /projects/{projectId}/exports', () => {
     ).toEqual([]);
     expect(response.json().fields).toHaveProperty('format');
   });
+
+  it('200 con Gherkin devuelve el ZIP con las cabeceras del contrato', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/projects/${projectId}/exports`,
+      headers: admin,
+      payload: { format: 'gherkin', options: { includePending: true } },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/zip');
+    expect(response.headers['content-disposition']).toMatch(
+      /^attachment; filename="reqcanvas-[a-z0-9-]+-gherkin\.zip"$/,
+    );
+    expect(response.headers['x-export-id']).toMatch(/^[0-9a-f]{24}$/);
+    expect(response.headers['x-export-empty']).toBe('true');
+    // Un ZIP empieza por la firma «PK».
+    expect(response.rawPayload.subarray(0, 2).toString()).toBe('PK');
+  });
 });
