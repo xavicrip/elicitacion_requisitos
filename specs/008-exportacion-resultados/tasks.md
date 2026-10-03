@@ -143,7 +143,7 @@ y que sus indicadores coinciden con los del dashboard
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [X] T045 [P] Mediciones en `e2e/perf/exports.perf.spec.ts` (sin navegador), extrayendo la inserción de volumen con `mongosh` a `e2e/perf/volume.ts`: CSV y Excel de 2 000 detalles listos en < 10 s (SC-001) y PDF de 2 000 detalles en < 2 min (SC-003), con la memoria máxima de `analytics-worker`; como referencia, 5 000 detalles; anotarlo en `plan.md` — `perf(e2e)`
-- [ ] T046 [P] Completar el ADR 0010 con las mediciones, README (sección de exportación: formatos, flag `exports`, caducidad de 24 h) y revisar que `quickstart.md` siga al día — `docs(repo)`
+- [X] T046 [P] Completar el ADR 0010 con las mediciones, README (sección de exportación: formatos, flag `exports`, caducidad de 24 h) y revisar que `quickstart.md` siga al día — `docs(repo)`
 - [ ] T047 Despliegue: comprobar que la imagen de `analytics` con WeasyPrint se construye en el job `build` y que `analytics-worker` arranca con las dos colas en `e2e-smoke`; documentar en `docs/adr/0002-despliegue-railway.md` que no hay servicios nuevos, la variable opcional `EXPORT_TIMEOUT_S` y `FEATURE_FLAGS=exports=true` en `api` de staging — `docs(infra)`
 - [ ] T048 Configurar Railway **antes de fusionar**: `FEATURE_FLAGS=exports=true` en `api` de staging (conservando `insights=true` si sigue activo); producción sin cambios — `docs(infra)`
 - [ ] T049 Recorrer quickstart.md en staging (CSV, Excel, Gherkin y PDF de «Tienda demo», permisos y auditoría), comprobar tiempo y memoria de `analytics-worker` en Railway y registrar el resultado en `quickstart.md` — `docs(specs)`
