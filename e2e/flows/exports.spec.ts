@@ -66,6 +66,52 @@ test('exportar los requisitos a Excel y a CSV, con los filtros del dashboard', a
   await page.screenshot({ path: test.info().outputPath('exportar.png'), fullPage: true });
 });
 
+/** Rutas de los archivos de un ZIP, leídas de su directorio central. */
+function zipEntries(path: string): string[] {
+  const zip = readFileSync(path);
+  const end = zip.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  const total = zip.readUInt16LE(end + 10);
+  let offset = zip.readUInt32LE(end + 16);
+  const names: string[] = [];
+  for (let index = 0; index < total; index++) {
+    const nameLength = zip.readUInt16LE(offset + 28);
+    const extraLength = zip.readUInt16LE(offset + 30);
+    const commentLength = zip.readUInt16LE(offset + 32);
+    names.push(zip.toString('utf8', offset + 46, offset + 46 + nameLength));
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+  return names;
+}
+
+// US2 de la 008 (quickstart §2): el ZIP lleva un `.feature` por actividad con detalles validados
+// y aumenta con «Incluir pendientes».
+test('exportar los requisitos validados a Gherkin', async ({ page, clientIp }) => {
+  test.setTimeout(120_000);
+  const seeded = await seedTiendaDemo(clientIp);
+  const activities = (statuses: string[]) =>
+    new Set(
+      seeded.details
+        .filter((detail) => statuses.includes(detail.status))
+        .map((detail) => detail.activityKey),
+    ).size;
+  await login(page, seeded.admin);
+  await page.goto(`/proyectos/${seeded.projectId}/dashboard`);
+  const region = page.getByRole('region', { name: 'Exportar' });
+  await expect(region).toBeVisible();
+
+  const validated = await downloadFrom(page, 'Exportar a Gherkin');
+  expect(validated.suggestedFilename()).toBe('reqcanvas-tienda-demo-gherkin.zip');
+  const features = zipEntries(await validated.path());
+  expect(features).toHaveLength(activities(['validated']));
+  expect(features.every((name) => /^[a-z0-9-]+\/[a-z0-9-]+\.feature$/.test(name))).toBe(true);
+
+  await region.getByLabel('Incluir pendientes').check();
+  const all = zipEntries(await (await downloadFrom(page, 'Exportar a Gherkin')).path());
+  expect(all).toHaveLength(activities(['validated', 'pending']));
+  expect(all.length).toBeGreaterThan(features.length);
+  expect(all).toEqual(expect.arrayContaining(features));
+});
+
 test('un Participante no puede exportar', async ({ page, clientIp }) => {
   test.setTimeout(90_000);
   const seeded = await seedTiendaDemo(clientIp);
