@@ -30,19 +30,14 @@ Los flags permiten integrar funcionalidades incompletas en `main` sin activarlas
 
 ## Flags actuales
 
-| Flag            | Por defecto | Feature                   | Qué oculta                                                                                                                                    |
-| --------------- | ----------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dashboard`     | `true`      | `007-dashboard-analitico` | El dashboard analítico: `/projects/:id/dashboard`, los análisis, las decisiones de duplicados y los ajustes; en `web`, la entrada _Dashboard_ |
-| `detection-llm` | `false`     | `006-deteccion-asistida`  | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste                                        |
-| `insights`      | `false`     | `007-dashboard-analitico` | Los resúmenes de hallazgos con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste                                             |
-| `invite-email`  | `false`     | `002-auth-proyectos`      | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)                                                     |
+| Flag            | Por defecto | Feature                   | Qué oculta                                                                                             |
+| --------------- | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `detection-llm` | `false`     | `006-deteccion-asistida`  | El refinamiento de la detección con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste |
+| `insights`      | `false`     | `007-dashboard-analitico` | Los resúmenes de hallazgos con Claude (requiere `ANTHROPIC_API_KEY`); flag operativo por su coste      |
+| `invite-email`  | `false`     | `002-auth-proyectos`      | El envío de invitaciones por email (hasta tener un servicio de correo se copia el enlace)              |
 
-`detection-llm` es un flag operativo por su coste: queda desactivado aunque la detección ya no
-dependa de ningún flag. `dashboard` está activado por defecto desde el
-recorrido en staging de la feature 007 (2026-10-03) y se retirará en un PR posterior; con él,
-`api /health/deep` exige un `analysis-worker` vivo en cada entorno. Mientras exista, se puede
-apagar con `FEATURE_FLAGS=dashboard=false`. `insights` es operativo, como
-`detection-llm`.
+`detection-llm` e `insights` son flags operativos por su coste: quedan desactivados aunque la
+detección y el dashboard ya no dependan de ningún flag.
 
 ## Flags retirados
 
@@ -53,6 +48,7 @@ apagar con `FEATURE_FLAGS=dashboard=false`. `insights` es operativo, como
 | `details`   | `004-detalles-requisitos`      | 2026-10-01 (T053)    | 2026-10-01 |
 | `realtime`  | `005-colaboracion-tiempo-real` | 2026-10-02 (T047)    | 2026-10-02 |
 | `detection` | `006-deteccion-asistida`       | 2026-10-02 (T052)    | 2026-10-02 |
+| `dashboard` | `007-dashboard-analitico`      | 2026-10-03 (T062)    | 2026-10-03 |
 
 ## Activarlo por entorno
 

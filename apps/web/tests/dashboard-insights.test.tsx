@@ -97,7 +97,7 @@ afterEach(() => {
 
 function renderDashboard(
   handlers: Record<string, Handler | Handler[]> = {},
-  flags: Record<string, boolean> = { dashboard: true, insights: true },
+  flags: Record<string, boolean> = { insights: true },
 ) {
   const api = mockApi({
     'GET /api/config': () => json(200, { flags }),
@@ -243,7 +243,7 @@ describe('resumen no disponible (US5-4)', () => {
         [`GET ${LATEST}`]: () =>
           json(200, run({ stages } as Partial<AnalysisRun>, { insights: undefined })),
       },
-      { dashboard: true },
+      {},
     );
     const view = within(await panel());
     expect(

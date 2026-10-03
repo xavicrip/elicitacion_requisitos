@@ -17,11 +17,7 @@ export type FlagGates = Partial<Record<string, RegExp>>;
  * (constitución IV: funcionalidad incompleta integrada detrás de un flag). Cada feature añade
  * aquí las suyas mientras su flag exista.
  */
-export const GATED_PREFIXES: FlagGates = {
-  // Dashboard analítico (feature 007): indicadores, análisis, decisiones de duplicados y ajustes.
-  dashboard:
-    /^\/(projects\/[^/?]+\/(dashboard|analysis-runs|duplicate-decisions|analysis-settings)|analysis-runs)(\/|\?|$)/,
-};
+export const GATED_PREFIXES: FlagGates = {};
 
 export const featureGatePlugin = fp<{ flags: ActiveFlags; gates?: FlagGates }>(
   async (app, { flags, gates = GATED_PREFIXES }) => {

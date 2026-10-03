@@ -220,10 +220,8 @@ jobs:
           docker compose -f infra/docker-compose.yml build
           docker compose -f infra/docker-compose.yml --profile mining up -d --no-build --wait --wait-timeout 300
         env:
+          # `/health/deep` exige el worker de minería (feature 007), que levanta el perfil `mining`.
           APP_VERSION: ci
-          # Los E2E de `flows` prueban el dashboard, detrás del flag `dashboard` (feature 007); con
-          # él, `/health/deep` exige el worker de minería, que levanta el perfil `mining`.
-          FEATURE_FLAGS: dashboard=true
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
         env:

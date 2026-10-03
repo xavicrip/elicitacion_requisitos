@@ -187,23 +187,21 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(voteRoutes);
         await app.register(commentRoutes);
 
-        // Dashboard analítico (feature 007): la cascada existe aunque el flag esté desactivado.
+        // Dashboard analítico (feature 007): cola con analysis-worker.
         registerDashboardCascade(app);
-        if (flags.dashboard) {
-          await app.register(descriptiveRoutes);
-          await app.register(analysisPlugin, {
-            redisUrl: services.redisUrl,
-            queuePrefix: `${redisNameSpace}bull`,
-            keyPrefix: redisNameSpace,
-            ...services.analysis,
-          });
-          await app.register(analysisSchedulePlugin, {
-            redisUrl: services.redisUrl,
-            queuePrefix: services.analysis?.queuePrefix ?? `${redisNameSpace}bull`,
-          });
-          await app.register(analysisRoutes);
-          await app.register(decisionRoutes);
-        }
+        await app.register(descriptiveRoutes);
+        await app.register(analysisPlugin, {
+          redisUrl: services.redisUrl,
+          queuePrefix: `${redisNameSpace}bull`,
+          keyPrefix: redisNameSpace,
+          ...services.analysis,
+        });
+        await app.register(analysisSchedulePlugin, {
+          redisUrl: services.redisUrl,
+          queuePrefix: services.analysis?.queuePrefix ?? `${redisNameSpace}bull`,
+        });
+        await app.register(analysisRoutes);
+        await app.register(decisionRoutes);
 
         // Detección asistida (feature 006): cola con analytics-worker.
         registerDetectionCascade(app);

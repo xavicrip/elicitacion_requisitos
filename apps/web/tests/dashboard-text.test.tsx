@@ -97,7 +97,7 @@ afterEach(() => {
 
 function renderDashboard(handlers: Record<string, Handler | Handler[]> = {}) {
   const api = mockApi({
-    'GET /api/config': () => json(200, { flags: { dashboard: true } }),
+    'GET /api/config': () => json(200, { flags: {} }),
     'GET /api/projects/p1': () => json(200, project),
     'GET /api/projects/p1/diagrams': () => json(200, []),
     'GET /api/projects/p1/dashboard/descriptive': () => json(200, descriptive),
