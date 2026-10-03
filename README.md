@@ -166,6 +166,49 @@ El CI falla si en los diagramas digitales las zonas bajan del 85 % o los nombres
 el [quickstart de la 006](specs/006-deteccion-asistida/quickstart.md) y el
 [ADR 0008](docs/adr/0008-deteccion-asistida.md).
 
+### Dashboard analítico (feature 007)
+
+El Administrador de un proyecto abre _Dashboard_ desde los ajustes del proyecto
+(`/proyectos/:id/dashboard`). Tiene dos capas:
+
+- **Descriptiva** (inmediata, la calcula `api` sobre MongoDB): KPIs, distribuciones por
+  actividad, tipo, prioridad, rol y estado, línea de tiempo y mapa de cobertura, con filtros por
+  diagrama, fechas, tipo y estado.
+- **Analítica** (en segundo plano): _Ejecutar análisis_ encola un trabajo en BullMQ que procesa
+  `analysis-worker` (Python: spaCy, sentence-transformers, UMAP + HDBSCAN, pysentimiento,
+  Apriori). El worker no accede a MongoDB: lee la entrada y deja los resultados en el bucket con
+  URLs prefirmadas. Calcula palabras clave, términos relacionados, temas, grupos, calidad de la
+  redacción, posibles duplicados, sentimiento, patrones y actividades críticas. Si una técnica
+  falla, el resto del análisis se conserva; con menos de 20 detalles solo se calcula lo que no
+  necesita volumen.
+- Nada se cambia sin revisión: un par de duplicados se confirma (aplica la moderación de la 004)
+  o se rechaza, y un hallazgo se puede marcar como no útil para que no se repita.
+- El análisis automático (cada noche, solo si hubo cambios) está desactivado por defecto y se
+  activa por proyecto en el propio dashboard.
+
+Flags: `dashboard` activa la función (Compose la activa) e `insights` añade el resumen de
+hallazgos con Claude, que solo se genera con `ANTHROPIC_API_KEY` en `analysis-worker` (tiene
+coste; modelo configurable con `INSIGHTS_LLM_MODEL`). Cada hallazgo cita sus evidencias y sus
+cifras se verifican contra los datos antes de mostrarlo.
+
+`pnpm dev:up` no incluye `analysis-worker` (su imagen ocupa ~3 GB por los modelos); se levanta
+con el perfil `mining`:
+
+```bash
+pnpm dev:up:mining                                  # el stack más analysis-worker
+pnpm --filter @reqcanvas/api seed:analytics         # proyecto «Tienda demo» con 80 detalles
+```
+
+Los gates de calidad del análisis (temas, duplicados y términos ambiguos sobre un conjunto de
+validación sintético) corren en el job `analysis-eval` del CI:
+
+```bash
+uv run --directory apps/analytics --group mining pytest tests/mining tests/unit/test_mining_run.py
+```
+
+Ver el [quickstart de la 007](specs/007-dashboard-analitico/quickstart.md) y el
+[ADR 0009](docs/adr/0009-dashboard-analitico.md).
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash
