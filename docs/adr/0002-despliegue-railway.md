@@ -272,3 +272,6 @@ está consumiendo esa cola: `analytics-worker` debe desplegarse con esta versió
 que es el orden de `deploy.yml`. Producción sigue sin definir el flag hasta el recorrido en
 staging. Los archivos generados en segundo plano viven 24 h en el bucket, bajo el prefijo del
 proyecto; no hace falta ninguna regla de ciclo de vida.
+
+Estado (2026-10-03): `api` en staging tiene `FEATURE_FLAGS=insights=true,exports=true` (lo aplicó
+el propietario, sin redesplegar); producción no define `exports`.
