@@ -20,16 +20,45 @@ Classifier = Callable[[list[str]], list[dict[Label, float]]]
 NEGATIVE_THRESHOLD = 0.7
 POSITIVE_THRESHOLD = 0.7
 TOP_NEGATIVE = 10
+MODEL = "pysentimiento/robertuito-sentiment-analysis"
+BATCH_SIZE = 32
+#: El mismo límite que usa `pysentimiento` para este modelo.
+MAX_TOKENS = 128
 
 
 @lru_cache(maxsize=1)
 def default_classifier() -> Classifier:
-    from pysentimiento import create_analyzer
+    """RoBERTuito con el preprocesado de `pysentimiento`, sin su `Trainer`.
 
-    analyzer = create_analyzer(task="sentiment", lang="es")
+    Los textos se agrupan por longitud antes de formar los lotes (menos relleno): con el mismo
+    modelo y las mismas probabilidades, tarda casi la mitad que `analyzer.predict`.
+    """
+    import torch
+    from pysentimiento.preprocessing import preprocess_tweet
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL)
+    model = AutoModelForSequenceClassification.from_pretrained(MODEL).eval()
+    labels: dict[int, Label] = model.config.id2label
 
     def classify(texts: list[str]) -> list[dict[Label, float]]:
-        return [dict(output.probas) for output in analyzer.predict(texts)]
+        prepared = [preprocess_tweet(text, lang="es") for text in texts]
+        order = sorted(range(len(prepared)), key=lambda index: len(prepared[index]))
+        scores: list[dict[Label, float]] = [{} for _ in prepared]
+        with torch.inference_mode():
+            for start in range(0, len(order), BATCH_SIZE):
+                batch = order[start : start + BATCH_SIZE]
+                encoded = tokenizer(
+                    [prepared[index] for index in batch],
+                    padding=True,
+                    truncation=True,
+                    max_length=MAX_TOKENS,
+                    return_tensors="pt",
+                )
+                probabilities = torch.softmax(model(**encoded).logits, dim=1).tolist()
+                for index, row in zip(batch, probabilities, strict=True):
+                    scores[index] = {labels[position]: value for position, value in enumerate(row)}
+        return scores
 
     return classify
 
