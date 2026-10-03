@@ -5,6 +5,7 @@ import {
   type AuthConfig,
   type DeletionConfig,
   type AnalysisConfig,
+  type ExportsConfig,
   type DetectionConfig,
   type RealtimeConfig,
 } from '../../src/app';
@@ -36,6 +37,8 @@ type TestAppOptions = {
   detection?: DetectionConfig;
   /** Tiempos del análisis del dashboard (feature 007), cortos en las pruebas. */
   analysis?: AnalysisConfig;
+  /** Umbral y tiempos de la exportación (feature 008). */
+  exports?: ExportsConfig;
   /** Reutiliza la base de datos de otra app: dos instancias de `api` (réplicas, feature 005). */
   dbName?: string;
   logStream?: Writable;
@@ -75,6 +78,7 @@ export async function buildTestApp(
       realtime: options.realtime,
       detection: options.detection,
       analysis: options.analysis,
+      exports: options.exports,
       deletion: {
         attempts: 3,
         backoffMs: 10,

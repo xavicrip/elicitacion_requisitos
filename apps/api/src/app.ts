@@ -14,7 +14,7 @@ import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { analysisRoutes } from './modules/dashboard/analysis.routes.js';
 import { registerExportsCascade } from './modules/exports/cascade.js';
-import { exportRoutes } from './modules/exports/routes.js';
+import { exportRoutes, type ExportsConfig } from './modules/exports/routes.js';
 import { registerDashboardCascade } from './modules/dashboard/cascade.js';
 import { decisionRoutes } from './modules/dashboard/decisions.routes.js';
 import { descriptiveRoutes } from './modules/dashboard/descriptive.routes.js';
@@ -66,11 +66,13 @@ export type ServicesConfig = {
   realtime?: RealtimeConfig;
   /** Detección asistida (feature 006): prefijos y tiempos para las pruebas. */
   detection?: DetectionConfig;
-  /** Análisis del dashboard (feature 007), solo con el flag `dashboard`. */
+  /** Análisis del dashboard (feature 007): prefijos y tiempos para las pruebas. */
   analysis?: AnalysisConfig;
+  /** Exportación (feature 008), solo con el flag `exports`: umbral y tiempos para las pruebas. */
+  exports?: ExportsConfig;
 };
 
-export type { AnalysisConfig, DetectionConfig, RealtimeConfig };
+export type { AnalysisConfig, DetectionConfig, ExportsConfig, RealtimeConfig };
 
 export type StorageConfig = {
   endpoint: string;
@@ -208,7 +210,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         // Exportación (feature 008): la cascada existe aunque el flag esté desactivado.
         registerExportsCascade(app);
         if (flags.exports) {
-          await app.register(exportRoutes);
+          await app.register(exportRoutes, services.exports ?? {});
         }
 
         // Detección asistida (feature 006): cola con analytics-worker.
