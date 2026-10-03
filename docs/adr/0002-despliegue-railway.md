@@ -236,3 +236,10 @@ despliegue falla):
 incluye el check `analysis-worker` (latido del worker en Redis), de modo que los smoke tests del
 despliegue cubren un worker caído. El build de la imagen es el más lento del despliegue (descarga
 de modelos); cabe en el `DEPLOY_TIMEOUT` de 1 500 s de `scripts/railway/deploy-service.sh`.
+
+Estado (2026-10-03): `analysis-worker` creado como servicio vacío (sin repositorio) en staging y
+producción, con la configuración de `railway.mining.json` y las variables `REDIS_URL`,
+`ANALYSIS_TIMEOUT_S=900` y `LOG_LEVEL=INFO`, sin `ANTHROPIC_API_KEY`. Como en la 006,
+`railway add` creó la instancia de producción y la de staging se creó con `environmentPatchCommit`.
+`api` en staging tiene `FEATURE_FLAGS=dashboard=true`; producción sigue sin definirla. Queda por
+comprobar en el panel que el servicio dispone de al menos 4 GB de memoria.
