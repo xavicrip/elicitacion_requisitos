@@ -30,7 +30,7 @@ sugeridos van al final de cada tarea.
 
 **Purpose**: decisión de arquitectura y dependencias
 
-- [ ] T001 ADR `docs/adr/0010-exportacion.md` antes de introducir las tecnologías nuevas (restricciones de la constitución): CSV, Excel y Gherkin en `api` en streaming (`csv-stringify`, `exceljs`, `archiver`); PDF en `analytics-worker` con WeasyPrint y Jinja2, sin acceso a MongoDB ni credenciales del bucket (URLs firmadas); gráficos en SVG sin matplotlib; aviso por consulta periódica; descarga a través de `api`; alternativas descartadas (Chromium, `@react-pdf/renderer`, colección compartida, servicio nuevo) — `docs(adr)`
+- [X] T001 ADR `docs/adr/0010-exportacion.md` antes de introducir las tecnologías nuevas (restricciones de la constitución): CSV, Excel y Gherkin en `api` en streaming (`csv-stringify`, `exceljs`, `archiver`); PDF en `analytics-worker` con WeasyPrint y Jinja2, sin acceso a MongoDB ni credenciales del bucket (URLs firmadas); gráficos en SVG sin matplotlib; aviso por consulta periódica; descarga a través de `api`; alternativas descartadas (Chromium, `@react-pdf/renderer`, colección compartida, servicio nuevo) — `docs(adr)`
 - [ ] T002 Dependencias: en `apps/api` `csv-stringify`, `exceljs` y `archiver` (y `@types/archiver`), y como dependencias de desarrollo `@cucumber/gherkin`, `@cucumber/messages` y `yauzl` (leer el ZIP en las pruebas); en `apps/analytics/pyproject.toml` `weasyprint`, `jinja2` y `pillow`, y `pypdf` en el grupo de desarrollo; en `apps/analytics/Dockerfile` las librerías de sistema de WeasyPrint (`libpango-1.0-0`, `libpangoft2-1.0-0`, `libharfbuzz-subset0`) y `fonts-dejavu-core`; las mismas librerías en el job `test-python` de `.github/workflows/ci.yml`; overrides de mypy para las librerías sin tipos — `build(repo)`
 
 ---
