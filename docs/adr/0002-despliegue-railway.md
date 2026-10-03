@@ -253,3 +253,22 @@ estar desplegado en cada entorno. El propietario confirmó en el panel que `anal
 dispone de más de 4 GB de memoria. La variable `FEATURE_FLAGS=dashboard=true` de `api` en staging
 se elimina después de desplegar el retiro; mientras siga definida, `api` solo avisa en el log del
 flag desconocido. Producción nunca la definió. `insights` sigue como flag operativo.
+
+## Exportación de la feature 008 (2026-10-03)
+
+La 008 no añade servicios ni variables obligatorias. El reporte PDF lo genera `analytics-worker`
+(ADR 0010), cuyo proceso consume ahora las colas `detection` y `export`; su imagen (la de
+`analytics`) incorpora las librerías de Pango que necesita WeasyPrint y se construye en el job
+`build` del CI como hasta ahora. CSV, Excel y Gherkin los genera `api`.
+
+| Servicio           | Variable           | Valor                            | Notas                                              |
+| ------------------ | ------------------ | -------------------------------- | -------------------------------------------------- |
+| `analytics-worker` | `EXPORT_TIMEOUT_S` | Opcional (por defecto, `300`)    | Tiempo máximo de un reporte PDF                    |
+| `api`              | `FEATURE_FLAGS`    | `exports=true` (solo en staging) | Se suma a `insights=true` si ese flag sigue activo |
+
+Con el flag activo, `/health/deep` de `api` incluye el check `export-worker` (latido de la cola
+`export` en Redis), de modo que los smoke tests del despliegue fallan si `analytics-worker` no
+está consumiendo esa cola: `analytics-worker` debe desplegarse con esta versión antes que `api`,
+que es el orden de `deploy.yml`. Producción sigue sin definir el flag hasta el recorrido en
+staging. Los archivos generados en segundo plano viven 24 h en el bucket, bajo el prefijo del
+proyecto; no hace falta ninguna regla de ciclo de vida.
