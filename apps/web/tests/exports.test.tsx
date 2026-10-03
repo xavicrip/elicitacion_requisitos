@@ -8,7 +8,7 @@ import { polling } from '../src/features/exports/useExport';
 import { useAuthStore } from '../src/lib/auth-store';
 import { json, mockApi, type Handler } from './helpers/api';
 
-// US1 de la 008 (FR-001, FR-002, FR-006, FR-007): menú Exportar del dashboard.
+// US1 y US2 de la 008 (FR-001, FR-002, FR-004, FR-006, FR-007): menú Exportar del dashboard.
 
 vi.mock('../src/features/dashboard/charts/EChart', () => ({
   default: () => <div data-testid="echart" />,
@@ -194,6 +194,43 @@ describe('exportación inmediata', () => {
     await userEvent.click(within(region).getByRole('button', { name: 'Exportar a CSV' }));
     expect(await within(region).findByRole('status')).toHaveTextContent(
       'No hay requisitos con estos filtros',
+    );
+    await waitFor(() => expect(saved).toHaveLength(1));
+  });
+
+  it('Gherkin envía «Incluir pendientes» y entrega el ZIP', async () => {
+    const api = renderDashboard({
+      [`POST ${EXPORTS}`]: () => file('reqcanvas-tienda-demo-gherkin.zip', 'zip'),
+    });
+    const region = await menu();
+    await userEvent.click(within(region).getByRole('button', { name: 'Exportar a Gherkin' }));
+    await waitFor(() => expect(saved).toHaveLength(1));
+    expect(posted(api)[0]!.body).toMatchObject({
+      format: 'gherkin',
+      options: { includePending: false },
+    });
+
+    await userEvent.click(within(region).getByRole('checkbox', { name: 'Incluir pendientes' }));
+    await userEvent.click(within(region).getByRole('button', { name: 'Exportar a Gherkin' }));
+    await waitFor(() =>
+      expect(saved).toEqual(
+        Array(2).fill({ name: 'reqcanvas-tienda-demo-gherkin.zip', text: 'zip' }),
+      ),
+    );
+    expect(posted(api)[1]!.body).toMatchObject({
+      format: 'gherkin',
+      options: { includePending: true },
+    });
+  });
+
+  it('Gherkin sin requisitos validados sugiere incluir los pendientes', async () => {
+    renderDashboard({
+      [`POST ${EXPORTS}`]: () => file('reqcanvas.zip', 'zip', { 'x-export-empty': 'true' }),
+    });
+    const region = await menu();
+    await userEvent.click(within(region).getByRole('button', { name: 'Exportar a Gherkin' }));
+    expect(await within(region).findByRole('status')).toHaveTextContent(
+      'No hay requisitos validados con estos filtros',
     );
     await waitFor(() => expect(saved).toHaveLength(1));
   });
