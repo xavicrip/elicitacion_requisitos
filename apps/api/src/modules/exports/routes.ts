@@ -1,4 +1,5 @@
 import {
+  type DashboardFilters,
   DashboardFiltersSchema,
   ExportOptionsSchema,
   ExportRequestSchema,
@@ -59,8 +60,17 @@ export async function exportRoutes(app: FastifyInstance, config: ExportsConfig =
     async (request, reply) => {
       const projectId = new Types.ObjectId(request.params.projectId);
       const { format } = request.body;
-      const filters = request.body.filters ?? DashboardFiltersSchema.parse({});
       const options = request.body.options ?? ExportOptionsSchema.parse({});
+      const requested = request.body.filters ?? DashboardFiltersSchema.parse({});
+      // Gherkin solo lleva los validados y, si se pide, los pendientes (FR-004), sea cual sea el
+      // filtro de estados.
+      const filters: DashboardFilters =
+        format === 'gherkin'
+          ? {
+              ...requested,
+              statuses: options.includePending ? ['validated', 'pending'] : ['validated'],
+            }
+          : requested;
       const count = await query.count(projectId, filters);
       if (!isFileFormat(format)) {
         // Respuesta temporal, fuera del contrato: cada historia de la 008 añade su formato.

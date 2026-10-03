@@ -1,6 +1,7 @@
 import { PassThrough, type Readable } from 'node:stream';
 import type { ExportFormat, ExportOptions } from '@reqcanvas/shared';
 import { csvStream } from './csv.js';
+import { gherkinZip } from './gherkin.js';
 import type { ExportRow } from './query.js';
 import { writeXlsx } from './xlsx.js';
 
@@ -22,17 +23,17 @@ export const EXTENSION: Record<ExportFormat, string> = {
 };
 
 /** Formatos que `api` ya sabe generar; cada historia de la 008 añade el suyo. */
-export const isFileFormat = (format: ExportFormat): format is 'csv' | 'xlsx' =>
-  format === 'csv' || format === 'xlsx';
+export const isFileFormat = (format: ExportFormat): format is FileFormat => format !== 'pdf';
 
 /** El archivo de una exportación, en streaming a medida que llegan las filas. */
 export function renderExport(
-  format: 'csv' | 'xlsx',
+  format: FileFormat,
   rows: AsyncIterable<ExportRow>,
   options: ExportOptions,
   timeZone: string,
 ): Readable {
   if (format === 'csv') return csvStream(rows, options.delimiter);
+  if (format === 'gherkin') return gherkinZip(rows);
   const output = new PassThrough();
   writeXlsx(rows, output, timeZone).catch((error: Error) => output.destroy(error));
   return output;

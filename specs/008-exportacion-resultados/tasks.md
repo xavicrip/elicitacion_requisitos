@@ -97,13 +97,13 @@ columnas, acentos correctos y sin fórmulas activas
 ### Tests for User Story 2
 
 - [X] T027 [P] [US2] Pruebas de `apps/api/src/modules/exports/gherkin.ts` en `apps/api/tests/unit/exports-gherkin.test.ts`: cada `.feature` empieza por `# language: es`, lleva la etiqueta del diagrama, la *Característica* con el nombre de la actividad y un *Escenario* por detalle con sus pasos; etiquetas del escenario con prioridad, tipo, estado y etiquetas normalizadas (`@must @no-funcional @pagos @validado`); nombre del escenario con las 8 primeras palabras de «Entonces» y `#<id corto>` si se repite; textos de varias líneas unidos en una y caracteres especiales (`|`, `"""`, `#` inicial, `@` inicial) que no rompen el análisis; **todos los archivos se analizan con `@cucumber/gherkin` sin errores (SC-002)**, incluidos los generados con los 300 detalles del conjunto de validación — `test(api)`
-- [ ] T028 [P] [US2] Pruebas de integración en `apps/api/tests/integration/exports-gherkin.test.ts`: `POST` con `gherkin` devuelve `reqcanvas-<proyecto>-gherkin.zip` con `<diagrama>/<actividad>.feature` (nombres con `safeFileName`, sin colisiones); por defecto solo los validados y con `includePending` también los pendientes, sea cual sea `filters.statuses`; no hay archivo para actividades sin escenarios; un proyecto sin detalles validados devuelve un ZIP con un `LEEME.txt` que lo indica — `test(api)`
+- [X] T028 [P] [US2] Pruebas de integración en `apps/api/tests/integration/exports-gherkin.test.ts`: `POST` con `gherkin` devuelve `reqcanvas-<proyecto>-gherkin.zip` con `<diagrama>/<actividad>.feature` (nombres con `safeFileName`, sin colisiones); por defecto solo los validados y con `includePending` también los pendientes, sea cual sea `filters.statuses`; no hay archivo para actividades sin escenarios; un proyecto sin detalles validados devuelve un ZIP con un `LEEME.txt` que lo indica — `test(api)`
 - [ ] T029 [P] [US2] Pruebas en `apps/web/tests/exports.test.tsx`: la opción *Gherkin* con la casilla *Incluir pendientes* envía `includePending` y descarga el ZIP — `test(web)`
 
 ### Implementation for User Story 2
 
 - [X] T030 [US2] Implementar `apps/api/src/modules/exports/gherkin.ts` (render de cada `.feature` y ZIP con `archiver`) — `feat(api)`
-- [ ] T031 [US2] Añadir `gherkin` a `POST /projects/:projectId/exports` y al worker de `apps/api/src/jobs/export-files.ts` — `feat(api)`
+- [X] T031 [US2] Añadir `gherkin` a `POST /projects/:projectId/exports` y al worker de `apps/api/src/jobs/export-files.ts` — `feat(api)`
 - [ ] T032 [US2] Añadir la opción Gherkin a `apps/web/src/features/exports/ExportMenu.tsx` y ampliar `e2e/flows/exports.spec.ts` (quickstart §2: el ZIP contiene un `.feature` por actividad con detalles validados y aumenta con *Incluir pendientes*) — `feat(web)`
 
 **Checkpoint**: US1 y US2 funcionan de forma independiente
