@@ -60,3 +60,35 @@ cd apps/analytics && uv run --group mining pytest tests/mining  # temas, duplica
 pnpm e2e --project=flows dashboard                             # el del análisis necesita el perfil mining
 pnpm e2e:perf -g dashboard                                      # SC-001 y SC-002
 ```
+
+## 8. Recorrido en staging (2026-10-03)
+
+Versión `v0.7.0-56-gdcdb5ea`, con `FEATURE_FLAGS=dashboard=true` en `api` y `analysis-worker`
+desplegado (primer build de la imagen de minería en Railway dentro del margen del despliegue).
+Hecho **por la API pública**, con el proyecto «Tienda demo» creado por `seed:analytics`.
+
+| Paso                         | Resultado                                                                                    |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `/health/deep`               | `ok`, con `analysis-worker` arriba                                                           |
+| Descriptivo (§1)             | 80 detalles, 6 participantes activos, 90 % de cobertura, 15 % validados; 0,5 s por petición  |
+| Acceso (§1.4)                | una cuenta ajena al proyecto recibe 404                                                      |
+| Análisis completo (§2)       | `done`, sin etapas fallidas: 69 s el primero (carga de modelos) y 6 s el segundo             |
+| Temas (§2.3)                 | pagos, seguridad (sesión) y notificaciones (entrega) salen como temas distintos              |
+| Calidad y duplicados (§3)    | los 3 pares sembrados (similitud 0,97–1,00); confirmar uno deja 79 detalles activos y, tras rechazar otro, el siguiente análisis solo propone 1 |
+| Patrones (§4)                | sentimiento, 30 reglas, 2 actividades calientes y 2 frías                                    |
+| Obsolescencia (§6.1)         | tras las decisiones, el último análisis queda marcado como desactualizado                    |
+| Programación (§6.2)          | desactivada por defecto; se activa y se desactiva desde los ajustes                          |
+| Insights (§5)                | sin `ANTHROPIC_API_KEY` ni flag `insights`: regenerar responde 409 `INSIGHTS_DISABLED`       |
+
+Pendiente, porque no se puede comprobar por la API:
+
+- Recorrer las pantallas en el navegador (gráficos, pestañas, panel de evidencias); la página
+  responde y los E2E del CI las cubren contra Compose.
+- Memoria de `analysis-worker` en el panel de Railway (en local, 2 GB de pico con 5 000
+  detalles) y confirmar que el servicio dispone de al menos 4 GB.
+- Insights con Claude en staging: requiere `ANTHROPIC_API_KEY` en `analysis-worker` y
+  `insights=true` en `api`.
+- **Evaluación con analistas (SC-005)**: sobre un proyecto real, los analistas valoran los
+  hallazgos generados (objetivo: al menos el 70 % considerados útiles). La valoración «no útil»
+  de cada hallazgo queda registrada en `insight_feedback`. SC-006 (todo hallazgo enlaza a sus
+  datos) lo garantiza la verificación de evidencias y lo cubren las pruebas.
