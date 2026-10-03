@@ -209,6 +209,31 @@ uv run --directory apps/analytics --group mining pytest tests/mining tests/unit/
 Ver el [quickstart de la 007](specs/007-dashboard-analitico/quickstart.md) y el
 [ADR 0009](docs/adr/0009-dashboard-analitico.md).
 
+### Exportación de requisitos y reportes (feature 008)
+
+En el dashboard, el Administrador tiene la sección _Exportar_, que usa los filtros activos:
+
+- **Excel y CSV**: una fila por requisito con 18 columnas (diagrama, actividad, Dado, Cuando,
+  Entonces, tipo, prioridad, rol, etiquetas, estado, votos, comentarios, autor y fechas). El CSV
+  va en UTF-8 con BOM y admite `,` o `;` como separador; el Excel añade una hoja _Resumen_. Los
+  textos que una hoja de cálculo ejecutaría como fórmula se neutralizan.
+- **Gherkin**: un ZIP con un `.feature` en español por actividad (`<diagrama>/<actividad>.feature`),
+  solo con los requisitos validados; _Incluir pendientes_ añade los pendientes.
+- **Reporte PDF**: portada, indicadores, diagramas con la cobertura, distribuciones, hallazgos
+  del último análisis y el listado de requisitos por actividad. Lo genera `analytics-worker`
+  (WeasyPrint) a partir de un archivo que prepara `api`; el worker no accede a MongoDB.
+
+Hasta 1 000 requisitos, CSV, Excel y Gherkin se descargan al momento. Por encima de ese número,
+y siempre para el PDF, la exportación se prepara en segundo plano: la página avisa cuando está
+lista y el archivo se puede descargar durante 24 h desde el _Historial de exportaciones_. Cada
+solicitud y cada descarga quedan en la auditoría.
+
+Flag: `exports` (desactivado por defecto; Compose y el CI lo activan con
+`FEATURE_FLAGS=exports=true`).
+
+Ver el [quickstart de la 008](specs/008-exportacion-resultados/quickstart.md) y el
+[ADR 0010](docs/adr/0010-exportacion.md).
+
 Cada petición lleva un `x-request-id` que aparece en los logs JSON de todos los servicios:
 
 ```bash

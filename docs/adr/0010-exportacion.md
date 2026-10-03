@@ -40,6 +40,24 @@ con `analytics`, credenciales del bucket en el worker, matplotlib y un evento de
    borrado elimina.
 8. **Flag `exports`** hasta completar la feature y recorrerla en staging.
 
+## Mediciones (2026-10-03)
+
+`e2e/perf/exports.perf.spec.ts` contra Compose en local (`pnpm e2e --project=perf exports`), con
+«Tienda demo» ampliado con `mongosh` (`e2e/perf/volume.ts`). Tiempos desde la solicitud hasta que
+la exportación queda lista para descargar:
+
+| Detalles | CSV            | Excel          | Gherkin (con pendientes) | PDF             | `analytics-worker` (reposo → pico) |
+| -------- | -------------- | -------------- | ------------------------ | --------------- | ---------------------------------- |
+| 2 000    | 0,2 s (661 KB) | 0,8 s (193 KB) | 0,2 s (24 KB)            | 7,4 s (596 KB)  | 186 MB → 343 MB                    |
+| 5 000    | 0,6 s (1,6 MB) | 1,5 s (456 KB) | 0,2 s (44 KB)            | 25,1 s (1,1 MB) | 346 MB → 685 MB                    |
+
+Se cumplen SC-001 (CSV y Excel de 2 000 detalles en menos de 10 s) y SC-003 (PDF de 2 000
+detalles en menos de 2 min) con mucho margen. El PDF crece con el anexo (una página cada 12
+requisitos, aproximadamente) y la memoria del worker, con el documento que maqueta WeasyPrint:
+con 5 000 detalles se queda por debajo de 1 GB, así que `analytics-worker` no necesita más
+recursos que los de la detección. El E2E con el worker real («Tienda demo», 80 detalles) genera
+un PDF de 12 páginas en 1,4 s.
+
 ## Alternativas descartadas
 
 - **Colección `exports` compartida y `boto3` en el worker** (plan original): reparte la escritura
