@@ -16,6 +16,7 @@ import { lookupOf } from '../text/lookup';
 import { Topics } from '../text/Topics';
 import { WordCloud } from '../text/WordCloud';
 import { describeFilters, STAGE_LABEL } from './labels';
+import { ScheduleSettings } from './ScheduleSettings';
 import { Tabs, type Tab } from './Tabs';
 import { useAnalysisRun } from './useAnalysisRun';
 
@@ -165,6 +166,7 @@ export function AnalysisSection({
           Ejecutar análisis
         </button>
       </div>
+      <ScheduleSettings projectId={projectId} />
       {analysis.running && <Progress run={analysis.current} />}
       <FormError>{analysis.error || failed?.error?.message || ''}</FormError>
       {analysis.loading && <p>Cargando el último análisis…</p>}

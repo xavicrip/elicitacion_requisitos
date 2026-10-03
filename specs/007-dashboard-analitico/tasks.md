@@ -190,8 +190,8 @@ existentes; sin el servicio, el resto del dashboard funciona
 
 ## Phase 8: Análisis programado (FR-013, P3)
 
-- [ ] T054 [P] Pruebas en `apps/api/tests/integration/analysis-schedule.test.ts`: un proyecto abierto con la programación activada tiene su scheduler de BullMQ con su cron y zona horaria; al dispararse solo encola si cambió el `dataFingerprint`; desactivarla, cerrar o borrar el proyecto elimina el scheduler (plan, ajuste 9) — `test(api)`
-- [ ] T055 Implementar la programación en `apps/api/src/jobs/analysis-schedule.ts` y la opción en los ajustes del dashboard en `web` — `feat(api)`
+- [X] T054 [P] Pruebas en `apps/api/tests/integration/analysis-schedule.test.ts`: un proyecto abierto con la programación activada tiene su scheduler de BullMQ con su cron y zona horaria; al dispararse solo encola si cambió el `dataFingerprint`; desactivarla, cerrar o borrar el proyecto elimina el scheduler (plan, ajuste 9) — `test(api)`
+- [X] T055 Implementar la programación en `apps/api/src/jobs/analysis-schedule.ts` y la opción en los ajustes del dashboard en `web` — `feat(api)`
 
 ---
 

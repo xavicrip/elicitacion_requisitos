@@ -229,6 +229,37 @@ describe('calidad de los requisitos', () => {
     });
   });
 
+  it('permite programar el análisis nocturno (desactivado por defecto)', async () => {
+    const off = { ...settings.schedule, enabled: false };
+    const api = renderDashboard({
+      [`GET ${SETTINGS}`]: () => json(200, { ...settings, schedule: off }),
+      [`PUT ${SETTINGS}`]: () =>
+        json(200, { ...settings, schedule: { ...off, enabled: true, cron: '30 2 * * *' } }),
+    });
+    const region = await screen.findByRole('region', { name: 'Análisis de texto' });
+    await userEvent.click(within(region).getByRole('button', { name: 'Análisis automático' }));
+    const enabled = await within(region).findByLabelText('Analizar cada noche si hay cambios');
+    const time = within(region).getByLabelText('Hora');
+    await waitFor(() => expect(enabled).toBeEnabled());
+    expect(enabled).not.toBeChecked();
+    expect(time).toBeDisabled();
+    expect(time).toHaveValue('03:00');
+    expect(within(region).getByText('(America/Guayaquil)')).toBeInTheDocument();
+    await userEvent.click(enabled);
+    await userEvent.clear(time);
+    await userEvent.type(time, '02:30');
+    await userEvent.click(within(region).getByRole('button', { name: 'Guardar programación' }));
+    expect(
+      await within(region).findByText(
+        'Guardado. El análisis se ejecutará cada noche si hay cambios.',
+      ),
+    ).toBeInTheDocument();
+    expect(api.requests.find((r) => r.method === 'PUT')?.body).toEqual({
+      ...settings,
+      schedule: { enabled: true, cron: '30 2 * * *', timezone: 'America/Guayaquil' },
+    });
+  });
+
   it('un error al guardar muestra el motivo', async () => {
     renderDashboard({
       [`PUT ${SETTINGS}`]: () =>
