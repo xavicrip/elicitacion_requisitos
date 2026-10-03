@@ -36,7 +36,7 @@ superan los 1 000 detalles).
     {
       "id": "66f1…", "name": "Proceso de compra",
       "image": { "url": "https://…", "width": 1600, "height": 900 },
-      "activities": [{ "key": "…", "label": "Validar pago", "bbox": { "x": 10, "y": 20, "w": 120, "h": 60 }, "detailCount": 20 }]
+      "activities": [{ "key": "…", "label": "Validar pago", "bbox": { "x": 0.1, "y": 0.2, "w": 0.2, "h": 0.15 }, "detailCount": 20 }]
     }
   ],
   "details": [

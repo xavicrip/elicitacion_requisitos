@@ -1,0 +1,8 @@
+{
+  "v": 1,
+  "status": "failed",
+  "error": {
+    "code": "EXPORT_FAILED",
+    "message": "No se pudo generar el reporte."
+  }
+}

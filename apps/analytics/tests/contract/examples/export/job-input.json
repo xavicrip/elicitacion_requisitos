@@ -1,0 +1,8 @@
+{
+  "v": 1,
+  "exportId": "671000000000000000000001",
+  "projectId": "66f000000000000000000001",
+  "inputUrl": "https://bucket.example/projects/66f0/exports/6710/input.json.gz?X-Amz-Signature=abc",
+  "outputUrl": "https://bucket.example/projects/66f0/exports/6710.pdf?X-Amz-Signature=def",
+  "requestId": "0192f0aa-0000-7000-8000-000000000001"
+}

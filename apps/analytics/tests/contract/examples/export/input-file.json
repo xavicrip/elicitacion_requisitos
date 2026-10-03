@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "Tienda demo",
+    "timezone": "America/Guayaquil"
+  },
+  "generatedAt": "2026-10-03T15:00:00.000Z",
+  "filters": {
+    "diagramIds": null,
+    "from": null,
+    "to": null,
+    "types": null,
+    "statuses": [
+      "pending",
+      "validated"
+    ]
+  },
+  "descriptive": {
+    "kpis": {
+      "totalDetails": 2,
+      "activeParticipants": 6,
+      "coveredActivitiesPct": 66.7,
+      "validatedPct": 50
+    },
+    "byActivity": [
+      {
+        "key": "act-04",
+        "label": "Validar pago",
+        "count": 2
+      },
+      {
+        "key": "act-09",
+        "label": "Gestionar devoluciones",
+        "count": 0
+      }
+    ],
+    "byType": [
+      {
+        "key": "functional",
+        "label": "Funcional",
+        "count": 1
+      },
+      {
+        "key": "non_functional",
+        "label": "No funcional",
+        "count": 1
+      }
+    ],
+    "byPriority": [
+      {
+        "key": "must",
+        "label": "Must",
+        "count": 1
+      },
+      {
+        "key": "none",
+        "label": "Sin prioridad",
+        "count": 1
+      }
+    ],
+    "byRole": [
+      {
+        "key": "Cajero",
+        "label": "Cajero",
+        "count": 2
+      }
+    ],
+    "byStatus": [
+      {
+        "key": "pending",
+        "label": "Pendiente",
+        "count": 1
+      },
+      {
+        "key": "validated",
+        "label": "Validado",
+        "count": 1
+      }
+    ],
+    "timeline": [
+      {
+        "date": "2026-10-01",
+        "created": 2,
+        "votes": 3,
+        "comments": 1
+      }
+    ]
+  },
+  "diagrams": [
+    {
+      "id": "66f100000000000000000001",
+      "name": "Proceso de compra",
+      "image": {
+        "url": "https://bucket.example/projects/66f0/diagrams/v1/display.webp?X-Amz-Signature=abc",
+        "width": 1600,
+        "height": 900
+      },
+      "activities": [
+        {
+          "key": "act-04",
+          "label": "Validar pago",
+          "bbox": {
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.2,
+            "h": 0.15
+          },
+          "detailCount": 2
+        },
+        {
+          "key": "act-09",
+          "label": "Gestionar devoluciones",
+          "bbox": {
+            "x": 0.7,
+            "y": 0.6,
+            "w": 0.2,
+            "h": 0.15
+          },
+          "detailCount": 0
+        }
+      ]
+    }
+  ],
+  "details": [
+    {
+      "id": "66f200000000000000000001",
+      "diagramId": "66f100000000000000000001",
+      "activityKey": "act-04",
+      "given": "el cliente eligió pagar con tarjeta de crédito",
+      "when": "confirma el pago del pedido",
+      "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+      "type": "non_functional",
+      "priority": "must",
+      "authorRole": "Cajero",
+      "tags": [
+        "pagos"
+      ],
+      "status": "pending",
+      "voteCount": 3,
+      "commentCount": 1,
+      "createdAt": "2026-10-01T15:00:00.000Z"
+    },
+    {
+      "id": "66f200000000000000000002",
+      "diagramId": "66f100000000000000000001",
+      "activityKey": "act-04",
+      "given": "el comprador eligió pagar con tarjeta de crédito",
+      "when": "aprueba el pago del pedido",
+      "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+      "type": "non_functional",
+      "priority": null,
+      "authorRole": null,
+      "tags": [],
+      "status": "validated",
+      "voteCount": 0,
+      "commentCount": 0,
+      "createdAt": "2026-10-01T15:00:00.000Z"
+    }
+  ],
+  "analysis": {
+    "finishedAt": "2026-10-03T14:00:00.000Z",
+    "stages": {
+      "keywords": {
+        "status": "done",
+        "durationMs": 100
+      },
+      "cooccurrence": {
+        "status": "done",
+        "durationMs": 101
+      },
+      "topics": {
+        "status": "done",
+        "durationMs": 102
+      },
+      "clusters": {
+        "status": "done",
+        "durationMs": 103
+      },
+      "duplicates": {
+        "status": "done",
+        "durationMs": 104
+      },
+      "sentiment": {
+        "status": "done",
+        "durationMs": 105
+      },
+      "quality": {
+        "status": "done",
+        "durationMs": 106
+      },
+      "association": {
+        "status": "done",
+        "durationMs": 107
+      },
+      "hotcold": {
+        "status": "done",
+        "durationMs": 108
+      },
+      "insights": {
+        "status": "skipped",
+        "reason": "NO_API_KEY"
+      }
+    },
+    "results": {
+      "schemaVersion": 1,
+      "stages": {
+        "keywords": {
+          "status": "done",
+          "durationMs": 100
+        },
+        "cooccurrence": {
+          "status": "done",
+          "durationMs": 101
+        },
+        "topics": {
+          "status": "done",
+          "durationMs": 102
+        },
+        "clusters": {
+          "status": "done",
+          "durationMs": 103
+        },
+        "duplicates": {
+          "status": "done",
+          "durationMs": 104
+        },
+        "sentiment": {
+          "status": "done",
+          "durationMs": 105
+        },
+        "quality": {
+          "status": "done",
+          "durationMs": 106
+        },
+        "association": {
+          "status": "done",
+          "durationMs": 107
+        },
+        "hotcold": {
+          "status": "done",
+          "durationMs": 108
+        },
+        "insights": {
+          "status": "skipped",
+          "reason": "NO_API_KEY"
+        }
+      },
+      "preprocess": {
+        "unrecognizedRatio": 0.04
+      },
+      "keywords": {
+        "byActivity": [
+          {
+            "activityKey": "act-04",
+            "terms": [
+              {
+                "term": "tarjeta",
+                "weight": 0.42
+              },
+              {
+                "term": "pasarela",
+                "weight": 0.31
+              }
+            ]
+          }
+        ],
+        "wordCloud": [
+          {
+            "term": "pago",
+            "weight": 34
+          },
+          {
+            "term": "pedido",
+            "weight": 21
+          }
+        ]
+      },
+      "cooccurrence": {
+        "nodes": [
+          {
+            "id": "pago",
+            "freq": 34,
+            "community": 0
+          },
+          {
+            "id": "tarjeta",
+            "freq": 12,
+            "community": 0
+          }
+        ],
+        "edges": [
+          {
+            "source": "pago",
+            "target": "tarjeta",
+            "pmi": 1.3,
+            "count": 9
+          }
+        ]
+      },
+      "topics": [
+        {
+          "id": "t0",
+          "label": "pago · tarjeta · pasarela",
+          "terms": [
+            {
+              "term": "pago",
+              "weight": 0.5
+            }
+          ],
+          "detailIds": [
+            "66f200000000000000000001"
+          ],
+          "activityKeys": [
+            "act-04"
+          ]
+        }
+      ],
+      "clusters": {
+        "groups": [
+          {
+            "id": "g0",
+            "detailIds": [
+              "66f200000000000000000001",
+              "66f200000000000000000002"
+            ],
+            "representativeId": "66f200000000000000000001"
+          }
+        ],
+        "points": [
+          {
+            "detailId": "66f200000000000000000001",
+            "x": 0.1,
+            "y": -0.4,
+            "groupId": "g0"
+          },
+          {
+            "detailId": "66f200000000000000000002",
+            "x": 0.12,
+            "y": -0.38,
+            "groupId": "g0"
+          },
+          {
+            "detailId": "66f200000000000000000003",
+            "x": 1.4,
+            "y": 0.9,
+            "groupId": null
+          }
+        ]
+      },
+      "duplicates": [
+        {
+          "pair": [
+            "66f200000000000000000001",
+            "66f200000000000000000002"
+          ],
+          "similarity": 0.93
+        }
+      ],
+      "sentiment": {
+        "byActivity": [
+          {
+            "activityKey": "act-04",
+            "pos": 1,
+            "neu": 10,
+            "neg": 2
+          }
+        ],
+        "mostNegative": [
+          {
+            "detailId": "66f200000000000000000002",
+            "score": 0.81
+          }
+        ]
+      },
+      "quality": [
+        {
+          "detailId": "66f200000000000000000002",
+          "score": 70,
+          "issues": [
+            {
+              "code": "ambiguous_term",
+              "field": "then",
+              "term": "rápido",
+              "penalty": 15,
+              "suggestion": "Hazlo medible: indica un tiempo o una cifra."
+            },
+            {
+              "code": "too_short",
+              "field": "when",
+              "penalty": 10
+            }
+          ]
+        }
+      ],
+      "association": [
+        {
+          "antecedent": [
+            "tag:pagos"
+          ],
+          "consequent": [
+            "type:non_functional"
+          ],
+          "support": 0.22,
+          "confidence": 0.9,
+          "lift": 2.4,
+          "sentence": "Cuando la etiqueta es pagos, el 90 % de los requisitos son no funcionales."
+        }
+      ],
+      "hotcold": [
+        {
+          "activityKey": "act-04",
+          "class": "hot",
+          "score": 2.1,
+          "reason": "volumen"
+        },
+        {
+          "activityKey": "act-10",
+          "class": "cold",
+          "score": -1.4,
+          "reason": "sin detalles"
+        }
+      ],
+      "insightsFewerThanExpected": false,
+      "insights": [
+        {
+          "id": "i1",
+          "title": "Validar pago concentra los no funcionales",
+          "statement": "La actividad Validar pago reúne el 30 % de los requisitos no funcionales.",
+          "recommendation": "Revisa con el equipo los tiempos de respuesta de la pasarela.",
+          "evidence": [
+            {
+              "kind": "activity",
+              "id": "act-04"
+            },
+            {
+              "kind": "rule",
+              "id": "0"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
