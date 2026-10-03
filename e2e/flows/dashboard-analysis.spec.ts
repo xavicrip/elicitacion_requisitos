@@ -36,7 +36,14 @@ test('ejecutar el análisis de texto y explorar sus resultados', async ({
   // Con el worker real, todas las etapas terminan (modelos incluidos en su imagen).
   await expect(analysis.getByText(/No se pudo calcular/)).toHaveCount(0);
 
+  // La primera pestaña es el resumen (US5); sin el flag `insights` avisa de que no está disponible.
+  await expect(analysis.getByRole('tab', { name: 'Resumen' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+
   // Palabras clave de "Validar pago": términos de pagos.
+  await analysis.getByRole('tab', { name: 'Palabras clave' }).click();
   const keywords = analysis.getByRole('tabpanel');
   await keywords.getByLabel('Actividad').selectOption({ label: 'Validar pago' });
   await expect(
