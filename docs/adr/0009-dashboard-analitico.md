@@ -25,7 +25,7 @@ minutos de CPU.
    coocurrencia, `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`) para los
    embeddings, UMAP y el `HDBSCAN` de scikit-learn con c-TF-IDF para temas y grupos (la cadena de
    BERTopic, sin su envoltorio ni sus dependencias), similitud coseno del texto y de cada parte
-   (Dado, Cuando, Entonces) para los casi duplicados, `pysentimiento` para el sentimiento, reglas explicables con
+   (Dado, Cuando, Entonces) para los casi duplicados, el modelo RoBERTuito de `pysentimiento` para el sentimiento, reglas explicables con
    un léxico configurable para la calidad y `mlxtend` (Apriori) para las reglas de asociación.
    torch se instala en su variante CPU.
 3. **El worker no accede a MongoDB**: `api` exporta el conjunto analizado (detalles filtrados sin
@@ -67,3 +67,35 @@ minutos de CPU.
 - **Un clasificador supervisado de calidad**: no hay datos etiquetados reales; las reglas son
   explicables, como pide la spec.
 - **Recharts**: no tiene grafo de red ni nube de palabras.
+- **Clasificar el sentimiento con `analyzer.predict` de `pysentimiento`**: su `Trainer` tardaba
+  3,5 veces más y duplicaba la memoria; se usa su modelo y su preprocesado con una inferencia
+  directa por lotes, con las mismas probabilidades.
+- **Análisis programado activado por defecto**: cada análisis tiene coste de cómputo (y del
+  modelo, con insights); el Administrador lo activa por proyecto.
+
+## Resultados (2026-10-03)
+
+Gates del job `analysis-eval` sobre el conjunto de validación sintético (300 detalles):
+
+| Gate                                  | Resultado | Umbral |
+| ------------------------------------- | --------- | ------ |
+| Pureza de los temas                   | 0,99      | ≥ 0,80 |
+| Casi duplicados detectados (SC-003)   | 100 %     | ≥ 80 % |
+| Falsos positivos de duplicados        | 0 %       | < 20 % |
+| Detalles ambiguos detectados (SC-004) | 100 %     | ≥ 80 % |
+
+El conjunto es sintético: la evaluación con analistas sobre datos reales (SC-005 y SC-006) queda
+para el recorrido en staging.
+
+Mediciones de `e2e/perf/dashboard.perf.spec.ts` contra Compose en un portátil (Docker con 8 CPU,
+sin GPU):
+
+| Medición                                 | Resultado                      | Objetivo         |
+| ---------------------------------------- | ------------------------------ | ---------------- |
+| Descriptivo con 2 000 detalles           | 26–63 ms                       | < 3 s (SC-001)   |
+| Análisis completo de 2 000 detalles      | 130 s                          | < 5 min (SC-002) |
+| Análisis de 5 000 detalles (caso límite) | 287 s                          | < 12 min         |
+| Memoria de `analysis-worker`             | 207 MB en reposo; pico de 2 GB | —                |
+
+El sentimiento (50 s con 2 000 detalles) y los temas (41 s) dominan el tiempo. En Railway el
+servicio necesita al menos 4 GB de memoria.
