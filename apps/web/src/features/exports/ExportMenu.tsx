@@ -1,7 +1,8 @@
-import type { DashboardFilters, ExportOptions } from '@reqcanvas/shared';
+import type { DashboardFilters, ExportFormat, ExportOptions } from '@reqcanvas/shared';
 import { useId, useState } from 'react';
 import { FormError } from '../../components/form';
 import { ExportsList } from './ExportsList';
+import type { ExportInput } from './api';
 import { useExport } from './useExport';
 
 const BUTTON = 'rounded border px-3 py-1 text-sm disabled:opacity-50';
@@ -17,22 +18,29 @@ export function ExportMenu({
   projectId: string;
   filters: DashboardFilters;
 }) {
-  const ids = { delimiter: useId(), history: useId() };
+  const ids = { delimiter: useId(), pending: useId(), history: useId() };
   const [delimiter, setDelimiter] = useState<ExportOptions['delimiter']>('comma');
   const [history, setHistory] = useState(false);
+  const [includePending, setIncludePending] = useState(false);
+  const [format, setFormat] = useState<ExportFormat | null>(null);
   const exporting = useExport(projectId);
+  const request = (input: ExportInput) => {
+    setFormat(input.format);
+    exporting.request(input);
+  };
 
   return (
     <section aria-label="Exportar" className="space-y-3 rounded border p-3">
       <h2 className="text-lg font-semibold">Exportar</h2>
       <p className="text-sm text-gray-600">
-        Se exportan los requisitos que cumplen los filtros de arriba.
+        Se exportan los requisitos que cumplen los filtros de arriba. Gherkin lleva solo los
+        validados, con un archivo <code>.feature</code> por actividad.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={exporting.busy}
-          onClick={() => exporting.request({ format: 'xlsx', filters })}
+          onClick={() => request({ format: 'xlsx', filters })}
           className={BUTTON}
         >
           Exportar a Excel
@@ -40,7 +48,7 @@ export function ExportMenu({
         <button
           type="button"
           disabled={exporting.busy}
-          onClick={() => exporting.request({ format: 'csv', filters, options: { delimiter } })}
+          onClick={() => request({ format: 'csv', filters, options: { delimiter } })}
           className={BUTTON}
         >
           Exportar a CSV
@@ -56,6 +64,25 @@ export function ExportMenu({
             <option value="comma">Coma</option>
             <option value="semicolon">Punto y coma</option>
           </select>
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={exporting.busy}
+          onClick={() => request({ format: 'gherkin', filters, options: { includePending } })}
+          className={BUTTON}
+        >
+          Exportar a Gherkin
+        </button>
+        <span className="flex items-center gap-2 text-sm">
+          <input
+            id={ids.pending}
+            type="checkbox"
+            checked={includePending}
+            onChange={(event) => setIncludePending(event.target.checked)}
+          />
+          <label htmlFor={ids.pending}>Incluir pendientes</label>
         </span>
       </div>
 
@@ -78,7 +105,9 @@ export function ExportMenu({
       )}
       {exporting.empty && (
         <p role="status" className="text-sm">
-          No hay requisitos con estos filtros: el archivo solo lleva los encabezados.
+          {format === 'gherkin'
+            ? 'No hay requisitos validados con estos filtros: el ZIP solo lleva un LEEME.txt. Marca «Incluir pendientes» para exportar también los pendientes.'
+            : 'No hay requisitos con estos filtros: el archivo solo lleva los encabezados.'}
         </p>
       )}
       <FormError>{exporting.error || exporting.failed?.error?.message || ''}</FormError>
