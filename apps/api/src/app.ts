@@ -13,6 +13,7 @@ import { projectDeletionPlugin } from './jobs/project-deletion.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { analysisRoutes } from './modules/dashboard/analysis.routes.js';
+import { registerExportsCascade } from './modules/exports/cascade.js';
 import { registerDashboardCascade } from './modules/dashboard/cascade.js';
 import { decisionRoutes } from './modules/dashboard/decisions.routes.js';
 import { descriptiveRoutes } from './modules/dashboard/descriptive.routes.js';
@@ -202,6 +203,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         });
         await app.register(analysisRoutes);
         await app.register(decisionRoutes);
+
+        // Exportación (feature 008): la cascada existe aunque el flag esté desactivado.
+        registerExportsCascade(app);
 
         // Detección asistida (feature 006): cola con analytics-worker.
         registerDetectionCascade(app);
