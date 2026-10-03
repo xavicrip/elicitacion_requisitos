@@ -32,6 +32,7 @@ paths:
           headers:
             Content-Disposition: { schema: { type: string } }
             X-Export-Id: { schema: { type: string } }
+            X-Export-Empty: { schema: { type: string, enum: ['true'] }, description: Ningún detalle con esos filtros }
           content:
             text/csv: { schema: { type: string, format: binary } }
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } }
@@ -42,6 +43,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Export' }
         '403': { description: No es Administrador }
+        '409': { description: 'Ya hay una exportación de ese formato en curso (EXPORT_IN_PROGRESS)' }
         '422': { description: 'PDF sin diagramas publicados (NO_DIAGRAMS)' }
         '503': { description: 'PDF sin worker disponible (WORKER_UNAVAILABLE)' }
   /exports/{exportId}:

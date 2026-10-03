@@ -40,12 +40,13 @@ superan los 1 000 detalles).
     }
   ],
   "details": [
-    { "id": "…", "diagramId": "66f1…", "activityKey": "…", "given": "…", "when": "…", "then": "…", "type": "functional", "priority": "must", "authorRole": "Cajero", "tags": ["pagos"], "status": "validated", "voteCount": 3, "commentCount": 1, "authorName": "Ana", "createdAt": "…" }
+    { "id": "…", "diagramId": "66f1…", "activityKey": "…", "given": "…", "when": "…", "then": "…", "type": "functional", "priority": "must", "authorRole": "Cajero", "tags": ["pagos"], "status": "validated", "voteCount": 3, "commentCount": 1, "createdAt": "…" }
   ],
   "analysis": null
 }
 ```
 
+Los detalles no llevan nombres ni identificadores de personas (sí el rol declarado).
 `descriptive` es el `DescriptiveDashboard` de la 007 calculado con los mismos filtros (SC-004).
 `analysis` es `null` si no hay un análisis terminado; si lo hay, `{ finishedAt, stages, results }`
 con los `AnalysisResults` de la 007 ya filtrados (sin pares de duplicados decididos ni insights
