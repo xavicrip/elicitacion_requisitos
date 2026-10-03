@@ -35,14 +35,32 @@ def render(data: dict[str, Any], images: dict[str, bytes | None] | None = None) 
     return render_report(ExportInputFile.model_validate(data), IMAGES if images is None else images)
 
 
-def pages_of(report: Report) -> list[str]:
-    return [
-        re.sub(r"\s+", " ", page.extract_text()) for page in PdfReader(io.BytesIO(report.pdf)).pages
-    ]
+class Loose(str):
+    """Texto extraído de un PDF, comparado sin espacios.
+
+    Según la fuente instalada, el kerning hace que `pypdf` parta palabras («T odos»), así que las
+    búsquedas ignoran los espacios del texto y de lo buscado.
+    """
+
+    def __new__(cls, text: str) -> "Loose":
+        return super().__new__(cls, re.sub(r"\s+", "", text))
+
+    def __contains__(self, needle: object) -> bool:
+        return isinstance(needle, str) and super().__contains__(re.sub(r"\s+", "", needle))
+
+    def occurrences(self, needle: str) -> int:
+        return super().count(re.sub(r"\s+", "", needle))
+
+    def after(self, needle: str) -> "Loose":
+        return Loose(self[super().index(re.sub(r"\s+", "", needle)) :])
 
 
-def text_of(report: Report) -> str:
-    return " ".join(pages_of(report))
+def pages_of(report: Report) -> list[Loose]:
+    return [Loose(page.extract_text()) for page in PdfReader(io.BytesIO(report.pdf)).pages]
+
+
+def text_of(report: Report) -> Loose:
+    return Loose("".join(pages_of(report)))
 
 
 def with_stage(data: dict[str, Any], stage: str, result: dict[str, Any]) -> dict[str, Any]:
@@ -67,7 +85,7 @@ def test_es_un_pdf_con_sus_seis_secciones(full: Report) -> None:
     assert full.pdf.startswith(b"%PDF")
     pages = pages_of(full)
     assert full.pages == len(pages) >= 6
-    text = " ".join(pages)
+    text = Loose("".join(pages))
     for title in (
         "Reporte del levantamiento de requisitos",
         "Resumen",
@@ -102,7 +120,7 @@ def test_cada_pagina_lleva_el_pie(full: Report) -> None:
 
 def test_el_anexo_lista_los_requisitos_por_actividad_sin_autor(full: Report) -> None:
     text = text_of(full)
-    annex = text[text.index("Anexo: requisitos por actividad") :]
+    annex = text.after("Anexo: requisitos por actividad")
     assert "Proceso de compra" in annex
     assert "Validar pago (2)" in annex
     assert "#00000001 Dado el cliente eligió pagar con tarjeta de crédito" in annex
@@ -122,7 +140,7 @@ def test_los_hallazgos_citan_ids_cortos(full: Report) -> None:
     assert "(confianza 90 %, lift 2,4)" in text
     assert "66f200000000000000000002" not in text
     # En el ejemplo los insights se omitieron (sin clave de API).
-    assert text.count(UNAVAILABLE) == 1
+    assert text.occurrences(UNAVAILABLE) == 1
 
 
 def test_los_insights_citan_sus_evidencias() -> None:
@@ -136,7 +154,7 @@ def test_los_insights_citan_sus_evidencias() -> None:
 def test_sin_analisis_lo_indica() -> None:
     report = render(example("input-file-no-analysis"))
     text = text_of(report)
-    assert text.count(UNAVAILABLE) == 1
+    assert text.occurrences(UNAVAILABLE) == 1
     assert "Temas" not in text
 
 
@@ -144,7 +162,7 @@ def test_sin_analisis_lo_indica() -> None:
 def test_una_etapa_fallida_u_omitida_lo_indica_en_su_parte(status: str) -> None:
     result = {"status": status, "error": "X"} if status == "failed" else {"status": status}
     text = text_of(render(with_stage(example(), "topics", result)))
-    assert text.count(UNAVAILABLE) == 2
+    assert text.occurrences(UNAVAILABLE) == 2
     assert "pago · tarjeta · pasarela" not in text
     assert "Caliente: Validar pago" in text
 
@@ -166,8 +184,8 @@ def test_sin_detalles_las_secciones_lo_indican() -> None:
         },
     }
     text = text_of(render(empty))
-    assert text.count("No hay requisitos con estos filtros.") == 3
-    assert text.count("Sin datos") == 4
+    assert text.occurrences("No hay requisitos con estos filtros.") == 3
+    assert text.occurrences("Sin datos") == 4
     assert "Requisitos: 0" in text
 
 
