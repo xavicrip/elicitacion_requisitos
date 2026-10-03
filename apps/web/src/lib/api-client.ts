@@ -107,6 +107,17 @@ export async function apiFetch<T>(path: string, options: Options = {}): Promise<
 }
 
 /**
+ * Llamada cuya respuesta puede ser un archivo (exportaciones, feature 008): devuelve la
+ * `Response` tal cual, con el mismo refresco de sesión y los mismos errores que `apiFetch`.
+ */
+export async function apiRaw(path: string, options: Options = {}): Promise<Response> {
+  let response = await send(path, options);
+  if (response.status === 401 && (await refreshSession())) response = await send(path, options);
+  if (!response.ok) throw await toApiError(response);
+  return response;
+}
+
+/**
  * Lee un recurso binario de la API (imágenes de diagramas) con la sesión: `<img>` y las
  * texturas no pueden enviar el access token. `url` es la ruta del contrato (`/api/…`).
  */
