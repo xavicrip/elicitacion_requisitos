@@ -10,7 +10,15 @@ export type AnalysisSettingsDoc = {
   schedule: { enabled: boolean; cron: string; timezone: string };
 };
 
-export const DEFAULT_SCHEDULE = { enabled: true, cron: '0 3 * * *', timezone: 'America/Guayaquil' };
+/**
+ * Programación por defecto: desactivada. Cada proyecto la activa si la quiere (un análisis
+ * nocturno automático tendría coste de LLM con los insights activos).
+ */
+export const DEFAULT_SCHEDULE = {
+  enabled: false,
+  cron: '0 3 * * *',
+  timezone: 'America/Guayaquil',
+};
 
 const SettingsSchema = new Schema<AnalysisSettingsDoc>(
   {

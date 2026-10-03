@@ -236,10 +236,10 @@ describe('ajustes del análisis', () => {
   const defaults = {
     extraAmbiguousTerms: [],
     extraStopwords: [],
-    schedule: { enabled: true, cron: '0 3 * * *', timezone: 'America/Guayaquil' },
+    schedule: { enabled: false, cron: '0 3 * * *', timezone: 'America/Guayaquil' },
   };
 
-  it('por defecto, sin términos propios y con la programación nocturna', async () => {
+  it('por defecto, sin términos propios y con la programación desactivada', async () => {
     const { projectId } = await projectWithPair();
     const response = await app.inject({ url: url(projectId), headers: authHeaders(ana) });
     expect(response.json()).toEqual(defaults);

@@ -57,7 +57,7 @@ el proyecto, la cascada elimina sus runs, decisiones, valoraciones y ajustes, y
 | `projectId` | ObjectId | Único |
 | `extraAmbiguousTerms` | string[] | ≤ 100 |
 | `extraStopwords` | string[] | ≤ 200 |
-| `schedule` | `{ enabled: boolean, cron: string, timezone: string }` | Por defecto `{true, "0 3 * * *", "America/Guayaquil"}` |
+| `schedule` | `{ enabled: boolean, cron: string, timezone: string }` | Por defecto `{false, "0 3 * * *", "America/Guayaquil"}` (se activa por proyecto: el análisis tiene coste) |
 
 ## Sin colecciones compartidas
 
