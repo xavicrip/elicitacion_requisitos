@@ -207,3 +207,32 @@ siempre el check `detection-worker`, así que `analytics-worker` debe estar desp
 entorno. La variable `FEATURE_FLAGS=detection=true` de `api` en staging se elimina después de
 desplegar el retiro; mientras siga definida, `api` solo avisa en el log del flag desconocido.
 Producción nunca la definió. `detection-llm` sigue como flag operativo.
+
+## Servicio `analysis-worker` de la feature 007 (2026-10-03)
+
+La 007 añade un séptimo servicio de aplicación, `analysis-worker` (ADR 0009): consume la cola
+`analysis` de BullMQ y ejecuta la minería del dashboard. A diferencia de `analytics-worker`,
+tiene **imagen propia** (`apps/analytics/Dockerfile.mining`, ~3 GB: spaCy, sentence-transformers
+y el modelo de sentimiento van dentro, sin descargas en ejecución). Sin dominio público y sin
+`preDeployCommand`; no accede a MongoDB: lee la entrada y escribe los resultados en el bucket con
+URLs prefirmadas que le pasa `api`. Su configuración está en `apps/analytics/railway.mining.json`
+(validada por `tests/repo/railway-config.test.ts`) y se aplica con `railway environment edit`.
+`deploy.yml` lo despliega en el mismo bucle que los demás servicios.
+
+Lo crea el propietario en staging y producción **antes de fusionar** (si no existe, el paso de
+despliegue falla):
+
+| Ajuste        | Valor                                                                          |
+| ------------- | ------------------------------------------------------------------------------ |
+| Origen        | CLI (`railway up`), Dockerfile `apps/analytics/Dockerfile.mining`              |
+| Start command | `python -m analytics.mining.worker`                                            |
+| Healthcheck   | `GET /health` (Redis y bucle de BullMQ vivos), 300 s, reinicio `ON_FAILURE` ×3 |
+| Variables     | `REDIS_URL=${{Redis.REDIS_URL}}`, `ANALYSIS_TIMEOUT_S=900`, `LOG_LEVEL=INFO`   |
+| Opcional      | `ANTHROPIC_API_KEY` (y `INSIGHTS_LLM_MODEL`) solo si se quieren los insights   |
+| Memoria       | Al menos 4 GB (modelos en memoria más UMAP/HDBSCAN con 5 000 detalles)         |
+
+`api` en staging pasa a `FEATURE_FLAGS=dashboard=true`; producción sigue sin definirla
+(`dashboard` desactivado) hasta el recorrido en staging. Con el flag activo, `api /health/deep`
+incluye el check `analysis-worker` (latido del worker en Redis), de modo que los smoke tests del
+despliegue cubren un worker caído. El build de la imagen es el más lento del despliegue (descarga
+de modelos); cabe en el `DEPLOY_TIMEOUT` de 1 500 s de `scripts/railway/deploy-service.sh`.

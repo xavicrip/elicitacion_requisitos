@@ -49,9 +49,25 @@ describe('railway.json', () => {
     expect(worker.deploy.preDeployCommand).toBeUndefined();
   });
 
-  it('deploy.yml despliega analytics-worker con los demás servicios', () => {
+  it('analysis-worker (007): imagen propia de minería, su comando y healthcheck', () => {
+    const worker = parse('apps/analytics/railway.mining.json');
+    expect(worker.build).toEqual({
+      builder: 'DOCKERFILE',
+      dockerfilePath: 'apps/analytics/Dockerfile.mining',
+    });
+    expect(readFileSync(worker.build.dockerfilePath, 'utf8')).toContain(
+      'CMD ["python", "-m", "analytics.mining.worker"]',
+    );
+    expect(worker.deploy.startCommand).toBe('python -m analytics.mining.worker');
+    expect(worker.deploy.healthcheckPath).toBe('/health');
+    expect(worker.deploy.restartPolicyType).toBe('ON_FAILURE');
+    expect(worker.deploy.restartPolicyMaxRetries).toBe(3);
+    expect(worker.deploy.preDeployCommand).toBeUndefined();
+  });
+
+  it('deploy.yml despliega los dos workers con los demás servicios', () => {
     expect(readFileSync('.github/workflows/deploy.yml', 'utf8')).toContain(
-      'for service in analytics analytics-worker api web; do',
+      'for service in analytics analytics-worker analysis-worker api web; do',
     );
   });
 });
