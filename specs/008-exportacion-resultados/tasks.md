@@ -120,7 +120,7 @@ y que sus indicadores coinciden con los del dashboard
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Prueba de contrato del lado Python en `apps/analytics/tests/contract/test_export_job.py`: los ejemplos de `examples/export/` validan contra los modelos pydantic y los inválidos (`v` distinto de 1, `schemaVersion` desconocido, retorno `failed` sin código) se rechazan — `test(analytics)`
+- [X] T033 [P] [US3] Prueba de contrato del lado Python en `apps/analytics/tests/contract/test_export_job.py`: los ejemplos de `examples/export/` validan contra los modelos pydantic y los inválidos (`v` distinto de 1, `schemaVersion` desconocido, retorno `failed` sin código) se rechazan — `test(analytics)`
 - [ ] T034 [P] [US3] Pruebas del reporte en `apps/analytics/tests/unit/test_report_pdf.py` (leyendo el PDF con `pypdf`): con el ejemplo completo están las seis secciones de `contracts/export-formats.md`, los KPIs impresos son los de `descriptive.kpis` (SC-004), aparece cada actividad con sus requisitos en formato Dado/Cuando/Entonces (con su rol, sin autor), sin detalles las secciones lo indican, los hallazgos citan IDs cortos, hay pie con número de página y «Generado por ReqCanvas»; sin análisis, o con una etapa omitida o fallida, la parte correspondiente dice «Análisis no disponible en el momento de generar el reporte»; el texto de los detalles se escapa (un `<script>` o `<img>` sale literal); 2 000 detalles generan el PDF sin error — `test(analytics)`
 - [ ] T035 [P] [US3] Pruebas de `apps/analytics/src/analytics/reports/coverage_image.py` y `charts.py` en `apps/analytics/tests/unit/test_report_graphics.py`: la imagen de cobertura conserva las proporciones del diagrama y colorea cada zona según la escala de la 004 (0 detalles distinto de muchos), con un diagrama que no se puede descargar se usa un marcador y el reporte se genera igual; las barras SVG tienen una barra por categoría con su etiqueta y valor y no fallan con listas vacías — `test(analytics)`
 - [ ] T036 [P] [US3] Pruebas del worker en `apps/analytics/tests/unit/test_export_worker.py` (HTTP simulado): descarga la entrada, sube el PDF con `PUT` y `Content-Type: application/pdf` y devuelve `done` con `bytes` y `pages`; un fallo de descarga, de subida o de generación devuelve `failed` con su código; el proceso de `analytics-worker` consume las colas `detection` y `export`, escribe un latido por cola y su `/health` refleja ambas; el log de fin incluye duración, bytes y páginas — `test(analytics)`
@@ -129,7 +129,7 @@ y que sus indicadores coinciden con los del dashboard
 
 ### Implementation for User Story 3
 
-- [ ] T039 [US3] Implementar `apps/analytics/src/analytics/reports/schemas.py` (pydantic, espejo del contrato v1) — `feat(analytics)`
+- [X] T039 [US3] Implementar `apps/analytics/src/analytics/reports/schemas.py` (pydantic, espejo del contrato v1) — `feat(analytics)`
 - [ ] T040 [US3] Implementar `apps/analytics/src/analytics/reports/{charts.py,coverage_image.py}` — `feat(analytics)`
 - [ ] T041 [US3] Implementar `apps/analytics/src/analytics/reports/pdf.py` y `templates/{report.html.j2,report.css}` (Jinja2 con autoescape y WeasyPrint) — `feat(analytics)`
 - [ ] T042 [US3] Implementar `apps/analytics/src/analytics/reports/worker.py` y hacer que `apps/analytics/src/analytics/worker.py` consuma también la cola `export` sobre `queue_worker.py` — `feat(analytics)`
