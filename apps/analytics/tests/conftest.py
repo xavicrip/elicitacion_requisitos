@@ -1,7 +1,13 @@
 import os
+import sys
 import uuid
 
 import pytest
+
+# macOS: WeasyPrint (feature 008) busca Pango con `ctypes.util.find_library`, que no mira en
+# Homebrew si no se le indica. En Linux (CI e imagen) las librerías están en la ruta del sistema.
+if sys.platform == "darwin" and os.path.isdir("/opt/homebrew/lib"):
+    os.environ.setdefault("DYLD_FALLBACK_LIBRARY_PATH", "/opt/homebrew/lib")
 
 MONGO_TEST_URL = os.environ.get("MONGO_TEST_URL", "mongodb://localhost:27017")
 REDIS_TEST_URL = os.environ.get("REDIS_TEST_URL", "redis://localhost:6379")
