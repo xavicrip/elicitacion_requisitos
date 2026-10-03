@@ -42,11 +42,13 @@ escenario exportable.
 ## PDF — secciones
 
 1. Portada: proyecto, fecha de generación, filtros aplicados, nº de detalles.
-2. Resumen: KPIs (`kpiSnapshot`).
+2. Resumen: KPIs (los de `descriptive` del archivo de entrada).
 3. Diagramas: por cada diagrama publicado, la imagen con la cobertura y la leyenda.
 4. Distribuciones: por tipo, prioridad, estado y actividad.
-5. Hallazgos (si hay `analysisRunId`): temas, calidad (los 10 de menor puntaje), actividades
-   calientes y frías, reglas de asociación (top 10) e insights con sus evidencias (IDs cortos).
+5. Hallazgos (si hay un análisis terminado): temas, calidad (los 10 de menor puntaje),
+   actividades calientes y frías, reglas de asociación (top 10) e insights con sus evidencias
+   (IDs cortos). Sin análisis, o para cada parte omitida o fallida, se indica «Análisis no
+   disponible en el momento de generar el reporte».
 6. Anexo: requisitos por diagrama → actividad, en formato Dado/Cuando/Entonces con sus
    metadatos.
 

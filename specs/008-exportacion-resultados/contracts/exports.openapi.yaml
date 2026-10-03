@@ -42,7 +42,8 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Export' }
         '403': { description: No es Administrador }
-        '422': { description: 'PDF sin diagramas publicados' }
+        '422': { description: 'PDF sin diagramas publicados (NO_DIAGRAMS)' }
+        '503': { description: 'PDF sin worker disponible (WORKER_UNAVAILABLE)' }
   /exports/{exportId}:
     parameters: [{ name: exportId, in: path, required: true, schema: { type: string } }]
     get:
@@ -55,9 +56,14 @@ paths:
   /exports/{exportId}/download:
     parameters: [{ name: exportId, in: path, required: true, schema: { type: string } }]
     get:
-      summary: Redirige a una presigned URL (15 min) mientras no haya caducado; registra la descarga
+      summary: Descarga el archivo (lo sirve api desde el bucket) mientras no haya caducado; registra la descarga
       responses:
-        '302': { description: Redirección al archivo }
+        '200':
+          description: El archivo
+          headers:
+            Content-Disposition: { schema: { type: string } }
+          content:
+            application/octet-stream: { schema: { type: string, format: binary } }
         '409': { description: Aún no está lista }
         '410': { description: Caducada (más de 24 h) }
 components:
@@ -76,7 +82,7 @@ components:
             from: { type: string, format: date }
             to: { type: string, format: date }
             types: { type: array, items: { type: string } }
-            includeStatuses: { type: array, items: { type: string, enum: [pending, validated, duplicate, discarded] } }
+            statuses: { type: array, items: { type: string, enum: [pending, validated, duplicate, discarded] } }
         options:
           type: object
           properties:
@@ -84,16 +90,18 @@ components:
             includePending: { type: boolean, default: false, description: Solo Gherkin }
     Export:
       type: object
-      required: [id, format, mode, status, createdAt]
+      required: [id, format, mode, status, expired, createdAt]
       properties:
         id: { type: string }
         format: { type: string, enum: [csv, xlsx, gherkin, pdf] }
         mode: { type: string, enum: [sync, async] }
-        status: { type: string, enum: [queued, running, ready, failed, expired] }
+        status: { type: string, enum: [pending, running, done, failed] }
+        expired: { type: boolean, description: Han pasado más de 24 h desde que terminó }
+        fileName: { type: [string, 'null'] }
         detailCount: { type: integer }
         bytes: { type: [integer, 'null'] }
         createdAt: { type: string, format: date-time }
-        readyAt: { type: [string, 'null'], format: date-time }
+        finishedAt: { type: [string, 'null'], format: date-time }
         expiresAt: { type: [string, 'null'], format: date-time }
         error:
           type: [object, 'null']

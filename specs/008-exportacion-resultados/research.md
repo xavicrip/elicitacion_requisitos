@@ -1,5 +1,9 @@
 # Research: Exportación de requisitos y reportes
 
+> Actualizado el 2026-10-03: donde este documento difiera de «Ajustes tras implementar la
+> 002–007» de `plan.md`, prevalece el plan (estados, colas, worker sin acceso a MongoDB, aviso
+> por consulta periódica, descarga a través de `api`, sin matplotlib).
+
 **Feature**: 008-exportacion-resultados | **Date**: 2026-09-25
 
 ## R1. CSV compatible con hojas de cálculo

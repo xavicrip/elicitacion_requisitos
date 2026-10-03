@@ -95,8 +95,77 @@ e2e/exports.spec.ts
 dependencias pesadas) y el PDF en `analytics`, donde ya están los resultados del análisis y el
 ecosistema de gráficos de Python.
 
+## Ajustes tras implementar la 002–007 (2026-10-03)
+
+El plan original es anterior a la implementación de las features 002–007. Estos ajustes
+**prevalecen** sobre lo escrito más arriba y sobre `research.md` cuando difieran.
+
+1. **El worker del PDF no accede a MongoDB ni tiene credenciales del bucket (constitución II,
+   como la 006 y la 007)**. `api` prepara la entrada del reporte en un JSON comprimido en el
+   bucket (`projects/{projectId}/exports/{exportId}/input.json.gz`: detalles filtrados con el
+   nombre del autor, diagramas publicados con sus actividades y una URL firmada de su imagen,
+   la instantánea descriptiva y los resultados del último análisis) y encola el job con una URL
+   firmada de lectura y otra de escritura (`presignGet` y `presignPut`, 15 min). El worker sube
+   el PDF a `projects/{projectId}/exports/{exportId}.pdf` y devuelve solo un resumen (`status`,
+   `bytes`, `pages`). `api` es la única que escribe `exports`. Desaparecen `boto3` y la colección
+   compartida (ver *Complexity Tracking*).
+2. **Estados de la constitución VI**: `pending`, `running`, `done` y `failed`. La caducidad no es
+   un estado: es `expiresAt` (24 h después de terminar); el DTO añade `expired: boolean` y, tras
+   la limpieza, `fileKey` queda vacío.
+3. **Filtros de la 007**: `DashboardFiltersSchema` de `packages/shared` (`diagramIds`, `from`,
+   `to`, `types`, `statuses`) y `apps/api/src/modules/dashboard/filters.ts`. El menú *Exportar*
+   del dashboard usa los filtros activos. En Gherkin los estados no salen del filtro: solo
+   `validated`, o `validated` y `pending` con `includePending`.
+4. **Dos colas, como la 006 y la 007**:
+   - `export-files` (CSV, Excel y Gherkin de más de 1 000 detalles): la consume un `Worker` de
+     BullMQ dentro de `api` (`apps/api/src/jobs/export-files.ts`, patrón de
+     `project-deletion.ts`), que genera el archivo en streaming y lo sube al bucket.
+   - `export` (PDF): la consume Python. Contrato versión 1 en `packages/shared` (zod) y en
+     `analytics` (pydantic), con la prueba de contrato en ambos lados sobre los mismos ejemplos;
+     `attempts: 1` y `EXPORT_TIMEOUT_S=300`.
+5. **Sin servicio nuevo**: el PDF lo genera `analytics-worker` (la imagen de `analytics`), cuyo
+   proceso pasa a consumir dos colas (`detection` y `export`) sobre `queue_worker.py`; su latido
+   y el check `detection-worker` de `/health/deep` cubren ambas. La imagen añade las librerías
+   de sistema de WeasyPrint (Pango) y una fuente.
+6. **Sin matplotlib**: los gráficos del reporte son barras en SVG generadas en la plantilla
+   (WeasyPrint incrusta SVG), con la paleta del dashboard. Dependencias nuevas de `analytics`:
+   `weasyprint`, `jinja2` y `pillow`; `pypdf` solo en pruebas.
+7. **Aviso sin socket**: las salas de la 005 son del espacio de trabajo de un diagrama. Como en
+   la 007, la web consulta `GET /exports/:id` cada 3 s mientras la exportación está `pending` o
+   `running` y avisa «Tu exportación está lista». No se añade `export:ready`.
+8. **Descarga a través de `api`**: `GET /exports/:id/download` sirve el archivo en streaming
+   desde el bucket (como las imágenes de la 003), con `Content-Disposition`; el bucket no es
+   accesible desde el navegador en Compose. Responde 409 si no está lista y 410 si caducó, y
+   registra `export.downloaded`. Las exportaciones síncronas (≤ 1 000 detalles) responden el
+   archivo directamente y no se guardan en el bucket.
+9. **Auditoría existente**: `auditService` (`apps/api/src/modules/audit`) con las acciones
+   `export.requested` (`{format, filters, options, count}`) y `export.downloaded`.
+10. **Un solo flag**: `exports` (por defecto `false`; Compose y el CI lo activan), con sus rutas
+    en `GATED_PREFIXES` y el menú en `web` detrás de `FlagGate`. No hay `export-pdf`: el PDF es
+    la última historia y entra detrás del mismo flag.
+11. **Limpieza**: un `JobScheduler` de BullMQ en `api` (cada hora, como la programación de la
+    007) borra del bucket los archivos caducados y vacía `fileKey`. Los archivos viven bajo el
+    prefijo del proyecto, así que la cascada de borrado de la 003 también los elimina; se
+    registra además la cascada de `exports` (`registerExportsCascade`). Sin regla de ciclo de
+    vida en el bucket.
+12. **Coherencia con el dashboard (SC-004)**: la instantánea del PDF la calcula
+    `descriptive.service` de la 007 con los mismos filtros en el momento de la solicitud, y los
+    hallazgos salen de `analysis.service` (`toFullDto` del último análisis terminado: sin los
+    pares de duplicados ya decididos ni los insights marcados como no útiles). Sin análisis, o
+    con etapas omitidas o fallidas, la sección lo indica.
+13. **Zona horaria**: la del proyecto (`analysis_settings.schedule.timezone`, por defecto
+    `America/Guayaquil`), como la serie temporal de la 007.
+14. **Web**: `apps/web/src/features/exports/` con `ExportMenu` (en la página del dashboard, solo
+    Administrador) y `ExportsList` (historial con estado y descarga). Las descargas usan
+    `fetch` con la sesión y un `Blob`. E2E en `e2e/flows/exports.spec.ts`.
+15. **Migración**: `20261105000000-exports-indexes.js` (posterior a la de la 007).
+16. **Volumen para las mediciones**: `e2e/perf/exports.perf.spec.ts` reutiliza la inserción con
+    `mongosh` de la medición del dashboard (se extrae a `e2e/perf/volume.ts`); no hay
+    `seed:bulk` ni `exports:expire` (la caducidad se prueba en integración).
+17. **Despliegue**: sin servicios ni variables obligatorias nuevas en Railway
+    (`EXPORT_TIMEOUT_S` es opcional); `api` de staging recibe `FEATURE_FLAGS=exports=true`.
+
 ## Complexity Tracking
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| `exports` actualizada por `analytics` (campos `status`, `fileKey`, `bytes`, `error` de los PDF) | El PDF se genera en el worker de `analytics` y su estado debe consultarse desde `api` | Devolverlo por el valor de retorno del job y que `api` lo persista (como en la 006) también es posible; se elige la escritura directa por coherencia con `analysis_runs` (007). **Alternativa aceptable**: si en la revisión se prefiere la propiedad única, se cambia a QueueEvents sin modificar el contrato REST. |
+Sin violaciones: con el ajuste 1, `exports` es propiedad exclusiva de `api` y el worker solo
+usa URLs firmadas.
