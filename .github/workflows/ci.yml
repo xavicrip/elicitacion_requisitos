@@ -222,6 +222,8 @@ jobs:
         env:
           # `/health/deep` exige el worker de minería (feature 007), que levanta el perfil `mining`.
           APP_VERSION: ci
+          # Los E2E de `flows` prueban la exportación, detrás del flag `exports` (feature 008).
+          FEATURE_FLAGS: exports=true
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
         env:

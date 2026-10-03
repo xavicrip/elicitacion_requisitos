@@ -24,6 +24,12 @@ export const FLAGS = defineFlags({
     default: false,
     owner: '006-deteccion-asistida',
   },
+  exports: {
+    description:
+      'Exportación de requisitos (CSV, Excel, Gherkin) y reporte PDF; oculto hasta completar la feature',
+    default: false,
+    owner: '008-exportacion-resultados',
+  },
   insights: {
     description:
       'Resumen de hallazgos con Claude en el dashboard (coste por análisis); requiere ANTHROPIC_API_KEY',
