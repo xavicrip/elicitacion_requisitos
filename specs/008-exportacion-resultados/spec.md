@@ -43,7 +43,7 @@ con una herramienta estándar de Gherkin en español.
 
 **Acceptance Scenarios**:
 
-1. **Given** un diagrama con 5 actividades con detalles, **When** exporto a Gherkin, **Then**
+1. **Given** un diagrama con 5 actividades con detalles validados, **When** exporto a Gherkin, **Then**
    descargo un archivo comprimido con 5 archivos `.feature` válidos.
 2. **Given** un detalle con prioridad *Must* y etiqueta *pagos*, **When** se exporta, **Then** su
    escenario lleva las etiquetas `@must @pagos`.
@@ -76,7 +76,11 @@ secciones y que los datos coinciden con el dashboard.
 
 ### Edge Cases
 
-- Proyecto sin detalles: la exportación genera el archivo con solo los encabezados y un aviso.
+- Proyecto sin detalles (o ninguno con los filtros): CSV y Excel se generan con solo los
+  encabezados y el PDF con sus secciones vacías indicadas; la aplicación avisa de que no hay
+  requisitos con esos filtros.
+- Solicitar una exportación del mismo formato mientras otra está en curso: se rechaza indicando
+  que ya hay una en preparación.
 - Textos que empiezan por "=", "+", "-" o "@" en el CSV: se neutralizan para evitar la
   inyección de fórmulas en hojas de cálculo.
 - Nombres de actividad con caracteres no válidos para nombres de archivo: se normalizan en
@@ -98,7 +102,8 @@ secciones y que los datos coinciden con el dashboard.
   indicadores, hallazgos del análisis y listado de requisitos por actividad.
 - **FR-006**: Las exportaciones grandes (más de 1 000 detalles o PDF) DEBEN generarse en segundo
   plano y notificar cuando estén listas.
-- **FR-007**: Los archivos generados DEBEN estar disponibles para descarga durante 24 horas.
+- **FR-007**: Los archivos generados en segundo plano DEBEN estar disponibles para descarga
+  durante 24 horas; las exportaciones inmediatas se descargan en el momento y no se conservan.
 - **FR-008**: Cada exportación DEBE registrarse en auditoría (quién, qué formato, qué filtros).
 
 ### Key Entities

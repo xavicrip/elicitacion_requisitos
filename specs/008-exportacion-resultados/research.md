@@ -1,8 +1,6 @@
 # Research: Exportación de requisitos y reportes
 
-> Actualizado el 2026-10-03: donde este documento difiera de «Ajustes tras implementar la
-> 002–007» de `plan.md`, prevalece el plan (estados, colas, worker sin acceso a MongoDB, aviso
-> por consulta periódica, descarga a través de `api`, sin matplotlib).
+> Actualizado el 2026-10-03 con los «Ajustes tras implementar la 002–007» de `plan.md` (R5–R8).
 
 **Feature**: 008-exportacion-resultados | **Date**: 2026-09-25
 
@@ -59,40 +57,48 @@
 
 ## R5. Reporte PDF
 
-- **Decision**: en `analytics`, **WeasyPrint** (HTML/CSS → PDF, sin navegador) con una plantilla
-  Jinja2. Secciones: portada, resumen de indicadores, diagrama con cobertura (imagen display de
-  la 003 + rectángulos coloreados con Pillow según la escala de la 004), distribuciones
-  (matplotlib → SVG incrustado), hallazgos del último `analysis_run` (temas, calidad,
-  actividades críticas, insights con sus evidencias) y listado de requisitos agrupado por
-  actividad. Si no hay análisis, las secciones analíticas se sustituyen por el texto "Análisis
-  no disponible en el momento de generar el reporte".
-  - **Coherencia de datos (SC-004)**: el job recibe el `runId` y un *snapshot* de los KPIs
-    calculado por `api` en el momento de la solicitud (los mismos valores que muestra el
-    dashboard).
+- **Decision**: en `analytics-worker`, **WeasyPrint** (HTML/CSS → PDF, sin navegador) con una
+  plantilla Jinja2 con autoescape. Secciones: portada, resumen de indicadores, diagrama con
+  cobertura (imagen display de la 003 + rectángulos coloreados con Pillow según la escala de la
+  004), distribuciones (barras en SVG incrustado, con la paleta del dashboard), hallazgos del
+  último análisis terminado (temas, calidad, actividades críticas, reglas e insights con sus
+  evidencias) y listado de requisitos agrupado por actividad. Si no hay análisis, o una parte se
+  omitió o falló, se sustituye por el texto "Análisis no disponible en el momento de generar el
+  reporte".
+  - **Coherencia de datos (SC-004)**: `api` calcula la instantánea con `descriptive.service` de
+    la 007 y los mismos filtros en el momento de la solicitud y la escribe en el archivo de
+    entrada; el worker no recalcula nada.
+  - **Sin acceso a datos**: el worker recibe una URL firmada de lectura (entrada) y otra de
+    escritura (PDF); no accede a MongoDB ni tiene credenciales del bucket. La entrada no lleva
+    nombres de personas.
 - **Alternatives considered**: Chromium/Playwright para imprimir el dashboard (imagen de más de
-  1 GB y frágil); `@react-pdf/renderer` en Node (habría que rehacer los gráficos).
-- **Imagen**: instalar en `analytics` `libpango-1.0-0`, `libpangoft2-1.0-0` y `fonts-dejavu`
-  (sustituir por la fuente del sistema de diseño si se define).
+  1 GB y frágil); `@react-pdf/renderer` en Node (habría que rehacer los gráficos); matplotlib
+  para los gráficos (dependencia pesada para unas barras); un servicio nuevo solo para el PDF.
+- **Imagen**: instalar en `analytics` `libpango-1.0-0`, `libpangoft2-1.0-0`,
+  `libharfbuzz-subset0` y `fonts-dejavu-core`.
 
 ## R6. Síncrono vs. asíncrono
 
 - **Decision**:
   - CSV, Excel o ZIP con ≤ 1 000 detalles → respuesta en streaming directa (`200` con
-    `Content-Disposition`); también se registra en `exports` para auditoría.
-  - Más de 1 000 detalles, o cualquier PDF → `202` con el `exportId`; job en la cola `export`
-    (CSV/Excel/Gherkin los procesa un worker **Node** dentro de `api`; los PDF, el worker
-    **Python**). Al terminar: archivo en el bucket, `status = ready` y evento `export:ready`
-    a la sala `user:{id}` (005). Sin la 005 integrada, `ExportsList` consulta cada 5 s.
-- **Rationale**: FR-006 y los tiempos de SC-001 y SC-003.
+    `Content-Disposition`); se registra en `exports` (`sync`, `done`, sin archivo guardado) para
+    la auditoría y el historial.
+  - Más de 1 000 detalles, o cualquier PDF → `202` con el `Export`; CSV, Excel y Gherkin los
+    genera un `Worker` de BullMQ dentro de `api` (cola `export-files`) y los PDF, el worker
+    Python (cola `export`). Al terminar: archivo en el bucket y `status = done`. La web consulta
+    `GET /exports/:id` cada 3 s y avisa «Tu exportación está lista».
+  - Una exportación en curso por proyecto y formato (409 `EXPORT_IN_PROGRESS`).
+- **Rationale**: FR-006 y los tiempos de SC-001 y SC-003. Las salas de la 005 son por diagrama,
+  así que no se añade un evento de socket (como en la 007).
 
 ## R7. Caducidad y limpieza
 
-- **Decision**: `expiresAt = readyAt + 24 h`; la descarga se hace con una presigned URL generada
-  bajo demanda (15 min) mientras no haya caducado. Un job repetido cada hora borra los objetos
-  y marca `status = expired`; además, regla de ciclo de vida del bucket a 2 días como red de
-  seguridad.
+- **Decision**: `expiresAt = finishedAt + 24 h`. `GET /exports/:id/download` sirve el archivo
+  desde el bucket a través de `api` mientras no haya caducado (410 después). Un `JobScheduler`
+  de BullMQ cada hora borra los objetos caducados y vacía `fileKey`. Los archivos viven bajo el
+  prefijo del proyecto, que la cascada de borrado elimina.
 
 ## R8. Auditoría
 
-`audit_logs` con `action: export.requested` y `diff: {format, filters, count}`; y
+`auditService` con `action: export.requested` y `diff: {format, filters, options, count}`; y
 `export.downloaded` en cada descarga (FR-008).
