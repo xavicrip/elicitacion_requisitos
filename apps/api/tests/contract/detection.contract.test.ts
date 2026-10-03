@@ -199,13 +199,16 @@ describe('transiciones propuestas', () => {
         [],
       );
     }
+    expect(body.activities).toHaveLength(3);
     for (const activity of body.activities) {
-      await app.inject({
+      const response = await app.inject({
         method: 'POST',
         url: `/proposals/${activity.id}/accept`,
         headers: admin,
         payload: {},
       });
+      // Si una aceptación falla, la flecha respondería 422: se comprueba aquí con su motivo.
+      expect(response.statusCode, response.body).toBe(200);
     }
     const [first, second] = body.transitions;
     const accepted = await app.inject({
@@ -213,7 +216,7 @@ describe('transiciones propuestas', () => {
       url: `/transition-proposals/${first!.id}/accept`,
       headers: admin,
     });
-    expect(accepted.statusCode).toBe(200);
+    expect(accepted.statusCode, accepted.body).toBe(200);
     const discarded = await app.inject({
       method: 'POST',
       url: `/transition-proposals/${second!.id}/discard`,
