@@ -81,7 +81,7 @@ columnas, acentos correctos y sin fórmulas activas
 - [X] T023 [US1] Añadir `csv` y `xlsx` a `POST /projects/:projectId/exports` en `apps/api/src/modules/exports/routes.ts`: respuesta en streaming por debajo del umbral, registro en `exports` y auditoría — `feat(api)`
 - [X] T024 [US1] Implementar `apps/api/src/jobs/export-files.ts` (cola `export-files`, `Worker` en `api`, subida al bucket, `sweep` y `JobScheduler` horario; opciones inyectables) y `GET /exports/:exportId/download` en `apps/api/src/modules/exports/routes.ts`; registrar el plugin en `apps/api/src/app.ts` — `feat(api)`
 - [X] T025 [US1] Implementar `apps/web/src/features/exports/{api.ts,ExportMenu.tsx,ExportsList.tsx,useExport.ts}` e integrarlos en `apps/web/src/features/dashboard/DashboardPage.tsx` detrás de `FlagGate` — `feat(web)`
-- [ ] T026 [US1] E2E en `e2e/flows/exports.spec.ts` (quickstart §1 y §4.2): con «Tienda demo», exportar a Excel y a CSV desde el dashboard, comprobar el nombre del archivo y las 80 filas, exportar solo los validados, y que un Participante no ve el menú y recibe 403 por la API — `test(e2e)`
+- [X] T026 [US1] E2E en `e2e/flows/exports.spec.ts` (quickstart §1 y §4.2): con «Tienda demo», exportar a Excel y a CSV desde el dashboard, comprobar el nombre del archivo y las 80 filas, exportar solo los validados, y que un Participante no ve el menú y recibe 403 por la API — `test(e2e)`
 
 **Checkpoint**: US1 funcional y demostrable de forma independiente (MVP)
 
