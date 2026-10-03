@@ -177,13 +177,13 @@ existentes; sin el servicio, el resto del dashboard funciona
 ### Tests for User Story 5 ⚠️
 
 - [X] T048 [P] [US5] Pruebas de `apps/analytics/tests/unit/test_insights.py` con un cliente simulado: salida estructurada, se descartan los insights con evidencias inexistentes o con cifras que no cuadran (±2 puntos) con las de las evidencias que citan; si quedan menos de 3 se reintenta una vez con los descartados y, si siguen faltando, se devuelven los que haya con `fewerThanExpected` (plan, ajuste 14); nunca más de 10; los rechazados del proyecto van en las instrucciones, ningún nombre ni email en lo enviado; sin clave, negativa, error o más de 60 s → etapa `skipped` o `failed` y el resto de resultados intactos — `test(analytics)`
-- [ ] T049 [P] [US5] Pruebas de integración en `apps/api/tests/integration/insights.test.ts` y de contrato de esas rutas en `apps/api/tests/contract/dashboard.contract.test.ts`: `POST /analysis-runs/:id/insights/:insightId/feedback` guarda la valoración y oculta el insight, y el siguiente job lleva los rechazados en `settings.rejectedInsights`; `POST /analysis-runs/:id/insights/regenerate` encola un job solo con la etapa `insights` y la URL de los resultados anteriores; con `insights` desactivado la etapa no se pide y la regeneración responde `409` con un mensaje — `test(api)`
+- [X] T049 [P] [US5] Pruebas de integración en `apps/api/tests/integration/insights.test.ts` y de contrato de esas rutas en `apps/api/tests/contract/dashboard.contract.test.ts`: `POST /analysis-runs/:id/insights/:insightId/feedback` guarda la valoración y oculta el insight, y el siguiente job lleva los rechazados en `settings.rejectedInsights`; `POST /analysis-runs/:id/insights/regenerate` encola un job solo con la etapa `insights` y la URL de los resultados anteriores; con `insights` desactivado la etapa no se pide y la regeneración responde `409` con un mensaje — `test(api)`
 - [X] T050 [P] [US5] Pruebas de `web` en `apps/web/tests/dashboard-insights.test.tsx`: lista de insights con título, afirmación y recomendación como texto plano, clic → panel de evidencias con los datos, *No útil* lo oculta, *Regenerar* lanza el job, aviso "El resumen no está disponible" sin afectar al resto — `test(web)`
 
 ### Implementation for User Story 5
 
 - [X] T051 [US5] Implementar `apps/analytics/src/analytics/mining/insights.py` (plan, ajuste 6) — `feat(analytics)`
-- [ ] T052 [US5] Implementar en `api` la valoración y la regeneración de insights — `feat(api)`
+- [X] T052 [US5] Implementar en `api` la valoración y la regeneración de insights — `feat(api)`
 - [X] T053 [US5] Implementar en `web` `insights/{InsightsPanel,EvidenceDrawer}.tsx` — `feat(web)`
 
 ---
