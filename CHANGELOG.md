@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.8.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.7.0...v0.8.0) (2026-10-03)
+
+
+### Funcionalidades
+
+* **analytics:** add sentiment, association rules and hot and cold activities ([652c2f1](https://github.com/xavicrip/elicitacion_requisitos/commit/652c2f1b30328cc303b28e6efdf1d6dc9c67e24a))
+* **analytics:** add the analysis worker and stage orchestrator ([6ae4560](https://github.com/xavicrip/elicitacion_requisitos/commit/6ae456060ebe3aa1998753afe0e564c19313a74d))
+* **analytics:** mine keywords, co-occurrence, topics and clusters ([b961414](https://github.com/xavicrip/elicitacion_requisitos/commit/b96141449a204f4f19e4c0bd3c5ac0daf0bbe834))
+* **analytics:** mirror the analysis job contract in pydantic ([d361fb7](https://github.com/xavicrip/elicitacion_requisitos/commit/d361fb70e4a058f0c6e88e819f00e7dc3c09b79f))
+* **analytics:** score requirement quality and find near-duplicates ([be086a9](https://github.com/xavicrip/elicitacion_requisitos/commit/be086a920a5f69217e78e1cc3950e999e3b8fe39))
+* **analytics:** summarise findings with Claude and verified evidence ([5efc00c](https://github.com/xavicrip/elicitacion_requisitos/commit/5efc00c041a7261022f4e264d3387b3494b0f77b))
+* **api:** add the analysis collections, indexes and project cascade ([02844e3](https://github.com/xavicrip/elicitacion_requisitos/commit/02844e3789b5d48c2f54ef1aa560a0f67dd0e2a3))
+* **api:** compute the descriptive dashboard with filters ([363daf7](https://github.com/xavicrip/elicitacion_requisitos/commit/363daf74f23040bb2b19ed365b184b5bff9c9c11))
+* **api:** decide duplicate pairs and store the analysis settings ([7669c80](https://github.com/xavicrip/elicitacion_requisitos/commit/7669c80b478afbd85d546f485634a3ee81ea8091))
+* **api:** hide decided duplicate pairs from the latest analysis ([ed1562c](https://github.com/xavicrip/elicitacion_requisitos/commit/ed1562c496fc248d5d78d27632b146583d1fdea1))
+* **api:** launch analysis runs and read their progress and results ([d1ee15b](https://github.com/xavicrip/elicitacion_requisitos/commit/d1ee15bebdbda0f32fdc42d0115d29e7624ea0d7))
+* **api:** presign uploads to the bucket ([3e3291d](https://github.com/xavicrip/elicitacion_requisitos/commit/3e3291d3814d8acef413deac3c9afeafe7afba94))
+* **api:** queue analysis runs through the bucket and the analysis worker ([2bc8198](https://github.com/xavicrip/elicitacion_requisitos/commit/2bc81982ce6763a647502d3e2fc14e7e126f400d))
+* **api:** rate insights and regenerate the findings summary ([d3d9369](https://github.com/xavicrip/elicitacion_requisitos/commit/d3d936995b01d885cf21cd7f1558ea5fc105e042))
+* **api:** return the analysed details with a finished run ([377fdd1](https://github.com/xavicrip/elicitacion_requisitos/commit/377fdd11e85fcd64cbd0b51d63a12de8acca84bc))
+* **api:** schedule nightly analyses per project, off by default ([6d74669](https://github.com/xavicrip/elicitacion_requisitos/commit/6d746690d83acfab6fa26e21dae879df68cca35f))
+* **shared:** add the analysis job and dashboard contracts ([6d3e399](https://github.com/xavicrip/elicitacion_requisitos/commit/6d3e399cfd78e3f98759eba6739f50edcf67bec4))
+* **shared:** add the dashboard and insights feature flags ([22cf12b](https://github.com/xavicrip/elicitacion_requisitos/commit/22cf12b7da29ab491f16faaecfcf6b4374359b9b))
+* **shared:** enable the dashboard by default (T062) ([d9fb487](https://github.com/xavicrip/elicitacion_requisitos/commit/d9fb487715e39ebf5f240498f5a02a8761d9315f))
+* **web:** let the admin schedule the nightly analysis ([b352a43](https://github.com/xavicrip/elicitacion_requisitos/commit/b352a43ecaf13c876fdf0637f1085780a3f4c1ae))
+* **web:** review requirement quality and duplicate pairs ([247d528](https://github.com/xavicrip/elicitacion_requisitos/commit/247d528e90d7517bed31292b7ce79e92f6213f3b))
+* **web:** run the text analysis and explore keywords, topics and clusters ([0e51556](https://github.com/xavicrip/elicitacion_requisitos/commit/0e51556967c2efd5ca2a0f80367c250c0c042161))
+* **web:** show sentiment, association rules and critical activities ([2e6947a](https://github.com/xavicrip/elicitacion_requisitos/commit/2e6947a9d6dc0fc6114b9f592b67f9413468e00b))
+* **web:** show the descriptive dashboard with filters and coverage map ([0d5c3e6](https://github.com/xavicrip/elicitacion_requisitos/commit/0d5c3e6a50005f27f7b4b14e0a6a29c2cf1b18e7))
+* **web:** show the findings summary with its evidence ([b33d76a](https://github.com/xavicrip/elicitacion_requisitos/commit/b33d76af6a1bd6b09892bc011b5a3601580479b4))
+
+
+### Correcciones
+
+* **analytics:** keep meaningful nulls in the uploaded analysis results ([39fee1b](https://github.com/xavicrip/elicitacion_requisitos/commit/39fee1be250fdf12ae0b25706c618a652d8fd1de))
+* **api:** delete detection jobs and proposals with their project ([f97d538](https://github.com/xavicrip/elicitacion_requisitos/commit/f97d538bbb8440e7c09d2c168b7dcfd5e31c3c0b))
+* **web:** render charts with a plain ECharts wrapper ([c9950eb](https://github.com/xavicrip/elicitacion_requisitos/commit/c9950ebd47a2a576f40c2e56db29c88abc296edd))
+
+
+### Rendimiento
+
+* **analytics:** classify sentiment without the transformers trainer ([78d6290](https://github.com/xavicrip/elicitacion_requisitos/commit/78d6290c922bc1409751cf4463c184573a85a3a5))
+* **e2e:** measure the dashboard with 2,000 and 5,000 details ([abbe854](https://github.com/xavicrip/elicitacion_requisitos/commit/abbe85405cd6976a209a14c2791fc804a62bbc4b))
+
+
+### Refactorizaciones
+
+* **analytics:** extract the common BullMQ worker infrastructure ([bf2e80e](https://github.com/xavicrip/elicitacion_requisitos/commit/bf2e80e4e3f37466aa4fc792db4dca0c84620be6))
+* **shared:** retire the detection feature flag ([fecaa20](https://github.com/xavicrip/elicitacion_requisitos/commit/fecaa20da281dac0eb2b4dbe353864a8b5fdb5c5))
+
+
+### CI/CD
+
+* **ci:** run the mining worker in the E2E job from the build cache ([247a758](https://github.com/xavicrip/elicitacion_requisitos/commit/247a7586ab55719ae53e66e76f98e0ef174bb62f))
+* **infra:** deploy the analysis worker with its own image ([d4a2e58](https://github.com/xavicrip/elicitacion_requisitos/commit/d4a2e5865190cb2e2685ddf993c98c010c3c851f))
+
 ## [0.7.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.6.0...v0.7.0) (2026-10-02)
 
 
