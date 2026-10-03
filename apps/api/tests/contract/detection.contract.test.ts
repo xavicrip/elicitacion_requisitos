@@ -190,7 +190,10 @@ describe('transiciones propuestas', () => {
         body = (
           await app.inject({ url: `/diagram-versions/${fresh}/proposals`, headers: admin })
         ).json();
+        // Las dos listas se leen por separado: una lectura a mitad del guardado puede traer las
+        // flechas sin sus actividades, así que se espera a tener ambas.
         expect(body.transitions).toHaveLength(2);
+        expect(body.activities).toHaveLength(3);
       },
       { timeout: 5000, interval: 50 },
     );
@@ -199,7 +202,6 @@ describe('transiciones propuestas', () => {
         [],
       );
     }
-    expect(body.activities).toHaveLength(3);
     for (const activity of body.activities) {
       const response = await app.inject({
         method: 'POST',
