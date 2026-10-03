@@ -99,3 +99,6 @@ sin GPU):
 
 El sentimiento (50 s con 2 000 detalles) y los temas (41 s) dominan el tiempo. En Railway el
 servicio necesita al menos 4 GB de memoria.
+
+El flag `dashboard` se retiró el 2026-10-03, tras el recorrido en staging y la release 0.8.0;
+`insights` sigue como flag operativo por su coste.

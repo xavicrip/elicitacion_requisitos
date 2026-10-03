@@ -186,7 +186,7 @@ El Administrador de un proyecto abre _Dashboard_ desde los ajustes del proyecto
 - El análisis automático (cada noche, solo si hubo cambios) está desactivado por defecto y se
   activa por proyecto en el propio dashboard.
 
-Flags: `dashboard` activa la función (Compose la activa) e `insights` añade el resumen de
+Flag: `insights` añade el resumen de
 hallazgos con Claude, que solo se genera con `ANTHROPIC_API_KEY` en `analysis-worker` (tiene
 coste; modelo configurable con `INSIGHTS_LLM_MODEL`). Cada hallazgo cita sus evidencias y sus
 cifras se verifican contra los datos antes de mostrarlo.
