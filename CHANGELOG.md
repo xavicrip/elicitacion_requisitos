@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.9.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.8.1...v0.9.0) (2026-10-03)
+
+
+### Funcionalidades
+
+* **analytics:** consume the export queue and upload the PDF report ([18952a1](https://github.com/xavicrip/elicitacion_requisitos/commit/18952a1c4734935e12691265640f052955ea4fd1))
+* **analytics:** draw the coverage image and the bar charts of the report ([634bbc5](https://github.com/xavicrip/elicitacion_requisitos/commit/634bbc5941c3a395538ef1bf0015e11f50d7f3e0))
+* **analytics:** mirror the export job contract in pydantic ([194a7d5](https://github.com/xavicrip/elicitacion_requisitos/commit/194a7d5922e6421269b4de61970658979f9114f2))
+* **analytics:** render the PDF report with WeasyPrint ([e69d66f](https://github.com/xavicrip/elicitacion_requisitos/commit/e69d66fef276d24c2a66879beab6af0085a5d1cc))
+* **api:** add the exports collection, its indexes and cascade ([d6ea311](https://github.com/xavicrip/elicitacion_requisitos/commit/d6ea3110e53fad19f1bf689c00bf04bb7998c52c))
+* **api:** download the details as CSV or Excel ([0a68fef](https://github.com/xavicrip/elicitacion_requisitos/commit/0a68fefe3d00d73b0a79a9077f90b65920cd3566))
+* **api:** export the details as a spreadsheet-friendly CSV ([42bcd09](https://github.com/xavicrip/elicitacion_requisitos/commit/42bcd0963e2448a3da8458404c488a9fe6794086))
+* **api:** export the details as an Excel workbook ([08a6de2](https://github.com/xavicrip/elicitacion_requisitos/commit/08a6de2bbb071c8c1918f1c29074faa0af3fc037))
+* **api:** export the validated details as Gherkin ([777fd4c](https://github.com/xavicrip/elicitacion_requisitos/commit/777fd4c5c43e489d1f9b619ad95db64f80545b37))
+* **api:** generate large exports in the background and expire them after 24 hours ([b4df4c6](https://github.com/xavicrip/elicitacion_requisitos/commit/b4df4c6453448164afbb842d9a8735de75fdf241))
+* **api:** list exports and report their status ([c6345f4](https://github.com/xavicrip/elicitacion_requisitos/commit/c6345f461bad7e48afcbd7c822c7d179016341b3))
+* **api:** neutralise spreadsheet formulas and normalise export file names ([cf763c7](https://github.com/xavicrip/elicitacion_requisitos/commit/cf763c7b73c014eb6de5849a6f51b17cd2972263))
+* **api:** render the details as Gherkin feature files in a ZIP ([b6cddde](https://github.com/xavicrip/elicitacion_requisitos/commit/b6cddde97863f825050ce55ff56d95b86d3ac0ae))
+* **api:** request the PDF report from the analytics worker ([2a37261](https://github.com/xavicrip/elicitacion_requisitos/commit/2a37261747b88cfb942db5e1e624024f8c09ab9f))
+* **api:** select the details to export with the dashboard filters ([0aa854e](https://github.com/xavicrip/elicitacion_requisitos/commit/0aa854e03763f4a847c0c65f68144c31345d2ba1))
+* **shared:** add the export contract and its examples ([e9d6d62](https://github.com/xavicrip/elicitacion_requisitos/commit/e9d6d62abe191f189742d2ff90ec7ee8b6ff61ec))
+* **shared:** add the exports feature flag ([203325b](https://github.com/xavicrip/elicitacion_requisitos/commit/203325ba248c1c964f5b7cb012b2f9baf9e91b99))
+* **shared:** enable the exports flag by default ([892c40b](https://github.com/xavicrip/elicitacion_requisitos/commit/892c40be75df97883bb9edfc1bb7523b4a646b66))
+* **web:** export the requirements from the dashboard ([0c40673](https://github.com/xavicrip/elicitacion_requisitos/commit/0c4067335c4f2ae636b96defa4f14fc04320de8f))
+* **web:** export the requirements to Gherkin from the dashboard ([0a924bc](https://github.com/xavicrip/elicitacion_requisitos/commit/0a924bc94a944cd0a244e4fff8b4a3566365eaff))
+* **web:** generate the PDF report from the dashboard ([33e2602](https://github.com/xavicrip/elicitacion_requisitos/commit/33e26022b125474be02584a22763a2302e87a092))
+
+
+### Rendimiento
+
+* **e2e:** measure the exports with 2,000 and 5,000 details ([a9c87ed](https://github.com/xavicrip/elicitacion_requisitos/commit/a9c87ed19a3d12ee284b9c93186f96125b4af599))
+
+
+### Build
+
+* **repo:** add the export dependencies ([00a578d](https://github.com/xavicrip/elicitacion_requisitos/commit/00a578df13730c0631c46f5a77c5f48062cd05c2))
+
 ## [0.8.1](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.8.0...v0.8.1) (2026-10-03)
 
 
