@@ -60,6 +60,9 @@
   probabilidades por detalle; agregado por actividad; top 10 más negativos.
 - **Nota**: el modelo está entrenado con tweets; los requisitos suelen ser neutros, así que se
   destaca solo NEG ≥ 0,7 para evitar ruido.
+- **Rendimiento**: se usa el modelo y el preprocesado de `pysentimiento`, pero la inferencia es
+  directa (lotes de 32 ordenados por longitud) en lugar de `analyzer.predict`, que con su
+  `Trainer` tardaba 3,5 veces más y duplicaba la memoria (plan, ajuste 17).
 
 ## R7. Calidad del requisito
 
