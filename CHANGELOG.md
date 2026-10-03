@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.8.0...v0.8.1) (2026-10-03)
+
+
+### Refactorizaciones
+
+* **shared:** retire the dashboard feature flag ([0778b31](https://github.com/xavicrip/elicitacion_requisitos/commit/0778b313e129f95ab2b2666581eb7a0c6db3cec8))
+
 ## [0.8.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.7.0...v0.8.0) (2026-10-03)
 
 
