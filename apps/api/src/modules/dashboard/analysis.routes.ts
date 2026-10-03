@@ -60,10 +60,10 @@ export async function analysisRoutes(app: FastifyInstance) {
     '/projects/:projectId/analysis-runs/latest',
     { preHandler: admin, schema: { params: ProjectParams, response: { 200: AnalysisRunSchema } } },
     async (request) => {
+      // El más reciente terminado, sea un análisis completo o un resumen regenerado.
       const run = await Runs.findOne({
         projectId: new Types.ObjectId(request.params.projectId),
         status: 'done',
-        kind: 'full',
       })
         .sort({ createdAt: -1 })
         .lean<AnalysisRunDoc>();
@@ -81,6 +81,38 @@ export async function analysisRoutes(app: FastifyInstance) {
     async (request) => {
       const run = request.resource as AnalysisRunDoc;
       return analysis.toFullDto(run);
+    },
+  );
+
+  const onRun = [app.requireAuth, app.requireResourceProject(loadRun, 'admin')];
+
+  routes.post(
+    '/analysis-runs/:id/insights/regenerate',
+    { preHandler: onRun, schema: { params: IdParams, response: { 202: AnalysisRunSchema } } },
+    async (request, reply) => {
+      const run = await analysis.regenerate(request.resource as AnalysisRunDoc, request.user.id);
+      reply.code(202);
+      return analysis.toDto(run);
+    },
+  );
+
+  routes.post(
+    '/analysis-runs/:id/insights/:insightId/feedback',
+    {
+      preHandler: onRun,
+      schema: {
+        params: IdParams.extend({ insightId: z.string().min(1) }),
+        body: z.object({ useful: z.boolean() }),
+      },
+    },
+    async (request, reply) => {
+      await analysis.feedback(
+        request.resource as AnalysisRunDoc,
+        request.params.insightId,
+        request.body.useful,
+        request.user.id,
+      );
+      return reply.code(204).send();
     },
   );
 }

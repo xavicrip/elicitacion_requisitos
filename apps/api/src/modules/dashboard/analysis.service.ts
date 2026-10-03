@@ -158,16 +158,38 @@ export function analysisService(app: FastifyInstance) {
     }
   }
 
-  async function readResults(key: string): Promise<unknown> {
+  async function readRaw(key: string): Promise<Buffer | null> {
     const object = await app.storage.getStream(key);
     if (!object) return null;
     const chunks: Buffer[] = [];
     for await (const chunk of object.body) chunks.push(Buffer.from(chunk as Uint8Array));
+    return Buffer.concat(chunks);
+  }
+
+  async function readResults(key: string): Promise<unknown> {
+    const raw = await readRaw(key);
+    if (!raw) return null;
     try {
-      return JSON.parse(gunzipSync(Buffer.concat(chunks)).toString('utf8'));
+      return JSON.parse(gunzipSync(raw).toString('utf8'));
     } catch {
       return null;
     }
+  }
+
+  /** Un segundo análisis activo en el proyecto → 409 con el id del que está en curso. */
+  async function inProgress(projectId: Types.ObjectId) {
+    const active = await Runs.findOne(
+      { projectId, status: { $in: ['pending', 'running'] } },
+      { _id: 1 },
+    ).lean<{ _id: Types.ObjectId }>();
+    return new HttpError(
+      409,
+      'ANALYSIS_IN_PROGRESS',
+      'Ya hay un análisis en curso en este proyecto. Espera a que termine.',
+      {},
+      undefined,
+      { runId: active?._id.toHexString() ?? null },
+    );
   }
 
   return {
@@ -201,18 +223,7 @@ export function analysisService(app: FastifyInstance) {
         ).toObject<AnalysisRunDoc>();
       } catch (error) {
         if ((error as { code?: number }).code !== 11000) throw error;
-        const active = await Runs.findOne(
-          { projectId, status: { $in: ['pending', 'running'] } },
-          { _id: 1 },
-        ).lean<{ _id: Types.ObjectId }>();
-        throw new HttpError(
-          409,
-          'ANALYSIS_IN_PROGRESS',
-          'Ya hay un análisis en curso en este proyecto. Espera a que termine.',
-          {},
-          undefined,
-          { runId: active?._id.toHexString() ?? null },
-        );
+        throw await inProgress(projectId);
       }
       try {
         await app.storage.put(run.inputKey, gzipSync(JSON.stringify(data)), 'application/gzip');
@@ -225,6 +236,77 @@ export function analysisService(app: FastifyInstance) {
         throw error;
       }
       return run;
+    },
+
+    /**
+     * Regenera solo el resumen de hallazgos de un análisis terminado (US5): un run nuevo de tipo
+     * `insights` con la misma entrada, que recibe los resultados anteriores.
+     */
+    async regenerate(source: AnalysisRunDoc, requestedBy: string): Promise<AnalysisRunDoc> {
+      if (!app.flags.insights) {
+        throw new HttpError(
+          409,
+          'INSIGHTS_DISABLED',
+          'El resumen de hallazgos no está activado en este entorno.',
+        );
+      }
+      if (source.status !== 'done') {
+        throw new HttpError(409, 'RUN_NOT_DONE', 'El análisis todavía no ha terminado.');
+      }
+      const input = await readRaw(source.inputKey);
+      if (!input) throw new HttpError(409, 'RUN_NOT_DONE', 'Este análisis ya no está disponible.');
+      const _id = new Types.ObjectId();
+      const prefix = prefixOf(source.projectId, _id);
+      let run: AnalysisRunDoc;
+      try {
+        run = (
+          await Runs.create({
+            _id,
+            projectId: source.projectId,
+            trigger: 'manual',
+            kind: 'insights',
+            sourceRunId: source._id,
+            filters: source.filters,
+            dataFingerprint: source.dataFingerprint,
+            detailCount: source.detailCount,
+            inputKey: `${prefix}input.json.gz`,
+            resultsKey: `${prefix}results.json.gz`,
+            requestedBy: new Types.ObjectId(requestedBy),
+          })
+        ).toObject<AnalysisRunDoc>();
+      } catch (error) {
+        if ((error as { code?: number }).code !== 11000) throw error;
+        throw await inProgress(source.projectId);
+      }
+      try {
+        await app.storage.put(run.inputKey, input, 'application/gzip');
+        await app.analysis.enqueue(run, {
+          previousResultsKey: source.resultsKey,
+          insightsEnabled: true,
+        });
+      } catch (error) {
+        await this.fail(_id.toHexString(), 'INTERNAL');
+        throw error;
+      }
+      return run;
+    },
+
+    /** Valora un insight; los marcados como no útiles se ocultan y orientan los siguientes. */
+    async feedback(run: AnalysisRunDoc, insightId: string, useful: boolean, userId: string) {
+      const insight = (await this.results(run))?.insights?.find((item) => item.id === insightId);
+      if (!insight) throw new HttpError(404, 'NOT_FOUND', 'Recurso no encontrado');
+      await insightFeedbackModel(app.mongo).updateOne(
+        { projectId: run.projectId, runId: run._id, insightId },
+        {
+          $set: {
+            useful,
+            statement: insight.statement,
+            userId: new Types.ObjectId(userId),
+            at: new Date(),
+          },
+        },
+        { upsert: true },
+      );
     },
 
     async markRunning(runId: string) {
@@ -336,6 +418,17 @@ export function analysisService(app: FastifyInstance) {
             ({ pair }) => !decided.has([...pair].sort().join('|')),
           ),
         };
+      }
+      if (results?.insights) {
+        // Los insights marcados como no útiles no se muestran (US5-3).
+        const hidden = new Set(
+          (
+            await insightFeedbackModel(app.mongo)
+              .find({ runId: run._id, useful: false }, { insightId: 1 })
+              .lean<Array<{ insightId: string }>>()
+          ).map((feedback) => feedback.insightId),
+        );
+        results = { ...results, insights: results.insights.filter(({ id }) => !hidden.has(id)) };
       }
       return { ...(await this.toDto(run, results)), ...(results && input ? { input } : {}) };
     },

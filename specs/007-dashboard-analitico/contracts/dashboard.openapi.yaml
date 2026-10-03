@@ -136,7 +136,7 @@ paths:
   /projects/{projectId}/analysis-runs/latest:
     parameters: [{ $ref: '#/components/parameters/ProjectId' }]
     get:
-      summary: Último run terminado (`done`), con results
+      summary: Último run terminado (`done`), completo o con el resumen regenerado, con results e input
       responses:
         '200':
           content:
@@ -183,14 +183,19 @@ paths:
               required: [useful]
               properties: { useful: { type: boolean } }
       responses:
-        '204': { description: Registrado }
+        '204': { description: Registrado (los no útiles dejan de mostrarse) }
+        '404': { description: El insight no existe en ese run }
   /analysis-runs/{runId}/insights/regenerate:
     parameters: [{ name: runId, in: path, required: true, schema: { type: string } }]
     post:
       summary: Relanzar solo la etapa insights sobre los resultados del run
       responses:
-        '202': { description: Encolado }
-        '409': { description: 'Flag insights desactivado o análisis en curso' }
+        '202':
+          description: Run nuevo de tipo `insights` (pending)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalysisRun' }
+        '409': { description: 'INSIGHTS_DISABLED (flag insights desactivado), ANALYSIS_IN_PROGRESS o RUN_NOT_DONE' }
   /projects/{projectId}/analysis-settings:
     parameters: [{ $ref: '#/components/parameters/ProjectId' }]
     get:

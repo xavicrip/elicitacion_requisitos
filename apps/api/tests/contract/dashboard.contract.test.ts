@@ -191,3 +191,43 @@ describe('decisiones y ajustes (US3)', () => {
     expect(StrictSettings.safeParse(saved.json()).error?.issues ?? []).toEqual([]);
   });
 });
+
+describe('insights (US5)', () => {
+  it('POST /analysis-runs/{runId}/insights/{insightId}/feedback 404 si el insight no existe', async () => {
+    const latest = (
+      await app.inject({ url: `/projects/${projectId}/analysis-runs/latest`, headers: admin })
+    ).json();
+    const response = await app.inject({
+      method: 'POST',
+      url: `/analysis-runs/${latest.id}/insights/nope/feedback`,
+      headers: admin,
+      payload: { useful: false },
+    });
+    expect(response.statusCode).toBe(404);
+    const known = await app.inject({
+      method: 'POST',
+      url: `/analysis-runs/${latest.id}/insights/i1/feedback`,
+      headers: admin,
+      payload: { useful: false },
+    });
+    expect(known.statusCode).toBe(204);
+    expect(known.body).toBe('');
+  });
+
+  it('POST /analysis-runs/{runId}/insights/regenerate 409 sin el flag insights', async () => {
+    const latest = (
+      await app.inject({ url: `/projects/${projectId}/analysis-runs/latest`, headers: admin })
+    ).json();
+    const response = await app.inject({
+      method: 'POST',
+      url: `/analysis-runs/${latest.id}/insights/regenerate`,
+      headers: admin,
+    });
+    expect(response.statusCode).toBe(409);
+    expect(
+      z
+        .strictObject({ code: z.literal('INSIGHTS_DISABLED'), message: z.string() })
+        .safeParse(response.json()).success,
+    ).toBe(true);
+  });
+});
