@@ -280,3 +280,11 @@ el propietario, sin redesplegar); producción no define `exports`.
 a producción con la siguiente release: allí `/health/deep` incluirá el check `export-worker`, que
 `analytics-worker` cumple al desplegarse antes que `api`. La variable de `api` en staging puede
 volver a `FEATURE_FLAGS=insights=true`.
+
+## Flag `exports` retirado (2026-10-03)
+
+`exports` se activó por defecto tras el recorrido en staging (T049–T050) y se retira después
+(`docs/feature-flags.md`): `api` monta siempre las colas de exportación y `/health/deep` incluye
+siempre el check `export-worker`, que cumple `analytics-worker`. La variable de `api` en staging
+vuelve a `FEATURE_FLAGS=insights=true` después de desplegar el retiro; mientras siga definida con
+`exports=true`, `api` solo avisa en el log del flag desconocido. Producción nunca lo definió.
