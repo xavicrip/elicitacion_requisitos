@@ -2,7 +2,7 @@ import type { DashboardFilters } from '@reqcanvas/shared';
 import { Types } from 'mongoose';
 
 /** Diferencia entre la hora local de `timeZone` y UTC en un instante, en ms. */
-function offsetMs(instant: Date, timeZone: string): number {
+export function offsetMs(instant: Date, timeZone: string): number {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,
     hourCycle: 'h23',
