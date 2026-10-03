@@ -1,7 +1,8 @@
 # Quickstart: Exportación de requisitos y reportes
 
-Requiere 001–004 y 007 (con un análisis completado de "Tienda demo", `seed:analytics`).
-Para el PDF: flag `export-pdf=true` y el worker de `analytics` en marcha.
+Requiere 001–007 (con un análisis completado de "Tienda demo", `seed:analytics`) y el flag
+`exports=true` (Compose lo activa). El PDF lo genera `analytics-worker`, que `pnpm dev:up` ya
+levanta.
 
 ## 1. CSV y Excel (US1)
 
@@ -12,8 +13,8 @@ Para el PDF: flag `export-pdf=true` y el worker de `analytics` en marcha.
    1 fila por detalle.
 4. Crear un detalle con Dado `=HYPERLINK("http://x","clic")` y exportar → la celda muestra el
    texto literal, no una fórmula.
-5. Con `pnpm --filter api seed:bulk --details 2000`: exportar a Excel → 202 → aviso "Tu
-   exportación está lista" en < 10 s (SC-001).
+5. Con más de 1 000 detalles: exportar a Excel → 202 → aviso "Tu exportación está lista"; con
+   2 000, en < 10 s (SC-001, `pnpm e2e:perf -g exportación`).
 
 ## 2. Gherkin (US2)
 
@@ -22,7 +23,7 @@ Para el PDF: flag `export-pdf=true` y el worker de `analytics` en marcha.
 2. Activar *Incluir pendientes* → aparecen más escenarios.
 3. Validación:
    ```bash
-   pnpm --filter api test -- gherkin      # analiza cada .feature con @cucumber/gherkin (SC-002)
+   pnpm --filter @reqcanvas/api test -- gherkin      # analiza cada .feature con @cucumber/gherkin (SC-002)
    ```
 
 ## 3. PDF (US3)
@@ -35,15 +36,15 @@ Para el PDF: flag `export-pdf=true` y el worker de `analytics` en marcha.
 
 ## 4. Caducidad, permisos y auditoría
 
-1. Simular la caducidad: `pnpm --filter api exports:expire --id <id>` → la descarga responde
-   "El enlace caducó".
+1. Pasadas 24 h la descarga responde "El enlace caducó" (410) y la limpieza horaria borra el
+   archivo; se cubre con las pruebas de integración (`exports-expiry`).
 2. Como Participante: el menú *Exportar* no aparece y `POST /api/projects/:id/exports` → 403.
 3. `audit_logs` contiene `export.requested` y `export.downloaded`.
 
 ## 5. Pruebas
 
 ```bash
-pnpm --filter api test -- exports csv xlsx gherkin
+pnpm --filter @reqcanvas/api test -- exports
 cd apps/analytics && uv run pytest tests -k report
-pnpm e2e -- exports
+pnpm e2e --project=flows exports
 ```
