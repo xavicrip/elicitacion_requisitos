@@ -227,7 +227,7 @@ docker compose -f infra/docker-compose.yml logs api analytics | grep prueba-456
 | `pnpm test`                                                                   | Vitest (shared, api, web) + pytest (analytics)                            |
 | `pnpm test:py`                                                                | Solo pytest de `analytics` (unitarias, contrato y gate de precisión)      |
 | `pnpm e2e`                                                                    | Pruebas de humo contra `BASE_URL` / `API_URL` y, en local, los flujos E2E |
-| `pnpm e2e:perf`                                                               | Mediciones de rendimiento del canvas y de la detección (local)            |
+| `pnpm e2e:perf`                                                               | Mediciones de rendimiento del canvas, la detección y el dashboard (local) |
 | `pnpm --filter @reqcanvas/api migrate:up` / `migrate:down` / `migrate:status` | Migraciones (lee `MONGO_URL` y `MONGO_DB`)                                |
 | `pnpm --filter @reqcanvas/api migrate:create <nombre>`                        | Nueva migración a partir de `migrations/sample-migration.js`              |
 

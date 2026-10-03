@@ -229,6 +229,23 @@ se extrae de la 006 a `queue_worker.py`.
     pruebas y los gates con los modelos reales en el runner (`uv run --group mining`), con los
     modelos en la caché de Actions. La cobertura de `analytics` combina `test-python` y
     `analysis-eval`.
+17. **Mediciones (T056, 2026-10-03)**: `e2e/perf/dashboard.perf.spec.ts` contra Compose con el
+    perfil `mining` en un portátil (Docker con 8 CPU, sin GPU). El volumen se inserta en MongoDB
+    combinando partes de los detalles del conjunto de validación.
+
+    | Medición                                   | Resultado                 | Objetivo          |
+    | ------------------------------------------ | ------------------------- | ----------------- |
+    | Descriptivo con 2 000 detalles (5 lecturas) | 26–63 ms                  | < 3 s (SC-001)    |
+    | Análisis completo de 2 000 detalles        | 130 s                     | < 5 min (SC-002)  |
+    | Análisis de 5 000 detalles (caso límite)   | 287 s                     | < 12 min          |
+    | Memoria de `analysis-worker`               | 207 MB en reposo; pico de 1,7 GB (2 000) y 2,0 GB (5 000) | — |
+
+    Por etapa con 2 000 detalles: sentimiento 50 s, temas 41 s (embeddings y UMAP), duplicados
+    21 s, grupos 8 s, palabras clave 4 s, calidad 2 s; el resto, menos de 1 s. La primera
+    medición dio 296 s y 3,7 GB: `pysentimiento` clasificaba con el `Trainer` de transformers.
+    El sentimiento llama ahora al mismo modelo directamente, con el preprocesado de
+    `pysentimiento` y lotes ordenados por longitud: mismas probabilidades (diferencia < 1e-6),
+    3,5 veces más rápido y la mitad de memoria. Para Railway: al menos 4 GB de memoria.
 
 ## Complexity Tracking
 
