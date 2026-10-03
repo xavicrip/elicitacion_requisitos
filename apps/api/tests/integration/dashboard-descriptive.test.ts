@@ -85,7 +85,6 @@ const SEED: Seed[] = [
 beforeAll(async () => {
   ({ app } = await buildTestApp('dashdescriptive', {
     withAuth: true,
-    featureFlags: 'dashboard=true',
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');

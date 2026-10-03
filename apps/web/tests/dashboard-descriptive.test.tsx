@@ -98,10 +98,10 @@ afterEach(() => {
 
 function renderAt(
   path: string,
-  { role = 'admin', flag = true, handlers = {} as Record<string, Handler | Handler[]> } = {},
+  { role = 'admin', handlers = {} as Record<string, Handler | Handler[]> } = {},
 ) {
   const api = mockApi({
-    'GET /api/config': () => json(200, { flags: flag ? { dashboard: true } : {} }),
+    'GET /api/config': () => json(200, { flags: {} }),
     'GET /api/projects/p1': () => json(200, project(role)),
     'GET /api/projects/p1/members': () => json(200, []),
     'GET /api/projects/p1/diagrams': () =>
@@ -260,12 +260,7 @@ describe('acceso (FR-001)', () => {
     expect(api.requests.some((r) => r.url.startsWith(URL))).toBe(false);
   });
 
-  it('sin el flag, la ruta no existe', async () => {
-    dashboard({ flag: false });
-    expect(await screen.findByRole('heading', { name: /no encontrada/i })).toBeInTheDocument();
-  });
-
-  it('el enlace Dashboard solo aparece al Administrador con el flag', async () => {
+  it('el enlace Dashboard solo aparece al Administrador', async () => {
     renderAt('/proyectos/p1');
     expect(await screen.findByRole('link', { name: 'Dashboard' })).toHaveAttribute(
       'href',
@@ -273,11 +268,8 @@ describe('acceso (FR-001)', () => {
     );
   });
 
-  it.each([
-    ['participant', true],
-    ['admin', false],
-  ])('rol %s con flag %s: sin enlace', async (role, flag) => {
-    renderAt('/proyectos/p1', { role, flag });
+  it('un Participante no ve el enlace', async () => {
+    renderAt('/proyectos/p1', { role: 'participant' });
     expect(await screen.findByRole('link', { name: 'Diagramas' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Dashboard' })).toBeNull();
   });

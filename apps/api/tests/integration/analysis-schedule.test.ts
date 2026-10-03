@@ -22,7 +22,6 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('analysisschedule', {
     withAuth: true,
-    featureFlags: 'dashboard=true',
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');

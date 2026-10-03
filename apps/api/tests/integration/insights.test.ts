@@ -110,7 +110,7 @@ async function done(app: FastifyInstance, user: TestUser, runId: string) {
 describe('con el flag insights', () => {
   let h: Harness;
   beforeAll(async () => {
-    h = await harness('insightson', 'dashboard=true,insights=true');
+    h = await harness('insightson', 'insights=true');
   });
   afterAll(async () => {
     await h.worker.close();
@@ -221,7 +221,7 @@ describe('con el flag insights', () => {
 describe('sin el flag insights', () => {
   let h: Harness;
   beforeAll(async () => {
-    h = await harness('insightsoff', 'dashboard=true');
+    h = await harness('insightsoff', '');
   });
   afterAll(async () => {
     await h.worker.close();

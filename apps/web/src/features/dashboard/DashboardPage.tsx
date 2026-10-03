@@ -2,10 +2,8 @@ import type { DashboardFilters } from '@reqcanvas/shared';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { NotFoundPage } from '../../app/NotFoundPage';
 import { FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
-import { useFlags } from '../../lib/flags';
 import { projectKeys, projectsApi } from '../projects/api';
 import { ProjectNotFound } from '../projects/ProjectNotFound';
 import { AnalysisSection } from './analysis/AnalysisSection';
@@ -22,7 +20,6 @@ import { FiltersBar } from './FiltersBar';
  */
 export default function DashboardPage() {
   const { projectId = '' } = useParams();
-  const { flags, isLoading: flagsLoading } = useFlags();
   const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_FILTERS);
   const project = useQuery({
     queryKey: projectKeys.detail(projectId),
@@ -32,12 +29,10 @@ export default function DashboardPage() {
   const descriptive = useQuery({
     queryKey: dashboardKeys.descriptive(projectId, filters),
     queryFn: () => dashboardApi.descriptive(projectId, filters),
-    enabled: isAdmin && Boolean(flags.dashboard),
+    enabled: isAdmin,
     placeholderData: keepPreviousData,
   });
 
-  if (flagsLoading) return null;
-  if (!flags.dashboard) return <NotFoundPage />;
   if (project.error instanceof ApiError && project.error.status === 404) {
     return <ProjectNotFound />;
   }

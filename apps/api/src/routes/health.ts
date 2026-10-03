@@ -66,7 +66,7 @@ export async function healthRoutes(app: FastifyInstance, options: HealthRoutesOp
         }
       : {};
 
-  // Análisis del dashboard (feature 007): algún analysis-worker vivo, si el flag está activo.
+  // Análisis del dashboard (feature 007): algún analysis-worker vivo.
   const analysisChecks = async (): Promise<Record<string, HealthCheck>> =>
     app.hasDecorator('analysis')
       ? {

@@ -38,7 +38,6 @@ let worker: ReturnType<typeof startFakeAnalysisWorker>;
 beforeAll(async () => {
   ({ app, dbName } = await buildTestApp('analysisqueue', {
     withAuth: true,
-    featureFlags: 'dashboard=true',
     analysis: { timeoutMs: 60_000, sweepIntervalMs: 3_600_000 },
   }));
   await app.ready();
