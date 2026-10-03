@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { FormError } from '../../components/form';
 import { ApiError } from '../../lib/api-client';
-import { FlagGate } from '../../lib/flags';
 import { ExportMenu } from '../exports/ExportMenu';
 import { projectKeys, projectsApi } from '../projects/api';
 import { ProjectNotFound } from '../projects/ProjectNotFound';
@@ -74,9 +73,7 @@ export default function DashboardPage() {
         </>
       )}
       <AnalysisSection projectId={projectId} filters={filters} />
-      <FlagGate flag="exports">
-        <ExportMenu projectId={projectId} filters={filters} />
-      </FlagGate>
+      <ExportMenu projectId={projectId} filters={filters} />
     </section>
   );
 }

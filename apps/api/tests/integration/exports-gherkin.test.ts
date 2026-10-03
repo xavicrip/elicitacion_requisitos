@@ -20,7 +20,6 @@ let emptyProjectId: string;
 beforeAll(async () => {
   ({ app } = await buildTestApp('exportsgherkin', {
     withAuth: true,
-    featureFlags: 'exports=true',
     exports: { syncLimit: 3 },
   }));
   await app.ready();

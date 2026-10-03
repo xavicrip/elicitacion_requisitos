@@ -16,7 +16,6 @@ let projectId: string;
 beforeAll(async () => {
   ({ app } = await buildTestApp('exportsexpiry', {
     withAuth: true,
-    featureFlags: 'exports=true',
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');

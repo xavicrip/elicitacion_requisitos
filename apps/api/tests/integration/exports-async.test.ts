@@ -33,7 +33,6 @@ beforeAll(async () => {
   });
   ({ app } = await buildTestApp('exportsasync', {
     withAuth: true,
-    featureFlags: 'exports=true',
     exports: { syncLimit: 2 },
     logStream,
   }));

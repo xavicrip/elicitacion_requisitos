@@ -79,10 +79,10 @@ const exported = (overrides: Partial<Export> = {}): Export => ({
 
 function renderDashboard(
   handlers: Record<string, Handler | Handler[]> = {},
-  { role = 'admin', flags = { exports: true } as Record<string, boolean> } = {},
+  { role = 'admin' } = {},
 ) {
   const api = mockApi({
-    'GET /api/config': () => json(200, { flags }),
+    'GET /api/config': () => json(200, { flags: {} }),
     'GET /api/projects/p1': () =>
       json(200, {
         id: 'p1',
@@ -127,17 +127,11 @@ const posted = (api: ReturnType<typeof mockApi>) =>
   api.requests.filter((request) => request.method === 'POST' && request.url === EXPORTS);
 
 describe('quién ve el menú', () => {
-  it('el Administrador, con el flag activo', async () => {
+  it('el Administrador', async () => {
     renderDashboard();
     const region = await menu();
     expect(within(region).getByRole('button', { name: 'Exportar a Excel' })).toBeEnabled();
     expect(within(region).getByRole('button', { name: 'Exportar a CSV' })).toBeEnabled();
-  });
-
-  it('sin el flag no aparece', async () => {
-    renderDashboard({}, { flags: {} });
-    await screen.findByRole('region', { name: 'Análisis de texto' });
-    expect(screen.queryByRole('region', { name: 'Exportar' })).toBeNull();
   });
 
   it('un Participante no ve el dashboard ni el menú', async () => {
