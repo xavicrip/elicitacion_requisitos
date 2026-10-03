@@ -29,16 +29,18 @@ const ROUTES: Array<['GET' | 'POST' | 'PUT', string]> = [
 ];
 
 describe('registro', () => {
-  it('dashboard e insights están desactivados por defecto y son de la 007', () => {
-    for (const name of ['dashboard', 'insights'] as const) {
-      expect(FLAGS[name]).toMatchObject({ default: false, owner: '007-dashboard-analitico' });
-    }
+  it('dashboard está activado por defecto (T062); insights sigue desactivado (coste)', () => {
+    expect(FLAGS.dashboard).toMatchObject({ default: true, owner: '007-dashboard-analitico' });
+    expect(FLAGS.insights).toMatchObject({ default: false, owner: '007-dashboard-analitico' });
   });
 });
 
-describe('dashboard desactivado (valor por defecto)', () => {
+describe('dashboard desactivado (FEATURE_FLAGS=dashboard=false)', () => {
   it('las rutas del dashboard responden 404 como si no existieran', async () => {
-    ({ app } = await buildTestApp('dashboardoff', { withAuth: true }));
+    ({ app } = await buildTestApp('dashboardoff', {
+      withAuth: true,
+      featureFlags: 'dashboard=false',
+    }));
     const user = await registerTestUser(app, 'Ana');
     for (const [method, url] of ROUTES) {
       const response = await app.inject({ method, url, headers: authHeaders(user), payload: {} });
@@ -48,7 +50,7 @@ describe('dashboard desactivado (valor por defecto)', () => {
   });
 
   it('GET /config lo informa al frontend', async () => {
-    ({ app } = await buildTestApp('dashboardconfig'));
+    ({ app } = await buildTestApp('dashboardconfig', { featureFlags: 'dashboard=false' }));
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({
       dashboard: false,
       insights: false,
@@ -74,9 +76,9 @@ describe('patrón de rutas', () => {
   });
 });
 
-describe('dashboard activado', () => {
+describe('dashboard activado (valor por defecto)', () => {
   it('GET /config lo informa', async () => {
-    ({ app } = await buildTestApp('dashboardon', { featureFlags: 'dashboard=true' }));
+    ({ app } = await buildTestApp('dashboardon'));
     expect((await app.inject({ url: '/config' })).json().flags).toMatchObject({ dashboard: true });
   });
 });

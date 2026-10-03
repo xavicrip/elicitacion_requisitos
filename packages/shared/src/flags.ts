@@ -20,8 +20,8 @@ export function defineFlags<const R extends FlagRegistry>(registry: R): R {
 export const FLAGS = defineFlags({
   dashboard: {
     description:
-      'Dashboard analítico: indicadores, minería de texto, calidad y duplicados; oculto hasta completar la feature',
-    default: false,
+      'Dashboard analítico: indicadores, minería de texto, calidad y duplicados; activado tras el recorrido en staging, se retira en un PR posterior',
+    default: true,
     owner: '007-dashboard-analitico',
   },
   'detection-llm': {

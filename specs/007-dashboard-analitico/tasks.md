@@ -203,7 +203,7 @@ existentes; sin el servicio, el resto del dashboard funciona
 - [X] T059 Desplegar `analysis-worker`: configuración en `apps/analytics/railway.mining.json` (`Dockerfile.mining`, *start command* `python -m analytics.mining.worker`, healthcheck `/health`), añadirlo al bucle de `.github/workflows/deploy.yml` y a `tests/repo/railway-config.test.ts`, y registrarlo en `docs/adr/0002-despliegue-railway.md` — `ci(infra)`
 - [X] T060 Configurar Railway **antes de fusionar**: crear `analysis-worker` en staging y producción con esa configuración y las variables `REDIS_URL`, `ANALYSIS_TIMEOUT_S=900` y `LOG_LEVEL`; `ANTHROPIC_API_KEY` solo si se quieren insights; `FEATURE_FLAGS=dashboard=true` en `api` de staging (producción sin cambios). Si `railway add` solo crea la instancia del entorno enlazado, crear la otra con `environmentPatchCommit` (ADR 0002) — `docs(infra)`
 - [X] T061 Recorrer quickstart.md en staging, comprobar tiempo y memoria de `analysis-worker` en Railway y dejar preparada la evaluación de insights con analistas (SC-005); registrar el resultado en `quickstart.md` — `docs(specs)`
-- [ ] T062 Activar `dashboard` por defecto (`default: true`) cuando US1–US5 y T061 estén en verde y retirarlo en un PR posterior (constitución IV); `insights` sigue como flag operativo (coste) con `default: false` — `feat(shared)`
+- [X] T062 Activar `dashboard` por defecto (`default: true`) cuando US1–US5 y T061 estén en verde y retirarlo en un PR posterior (constitución IV); `insights` sigue como flag operativo (coste) con `default: false` — `feat(shared)`
 
 ---
 
