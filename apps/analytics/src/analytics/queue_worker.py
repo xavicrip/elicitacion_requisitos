@@ -14,7 +14,7 @@ import signal
 import socket
 import sys
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, cast
@@ -130,22 +130,37 @@ async def _check(check: Callable[[], Awaitable[Any]]) -> dict[str, Any]:
         }
 
 
-def create_health_app(worker: QueueWorker, service: str, version: str, commit: str) -> FastAPI:
-    """`GET /health` del worker (constitución VI): Redis responde y BullMQ sigue consumiendo."""
+def create_health_app(
+    worker: QueueWorker,
+    service: str,
+    version: str,
+    commit: str,
+    others: Mapping[str, QueueWorker] | None = None,
+) -> FastAPI:
+    """`GET /health` del worker (constitución VI): Redis responde y BullMQ sigue consumiendo.
+
+    `others` son las demás colas que consume el mismo proceso, cada una con su check.
+    """
     app = FastAPI(title=f"ReqCanvas {service}")
+    consumers = {"worker": worker, **(others or {})}
 
     async def ping_redis() -> None:
         # redis-py tipa `ping` como síncrono o asíncrono según el cliente.
         await cast(Awaitable[bool], worker.redis.ping())
 
-    async def worker_alive() -> None:
-        if not worker.running:
-            raise RuntimeError("stopped")
+    def alive(consumer: QueueWorker) -> Callable[[], Awaitable[None]]:
+        async def check() -> None:
+            if not consumer.running:
+                raise RuntimeError("stopped")
+
+        return check
 
     @app.get("/health")
     async def health() -> JSONResponse:
-        redis, alive = await asyncio.gather(_check(ping_redis), _check(worker_alive))
-        checks = {"redis": redis, "worker": alive}
+        redis, *running = await asyncio.gather(
+            _check(ping_redis), *(_check(alive(consumer)) for consumer in consumers.values())
+        )
+        checks = {"redis": redis, **dict(zip(consumers, running, strict=True))}
         ok = all(check["status"] == "up" for check in checks.values())
         body = {
             "status": "ok" if ok else "degraded",
@@ -160,9 +175,17 @@ def create_health_app(worker: QueueWorker, service: str, version: str, commit: s
     return app
 
 
-async def serve(worker: QueueWorker, app: FastAPI, host: str, port: int) -> None:
+async def serve(
+    worker: QueueWorker,
+    app: FastAPI,
+    host: str,
+    port: int,
+    others: Sequence[QueueWorker] = (),
+) -> None:
     """Arranca el worker y su `/health`; al recibir SIGTERM cierra de forma ordenada."""
     await worker.start()
+    for other in others:
+        await other.start()
     server = uvicorn.Server(uvicorn.Config(app, log_config=None))
     loop = asyncio.get_running_loop()
     for signum in (signal.SIGTERM, signal.SIGINT):
@@ -171,7 +194,8 @@ async def serve(worker: QueueWorker, app: FastAPI, host: str, port: int) -> None
         await server.serve(sockets=[dual_stack_socket(host, port)])
     finally:
         # Cierre ordenado: el job en curso termina o se libera para otro worker.
-        await worker.aclose()
+        for consumer in (worker, *others):
+            await consumer.aclose()
 
 
 def load_settings[S: BaseModel](settings_type: type[S]) -> S:

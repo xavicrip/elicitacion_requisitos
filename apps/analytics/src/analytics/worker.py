@@ -1,10 +1,13 @@
-"""Worker de la cola `detection` (feature 006, contracts/detection-job.md).
+"""Worker de las colas `detection` (feature 006) y `export` (feature 008).
 
 Proceso aparte (`python -m analytics.worker`, servicio `analytics-worker` en Railway) para que el
 OCR no bloquee el `/health` ni las peticiones de `analytics`. Consume los jobs que encola `api`,
 publica el progreso, devuelve el resultado validado (nunca escribe en MongoDB, Principio II) y
 falla con el código en el mensaje. La conexión, el latido en Redis y `GET /health` son los de
 `analytics.queue_worker` (plan, ajuste 10).
+
+El mismo proceso consume además la cola `export` (reporte PDF; plan de la 008, ajuste 5), con su
+propio latido: lo propio de esa cola está en `analytics.reports.worker`.
 """
 
 import asyncio
@@ -23,6 +26,7 @@ from analytics.detection.errors import DetectionError
 from analytics.detection.schemas import DetectionJobInput, DetectionResult, Stage
 from analytics.logging import bind_request_id, configure_logging, reset_request_id
 from analytics.queue_worker import QueueOptions, QueueWorker
+from analytics.reports.worker import ExportOptions, ExportWorker, Renderer
 
 QUEUE = "detection"
 SERVICE = "analytics-worker"
@@ -47,6 +51,8 @@ class WorkerSettings(BaseSettings):
     # Prefijos: los de `api` (BullMQ usa `bull`); las pruebas usan los suyos.
     queue_prefix: str = Field(default="bull", validation_alias="DETECTION_QUEUE_PREFIX")
     key_prefix: str = Field(default="", validation_alias="DETECTION_KEY_PREFIX")
+    #: Tiempo máximo de un reporte PDF (cola `export`).
+    export_timeout_s: float = Field(default=300, gt=0, validation_alias="EXPORT_TIMEOUT_S")
     log_level: Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"] = Field(
         default="INFO", validation_alias="LOG_LEVEL"
     )
@@ -119,9 +125,28 @@ class DetectionWorker(QueueWorker):
             reset_request_id(request_token)
 
 
-def create_health_app(worker: DetectionWorker) -> FastAPI:
+def export_worker(settings: WorkerSettings, render: Renderer) -> ExportWorker:
+    """El consumidor de la cola `export`, con los prefijos y el latido del proceso."""
+    return ExportWorker(
+        ExportOptions(
+            redis_url=str(settings.redis_url),
+            queue_prefix=settings.queue_prefix,
+            key_prefix=settings.key_prefix,
+            timeout_s=settings.export_timeout_s,
+            heartbeat_s=settings.heartbeat_s,
+            heartbeat_ttl_s=settings.heartbeat_ttl_s,
+        ),
+        render,
+    )
+
+
+def create_health_app(worker: DetectionWorker, exports: ExportWorker | None = None) -> FastAPI:
     return queue_worker.create_health_app(
-        worker, SERVICE, worker.settings.app_version, worker.settings.git_sha
+        worker,
+        SERVICE,
+        worker.settings.app_version,
+        worker.settings.git_sha,
+        {"export-worker": exports} if exports else None,
     )
 
 
@@ -132,15 +157,25 @@ def default_processor() -> Processor:
     return process
 
 
-async def serve(settings: WorkerSettings, process: Processor) -> None:
+def default_renderer() -> Renderer:
+    """El generador real del PDF; WeasyPrint se carga con el primer reporte."""
+    from analytics.reports.pdf import render_report
+
+    return render_report
+
+
+async def serve(settings: WorkerSettings, process: Processor, render: Renderer) -> None:
     worker = DetectionWorker(settings, process)
-    await queue_worker.serve(worker, create_health_app(worker), settings.host, settings.port)
+    exports = export_worker(settings, render)
+    await queue_worker.serve(
+        worker, create_health_app(worker, exports), settings.host, settings.port, [exports]
+    )
 
 
 def run() -> None:
     settings = queue_worker.load_settings(WorkerSettings)
     configure_logging(settings.log_level, service=SERVICE)
-    asyncio.run(serve(settings, default_processor()))
+    asyncio.run(serve(settings, default_processor(), default_renderer()))
 
 
 if __name__ == "__main__":
