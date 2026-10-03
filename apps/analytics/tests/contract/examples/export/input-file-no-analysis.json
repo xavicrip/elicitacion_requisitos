@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "Tienda demo",
+    "timezone": "America/Guayaquil"
+  },
+  "generatedAt": "2026-10-03T15:00:00.000Z",
+  "filters": {
+    "diagramIds": null,
+    "from": null,
+    "to": null,
+    "types": null,
+    "statuses": [
+      "pending",
+      "validated"
+    ]
+  },
+  "descriptive": {
+    "kpis": {
+      "totalDetails": 2,
+      "activeParticipants": 6,
+      "coveredActivitiesPct": 66.7,
+      "validatedPct": 50
+    },
+    "byActivity": [
+      {
+        "key": "act-04",
+        "label": "Validar pago",
+        "count": 2
+      },
+      {
+        "key": "act-09",
+        "label": "Gestionar devoluciones",
+        "count": 0
+      }
+    ],
+    "byType": [
+      {
+        "key": "functional",
+        "label": "Funcional",
+        "count": 1
+      },
+      {
+        "key": "non_functional",
+        "label": "No funcional",
+        "count": 1
+      }
+    ],
+    "byPriority": [
+      {
+        "key": "must",
+        "label": "Must",
+        "count": 1
+      },
+      {
+        "key": "none",
+        "label": "Sin prioridad",
+        "count": 1
+      }
+    ],
+    "byRole": [
+      {
+        "key": "Cajero",
+        "label": "Cajero",
+        "count": 2
+      }
+    ],
+    "byStatus": [
+      {
+        "key": "pending",
+        "label": "Pendiente",
+        "count": 1
+      },
+      {
+        "key": "validated",
+        "label": "Validado",
+        "count": 1
+      }
+    ],
+    "timeline": [
+      {
+        "date": "2026-10-01",
+        "created": 2,
+        "votes": 3,
+        "comments": 1
+      }
+    ]
+  },
+  "diagrams": [
+    {
+      "id": "66f100000000000000000001",
+      "name": "Proceso de compra",
+      "image": {
+        "url": "https://bucket.example/projects/66f0/diagrams/v1/display.webp?X-Amz-Signature=abc",
+        "width": 1600,
+        "height": 900
+      },
+      "activities": [
+        {
+          "key": "act-04",
+          "label": "Validar pago",
+          "bbox": {
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.2,
+            "h": 0.15
+          },
+          "detailCount": 2
+        },
+        {
+          "key": "act-09",
+          "label": "Gestionar devoluciones",
+          "bbox": {
+            "x": 0.7,
+            "y": 0.6,
+            "w": 0.2,
+            "h": 0.15
+          },
+          "detailCount": 0
+        }
+      ]
+    }
+  ],
+  "details": [
+    {
+      "id": "66f200000000000000000001",
+      "diagramId": "66f100000000000000000001",
+      "activityKey": "act-04",
+      "given": "el cliente eligió pagar con tarjeta de crédito",
+      "when": "confirma el pago del pedido",
+      "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+      "type": "non_functional",
+      "priority": "must",
+      "authorRole": "Cajero",
+      "tags": [
+        "pagos"
+      ],
+      "status": "pending",
+      "voteCount": 3,
+      "commentCount": 1,
+      "createdAt": "2026-10-01T15:00:00.000Z"
+    },
+    {
+      "id": "66f200000000000000000002",
+      "diagramId": "66f100000000000000000001",
+      "activityKey": "act-04",
+      "given": "el comprador eligió pagar con tarjeta de crédito",
+      "when": "aprueba el pago del pedido",
+      "then": "la pasarela autoriza la transacción en menos de 3 segundos",
+      "type": "non_functional",
+      "priority": null,
+      "authorRole": null,
+      "tags": [],
+      "status": "validated",
+      "voteCount": 0,
+      "commentCount": 0,
+      "createdAt": "2026-10-01T15:00:00.000Z"
+    }
+  ],
+  "analysis": null
+}
