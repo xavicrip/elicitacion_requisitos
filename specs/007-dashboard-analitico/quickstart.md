@@ -80,14 +80,16 @@ Hecho **por la API pública**, con el proyecto «Tienda demo» creado por `seed:
 | Programación (§6.2)          | desactivada por defecto; se activa y se desactiva desde los ajustes                          |
 | Insights (§5)                | sin `ANTHROPIC_API_KEY` ni flag `insights`: regenerar responde 409 `INSIGHTS_DISABLED`       |
 
-Pendiente, porque no se puede comprobar por la API:
+Después (2026-10-03), el propietario recorrió las pantallas en el navegador y confirmó en el
+panel que `analysis-worker` dispone de más de 4 GB de memoria. Con `ANTHROPIC_API_KEY` en
+`analysis-worker` e `insights=true` en `api` de staging, regenerar el resumen devolvió 7
+hallazgos en 24 s (`claude-opus-5-5`), todos con evidencias y sin reintento, coherentes con los
+datos sembrados (actividades calientes y frías, 15 % validado, el par de duplicados pendiente);
+el propietario los revisó con sus evidencias en la pestaña _Resumen_. Con una clave inválida, la
+etapa falla (`AuthenticationError`) y el análisis termina `done` y parcial, con el resto intacto.
 
-- Recorrer las pantallas en el navegador (gráficos, pestañas, panel de evidencias); la página
-  responde y los E2E del CI las cubren contra Compose.
-- Memoria de `analysis-worker` en el panel de Railway (en local, 2 GB de pico con 5 000
-  detalles) y confirmar que el servicio dispone de al menos 4 GB.
-- Insights con Claude en staging: requiere `ANTHROPIC_API_KEY` en `analysis-worker` y
-  `insights=true` en `api`.
+Pendiente:
+
 - **Evaluación con analistas (SC-005)**: sobre un proyecto real, los analistas valoran los
   hallazgos generados (objetivo: al menos el 70 % considerados útiles). La valoración «no útil»
   de cada hallazgo queda registrada en `insight_feedback`. SC-006 (todo hallazgo enlaza a sus
