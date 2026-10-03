@@ -49,3 +49,25 @@ pnpm --filter @reqcanvas/api test -- exports
 cd apps/analytics && uv run pytest tests -k report
 pnpm e2e --project=flows exports
 ```
+
+## 6. Recorrido en staging (T049, 2026-10-03)
+
+Con `api` v0.8.1-34 (`e0079e2`), `FEATURE_FLAGS=insights=true,exports=true` y `/health/deep` en
+`ok` (incluido `export-worker`), sobre un «Tienda demo» recién sembrado (80 detalles, 12
+validados) y con un análisis terminado (88 s):
+
+| Paso                  | Resultado                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| Excel (§1)            | 200 en 0,9 s; hojas «Requisitos» y «Resumen»                                                |
+| CSV (§1)              | 200 en 0,2 s; 80 filas y 18 columnas; con el filtro *Validado* y `;`, 12 filas              |
+| Gherkin (§2)          | 6 `.feature` con 12 escenarios; con *Incluir pendientes*, 9 `.feature` con 80 escenarios    |
+| PDF (§3)              | 202 y listo en 3,0 s; 14 páginas (228 KB) con las seis secciones y el diagrama con cobertura |
+| Coherencia (SC-004)   | KPIs del PDF iguales a los del dashboard: 80 requisitos, 6 participantes, 90 % y 15 %       |
+| Hallazgos             | temas, calidad, actividades calientes y frías, reglas y 6 insights con sus evidencias       |
+| Permisos (§4)         | un Participante recibe 403                                                                  |
+| Historial             | las 6 exportaciones quedan registradas                                                      |
+
+La caducidad a las 24 h y la auditoría se cubren con las pruebas de integración. Queda por mirar
+en el panel de Railway la memoria de `analytics-worker` durante un reporte (en local, 343 MB con
+2 000 detalles).
+
