@@ -185,6 +185,18 @@ cambió y por qué.
 19. **Despliegue**: sin servicios ni variables obligatorias nuevas en Railway
     (`EXPORT_TIMEOUT_S` es opcional); `api` de staging recibe `FEATURE_FLAGS=exports=true`.
 
+20. **Mediciones (T045, 2026-10-03)**: `e2e/perf/exports.perf.spec.ts` contra Compose en local.
+    Con 2 000 detalles: CSV 0,2 s, Excel 0,8 s, Gherkin 0,2 s y PDF 7,4 s (596 KB), con
+    `analytics-worker` entre 186 MB y 343 MB (SC-001 y SC-003 cumplidos). Con 5 000: CSV 0,6 s,
+    Excel 1,5 s, Gherkin 0,2 s y PDF 25,1 s (1,1 MB), con un pico de 685 MB. Detalle en el
+    ADR 0010.
+21. **Detalles del reporte PDF**: usa los mismos detalles que cuenta el dashboard con esos
+    filtros (`detailsQuery` de la 007, sin los duplicados confirmados), para que el anexo y los
+    indicadores sean coherentes; CSV y Excel sí exportan los duplicados si el filtro los pide.
+    El filtro de diagramas también limita los diagramas del reporte, y `NO_DIAGRAMS` se responde
+    cuando no queda ninguno publicado. WeasyPrint solo puede leer recursos incrustados
+    (`data:`): las imágenes las descarga el worker por su URL firmada.
+
 ## Complexity Tracking
 
 Sin violaciones: con el ajuste 1, `exports` es propiedad exclusiva de `api` y el worker solo
