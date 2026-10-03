@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
 import { exportFilesPlugin } from './jobs/export-files.js';
+import { exportPdfPlugin } from './jobs/export-pdf.js';
 import { analysisSchedulePlugin } from './jobs/analysis-schedule.js';
 import { analysisPlugin, type AnalysisConfig } from './jobs/analysis.js';
 import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
@@ -214,6 +215,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
           await app.register(exportFilesPlugin, {
             redisUrl: services.redisUrl,
             queuePrefix: `${redisNameSpace}bull`,
+            ...services.exports,
+          });
+          await app.register(exportPdfPlugin, {
+            redisUrl: services.redisUrl,
+            queuePrefix: `${redisNameSpace}bull`,
+            keyPrefix: redisNameSpace,
             ...services.exports,
           });
           await app.register(exportRoutes, services.exports ?? {});

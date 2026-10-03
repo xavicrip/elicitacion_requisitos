@@ -5,6 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { exportsModel } from '../../src/modules/exports/models/export';
 import { buildTestApp, closeTestApp } from '../helpers/app';
+import { publishedDiagram } from '../helpers/details';
+import { clearExportHeartbeat, writeExportHeartbeat } from '../helpers/export-worker';
 import { seedProject } from '../helpers/seed';
 import { authHeaders, registerTestUser, type TestUser } from '../helpers/users';
 
@@ -17,13 +19,16 @@ let user: TestUser;
 let admin: Record<string, string>;
 let projectId: string;
 let exportId: string;
+let keyPrefix: string;
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('exportscontract', {
+  let dbName: string;
+  ({ app, dbName } = await buildTestApp('exportscontract', {
     withAuth: true,
     featureFlags: 'exports=true',
   }));
   await app.ready();
+  keyPrefix = `test-${dbName}:`;
   user = await registerTestUser(app);
   admin = authHeaders(user);
   projectId = await seedProject(app, { status: 'open', members: [[user, 'admin']] });
@@ -132,5 +137,40 @@ describe('POST /projects/{projectId}/exports', () => {
     expect(response.headers['x-export-empty']).toBe('true');
     // Un ZIP empieza por la firma «PK».
     expect(response.rawPayload.subarray(0, 2).toString()).toBe('PK');
+  });
+
+  describe('con PDF', () => {
+    const pdf = () =>
+      app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/exports`,
+        headers: admin,
+        payload: { format: 'pdf' },
+      });
+
+    it('503 WORKER_UNAVAILABLE sin un worker vivo', async () => {
+      await clearExportHeartbeat(keyPrefix);
+      const response = await pdf();
+      expect(response.statusCode).toBe(503);
+      expect(StrictError.safeParse(response.json()).error?.issues ?? []).toEqual([]);
+      expect(response.json().code).toBe('WORKER_UNAVAILABLE');
+    });
+
+    it('422 NO_DIAGRAMS sin diagramas publicados', async () => {
+      await writeExportHeartbeat(keyPrefix);
+      const response = await pdf();
+      expect(response.statusCode).toBe(422);
+      expect(StrictError.safeParse(response.json()).error?.issues ?? []).toEqual([]);
+      expect(response.json().code).toBe('NO_DIAGRAMS');
+    });
+
+    it('202 cumple Export (estricto), pendiente', async () => {
+      await writeExportHeartbeat(keyPrefix);
+      await publishedDiagram(app, admin, projectId);
+      const response = await pdf();
+      expect(response.statusCode).toBe(202);
+      expect(StrictExport.safeParse(response.json()).error?.issues ?? []).toEqual([]);
+      expect(response.json()).toMatchObject({ format: 'pdf', mode: 'async', status: 'pending' });
+    });
   });
 });
