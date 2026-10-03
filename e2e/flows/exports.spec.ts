@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { inflateSync } from 'node:zlib';
 import type { Download, Page } from '@playwright/test';
 import { seedTiendaDemo } from './dashboard';
 import { login } from './diagrams';
@@ -110,6 +111,49 @@ test('exportar los requisitos validados a Gherkin', async ({ page, clientIp }) =
   expect(all).toHaveLength(activities(['validated', 'pending']));
   expect(all.length).toBeGreaterThan(features.length);
   expect(all).toEqual(expect.arrayContaining(features));
+});
+
+/** Páginas de un PDF: los objetos `/Type /Page`, también dentro de los flujos comprimidos. */
+function pdfPages(path: string): number {
+  const pdf = readFileSync(path);
+  expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
+  const chunks = [pdf.toString('latin1')];
+  for (const match of chunks[0]!.matchAll(/stream\r?\n/g)) {
+    const start = match.index + match[0].length;
+    const end = pdf.indexOf('endstream', start);
+    try {
+      chunks.push(inflateSync(pdf.subarray(start, end)).toString('latin1'));
+    } catch {
+      // No es un flujo comprimido con zlib (p. ej., una imagen).
+    }
+  }
+  return chunks.join('\n').match(/\/Type\s*\/Page(?!s)/g)?.length ?? 0;
+}
+
+// US3 de la 008 (quickstart §3): el reporte PDF se genera en segundo plano con el worker real
+// (`analytics-worker`), se avisa cuando está listo y se descarga.
+test('generar y descargar el reporte PDF', async ({ page, clientIp }) => {
+  test.setTimeout(240_000);
+  const seeded = await seedTiendaDemo(clientIp);
+  await login(page, seeded.admin);
+  await page.goto(`/proyectos/${seeded.projectId}/dashboard`);
+  const region = page.getByRole('region', { name: 'Exportar' });
+  await region.getByRole('button', { name: 'Generar reporte PDF' }).click();
+  await expect(region.getByText('Generando el reporte PDF…')).toBeVisible();
+  await expect(region.getByText('Tu exportación está lista.')).toBeVisible({ timeout: 150_000 });
+
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    region.getByRole('button', { name: 'Descargar' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^reqcanvas-tienda-demo-\d{8}-\d{4}\.pdf$/);
+  // Portada, resumen, diagramas, distribuciones, hallazgos y anexo.
+  expect(pdfPages(await download.path())).toBeGreaterThanOrEqual(6);
+
+  await region.getByRole('button', { name: 'Historial de exportaciones' }).click();
+  await expect(
+    region.getByRole('list', { name: 'Historial de exportaciones' }).getByRole('listitem'),
+  ).toContainText(['Reporte PDF']);
 });
 
 test('un Participante no puede exportar', async ({ page, clientIp }) => {
