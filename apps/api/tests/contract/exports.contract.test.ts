@@ -25,7 +25,6 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('exportscontract', {
     withAuth: true,
-    featureFlags: 'exports=true',
   }));
   await app.ready();
   keyPrefix = `test-${dbName}:`;

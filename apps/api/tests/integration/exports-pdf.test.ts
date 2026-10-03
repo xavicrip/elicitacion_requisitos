@@ -34,7 +34,6 @@ beforeAll(async () => {
   let dbName: string;
   ({ app, dbName } = await buildTestApp('exportspdf', {
     withAuth: true,
-    featureFlags: 'exports=true',
   }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana Pérez');

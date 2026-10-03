@@ -21,7 +21,6 @@ let emptyProjectId: string;
 beforeAll(async () => {
   ({ app } = await buildTestApp('exportssheets', {
     withAuth: true,
-    featureFlags: 'exports=true',
     exports: { syncLimit: 5 },
   }));
   await app.ready();

@@ -70,7 +70,7 @@ export type ServicesConfig = {
   detection?: DetectionConfig;
   /** Análisis del dashboard (feature 007): prefijos y tiempos para las pruebas. */
   analysis?: AnalysisConfig;
-  /** Exportación (feature 008), solo con el flag `exports`: umbral y tiempos para las pruebas. */
+  /** Exportación (feature 008): umbral y tiempos para las pruebas. */
   exports?: ExportsConfig;
 };
 
@@ -209,22 +209,20 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         await app.register(analysisRoutes);
         await app.register(decisionRoutes);
 
-        // Exportación (feature 008): la cascada existe aunque el flag esté desactivado.
+        // Exportación (feature 008): CSV, Excel y Gherkin en `api`; el PDF, con analytics-worker.
         registerExportsCascade(app);
-        if (flags.exports) {
-          await app.register(exportFilesPlugin, {
-            redisUrl: services.redisUrl,
-            queuePrefix: `${redisNameSpace}bull`,
-            ...services.exports,
-          });
-          await app.register(exportPdfPlugin, {
-            redisUrl: services.redisUrl,
-            queuePrefix: `${redisNameSpace}bull`,
-            keyPrefix: redisNameSpace,
-            ...services.exports,
-          });
-          await app.register(exportRoutes, services.exports ?? {});
-        }
+        await app.register(exportFilesPlugin, {
+          redisUrl: services.redisUrl,
+          queuePrefix: `${redisNameSpace}bull`,
+          ...services.exports,
+        });
+        await app.register(exportPdfPlugin, {
+          redisUrl: services.redisUrl,
+          queuePrefix: `${redisNameSpace}bull`,
+          keyPrefix: redisNameSpace,
+          ...services.exports,
+        });
+        await app.register(exportRoutes, services.exports ?? {});
 
         // Detección asistida (feature 006): cola con analytics-worker.
         registerDetectionCascade(app);

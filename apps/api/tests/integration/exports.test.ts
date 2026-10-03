@@ -28,7 +28,7 @@ const FILTERS: DashboardFilters = {
 const OPTIONS = { delimiter: 'comma', includePending: false } as const;
 
 beforeAll(async () => {
-  ({ app } = await buildTestApp('exports', { withAuth: true, featureFlags: 'exports=true' }));
+  ({ app } = await buildTestApp('exports', { withAuth: true }));
   await app.ready();
   ana = await registerTestUser(app, 'Ana');
   luis = await registerTestUser(app, 'Luis');
