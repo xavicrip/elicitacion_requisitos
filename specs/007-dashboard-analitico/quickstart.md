@@ -1,8 +1,8 @@
 # Quickstart: Dashboard analítico con minería de datos y de texto
 
-Requiere 001–006, el flag `dashboard=true` (Compose lo activa) y, para el análisis, el worker de
+Requiere 001–006 (el flag `dashboard` ya se retiró) y, para el análisis, el worker de
 minería: `pnpm dev:up:mining` levanta
-`analysis-worker` (imagen de ~3 GB). Para los insights: `FEATURE_FLAGS=dashboard=true,insights=true`
+`analysis-worker` (imagen de ~3 GB). Para los insights: `FEATURE_FLAGS=insights=true`
 y `ANTHROPIC_API_KEY` en `.env`. Datos: `pnpm --filter @reqcanvas/api seed:analytics` crea el
 proyecto "Tienda demo" (10 actividades, 80 detalles, 6 participantes) con 3 temas conocidos
 (pagos, notificaciones, seguridad), 5 detalles ambiguos y 3 pares de duplicados.

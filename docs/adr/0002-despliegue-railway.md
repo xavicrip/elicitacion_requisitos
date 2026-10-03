@@ -243,3 +243,13 @@ producción, con la configuración de `railway.mining.json` y las variables `RED
 `railway add` creó la instancia de producción y la de staging se creó con `environmentPatchCommit`.
 `api` en staging tiene `FEATURE_FLAGS=dashboard=true`; producción sigue sin definirla. Queda por
 comprobar en el panel que el servicio dispone de al menos 4 GB de memoria.
+
+## Flag `dashboard` retirado (2026-10-03)
+
+`dashboard` se activó por defecto tras el recorrido en staging (T062), llegó a producción con la
+release 0.8.0 y se retiró después (`docs/feature-flags.md`): `api` monta siempre la cola del
+análisis y `/health/deep` incluye siempre el check `analysis-worker`, así que ese servicio debe
+estar desplegado en cada entorno. El propietario confirmó en el panel que `analysis-worker`
+dispone de más de 4 GB de memoria. La variable `FEATURE_FLAGS=dashboard=true` de `api` en staging
+se elimina después de desplegar el retiro; mientras siga definida, `api` solo avisa en el log del
+flag desconocido. Producción nunca la definió. `insights` sigue como flag operativo.
