@@ -85,10 +85,24 @@ export function ExportMenu({
           <label htmlFor={ids.pending}>Incluir pendientes</label>
         </span>
       </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={exporting.busy}
+          onClick={() => request({ format: 'pdf', filters })}
+          className={BUTTON}
+        >
+          Generar reporte PDF
+        </button>
+        <span className="text-sm text-gray-600">
+          Con los diagramas, los indicadores, los hallazgos del último análisis y el listado de
+          requisitos. Se prepara en segundo plano.
+        </span>
+      </div>
 
       {exporting.preparing && (
         <p role="status" className="text-sm">
-          Preparando la exportación…
+          {format === 'pdf' ? 'Generando el reporte PDF…' : 'Preparando la exportación…'}
         </p>
       )}
       {exporting.ready && (
