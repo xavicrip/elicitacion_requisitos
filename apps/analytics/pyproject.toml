@@ -8,14 +8,17 @@ dependencies = [
     "bullmq>=3.3.0",
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
+    "jinja2>=3.1.6",
     "numpy>=2.5.3",
     "opencv-python-headless>=5.0.0.93",
+    "pillow>=12.3.0",
     "pydantic-settings>=2.15.0",
     "pymongo>=4.18.2",
     "pytesseract>=0.3.13",
     "python-json-logger>=4.2.0",
     "redis>=7.4.1",
     "uvicorn[standard]>=0.54.0",
+    "weasyprint>=70.0",
 ]
 
 [build-system]
@@ -49,6 +52,11 @@ module = ["bullmq", "bullmq.*", "pytesseract"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+# Sin tipos publicados (feature 008).
+module = ["weasyprint", "weasyprint.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 # Grupo `mining` (feature 007): sin tipos publicados, y ausente en el entorno de `typecheck`.
 module = [
     "spacy", "spacy.*", "sentence_transformers", "sklearn", "sklearn.*", "umap", "umap.*",
@@ -63,6 +71,7 @@ dev = [
     "httpx>=0.28.1",
     "jsonschema>=4.26.0",
     "mypy>=2.3.1",
+    "pypdf>=6.19.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
