@@ -139,6 +139,8 @@ export async function decisionRoutes(app: FastifyInstance) {
         { $set: request.body },
         { upsert: true, returnDocument: 'after' },
       ).lean<AnalysisSettings>();
+      // La programación del proyecto sigue a sus ajustes (FR-013).
+      await app.analysisSchedule.sync(new Types.ObjectId(request.params.projectId));
       return toDto(saved);
     },
   );

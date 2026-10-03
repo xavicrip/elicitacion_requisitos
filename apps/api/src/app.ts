@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { z } from 'zod';
 import { registerErrorHandlers } from './lib/errors.js';
 import { loadFlags } from './lib/flags.js';
+import { analysisSchedulePlugin } from './jobs/analysis-schedule.js';
 import { analysisPlugin, type AnalysisConfig } from './jobs/analysis.js';
 import { detectionPlugin, type DetectionConfig } from './jobs/detection.js';
 import { projectDeletionPlugin } from './jobs/project-deletion.js';
@@ -195,6 +196,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
             queuePrefix: `${redisNameSpace}bull`,
             keyPrefix: redisNameSpace,
             ...services.analysis,
+          });
+          await app.register(analysisSchedulePlugin, {
+            redisUrl: services.redisUrl,
+            queuePrefix: services.analysis?.queuePrefix ?? `${redisNameSpace}bull`,
           });
           await app.register(analysisRoutes);
           await app.register(decisionRoutes);

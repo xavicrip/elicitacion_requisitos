@@ -191,6 +191,9 @@ se extrae de la 006 a `queue_worker.py`.
 9. **Análisis programado**: `upsertJobScheduler` de BullMQ en `api` (un scheduler por proyecto con
    la programación activada), que solo encola si hubo cambios desde el último run
    (`dataFingerprint`). Es P3 dentro de la feature y va después de US1–US5.
+   Viene **desactivada por defecto** (el análisis tiene coste de cómputo y, con insights, del
+   modelo): el Administrador la activa y elige la hora en el dashboard. Al arrancar, `api`
+   reconcilia los schedulers con los ajustes guardados; cerrar o borrar el proyecto los elimina.
 10. **Web**: página `/proyectos/:id/dashboard` (solo Administrador; enlace en la cabecera del
     proyecto). Gráficos con ECharts siguiendo la guía *dataviz* (paleta validada en claro y
     oscuro, texto alternativo y tabla accesible por gráfico). El mapa de cobertura reutiliza
