@@ -8,7 +8,7 @@ import { polling } from '../src/features/exports/useExport';
 import { useAuthStore } from '../src/lib/auth-store';
 import { json, mockApi, type Handler } from './helpers/api';
 
-// US1 y US2 de la 008 (FR-001, FR-002, FR-004, FR-006, FR-007): menú Exportar del dashboard.
+// US1–US3 de la 008 (FR-001, FR-002, FR-004, FR-005, FR-006, FR-007): menú Exportar del dashboard.
 
 vi.mock('../src/features/dashboard/charts/EChart', () => ({
   default: () => <div data-testid="echart" />,
@@ -279,6 +279,48 @@ describe('exportación en segundo plano', () => {
     await userEvent.click(within(region).getByRole('button', { name: 'Descargar' }));
     await waitFor(() => expect(saved).toEqual([{ name: done.fileName, text: 'libro grande' }]));
     expect(api.requests.filter((r) => r.url === '/api/exports/e1').length).toBeGreaterThan(0);
+  });
+
+  it('Reporte PDF: muestra el progreso, avisa cuando está listo y permite descargarlo', async () => {
+    const pending = exported({
+      format: 'pdf',
+      detailCount: 80,
+      fileName: 'reqcanvas-tienda-demo-20261003-1000.pdf',
+    });
+    const done = { ...pending, status: 'done' as const, bytes: 482133 };
+    const api = renderDashboard({
+      [`POST ${EXPORTS}`]: () => json(202, pending),
+      'GET /api/exports/e1': [
+        () => json(200, { ...pending, status: 'running' }),
+        () => json(200, done),
+      ],
+      'GET /api/exports/e1/download': () => file(done.fileName!, '%PDF'),
+    });
+    const region = await menu();
+    await userEvent.click(within(region).getByRole('button', { name: 'Generar reporte PDF' }));
+    expect(await within(region).findByText('Generando el reporte PDF…')).toBeInTheDocument();
+    expect(within(region).getByRole('button', { name: 'Generar reporte PDF' })).toBeDisabled();
+    expect(posted(api)[0]!.body).toMatchObject({ format: 'pdf' });
+
+    expect(await within(region).findByText(/Tu exportación está lista\./)).toBeInTheDocument();
+    await userEvent.click(within(region).getByRole('button', { name: 'Descargar' }));
+    await waitFor(() => expect(saved).toEqual([{ name: done.fileName, text: '%PDF' }]));
+  });
+
+  it.each([
+    [422, 'NO_DIAGRAMS', 'El reporte necesita al menos un diagrama publicado.'],
+    [
+      503,
+      'WORKER_UNAVAILABLE',
+      'El generador de reportes no está disponible. Inténtalo de nuevo en unos minutos.',
+    ],
+  ])('Reporte PDF: %i %s muestra su mensaje', async (status, code, message) => {
+    renderDashboard({ [`POST ${EXPORTS}`]: () => json(status, { code, message }) });
+    const region = await menu();
+    await userEvent.click(within(region).getByRole('button', { name: 'Generar reporte PDF' }));
+    expect(await within(region).findByRole('alert')).toHaveTextContent(message);
+    expect(within(region).getByRole('button', { name: 'Generar reporte PDF' })).toBeEnabled();
+    expect(saved).toEqual([]);
   });
 
   it('si falla muestra el motivo', async () => {
