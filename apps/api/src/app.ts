@@ -14,6 +14,7 @@ import { authRoutes } from './modules/auth/routes.js';
 import { activityRoutes } from './modules/diagrams/activities.routes.js';
 import { analysisRoutes } from './modules/dashboard/analysis.routes.js';
 import { registerExportsCascade } from './modules/exports/cascade.js';
+import { exportRoutes } from './modules/exports/routes.js';
 import { registerDashboardCascade } from './modules/dashboard/cascade.js';
 import { decisionRoutes } from './modules/dashboard/decisions.routes.js';
 import { descriptiveRoutes } from './modules/dashboard/descriptive.routes.js';
@@ -206,6 +207,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
         // Exportación (feature 008): la cascada existe aunque el flag esté desactivado.
         registerExportsCascade(app);
+        if (flags.exports) {
+          await app.register(exportRoutes);
+        }
 
         // Detección asistida (feature 006): cola con analytics-worker.
         registerDetectionCascade(app);
