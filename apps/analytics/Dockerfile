@@ -13,8 +13,10 @@ ARG APP_VERSION=dev
 ARG GIT_SHA=unknown
 ENV PATH=/app/.venv/bin:$PATH PYTHONUNBUFFERED=1 APP_VERSION=$APP_VERSION GIT_SHA=$GIT_SHA
 # Tesseract para el OCR de la detección (feature 006, ADR 0008); OpenCV es headless (sin libGL).
+# Pango y una fuente para el reporte PDF con WeasyPrint (feature 008, ADR 0010).
 RUN apt-get update \
     && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng \
+       libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 10001 app
 WORKDIR /app

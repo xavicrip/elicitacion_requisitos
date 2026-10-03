@@ -107,7 +107,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
       # OCR de la detección (feature 006).
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core
       - run: pnpm test:py
 
   # Gate de precisión de la detección (feature 006, SC-001 y SC-002) sobre los 20 diagramas
@@ -117,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core
       - run: uv run --directory apps/analytics python tests/eval/evaluate_detection.py --subset digital --timing
 
   # Minería de texto (feature 007, plan ajuste 16): pruebas y gates con los modelos reales del
