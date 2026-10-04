@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.9.0...v0.9.1) (2026-10-04)
+
+
+### Refactorizaciones
+
+* **shared:** retire the exports feature flag ([5d385bc](https://github.com/xavicrip/elicitacion_requisitos/commit/5d385bcb11d5d1347d0dff563fc86f021f26796b))
+
 ## [0.9.0](https://github.com/xavicrip/elicitacion_requisitos/compare/v0.8.1...v0.9.0) (2026-10-03)
 
 
